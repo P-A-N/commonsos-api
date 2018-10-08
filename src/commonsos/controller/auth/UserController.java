@@ -1,15 +1,15 @@
 package commonsos.controller.auth;
 
+import static java.lang.Long.parseLong;
+import static spark.utils.StringUtils.isNotBlank;
+
+import javax.inject.Inject;
+
 import commonsos.controller.Controller;
 import commonsos.domain.auth.User;
 import commonsos.domain.auth.UserService;
 import spark.Request;
 import spark.Response;
-
-import javax.inject.Inject;
-
-import static java.lang.Long.parseLong;
-import static spark.utils.StringUtils.isNotBlank;
 
 public class UserController extends Controller {
 

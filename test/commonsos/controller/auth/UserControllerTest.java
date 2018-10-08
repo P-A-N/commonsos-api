@@ -1,56 +1,77 @@
 package commonsos.controller.auth;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserPrivateView;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.auth.UserView;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import spark.Request;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import commonsos.domain.auth.User;
+import commonsos.domain.auth.UserPrivateView;
+import commonsos.domain.auth.UserService;
+import commonsos.domain.auth.UserView;
+import spark.Request;
+import spark.Response;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserControllerTest {
 
-  @InjectMocks UserController controller;
-  @Mock UserService service;
   @Mock Request request;
+  @Mock Response response;
+  @Mock UserService userService;
+  @InjectMocks UserController controller;
 
   @Test
-  public void handle() {
+  public void handle_noId() {
+    // prepare
+    when(request.params("id")).thenReturn(null);
     UserPrivateView userView = new UserPrivateView();
-    when(service.privateView(new User())).thenReturn(userView);
+    when(userService.privateView(any())).thenReturn(userView);
 
-    Object result = controller.handle(new User(), request, null);
+    // execute
+    User user = new User();
+    Object result = controller.handle(user, request, response);
 
+    // verify
+    verify(userService, times(1)).privateView(user);
     assertThat(result).isEqualTo(userView);
   }
 
   @Test
   public void handle_withOtherUserId() {
+    // prepare
     when(request.params("id")).thenReturn("123");
     UserView userView = new UserView();
-    when(service.view(123L)).thenReturn(userView);
+    when(userService.view(123L)).thenReturn(userView);
 
-    Object result = controller.handle(new User().setAdmin(false), request, null);
+    // execute
+    User user = new User().setAdmin(false);
+    Object result = controller.handle(user, request, response);
 
+    // verify
+    verify(userService, times(1)).view(123L);
     assertThat(result).isEqualTo(userView);
   }
 
   @Test
   public void handle_withOtherUserId_admin() {
+    // prepare
     when(request.params("id")).thenReturn("123");
     UserPrivateView userView = new UserPrivateView();
+    when(userService.privateView(any(), any())).thenReturn(userView);
+
+    // execute
     User user = new User().setAdmin(true);
-    when(service.privateView(user, 123L)).thenReturn(userView);
+    Object result = controller.handle(user, request, response);
 
-    Object result = controller.handle(user, request, null);
-
+    // verify
+    verify(userService, times(1)).privateView(user, 123L);
     assertThat(result).isEqualTo(userView);
   }
 }

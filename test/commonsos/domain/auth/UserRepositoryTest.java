@@ -1,67 +1,48 @@
 package commonsos.domain.auth;
 
-import commonsos.DBTest;
-import org.junit.Test;
-
 import static commonsos.TestId.id;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Optional;
+
+import org.junit.Test;
+
+import commonsos.DBTest;
 
 public class UserRepositoryTest extends DBTest {
 
   private UserRepository repository = new UserRepository(entityManagerService);
 
   @Test
-  public void create() {
-    Long id = inTransaction(() -> repository.create(new User()
-      .setUsername("worker")
-      .setAdmin(true)
-      .setPasswordHash("password hash")
-      .setDescription("description")
-      .setAvatarUrl("avatar url")
-      .setLocation("location")
-      .setLastName("last name")
-      .setFirstName("first name")
-      .setWallet("wallet")
-      .setWalletAddress("wallet address")
-      .setCommunityId(321L)
-    ).getId());
-
-    User created = em().find(User.class, id);
-    assertThat(created.getUsername()).isEqualTo("worker");
-    assertThat(created.isAdmin()).isTrue();
-    assertThat(created.getPasswordHash()).isEqualTo("password hash");
-    assertThat(created.getDescription()).isEqualTo("description");
-    assertThat(created.getAvatarUrl()).isEqualTo("avatar url");
-    assertThat(created.getLocation()).isEqualTo("location");
-    assertThat(created.getLastName()).isEqualTo("last name");
-    assertThat(created.getFirstName()).isEqualTo("first name");
-    assertThat(created.getWallet()).isEqualTo("wallet");
-    assertThat(created.getWalletAddress()).isEqualTo("wallet address");
-    assertThat(created.getCommunityId()).isEqualTo(321L);
-  }
-
-  @Test
   public void findByUsername() {
-    inTransaction(() -> repository.create(new User().setUsername("worker")));
+    // prepare
+    User testUser = createTestUser();
 
-    assertThat(repository.findByUsername("worker")).isNotEmpty();
-  }
-
-  @Test
-  public void update() {
-    Long id = inTransaction(() -> repository.create(new User().setUsername("worker").setCommunityId(1L)).getId());
-    User user = em().find(User.class, id);
-    user.setCommunityId(2L);
-
-    repository.update(user);
-
-    User result = em().find(User.class, id);
-    assertThat(result.getCommunityId()).isEqualTo(2L);
+    // execute
+    Optional<User> result = repository.findByUsername(testUser.getUsername());
+    
+    // verify
+    assertThat(result.isPresent());
+    assertUser(result.get(), testUser);
   }
 
   @Test
   public void findByUsername_notFound() {
-    assertThat(repository.findByUsername("worker")).isEmpty();
+    // execute
+    Optional<User> result = repository.findByUsername("worker");
+    
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void create() {
+    // execute
+    User testUser = createTestUser();
+    
+    // verify
+    User createdUser = em().find(User.class, testUser.getId());
+    assertUser(createdUser, testUser);
   }
 
   @Test
@@ -74,6 +55,24 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void findById_notFound() {
     assertThat(repository.findById(id("invalid id"))).isEmpty();
+  }
+
+  @Test
+  public void update() {
+    // prepare
+    User testUser = createTestUser();
+    
+    // execute
+    testUser.setFirstName("new first name")
+        .setLastName("new last name")
+        .setDescription("new description")
+        .setLocation("new location")
+        .setEmailAddress("new@test.com");
+    repository.update(testUser);
+
+    // verify
+    User updatedUser = em().find(User.class, testUser.getId());
+    assertUser(updatedUser, testUser);
   }
 
   @Test
@@ -113,5 +112,41 @@ public class UserRepositoryTest extends DBTest {
     User result = repository.findAdminByCommunityId(id("community"));
 
     assertThat(result).isEqualTo(admin);
+  }
+  
+  private User createTestUser() {
+    User testUser =  new User()
+        .setCommunityId(id("community id"))
+        .setAdmin(false)
+        .setUsername("worker")
+        .setPasswordHash("password hash")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setDescription("description")
+        .setLocation("location")
+        .setAvatarUrl("avatar url")
+        .setWallet("wallet")
+        .setWalletAddress("wallet address")
+        .setPushNotificationToken("push notification token")
+        .setEmailAddress("test@test.com");
+    
+    return inTransaction(() -> repository.create(testUser));
+  }
+  
+  private void assertUser(User actual, User expect) {
+    assertThat(actual.getId()).isEqualTo(expect.getId());
+    assertThat(actual.getCommunityId()).isEqualTo(expect.getCommunityId());
+    assertThat(actual.isAdmin()).isEqualTo(expect.isAdmin());
+    assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
+    assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
+    assertThat(actual.getFirstName()).isEqualTo(expect.getFirstName());
+    assertThat(actual.getLastName()).isEqualTo(expect.getLastName());
+    assertThat(actual.getDescription()).isEqualTo(expect.getDescription());
+    assertThat(actual.getLocation()).isEqualTo(expect.getLocation());
+    assertThat(actual.getAvatarUrl()).isEqualTo(expect.getAvatarUrl());
+    assertThat(actual.getWallet()).isEqualTo(expect.getWallet());
+    assertThat(actual.getWalletAddress()).isEqualTo(expect.getWalletAddress());
+    assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
+    assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
   }
 }

@@ -15,5 +15,6 @@ public class AccountCreateCommand {
   private String description;
   private String location;
   private Long communityId;
+  private String emailAddress;
   private boolean waitUntilCompleted;
 }

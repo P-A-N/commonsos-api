@@ -12,4 +12,5 @@ public class UserUpdateCommand {
   private String lastName;
   private String description;
   private String location;
+  private String emailAddress;
 }

@@ -1,24 +1,30 @@
 package commonsos.domain.auth;
 
-import commonsos.*;
+import static java.util.stream.Collectors.toList;
+
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.validator.routines.EmailValidator;
+import org.web3j.crypto.Credentials;
+
+import commonsos.AuthenticationException;
+import commonsos.BadRequestException;
+import commonsos.DisplayableException;
+import commonsos.ForbiddenException;
+import commonsos.JobService;
+import commonsos.UserSession;
 import commonsos.controller.auth.DelegateWalletTask;
 import commonsos.domain.blockchain.BlockchainService;
 import commonsos.domain.community.Community;
 import commonsos.domain.community.CommunityService;
 import commonsos.domain.transaction.TransactionService;
-import lombok.extern.slf4j.Slf4j;
-import org.web3j.crypto.Credentials;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Singleton
-@Slf4j
 public class UserService {
   public static final String WALLET_PASSWORD = "test";
 
@@ -46,14 +52,15 @@ public class UserService {
       .setFullName(fullName(user))
       .setFirstName(user.getFirstName())
       .setLastName(user.getLastName())
-      .setLocation(user.location)
+      .setLocation(user.getLocation())
       .setDescription(user.getDescription())
-      .setAvatarUrl(user.getAvatarUrl());
+      .setAvatarUrl(user.getAvatarUrl())
+      .setEmailAddress(user.getEmailAddress());
   }
 
   public UserPrivateView privateView(User currentUser, Long userId) {
     if (!currentUser.getId().equals(userId) && !currentUser.isAdmin()) throw new ForbiddenException();
-    User user = repository.findById(userId).orElseThrow(ForbiddenException::new);
+    User user = repository.findById(userId).orElseThrow(BadRequestException::new);
     return privateView(user);
   }
 
@@ -76,7 +83,8 @@ public class UserService {
       .setFirstName(command.getFirstName())
       .setLastName(command.getLastName())
       .setDescription(command.getDescription())
-      .setLocation(command.getLocation());
+      .setLocation(command.getLocation())
+      .setEmailAddress(command.getEmailAddress());
 
     String wallet = blockchainService.createWallet(WALLET_PASSWORD);
     Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
@@ -109,8 +117,13 @@ public class UserService {
     if (command.getPassword() == null || command.getPassword().length() < 8) throw new BadRequestException();
     if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException();
     if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException();
+    if (command.getEmailAddress() == null || !validateEmailAddress(command.getEmailAddress())) throw new BadRequestException();
   }
 
+  boolean validateEmailAddress(String emailAddress) {
+    return EmailValidator.getInstance().isValid(emailAddress);
+  }
+  
   public UserView view(Long id) {
     return view(user(id));
   }
@@ -151,12 +164,13 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
+    user.setEmailAddress(command.getEmailAddress());
     repository.update(user);
     return user;
   }
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
-    user.pushNotificationToken = command.getPushNotificationToken();
+    user.setPushNotificationToken(command.getPushNotificationToken());
     repository.update(user);
   }
 }
