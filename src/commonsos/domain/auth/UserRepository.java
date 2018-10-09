@@ -1,18 +1,18 @@
 package commonsos.domain.auth;
 
-import commonsos.EntityManagerService;
-import commonsos.Repository;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
+import static spark.utils.StringUtils.isBlank;
+
+import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
-import java.util.List;
-import java.util.Optional;
 
-import static java.util.Collections.emptyList;
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
-import static spark.utils.StringUtils.isBlank;
+import commonsos.EntityManagerService;
+import commonsos.Repository;
 
 @Singleton
 public class UserRepository extends Repository {
@@ -24,7 +24,7 @@ public class UserRepository extends Repository {
 
   public Optional<User> findByUsername(String username) {
     try {
-      return Optional.of(em().createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+      return Optional.of(em().createQuery("FROM User WHERE username = :username AND deleted = FALSE", User.class)
         .setParameter("username", username)
         .getSingleResult()
       );
@@ -40,13 +40,24 @@ public class UserRepository extends Repository {
   }
 
   public Optional<User> findById(Long id) {
-    return ofNullable(em().find(User.class, id));
+    try {
+      return Optional.of(em().createQuery("FROM User WHERE id = :id AND deleted = FALSE", User.class)
+        .setParameter("id", id)
+        .getSingleResult()
+      );
+    }
+    catch (NoResultException e) {
+        return empty();
+    }
   }
 
   public List<User> search(Long communityId, String query) {
     if (isBlank(query)) return emptyList();
-    return em().createQuery("FROM User WHERE communityId = :communityId " +
-      "AND (LOWER(firstName) LIKE LOWER(:query) OR LOWER(lastName) LIKE LOWER(:query))", User.class)
+    return em().createQuery(
+      "FROM User " +
+      "WHERE communityId = :communityId " +
+      "AND deleted = FALSE " +
+      "AND LOWER(username) LIKE LOWER(:query)", User.class)
       .setParameter("communityId", communityId)
       .setParameter("query", "%"+query+"%")
       .setMaxResults(10)
@@ -58,7 +69,7 @@ public class UserRepository extends Repository {
   }
 
   public User findAdminByCommunityId(Long communityId) {
-    return em().createQuery("FROM User WHERE admin = TRUE and communityId = :communityId ", User.class)
+    return em().createQuery("FROM User WHERE admin = TRUE and communityId = :communityId AND deleted = FALSE", User.class)
       .setParameter("communityId", communityId)
       .getSingleResult();
   }

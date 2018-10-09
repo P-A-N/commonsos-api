@@ -1,19 +1,20 @@
 package commonsos.domain.ad;
 
-import commonsos.DBTest;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserRepository;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.Optional;
-
 import static commonsos.TestId.id;
 import static commonsos.domain.ad.AdType.GIVE;
 import static java.math.BigDecimal.TEN;
 import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+
+import commonsos.DBTest;
+import commonsos.domain.auth.User;
+import commonsos.domain.auth.UserRepository;
 
 public class AdRepositoryTest extends DBTest {
 
@@ -28,10 +29,85 @@ public class AdRepositoryTest extends DBTest {
   }
 
   @Test
-  public void findById_notFound() {
-    Optional<Ad> result = inTransaction(() -> repository.find(id("unknown")));
+  public void ads() {
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setDeleted(true)).getId());
+    Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2"))).getId());
 
-    assertFalse(result.isPresent());
+    List<Ad> list = repository.ads(id("community1"));
+
+    assertThat(list).extracting("id").containsExactly(id1, id2);
+  }
+
+  @Test
+  public void ads_notFound() {
+    List<Ad> list = repository.ads(id("community1"));
+
+    assertThat(list.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void ads_filter_description() {
+    Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
+    Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
+    Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setDescription("text").setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setDescription("text").setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setDescription("text").setCommunityId(id("community3"))).getId());
+
+    List<Ad> list = repository.ads(id("community1"), "text");
+
+    assertThat(list).extracting("id").containsExactly(id1);
+  }
+
+  @Test
+  public void ads_filter_title() {
+    Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
+    Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
+    Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setTitle("_title_").setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setTitle("_title_").setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setTitle("_title_").setCommunityId(id("community3"))).getId());
+
+    List<Ad> list = repository.ads(id("community1"), "title");
+
+    assertThat(list).extracting("id").containsExactly(id1);
+  }
+
+  @Test
+  public void ads_filter_username() {
+    Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
+    Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
+    Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community3"))).getId());
+
+    List<Ad> list = repository.ads(id("community1"), "user");
+
+    assertThat(list).extracting("id").containsExactly(id1);
+  }
+
+  @Test
+  public void ads_filter_deleted() {
+    Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
+    Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2").setDeleted(true)).getId());
+    Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community1"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community1")).setDeleted(true)).getId());
+
+    List<Ad> list = repository.ads(id("community1"), "user");
+
+    assertThat(list).extracting("id").containsExactly(id1);
+  }
+
+  @Test
+  public void ads_filter_notFound() {
+    List<Ad> list = repository.ads(id("community1"), "user");
+
+    assertThat(list.size()).isEqualTo(0);
   }
 
   @Test
@@ -55,57 +131,22 @@ public class AdRepositoryTest extends DBTest {
     assertThat(result.getCreatedAt()).isEqualTo(parse("2016-02-02T20:15:30Z"));
     assertThat(result.getDescription()).isEqualTo("description");
     assertThat(result.getLocation()).isEqualTo("home");
+    assertThat(result.isDeleted()).isEqualTo(false);
   }
 
   @Test
-  public void list() {
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("other community"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community"))).getId());
+  public void findById_deleted() {
+    Long id = inTransaction(() -> repository.create(new Ad().setDeleted(true)).getId());
 
-    List<Ad> list = repository.ads(id(("community")));
+    Optional<Ad> result = repository.find(id);
 
-    assertThat(list).extracting("id").containsExactly(id1, id3);
+    assertFalse(result.isPresent());
   }
 
   @Test
-  public void list_filtered_includesOnlyUserCommunity() {
-    Long userId1 = inTransaction(() -> userRepository.create(new User()).getId());
-    Long userId2 = inTransaction(() -> userRepository.create(new User()).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setDescription("text").setCommunityId(id("community"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setDescription("text").setCommunityId(id("other community"))).getId());
+  public void findById_notFound() {
+    Optional<Ad> result = inTransaction(() -> repository.find(id("unknown")));
 
-    List<Ad> list = repository.ads(id("community"), "text");
-
-    assertThat(list).extracting("id").containsExactly(id1);
+    assertFalse(result.isPresent());
   }
-
-  @Test
-  public void list_filtered() {
-    Long userId = inTransaction(() -> userRepository.create(new User()).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId).setDescription("this does match").setCommunityId(id("community"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId).setDescription("no match").setCommunityId(id("community"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId).setDescription("this dOeS match").setCommunityId(id("community"))).getId());
-    Long id4 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId).setTitle("this dOeS match").setCommunityId(id("community"))).getId());
-
-    List<Ad> list = repository.ads(id("community"), "does");
-
-    assertThat(list).extracting("id").containsExactly(id1, id3, id4);
-  }
-
-  @Test
-  public void list_filteredByAdCreatorName() {
-    Long userId1 = inTransaction(() -> userRepository.create(new User().setFirstName("Foo").setLastName("Baz")).getId());
-    Long userId2 = inTransaction(() -> userRepository.create(new User().setFirstName("Big").setLastName("Ben")).getId());
-    Long userId3 = inTransaction(() -> userRepository.create(new User().setFirstName("Bar").setLastName("Oo")).getId());
-
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community")).setCreatedBy(userId1)).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community")).setCreatedBy(userId2)).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community")).setCreatedBy(userId3)).getId());
-
-    List<Ad> list = repository.ads(id("community"), "oo");
-
-    assertThat(list).extracting("id").containsExactly(id1, id3);
-  }
-
 }

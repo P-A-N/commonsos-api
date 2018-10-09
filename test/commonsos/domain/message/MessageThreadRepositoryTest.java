@@ -1,21 +1,22 @@
 package commonsos.domain.message;
 
-import commonsos.DBTest;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserRepository;
-import org.junit.Test;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import static commonsos.TestId.id;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+
+import commonsos.DBTest;
+import commonsos.domain.auth.User;
+import commonsos.domain.auth.UserRepository;
 
 public class MessageThreadRepositoryTest extends DBTest {
 
@@ -41,8 +42,8 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void create() {
-    User myself = inTransaction(() -> userRepository.create(new User()));
-    User counterparty = inTransaction(() -> userRepository.create(new User()));
+    User myself = inTransaction(() -> userRepository.create(new User().setUsername("myself")));
+    User counterparty = inTransaction(() -> userRepository.create(new User().setUsername("counterparty")));
 
     List<MessageThreadParty> parties = asList(party(myself), party(counterparty));
     MessageThread messageThread = new MessageThread().setParties(parties);
@@ -68,8 +69,8 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void listByUser() {
-    User user = inTransaction(() -> userRepository.create(new User()));
-    User otherUser = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User otherUser = inTransaction(() -> userRepository.create(new User().setUsername("otherUser")));
 
     MessageThread thread1 = new MessageThread().setParties(asList(party(user), party(otherUser)));
     MessageThread thread2 = new MessageThread().setParties(asList(party(otherUser)));
@@ -86,9 +87,9 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void byUserId() {
-    User user = inTransaction(() -> userRepository.create(new User()));
-    User otherUser1 = inTransaction(() -> userRepository.create(new User()));
-    User otherUser2 = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));
+    User otherUser2 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser2")));
 
     MessageThread thread0 = new MessageThread().setParties(asList(party(user), party(otherUser1))).setGroup(true);
     MessageThread thread1 = new MessageThread().setParties(asList(party(user), party(otherUser1))).setGroup(false);
@@ -112,7 +113,7 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void threadById() {
-    User user = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     Long id = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
 
     Optional<MessageThread> result = repository.thread(id);
@@ -128,7 +129,7 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void updateParty() {
-    User user = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     MessageThreadParty party = new MessageThreadParty().setUser(user);
     MessageThread thread = new MessageThread().setParties(asList(party));
     inTransaction(() -> repository.create(thread).getId());
@@ -165,8 +166,8 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void unreadMessageThreadCount() {
-    User user = inTransaction(() -> userRepository.create(new User()));
-    User user2 = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     Long threadId1 = threadWithMessages(user, user2, null).getId();
     Long threadId2 = threadWithMessages(user, user2, now().minus(10, SECONDS)).getId();
@@ -179,8 +180,8 @@ public class MessageThreadRepositoryTest extends DBTest {
 
   @Test
   public void unreadMessageThreadCount_excludesThreadsWithoutMessages() {
-    User user = inTransaction(() -> userRepository.create(new User()));
-    User user2 = inTransaction(() -> userRepository.create(new User()));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     MessageThreadParty myParty = new MessageThreadParty().setUser(user);
     MessageThreadParty counterParty = new MessageThreadParty().setUser(user2);

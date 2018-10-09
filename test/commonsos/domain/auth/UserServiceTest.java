@@ -96,6 +96,7 @@ public class UserServiceTest {
         .setAdmin(true)
         .setFirstName("first")
         .setLastName("last")
+        .setUsername("user")
         .setLocation("Shibuya")
         .setDescription("description")
         .setAvatarUrl("/avatar.png")
@@ -113,6 +114,7 @@ public class UserServiceTest {
     assertThat(view.getFullName()).isEqualTo("last first");
     assertThat(view.getFirstName()).isEqualTo("first");
     assertThat(view.getLastName()).isEqualTo("last");
+    assertThat(view.getUsername()).isEqualTo("user");
     assertThat(view.getLocation()).isEqualTo("Shibuya");
     assertThat(view.getDescription()).isEqualTo("description");
     assertThat(view.getAvatarUrl()).isEqualTo("/avatar.png");
@@ -191,6 +193,7 @@ public class UserServiceTest {
         .setId(id("user"))
         .setFirstName("first")
         .setLastName("last")
+        .setUsername("user")
         .setLocation("location")
         .setDescription("description")
         .setAvatarUrl("avatar url");
@@ -199,6 +202,7 @@ public class UserServiceTest {
     // verify
     assertThat(result.getId()).isEqualTo(id("user"));
     assertThat(result.getFullName()).isEqualTo("last first");
+    assertThat(result.getUsername()).isEqualTo("user");
     assertThat(result.getDescription()).isEqualTo("description");
     assertThat(result.getLocation()).isEqualTo("location");
     assertThat(result.getAvatarUrl()).isEqualTo("avatar url");
@@ -557,8 +561,7 @@ public class UserServiceTest {
         .setFirstName("first")
         .setLastName("last")
         .setDescription("description")
-        .setLocation("location")
-        .setEmailAddress("test@test.com");
+        .setLocation("location");
     User result = userService.updateUser(user, command);
     
     // verify
@@ -567,7 +570,6 @@ public class UserServiceTest {
     assertThat(user.getLastName()).isEqualTo(command.getLastName());
     assertThat(user.getDescription()).isEqualTo(command.getDescription());
     assertThat(user.getLocation()).isEqualTo(command.getLocation());
-    assertThat(user.getEmailAddress()).isEqualTo(command.getEmailAddress());
     
     assertThat(result).isEqualTo(user);
   }

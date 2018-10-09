@@ -30,4 +30,5 @@ public class User {
   private String walletAddress;
   private String pushNotificationToken;
   private String emailAddress;
+  private boolean deleted;
 }

@@ -1,10 +1,10 @@
 package commonsos.domain.auth;
 
+import java.math.BigDecimal;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.math.BigDecimal;
 
 @Getter @Setter @Accessors(chain=true)
 public class UserPrivateView {
@@ -13,6 +13,7 @@ public class UserPrivateView {
   private String fullName;
   private String firstName;
   private String lastName;
+  private String username;
   private String description;
   private BigDecimal balance;
   private String location;

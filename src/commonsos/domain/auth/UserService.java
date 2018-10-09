@@ -52,6 +52,7 @@ public class UserService {
       .setFullName(fullName(user))
       .setFirstName(user.getFirstName())
       .setLastName(user.getLastName())
+      .setUsername(user.getUsername())
       .setLocation(user.getLocation())
       .setDescription(user.getDescription())
       .setAvatarUrl(user.getAvatarUrl())
@@ -136,6 +137,7 @@ public class UserService {
     return new UserView()
       .setId(user.getId())
       .setFullName(fullName(user))
+      .setUsername(user.getUsername())
       .setLocation(user.getLocation())
       .setDescription(user.getDescription())
       .setAvatarUrl(user.getAvatarUrl());
@@ -164,7 +166,6 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
-    user.setEmailAddress(command.getEmailAddress());
     repository.update(user);
     return user;
   }

@@ -3,7 +3,10 @@ package commonsos.domain.auth;
 import static commonsos.TestId.id;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.persistence.NoResultException;
 
 import org.junit.Test;
 
@@ -27,6 +30,20 @@ public class UserRepositoryTest extends DBTest {
   }
 
   @Test
+  public void findByUsername_deleted() {
+    // prepare
+    User testUser = createTestUser();
+    testUser.setDeleted(true);
+    inTransaction(() -> repository.update(testUser));
+
+    // execute
+    Optional<User> result = repository.findByUsername(testUser.getUsername());
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
   public void findByUsername_notFound() {
     // execute
     Optional<User> result = repository.findByUsername("worker");
@@ -47,14 +64,38 @@ public class UserRepositoryTest extends DBTest {
 
   @Test
   public void findById() {
-    Long id = inTransaction(() -> repository.create(new User().setUsername("worker")).getId());
+    // prepare
+    User testUser = createTestUser();
+    
+    // execute
+    Optional<User> result = repository.findById(testUser.getId());
 
-    assertThat(repository.findById(id)).isNotEmpty();
+    // verify
+    assertThat(result.isPresent());
+    assertUser(result.get(), testUser);
+  }
+
+  @Test
+  public void findById_deleted() {
+    // prepare
+    User testUser = createTestUser();
+    testUser.setDeleted(true);
+    inTransaction(() -> repository.update(testUser));
+
+    // execute
+    Optional<User> result = repository.findById(testUser.getId());
+
+    // verify
+    assertThat(result).isEmpty();
   }
 
   @Test
   public void findById_notFound() {
-    assertThat(repository.findById(id("invalid id"))).isEmpty();
+    // execute
+    Optional<User> result = repository.findById(id("invalid id"));
+    
+    // verify
+    assertThat(result).isEmpty();
   }
 
   @Test
@@ -77,43 +118,119 @@ public class UserRepositoryTest extends DBTest {
 
   @Test
   public void search() {
-    User user1 = inTransaction(() -> repository.create(new User().setFirstName("FIRST").setLastName("foo").setCommunityId(id("community"))));
-    User user2 = inTransaction(() -> repository.create(new User().setFirstName("first").setLastName("bar").setCommunityId(id("community"))));
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("foobarUser").setCommunityId(id("community2"))));
+    inTransaction(() -> repository.create(new User().setUsername("hogeUser").setCommunityId(id("community2"))));
+    
+    // execute
+    List<User> results = repository.search(id("community1"), "foo");
+    
+    // verify
+    assertThat(results.size()).isEqualTo(1);
+    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
+    
+    // execute
+    results = repository.search(id("community2"), "user");
 
-    assertThat(repository.search(id("community"), "irs")).containsExactly(user1, user2);
-    assertThat(repository.search(id("community"), "FOO")).containsExactly(user1);
-    assertThat(repository.search(id("community"), "baz")).isEmpty();
-    assertThat(repository.search(id("community"), " ")).isEmpty();
-    assertThat(repository.search(id("community"), "")).isEmpty();
+    // verify
+    results.sort((a,b) -> a.getId().compareTo(b.getId()));
+    assertThat(results.size()).isEqualTo(2);
+    assertThat(results.get(0).getUsername()).isEqualTo("foobarUser");
+    assertThat(results.get(1).getUsername()).isEqualTo("hogeUser");
   }
 
   @Test
-  public void search_excludesOtherCommunities() {
-    User user1 = inTransaction(() -> repository.create(new User().setFirstName("first").setLastName("foo").setCommunityId(id("Shibuya"))));
-    User user2 = inTransaction(() -> repository.create(new User().setFirstName("first").setLastName("bar").setCommunityId(id("Kaga"))));
+  public void search_deleted() {
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1")).setDeleted(true)));
+    
+    // execute
+    List<User> results = repository.search(id("community1"), "user");
 
-    assertThat(repository.search(id("Shibuya"), "first")).containsExactly(user1);
-    assertThat(repository.search(id("Kaga"), "first")).containsExactly(user2);
+    // verify
+    assertThat(results.size()).isEqualTo(1);
+    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
   }
 
   @Test
-  public void search_includesAdminUser() {
-    User admin = inTransaction(() -> repository.create(new User().setCommunityId(id("community")).setFirstName("name").setLastName("name").setAdmin(true)));
-    User user = inTransaction(() -> repository.create(new User().setCommunityId(id("community")).setFirstName("name").setLastName("name").setAdmin(false)));
+  public void search_emptyQuery() {
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
+    
+    // execute
+    List<User> results = repository.search(id("community1"), null);
+    
+    // verify
+    assertThat(results.size()).isEqualTo(0);
+    
+    // execute
+    results = repository.search(id("community1"), "");
 
-    assertThat(repository.search(id("community"), "name")).containsExactly(admin, user);
+    // verify
+    assertThat(results.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void search_notFound() {
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
+    
+    // execute
+    List<User> results = repository.search(id("community1"), "hogehoge");
+    
+    // verify
+    assertThat(results.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void search_maxResults() {
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("user1").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user2").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user3").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user4").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user5").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user6").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user7").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user8").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user9").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user10").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user11").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user12").setCommunityId(id("community1"))));
+    
+    // execute
+    List<User> results = repository.search(id("community1"), "user");
+    
+    // verify
+    assertThat(results.size()).isEqualTo(10);
   }
 
   @Test
   public void findAdminByCommunityId() {
-    inTransaction(() -> repository.create(new User().setCommunityId(id("community"))));
-    User admin = inTransaction(() -> repository.create(new User().setCommunityId(id("community")).setAdmin(true)));
-
-    User result = repository.findAdminByCommunityId(id("community"));
-
-    assertThat(result).isEqualTo(admin);
+    // prepare
+    inTransaction(() -> repository.create(new User().setUsername("user1").setCommunityId(id("community1")).setAdmin(true)));
+    inTransaction(() -> repository.create(new User().setUsername("user2").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user3").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new User().setUsername("user4").setCommunityId(id("community1")).setAdmin(true).setDeleted(true)));
+    
+    // execute
+    User result = repository.findAdminByCommunityId(id("community1"));
+    
+    // verify
+    assertThat(result.getUsername()).isEqualTo("user1");
   }
-  
+
+  @Test(expected = NoResultException.class)
+  public void findAdminByCommunityId_notFound() {
+    // execute
+    repository.findAdminByCommunityId(id("community1"));
+  }
+
   private User createTestUser() {
     User testUser =  new User()
         .setCommunityId(id("community id"))
@@ -148,5 +265,6 @@ public class UserRepositoryTest extends DBTest {
     assertThat(actual.getWalletAddress()).isEqualTo(expect.getWalletAddress());
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
+    assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
   }
 }

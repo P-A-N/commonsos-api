@@ -44,8 +44,7 @@ public class UserUpdateControllerTest {
         + " \"firstName\":\"John\","
         + " \"lastName\":\"Doe\","
         + " \"description\":\"Retired\","
-        + " \"location\":\"Sapporo\","
-        + " \"emailAddress\":\"test@test.com\""
+        + " \"location\":\"Sapporo\""
         + "}";
     when(request.body()).thenReturn(json);
     User updatedUser = new User();
@@ -65,7 +64,6 @@ public class UserUpdateControllerTest {
     assertThat(actualCommand.getLastName()).isEqualTo("Doe");
     assertThat(actualCommand.getDescription()).isEqualTo("Retired");
     assertThat(actualCommand.getLocation()).isEqualTo("Sapporo");
-    assertThat(actualCommand.getEmailAddress()).isEqualTo("test@test.com");
     
     verify(userService, times(1)).privateView(updatedUser);
     assertThat(result).isEqualTo(privateView);

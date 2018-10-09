@@ -1,0 +1,1 @@
+ALTER TABLE message_thread_parties ADD PRIMARY KEY(id);
