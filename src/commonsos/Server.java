@@ -1,26 +1,56 @@
 package commonsos;
 
+import static java.util.Arrays.asList;
+import static spark.Spark.before;
+import static spark.Spark.exception;
+import static spark.Spark.get;
+import static spark.Spark.post;
+
+import java.util.stream.Stream;
+
+import org.web3j.protocol.Web3j;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import com.google.inject.*;
-import commonsos.controller.ad.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+
+import commonsos.controller.ad.AdController;
+import commonsos.controller.ad.AdCreateController;
+import commonsos.controller.ad.AdDeleteController;
+import commonsos.controller.ad.AdListController;
+import commonsos.controller.ad.AdPhotoUpdateController;
+import commonsos.controller.ad.AdUpdateController;
+import commonsos.controller.ad.MessageThreadWithUserController;
+import commonsos.controller.ad.MyAdsController;
 import commonsos.controller.admin.UserSearchController;
-import commonsos.controller.auth.*;
+import commonsos.controller.auth.AccountCreateController;
+import commonsos.controller.auth.LoginController;
+import commonsos.controller.auth.LogoutController;
+import commonsos.controller.auth.UserAvatarUpdateController;
+import commonsos.controller.auth.UserController;
+import commonsos.controller.auth.UserDeleteController;
+import commonsos.controller.auth.UserMobileDeviceUpdateController;
+import commonsos.controller.auth.UserUpdateController;
 import commonsos.controller.community.CommunityListController;
-import commonsos.controller.message.*;
+import commonsos.controller.message.GroupMessageThreadController;
+import commonsos.controller.message.GroupMessageThreadUpdateController;
+import commonsos.controller.message.MessageListController;
+import commonsos.controller.message.MessagePostController;
+import commonsos.controller.message.MessageThreadController;
+import commonsos.controller.message.MessageThreadForAdController;
+import commonsos.controller.message.MessageThreadListController;
+import commonsos.controller.message.MessageThreadUnreadCountController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
 import commonsos.domain.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
-import org.web3j.protocol.Web3j;
 import spark.Request;
-
-import java.util.stream.Stream;
-
-import static java.util.Arrays.asList;
-import static spark.Spark.*;
 
 @Slf4j
 public class Server {
@@ -70,6 +100,7 @@ public class Server {
     get("/user", injector.getInstance(UserController.class), toJson);
     get("/users/:id", injector.getInstance(UserController.class), toJson);
     post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);
+    post("/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
@@ -77,6 +108,8 @@ public class Server {
     post("/ads", injector.getInstance(AdCreateController.class), toJson);
     get("/ads", injector.getInstance(AdListController.class), toJson);
     get("/ads/:id", injector.getInstance(AdController.class), toJson);
+    post("/ads/:id", injector.getInstance(AdUpdateController.class), toJson);
+    post("/ads/:id/delete", injector.getInstance(AdDeleteController.class), toJson);
     post("/ads/:id/photo", injector.getInstance(AdPhotoUpdateController.class), toJson);
     get("/my-ads", injector.getInstance(MyAdsController.class), toJson);
 

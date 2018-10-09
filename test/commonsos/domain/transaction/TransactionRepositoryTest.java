@@ -1,17 +1,23 @@
 package commonsos.domain.transaction;
 
-import commonsos.DBTest;
-import commonsos.domain.auth.User;
-import org.junit.Test;
+import static commonsos.TestId.id;
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.TEN;
+import static java.math.BigDecimal.ZERO;
+import static java.time.Instant.now;
+import static java.time.Instant.parse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static commonsos.TestId.id;
-import static java.math.BigDecimal.*;
-import static java.time.Instant.now;
-import static java.time.Instant.parse;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import commonsos.DBTest;
+import commonsos.domain.ad.Ad;
+import commonsos.domain.auth.User;
 
 public class TransactionRepositoryTest extends DBTest {
 
@@ -97,6 +103,24 @@ public class TransactionRepositoryTest extends DBTest {
     BigDecimal amount = repository.pendingTransactionsAmount(id("user"));
 
     assertThat(amount).isEqualByComparingTo(TEN);
+  }
+
+  @Test
+  public void hasPaid() {
+    // prepare
+    inTransaction(() -> repository.create(new Transaction().setAdId(id("ad1"))));
+    
+    // execute
+    boolean result = repository.hasPayd(new Ad().setId(id("ad1")));
+    
+    // verify
+    assertTrue(result);
+
+    // execute
+    result = repository.hasPayd(new Ad().setId(id("ad2")));
+    
+    // verify
+    assertFalse(result);
   }
 
   @Test

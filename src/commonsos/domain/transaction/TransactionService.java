@@ -1,5 +1,19 @@
 package commonsos.domain.transaction;
 
+import static java.lang.String.format;
+import static java.math.BigDecimal.ZERO;
+import static java.time.Instant.now;
+import static java.util.stream.Collectors.toList;
+import static spark.utils.StringUtils.isBlank;
+
+import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import commonsos.BadRequestException;
 import commonsos.DisplayableException;
 import commonsos.domain.ad.Ad;
@@ -10,19 +24,6 @@ import commonsos.domain.auth.UserView;
 import commonsos.domain.blockchain.BlockchainService;
 import commonsos.domain.message.PushNotificationService;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.math.BigDecimal;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import static java.lang.String.format;
-import static java.math.BigDecimal.ZERO;
-import static java.time.Instant.now;
-import static java.util.stream.Collectors.toList;
-import static spark.utils.StringUtils.isBlank;
 
 @Singleton
 @Slf4j
@@ -95,6 +96,10 @@ public class TransactionService {
     return transaction;
   }
 
+  public boolean hasPaid(Ad ad) {
+    return repository.hasPayd(ad);
+  }
+  
   public void markTransactionCompleted(String blockChainTransactionHash) {
     Optional<Transaction> result = repository.findByBlockchainTransactionHash(blockChainTransactionHash);
     if (!result.isPresent()) {

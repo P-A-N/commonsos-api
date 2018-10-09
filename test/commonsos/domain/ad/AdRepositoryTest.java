@@ -149,4 +149,27 @@ public class AdRepositoryTest extends DBTest {
 
     assertFalse(result.isPresent());
   }
+
+  @Test
+  public void update() {
+    Ad testAd = inTransaction(() -> repository.create(new Ad()
+        .setCreatedBy(id("john"))
+        .setType(GIVE)
+        .setTitle("Title")
+        .setDescription("description")
+        .setPoints(TEN)
+        .setLocation("home")))
+        .setCreatedAt(parse("2016-02-02T20:15:30Z"))
+        .setPhotoUrl("url://photo")
+        .setCommunityId(id("community"));
+
+    testAd.setTitle("Title2").setDescription("description2").setLocation("home2");
+    inTransaction(() -> repository.update(testAd));
+    
+    Ad result = repository.find(testAd.getId()).get();
+
+    assertThat(result.getTitle()).isEqualTo("Title2");
+    assertThat(result.getDescription()).isEqualTo("description2");
+    assertThat(result.getLocation()).isEqualTo("home2");
+  }
 }

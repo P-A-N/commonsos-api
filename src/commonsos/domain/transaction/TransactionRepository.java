@@ -1,19 +1,21 @@
 package commonsos.domain.transaction;
 
-import commonsos.EntityManagerService;
-import commonsos.Repository;
-import commonsos.domain.auth.User;
+import static java.math.BigDecimal.ZERO;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static java.math.BigDecimal.ZERO;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.persistence.NoResultException;
+
+import commonsos.EntityManagerService;
+import commonsos.Repository;
+import commonsos.domain.ad.Ad;
+import commonsos.domain.auth.User;
 
 @Singleton
 public class TransactionRepository extends Repository {
@@ -49,6 +51,14 @@ public class TransactionRepository extends Repository {
     catch (NoResultException e) {
         return empty();
     }
+  }
+
+  public boolean hasPayd(Ad ad) {
+    List<Transaction> resultList = em()
+      .createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
+      .setParameter("adId", ad.getId()).getResultList();
+    
+    return !resultList.isEmpty();
   }
 
   public BigDecimal pendingTransactionsAmount(Long userId) {

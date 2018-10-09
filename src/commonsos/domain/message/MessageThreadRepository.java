@@ -1,17 +1,18 @@
 package commonsos.domain.message;
 
-import commonsos.EntityManagerService;
-import commonsos.Repository;
-import commonsos.domain.auth.User;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
+import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
-import java.util.List;
-import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
+import commonsos.EntityManagerService;
+import commonsos.Repository;
+import commonsos.domain.auth.User;
 
 @Singleton
 public class MessageThreadRepository extends Repository {
@@ -73,6 +74,13 @@ public class MessageThreadRepository extends Repository {
 
   public void update(MessageThread messageThread) {
     em().merge(messageThread);
+  }
+
+  public int deleteMessageThreadParty(User user) {
+    return em().createQuery(
+      "DELETE FROM MessageThreadParty mtp WHERE mtp.user = :user " +
+      "AND EXISTS (SELECT mt FROM MessageThread mt WHERE mt.id = mtp.messageThreadId AND (mt.adId IS NOT NULL OR mt.group IS TRUE))")
+      .setParameter("user", user).executeUpdate();
   }
 
   public List<Long> unreadMessageThreadIds(User user) {

@@ -1,6 +1,21 @@
 package commonsos.domain.message;
 
+import static java.lang.String.format;
+import static java.time.Instant.now;
+import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.google.common.collect.ImmutableMap;
+
 import commonsos.BadRequestException;
 import commonsos.ForbiddenException;
 import commonsos.domain.ad.Ad;
@@ -10,19 +25,6 @@ import commonsos.domain.auth.User;
 import commonsos.domain.auth.UserService;
 import commonsos.domain.auth.UserView;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.List;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static java.time.Instant.now;
-import static java.util.Arrays.asList;
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.of;
 
 @Singleton
 @Slf4j
@@ -231,6 +233,10 @@ public class MessageService {
 
   private boolean isUserAllowedToAccessMessageThread(User user, MessageThread thread) {
     return thread.getParties().stream().anyMatch(p -> p.getUser().equals(user));
+  }
+
+  public int deleteMessageThreadParty(User user) {
+    return messageThreadRepository.deleteMessageThreadParty(user);
   }
 
   public int unreadMessageThreadCount(User user) {

@@ -1,32 +1,45 @@
 package commonsos.domain.ad;
 
-import commonsos.BadRequestException;
-import commonsos.ForbiddenException;
-import commonsos.domain.auth.ImageService;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.auth.UserView;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.io.InputStream;
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
 import static commonsos.TestId.id;
 import static commonsos.domain.ad.AdType.GIVE;
 import static commonsos.domain.ad.AdType.WANT;
-import static java.math.BigDecimal.*;
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.TEN;
+import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import commonsos.BadRequestException;
+import commonsos.ForbiddenException;
+import commonsos.domain.auth.ImageService;
+import commonsos.domain.auth.User;
+import commonsos.domain.auth.UserService;
+import commonsos.domain.auth.UserView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdServiceTest {
@@ -96,17 +109,29 @@ public class AdServiceTest {
   }
 
   @Test
-  public void adsCreatedByUser() {
+  public void myAdsView() {
     User user = new User().setId(id("worker"));
     Ad ad = new Ad().setCreatedBy(id("worker"));
     AdView adView = new AdView();
-    AdService service = spy(this.service);
     when(repository.ads(user.getCommunityId())).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
     doReturn(adView).when(service).view(ad, user);
 
-    List<AdView> result = service.createdBy(user);
+    List<AdView> result = service.myAdsView(user);
 
+    assertThat(result.size()).isEqualTo(1);
     assertThat(result).containsExactly(adView);
+  }
+
+  @Test
+  public void myAds() {
+    User user = new User().setId(id("worker"));
+    Ad ad = new Ad().setCreatedBy(id("worker"));
+    when(repository.ads(user.getCommunityId())).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
+
+    List<Ad> result = service.myAds(user);
+
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getCreatedBy()).isEqualTo(id("worker"));
   }
 
   @Test

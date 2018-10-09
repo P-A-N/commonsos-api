@@ -19,9 +19,12 @@ import commonsos.ForbiddenException;
 import commonsos.JobService;
 import commonsos.UserSession;
 import commonsos.controller.auth.DelegateWalletTask;
+import commonsos.domain.ad.Ad;
+import commonsos.domain.ad.AdService;
 import commonsos.domain.blockchain.BlockchainService;
 import commonsos.domain.community.Community;
 import commonsos.domain.community.CommunityService;
+import commonsos.domain.message.MessageService;
 import commonsos.domain.transaction.TransactionService;
 
 @Singleton
@@ -29,6 +32,8 @@ public class UserService {
   public static final String WALLET_PASSWORD = "test";
 
   @Inject UserRepository repository;
+  @Inject AdService adService;
+  @Inject MessageService messageService;
   @Inject BlockchainService blockchainService;
   @Inject TransactionService transactionService;
   @Inject PasswordService passwordService;
@@ -167,6 +172,21 @@ public class UserService {
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
     repository.update(user);
+    return user;
+  }
+
+  public User deleteUserLogically(User user) {
+    // delete my ads logically
+    List<Ad> myAds = adService.myAds(user);
+    myAds.forEach(ad -> adService.deleteAdLogically(ad, user));
+
+    // delete message thread party
+    messageService.deleteMessageThreadParty(user);
+    
+    // delete user logically
+    user.setDeleted(true);
+    repository.update(user);
+    
     return user;
   }
 
