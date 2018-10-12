@@ -124,7 +124,6 @@ public class AdService {
     if (!ad.getCreatedBy().equals(operator.getId())) throw new ForbiddenException();
 
     ad.setDeleted(true);
-    repository.update(ad);
-    return ad;
+    return repository.update(ad);
   }
 }

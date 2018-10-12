@@ -40,6 +40,7 @@ import commonsos.domain.auth.ImageService;
 import commonsos.domain.auth.User;
 import commonsos.domain.auth.UserService;
 import commonsos.domain.auth.UserView;
+import commonsos.domain.transaction.TransactionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdServiceTest {
@@ -47,6 +48,7 @@ public class AdServiceTest {
   @Mock AdRepository repository;
   @Mock UserService userService;
   @Mock ImageService imageService;
+  @Mock TransactionService transactionService;
   @Captor ArgumentCaptor<Ad> adCaptor;
   @InjectMocks @Spy AdService service;
 
@@ -110,10 +112,10 @@ public class AdServiceTest {
 
   @Test
   public void myAdsView() {
-    User user = new User().setId(id("worker"));
+    User user = new User().setId(id("worker")).setCommunityId(id("community"));
     Ad ad = new Ad().setCreatedBy(id("worker"));
     AdView adView = new AdView();
-    when(repository.ads(user.getCommunityId())).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
+    when(repository.ads(id("community"))).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
     doReturn(adView).when(service).view(ad, user);
 
     List<AdView> result = service.myAdsView(user);
@@ -124,9 +126,9 @@ public class AdServiceTest {
 
   @Test
   public void myAds() {
-    User user = new User().setId(id("worker"));
+    User user = new User().setId(id("worker")).setCommunityId(id("community"));
     Ad ad = new Ad().setCreatedBy(id("worker"));
-    when(repository.ads(user.getCommunityId())).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
+    when(repository.ads(id("community"))).thenReturn(asList(ad, new Ad().setCreatedBy(id("elderly"))));
 
     List<Ad> result = service.myAds(user);
 
@@ -220,6 +222,59 @@ public class AdServiceTest {
   }
 
   @Test
+  public void updateAd() {
+    // prepare
+    Ad targetAd = new Ad()
+        .setId(id("targetAd"))
+        .setCreatedBy(id("operator"));
+    doReturn(targetAd).when(service).ad(id("targetAd"));
+    when(transactionService.hasPaid(targetAd)).thenReturn(false);
+    when(repository.update(targetAd)).thenReturn(targetAd);
+    
+    // execute
+    User operator = new User().setId(id("operator"));
+    AdUpdateCommand command = new AdUpdateCommand()
+        .setId(id("targetAd"))
+        .setTitle("title")
+        .setDescription("description")
+        .setAmount(TEN)
+        .setLocation("location")
+        .setType(AdType.GIVE);
+    Ad result = service.updateAd(operator, command);
+    
+    // verify
+    assertThat(result).isEqualTo(targetAd);
+    assertThat(result.getTitle()).isEqualTo(command.getTitle());
+    assertThat(result.getDescription()).isEqualTo(command.getDescription());
+    assertThat(result.getPoints()).isEqualTo(command.getAmount());
+    assertThat(result.getLocation()).isEqualTo(command.getLocation());
+    assertThat(result.getType()).isEqualTo(command.getType());
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void updateAd_otherUser() {
+    // prepare
+    Ad targetAd = new Ad().setCreatedBy(id("otherUser"));
+    doReturn(targetAd).when(service).ad(any());
+    
+    // execute
+    User operator = new User().setId(id("operator"));
+    service.updateAd(operator, new AdUpdateCommand());
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void updateAd_hasPaid() {
+    // prepare
+    Ad targetAd = new Ad().setCreatedBy(id("operator"));
+    doReturn(targetAd).when(service).ad(any());
+    when(transactionService.hasPaid(any())).thenReturn(true);
+    
+    // execute
+    User operator = new User().setId(id("operator"));
+    service.updateAd(operator, new AdUpdateCommand());
+  }
+  
+  @Test
   public void updatePhoto() {
     User user = new User().setId(id("creator id"));
     InputStream photo = mock(InputStream.class);
@@ -265,5 +320,45 @@ public class AdServiceTest {
     when(repository.find(id("ad id"))).thenReturn(empty());
 
     service.updatePhoto(new User(), new AdPhotoUpdateCommand().setAdId(id("ad id")));
+  }
+  
+  @Test
+  public void deleteAdLogically_byId() {
+    // prepare
+    User operator = new User();
+    Ad targetAd = new Ad();
+    doReturn(targetAd).when(service).ad(id("ad"));
+    doReturn(targetAd).when(service).deleteAdLogically(targetAd, operator);
+    
+    // execute
+    Ad result = service.deleteAdLogically(id("ad"), operator);
+    
+    // verify
+    assertThat(result).isEqualTo(targetAd);
+  }
+
+  @Test
+  public void deleteAdLogically() {
+    // prepare
+    User operator = new User().setId(id("operator"));
+    Ad targetAd = new Ad().setCreatedBy(id("operator"));
+    when(repository.update(targetAd)).thenReturn(targetAd);
+    
+    // execute
+    Ad result = service.deleteAdLogically(targetAd, operator);
+    
+    // verify
+    assertThat(result).isEqualTo(targetAd);
+    assertThat(result.isDeleted()).isEqualTo(true);
+  }
+
+  @Test(expected = ForbiddenException.class)
+  public void deleteAdLogically_forbidden() {
+    // prepare
+    User operator = new User().setId(id("operator"));
+    Ad targetAd = new Ad().setCreatedBy(id("otherUser"));
+    
+    // execute
+    service.deleteAdLogically(targetAd, operator);
   }
 }

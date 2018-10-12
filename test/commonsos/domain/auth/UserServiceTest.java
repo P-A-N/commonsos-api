@@ -16,6 +16,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,15 +37,20 @@ import commonsos.ForbiddenException;
 import commonsos.JobService;
 import commonsos.UserSession;
 import commonsos.controller.auth.DelegateWalletTask;
+import commonsos.domain.ad.Ad;
+import commonsos.domain.ad.AdService;
 import commonsos.domain.blockchain.BlockchainService;
 import commonsos.domain.community.Community;
 import commonsos.domain.community.CommunityService;
+import commonsos.domain.message.MessageService;
 import commonsos.domain.transaction.TransactionService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
 
   @Mock UserRepository repository;
+  @Mock AdService adService;
+  @Mock MessageService messageService;
   @Mock TransactionService transactionService;
   @Mock PasswordService passwordService;
   @Mock BlockchainService blockchainService;
@@ -555,8 +562,10 @@ public class UserServiceTest {
 
   @Test
   public void updateUser() {
-    // execute
     User user = new User();
+    when(repository.update(user)).thenReturn(user);
+    
+    // execute
     UserUpdateCommand command = new UserUpdateCommand()
         .setFirstName("first")
         .setLastName("last")
@@ -574,6 +583,41 @@ public class UserServiceTest {
     assertThat(result).isEqualTo(user);
   }
 
+  @Test
+  public void deleteUserLogically() {
+    // prepare
+    User targetUser = new User();
+    
+    List<Ad> myAds = new ArrayList<>();
+    myAds.addAll(Arrays.asList(new Ad(), new Ad()));
+    when(adService.myAds(targetUser)).thenReturn(myAds);
+    
+    when(repository.update(targetUser)).thenReturn(targetUser);
+    
+    // execute
+    User result = userService.deleteUserLogically(targetUser);
+    
+    // verify
+    assertThat(result).isEqualTo(targetUser);
+    assertThat(result.isDeleted()).isEqualTo(true);
+    
+    verify(adService, times(2)).deleteAdLogically(any(Ad.class), any());
+    verify(messageService, times(1)).deleteMessageThreadParty(targetUser);
+  }
+
+  @Test
+  public void deleteUserLogically_noAds() {
+    // prepare
+    List<Ad> myAds = new ArrayList<>();
+    when(adService.myAds(any())).thenReturn(myAds);
+    
+    // execute
+    userService.deleteUserLogically(new User());
+    
+    // verify
+    verify(adService, never()).deleteAdLogically(any(Ad.class), any());
+  }
+  
   @Test
   public void updateMobileDevice() {
     MobileDeviceUpdateCommand command = new MobileDeviceUpdateCommand().setPushNotificationToken("12345");

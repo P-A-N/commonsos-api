@@ -1,24 +1,5 @@
 package commonsos.domain.message;
 
-import com.google.common.collect.ImmutableMap;
-import commonsos.BadRequestException;
-import commonsos.ForbiddenException;
-import commonsos.domain.ad.Ad;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.auth.UserView;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import static commonsos.TestId.id;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
@@ -29,7 +10,36 @@ import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import com.google.common.collect.ImmutableMap;
+
+import commonsos.BadRequestException;
+import commonsos.ForbiddenException;
+import commonsos.domain.ad.Ad;
+import commonsos.domain.ad.AdService;
+import commonsos.domain.ad.AdView;
+import commonsos.domain.auth.User;
+import commonsos.domain.auth.UserService;
+import commonsos.domain.auth.UserView;
 
 @RunWith(MockitoJUnitRunner.class)
 
@@ -373,6 +383,19 @@ public class MessageServiceTest {
     assertThat(result).isEqualTo(3);
   }
 
+  @Test
+  public void deleteMessageThreadParty() {
+    // prepare
+    User user = new User();
+    when(messageThreadRepository.deleteMessageThreadParty(user)).thenReturn(10);
+    
+    // execute
+    int result = service.deleteMessageThreadParty(user);
+    
+    // verify
+    assertThat(result).isEqualTo(10);
+  }
+  
   @Test
   public void group() {
     User addedUser = new User().setId(id("addedUser"));

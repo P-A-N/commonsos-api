@@ -1,5 +1,34 @@
 package commonsos.domain.transaction;
 
+import static commonsos.TestId.id;
+import static java.time.Instant.now;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static java.time.temporal.ChronoUnit.SECONDS;
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.assertj.core.api.Assertions.within;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import commonsos.BadRequestException;
 import commonsos.DisplayableException;
 import commonsos.domain.ad.Ad;
@@ -9,24 +38,6 @@ import commonsos.domain.auth.UserService;
 import commonsos.domain.auth.UserView;
 import commonsos.domain.blockchain.BlockchainService;
 import commonsos.domain.message.PushNotificationService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
-
-import static commonsos.TestId.id;
-import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.HOURS;
-import static java.time.temporal.ChronoUnit.SECONDS;
-import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
@@ -204,6 +215,19 @@ public class TransactionServiceTest {
     assertThat(result).isEqualTo(asList(transactionView2, transactionView1));
   }
 
+  @Test
+  public void hasPaid() {
+    // prepare
+    Ad ad = new Ad();
+    when(repository.hasPayd(ad)).thenReturn(true);
+    
+    // execute
+    boolean result = service.hasPaid(ad);
+    
+    // verify
+    assertThat(result).isTrue();
+  }
+  
   @Test
   public void markTransactionCompleted() {
     Transaction transaction = new Transaction()

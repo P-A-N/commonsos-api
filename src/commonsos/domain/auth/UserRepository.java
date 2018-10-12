@@ -64,8 +64,8 @@ public class UserRepository extends Repository {
       .getResultList();
   }
 
-  public void update(User user) {
-    em().merge(user);
+  public User update(User user) {
+    return em().merge(user);
   }
 
   public User findAdminByCommunityId(Long communityId) {

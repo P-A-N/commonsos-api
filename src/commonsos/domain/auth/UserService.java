@@ -171,8 +171,7 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
-    repository.update(user);
-    return user;
+    return repository.update(user);
   }
 
   public User deleteUserLogically(User user) {
@@ -185,9 +184,7 @@ public class UserService {
     
     // delete user logically
     user.setDeleted(true);
-    repository.update(user);
-    
-    return user;
+    return repository.update(user);
   }
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
