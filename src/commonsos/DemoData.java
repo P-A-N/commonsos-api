@@ -128,11 +128,11 @@ public class DemoData {
     );
 
     waitTransactionCompleted(
-      transactionService.create(admin, new TransactionCreateCommand().setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly1.getId()).setDescription("Funds from municipality"))
+      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(admin.getCommunityId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly1.getId()).setDescription("Funds from municipality"))
     );
 
     waitTransactionCompleted(
-      transactionService.create(admin, new TransactionCreateCommand().setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly2.getId()).setDescription("Funds from municipality"))
+      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(admin.getCommunityId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly2.getId()).setDescription("Funds from municipality"))
     );
 
     AdView workerAd = emService.runInTransaction(() -> adService.create(worker, new AdCreateCommand()
@@ -171,21 +171,21 @@ public class DemoData {
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("Hi, what about tomorrow in the afternoon?"));
     messageService.postMessage(elderly1, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("But I have a very little appartement, could it be cheaper?"));
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("No problem, it will be special price for you: 999.99"));
-    transactionService.create(elderly1, new TransactionCreateCommand().setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning (agreed price)").setAmount(new BigDecimal("999.99")));
+    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(elderly1.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning (agreed price)").setAmount(new BigDecimal("999.99")));
 
 
     MessageThreadView workerAdElderly2Thread = emService.runInTransaction(() -> messageService.threadForAd(elderly2, workerAd.getId()));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Hi! Would like to arrange cleaning on a weekly basis"));
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Hi! Ok, would it be ok to do the first cleaning next Tuesday?"));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Yes, waiting for you."));
-    transactionService.create(elderly2, new TransactionCreateCommand().setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning").setAmount(new BigDecimal("1299.01")));
+    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(elderly2.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning").setAmount(new BigDecimal("1299.01")));
 
     MessageThreadView elderly1AdThread = emService.runInTransaction(() -> messageService.threadForAd(elderly2, elderly1Ad.getId()));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(elderly1AdThread.getId()).setText("Hi, I can bring you some food from the shop"));
-    transactionService.create(elderly1, new TransactionCreateCommand().setBeneficiaryId(elderly2.getId()).setAdId(elderly1Ad.getId()).setDescription("Ad: Shopping agent").setAmount(new BigDecimal("300")));
+    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(elderly1.getCommunityId()).setBeneficiaryId(elderly2.getId()).setAdId(elderly1Ad.getId()).setDescription("Ad: Shopping agent").setAmount(new BigDecimal("300")));
 
     MessageThreadView elderly2AdThread = emService.runInTransaction(() -> messageService.threadForAd(worker, elderly2Ad.getId()));
-    transactionService.create(elderly2, new TransactionCreateCommand().setBeneficiaryId(worker.getId()).setAdId(elderly2Ad.getId()).setDescription("Ad: 小川くん、醤油かってきて").setAmount(BigDecimal.TEN.add(BigDecimal.TEN)));
+    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(elderly2.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(elderly2Ad.getId()).setDescription("Ad: 小川くん、醤油かってきて").setAmount(BigDecimal.TEN.add(BigDecimal.TEN)));
   }
 
   private void waitTransactionCompleted(Transaction transaction) {

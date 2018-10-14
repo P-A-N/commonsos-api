@@ -1,8 +1,5 @@
 package db.migration;
 
-import static com.ninja_squad.dbsetup.Operations.insertInto;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -18,10 +15,6 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.ninja_squad.dbsetup.DbSetup;
-import com.ninja_squad.dbsetup.destination.DataSourceDestination;
-import com.ninja_squad.dbsetup.operation.Operation;
-
 public class DBMigrationTest {
 
   protected static final Flyway flyway = new Flyway();
@@ -34,7 +27,7 @@ public class DBMigrationTest {
   }
   
   @Before
-  public void clean() {
+  public void cleanBefore() {
     flyway.clean();
   }
   
@@ -60,20 +53,5 @@ public class DBMigrationTest {
     }
     
     return results;
-  }
-  
-//  @Test
-  public void example() throws SQLException {
-    migrateTo("11.3");
-    
-    Operation operation = insertInto("users")
-        .columns("admin", "username", "deleted")
-        .values(false, "user", true)
-        .build();
-    DbSetup dbSetup = new DbSetup(new DataSourceDestination(dataSource), operation);
-    dbSetup.launch();
-    
-    List<Map<String, String>> results = sql("select * from users where username = 'user'");
-    assertThat(results.get(0).get("deleted")).isEqualTo("TRUE");
   }
 }

@@ -26,6 +26,7 @@ public class TransactionRepositoryTest extends DBTest {
   @Test
   public void create() {
     Long id = inTransaction(() -> repository.create(new Transaction()
+      .setCommunityId(id("community id"))
       .setRemitterId(id("remitter id"))
       .setBeneficiaryId(id("beneficiary id"))
       .setAdId(id("ad id"))
@@ -39,6 +40,7 @@ public class TransactionRepositoryTest extends DBTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNotNull();
+    assertThat(result.getCommunityId()).isEqualTo(id("community id"));
     assertThat(result.getRemitterId()).isEqualTo(id("remitter id"));
     assertThat(result.getBeneficiaryId()).isEqualTo(id("beneficiary id"));
     assertThat(result.getAdId()).isEqualTo(id("ad id"));
@@ -51,6 +53,7 @@ public class TransactionRepositoryTest extends DBTest {
   @Test
   public void update() {
     Long id = inTransaction(() -> repository.create(new Transaction()
+      .setCommunityId(id("community id"))
       .setAmount(TEN))
       .getId());
 
@@ -65,19 +68,20 @@ public class TransactionRepositoryTest extends DBTest {
 
   @Test
   public void transactions() {
-    User user = new User().setId(id("worker"));
+    User user = new User().setId(id("user1"));
 
-    Long id1 = inTransaction(() -> repository.create(transaction(id("elderly"), id("worker"))).getId());
-    Long id2 = inTransaction(() -> repository.create(transaction(id("worker"), id("elderly2"))).getId());
-    inTransaction(() -> repository.create(transaction(id("foo"), id("bar"))).getId());
+    Long id1 = inTransaction(() -> repository.create(transaction(id("community1"), id("user1"), id("user2"))).getId());
+    Long id2 = inTransaction(() -> repository.create(transaction(id("community1"), id("user2"), id("user1"))).getId());
+    Long id3 = inTransaction(() -> repository.create(transaction(id("community2"), id("user1"), id("user2"))).getId());
+    Long id4 = inTransaction(() -> repository.create(transaction(id("community2"), id("user2"), id("user1"))).getId());
 
-    assertThat(repository.transactions(user, id("community"))).extracting("id").containsExactly(id1, id2);
+    assertThat(repository.transactions(user, id("community1"))).extracting("id").containsExactly(id1, id2);
   }
 
   @Test
   public void findByBlockchainTransactionHash() {
-    inTransaction(() -> repository.create(new Transaction().setBlockchainTransactionHash("other value")));
-    Long id = inTransaction(() -> repository.create(new Transaction().setBlockchainTransactionHash("hash value")).getId());
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setBlockchainTransactionHash("other value")));
+    Long id = inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setBlockchainTransactionHash("hash value")).getId());
 
     Optional<Transaction> result = repository.findByBlockchainTransactionHash("hash value");
 
@@ -90,25 +94,27 @@ public class TransactionRepositoryTest extends DBTest {
     assertThat(repository.findByBlockchainTransactionHash("hash value")).isEmpty();
   }
 
-  private Transaction transaction(Long remitterId, Long beneficiary) {
-    return new Transaction().setBeneficiaryId(beneficiary).setRemitterId(remitterId);
+  private Transaction transaction(Long communityId, Long remitterId, Long beneficiary) {
+    return new Transaction().setCommunityId(communityId).setBeneficiaryId(beneficiary).setRemitterId(remitterId);
   }
 
   @Test
   public void pendingTransactionsAmount() {
-    inTransaction(() -> repository.create(new Transaction().setRemitterId(id("user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setRemitterId(id("other user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setRemitterId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("other user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("other community id")).setRemitterId(id("user")).setAmount(TEN)));
 
-    BigDecimal amount = repository.pendingTransactionsAmount(id("user"));
+    BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community id"));
 
-    assertThat(amount).isEqualByComparingTo(TEN);
+    assertThat(amount).isEqualByComparingTo(new BigDecimal(20));
   }
 
   @Test
   public void hasPaid() {
     // prepare
-    inTransaction(() -> repository.create(new Transaction().setAdId(id("ad1"))));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setAdId(id("ad1"))));
     
     // execute
     boolean result = repository.hasPaid(new Ad().setId(id("ad1")));
@@ -125,7 +131,7 @@ public class TransactionRepositoryTest extends DBTest {
 
   @Test
   public void pendingTransactionsAmount_none() {
-    BigDecimal amount = repository.pendingTransactionsAmount(id("user"));
+    BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community"));
 
     assertThat(amount).isEqualByComparingTo(ZERO);
   }

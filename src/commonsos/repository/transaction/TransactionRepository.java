@@ -32,7 +32,9 @@ public class TransactionRepository extends Repository {
 
   public List<Transaction> transactions(User user, Long communityId) {
     return em()
-      .createQuery("FROM Transaction WHERE beneficiaryId = :userId OR remitterId = :userId", Transaction.class)
+      .createQuery("FROM Transaction WHERE communityId = :communityId " +
+          "AND (beneficiaryId = :userId OR remitterId = :userId)", Transaction.class)
+      .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getResultList();
   }
@@ -61,9 +63,13 @@ public class TransactionRepository extends Repository {
     return !resultList.isEmpty();
   }
 
-  public BigDecimal pendingTransactionsAmount(Long userId) {
+  public BigDecimal pendingTransactionsAmount(Long userId, Long communityId) {
     BigDecimal amount = em()
-      .createQuery("SELECT SUM(amount) FROM Transaction WHERE blockchainCompletedAt IS NULL AND remitterId = :userId", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM Transaction " +
+          "WHERE communityId = :communityId " +
+          "AND blockchainCompletedAt IS NULL " +
+          "AND remitterId = :userId", BigDecimal.class)
+      .setParameter("communityId", communityId)
       .setParameter("userId", userId)
       .getSingleResult();
     return amount != null ? amount :  ZERO;

@@ -35,10 +35,10 @@ public class GetTransactionListTest extends IntegrationTest {
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityId(community1.getId()));
     user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityId(community2.getId()));
     Instant instant = Instant.now();
-    tran1 = create(new Transaction().setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)).setCreatedAt(instant.plusSeconds(10)));
-    tran2 = create(new Transaction().setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)).setCreatedAt(instant.plusSeconds(20)));
-    tran3 = create(new Transaction().setRemitterId(user2.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(3)).setCreatedAt(instant.plusSeconds(30)));
-    tran4 = create(new Transaction().setRemitterId(user3.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(4)).setCreatedAt(instant.plusSeconds(40)));
+    tran1 = create(new Transaction().setCommunityId(community1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)).setCreatedAt(instant.plusSeconds(10)));
+    tran2 = create(new Transaction().setCommunityId(community2.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)).setCreatedAt(instant.plusSeconds(20)));
+    tran3 = create(new Transaction().setCommunityId(community1.getId()).setRemitterId(user2.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(3)).setCreatedAt(instant.plusSeconds(30)));
+    tran4 = create(new Transaction().setCommunityId(community2.getId()).setRemitterId(user3.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(4)).setCreatedAt(instant.plusSeconds(40)));
     
 
     sessionId = login("user1", "pass");
@@ -51,7 +51,7 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community1.getId())
       .then().statusCode(200)
-      .body("remitter.username",    contains("user3", "user2", "user1", "user1"))
-      .body("beneficiary.username", contains("user1", "user1", "user3", "user2"));
+      .body("remitter.username",    contains("user2", "user1"))
+      .body("beneficiary.username", contains("user1", "user2"));
   }
 }

@@ -38,7 +38,7 @@ public class TransactionService {
 
   public BigDecimal balance(User user, Long communityId) {
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
-    return tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId()));
+    return tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId));
   }
 
   private boolean isDebit(User user, Transaction transaction) {
@@ -66,6 +66,7 @@ public class TransactionService {
   }
 
   public Transaction create(User user, TransactionCreateCommand command) {
+    if (command.getCommunityId() == null) throw new BadRequestException("community id is required");
     if (isBlank(command.getDescription()))  throw new BadRequestException();
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException();
     if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException();
@@ -74,13 +75,13 @@ public class TransactionService {
     if (command.getAdId() != null) {
       Ad ad = adService.ad(command.getAdId());
       if (!adService.isPayableByUser(user, ad)) throw new BadRequestException();
-      if (command.getCommunityId() == null ||
-          !command.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
+      if (!command.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
     }
     BigDecimal balance = balance(user, command.getCommunityId());
     if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
     Transaction transaction = new Transaction()
+      .setCommunityId(command.getCommunityId())
       .setRemitterId(user.getId())
       .setAmount(command.getAmount())
       .setBeneficiaryId(command.getBeneficiaryId())

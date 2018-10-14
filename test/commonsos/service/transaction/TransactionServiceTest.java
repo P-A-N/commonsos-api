@@ -69,6 +69,7 @@ public class TransactionServiceTest {
     assertThat(result.getBlockchainTransactionHash()).isEqualTo("blockchain hash");
     verify(repository).create(captor.capture());
     Transaction transaction = captor.getValue();
+    assertThat(transaction.getCommunityId()).isEqualTo(id("community"));
     assertThat(transaction.getAmount()).isEqualTo(BigDecimal.TEN);
     assertThat(transaction.getBeneficiaryId()).isEqualTo(id("beneficiary"));
     assertThat(transaction.getRemitterId()).isEqualTo(id("remitter"));
@@ -169,7 +170,7 @@ public class TransactionServiceTest {
   public void balance() {
     User user = new User().setId(id("user id")).setCommunityId(id("community"));
     when(blockchainService.tokenBalance(user, id("community"))).thenReturn(BigDecimal.TEN);
-    when(repository.pendingTransactionsAmount(id("user id"))).thenReturn(BigDecimal.ONE);
+    when(repository.pendingTransactionsAmount(id("user id"), id("community"))).thenReturn(BigDecimal.ONE);
 
     BigDecimal result = service.balance(user, id("community"));
 

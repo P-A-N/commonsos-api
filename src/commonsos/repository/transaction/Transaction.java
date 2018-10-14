@@ -1,22 +1,24 @@
 package commonsos.repository.transaction;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import static javax.persistence.GenerationType.IDENTITY;
+
+import java.math.BigDecimal;
+import java.time.Instant;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.time.Instant;
 
-import static javax.persistence.GenerationType.IDENTITY;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Entity @Table(name="transactions")
 @Getter @Setter @Accessors(chain=true)
 public class Transaction {
   @Id @GeneratedValue(strategy=IDENTITY) private Long id;
+  private Long communityId;
   private Long remitterId;
   private Long beneficiaryId;
   private String description;
