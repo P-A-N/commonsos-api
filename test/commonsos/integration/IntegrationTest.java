@@ -1,8 +1,12 @@
 package commonsos.integration;
 
 import static com.ninja_squad.dbsetup.Operations.deleteAllFrom;
+import static io.restassured.RestAssured.given;
 import static spark.Spark.awaitInitialization;
 import static spark.Spark.stop;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -14,6 +18,7 @@ import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.operation.Operation;
 
 import commonsos.EntityManagerService;
+import commonsos.service.auth.PasswordService;
 import io.restassured.RestAssured;
 
 public class IntegrationTest {
@@ -21,6 +26,7 @@ public class IntegrationTest {
   protected static Gson gson = new Gson();
   protected static EntityManagerService emService = new TestEntityManagerService();
   protected static Operation DELETE_ALL = deleteAllFrom("users", "ads", "messages", "message_threads", "message_thread_parties", "transactions", "communities");
+  protected PasswordService passwordService = new PasswordService();
   
   @BeforeClass
   public static void startUp() {
@@ -47,5 +53,24 @@ public class IntegrationTest {
   @AfterClass
   public static void stopServer() {
     stop();
+  }
+  
+  public static String login(String username, String password) {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("username", username);
+    requestParam.put("password", password);
+    
+    String sessionId = given()
+      .body(gson.toJson(requestParam))
+      .when().post("/login")
+      .then().statusCode(200)
+      .extract().cookie("JSESSIONID");
+    
+    return sessionId;
+  }
+  
+  public static <T> T create(T entity) {
+    emService.runInTransaction(() -> emService.get().persist(entity));
+    return entity;
   }
 }

@@ -36,7 +36,7 @@ public class AdService {
       .setTitle(command.getTitle())
       .setDescription(command.getDescription())
       .setLocation(command.getLocation())
-      .setPoints(command.getAmount())
+      .setPoints(command.getPoints())
       .setPhotoUrl(command.getPhotoUrl())
       .setCommunityId(user.getCommunityId());
 
@@ -100,7 +100,7 @@ public class AdService {
     
     ad.setTitle(command.getTitle())
       .setDescription(command.getDescription())
-      .setPoints(command.getAmount())
+      .setPoints(command.getPoints())
       .setLocation(command.getLocation())
       .setType(command.getType());
     return repository.update(ad);

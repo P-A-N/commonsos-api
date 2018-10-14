@@ -1,5 +1,22 @@
 package commonsos;
 
+import static commonsos.repository.ad.AdType.GIVE;
+import static commonsos.repository.ad.AdType.WANT;
+import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_DEPLOYMENT_GAS_LIMIT;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+
 import commonsos.repository.community.Community;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.transaction.Transaction;
@@ -17,19 +34,6 @@ import commonsos.service.transaction.TransactionCreateCommand;
 import commonsos.service.transaction.TransactionService;
 import commonsos.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-import org.web3j.tx.response.PollingTransactionReceiptProcessor;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-import static commonsos.repository.ad.AdType.GIVE;
-import static commonsos.repository.ad.AdType.WANT;
-import static commonsos.service.blockchain.BlockchainService.*;
 
 @Singleton
 @Slf4j
@@ -135,7 +139,7 @@ public class DemoData {
       .setType(GIVE)
       .setTitle("House cleaning")
       .setDescription("Vacuum cleaning, moist cleaning, floors etc")
-      .setAmount(new BigDecimal("1299.01"))
+      .setPoints(new BigDecimal("1299.01"))
       .setLocation("Kaga city")
       .setPhotoUrl("/static/temp/sample-photo-apartment1.jpg"))
     );
@@ -144,7 +148,7 @@ public class DemoData {
       .setType(WANT)
       .setTitle("Shopping agent")
       .setDescription("Thank you for reading this article. I had traffic accident last year and chronic pain on left leg\uD83D\uDE22 I want anyone to help me by going shopping to a grocery shop once a week.")
-      .setAmount(new BigDecimal("300"))
+      .setPoints(new BigDecimal("300"))
       .setLocation("Kumasakamachi 熊坂町")
       .setPhotoUrl("/static/temp/shop.jpeg")
     ));
@@ -153,7 +157,7 @@ public class DemoData {
       .setType(WANT)
       .setTitle("小川くん、醤油かってきて")
       .setDescription("刺し身買ってきたから")
-      .setAmount(new BigDecimal("20"))
+      .setPoints(new BigDecimal("20"))
       .setLocation("kaga")
       .setPhotoUrl("/static/temp/soy.jpeg")
     ));

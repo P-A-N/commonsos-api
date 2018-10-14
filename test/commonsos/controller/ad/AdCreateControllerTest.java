@@ -38,7 +38,7 @@ public class AdCreateControllerTest {
 
   @Test
   public void handle() throws Exception {
-    when(request.body()).thenReturn("{\"title\": \"title\", \"description\": \"description\", \"amount\": \"123.456\", \"location\": \"location\", \"type\": \"GIVE\"}");
+    when(request.body()).thenReturn("{\"title\": \"title\", \"description\": \"description\", \"points\": \"123.456\", \"location\": \"location\", \"type\": \"GIVE\"}");
     User user = new User();
     ArgumentCaptor<AdCreateCommand> captor = ArgumentCaptor.forClass(AdCreateCommand.class);
     AdView adView = new AdView();
@@ -50,7 +50,7 @@ public class AdCreateControllerTest {
     AdCreateCommand ad = captor.getValue();
     assertEquals("title", ad.getTitle());
     assertEquals("description", ad.getDescription());
-    assertEquals(new BigDecimal("123.456"), ad.getAmount());
+    assertEquals(new BigDecimal("123.456"), ad.getPoints());
     assertEquals("location", ad.getLocation());
     assertEquals(AdType.GIVE, ad.getType());
   }

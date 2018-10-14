@@ -12,7 +12,7 @@ public class AdUpdateCommand {
   private Long id;
   private String title;
   private String description;
-  private BigDecimal amount;
+  private BigDecimal points;
   private String location;
   private AdType type;
 }

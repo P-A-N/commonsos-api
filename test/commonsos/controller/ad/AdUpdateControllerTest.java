@@ -45,7 +45,7 @@ public class AdUpdateControllerTest {
     when(request.body()).thenReturn("{"
         + " \"title\": \"title\","
         + " \"description\": \"description\","
-        + " \"amount\": \"123.456\","
+        + " \"points\": \"123.456\","
         + " \"location\": \"location\","
         + " \"type\": \"GIVE\""
         + "}");
@@ -68,7 +68,7 @@ public class AdUpdateControllerTest {
     assertThat(actualCommand.getId()).isEqualTo(123L);
     assertThat(actualCommand.getTitle()).isEqualTo("title");
     assertThat(actualCommand.getDescription()).isEqualTo("description");
-    assertThat(actualCommand.getAmount()).isEqualTo(new BigDecimal("123.456"));
+    assertThat(actualCommand.getPoints()).isEqualTo(new BigDecimal("123.456"));
     assertThat(actualCommand.getLocation()).isEqualTo("location");
     assertThat(actualCommand.getType()).isEqualTo(AdType.GIVE);
   }

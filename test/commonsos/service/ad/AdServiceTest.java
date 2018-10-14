@@ -61,7 +61,7 @@ public class AdServiceTest {
     AdCreateCommand command = new AdCreateCommand()
       .setTitle("title")
       .setDescription("description")
-      .setAmount(TEN)
+      .setPoints(TEN)
       .setLocation("location")
       .setType(WANT)
       .setPhotoUrl("url://photo");
@@ -241,7 +241,7 @@ public class AdServiceTest {
         .setId(id("targetAd"))
         .setTitle("title")
         .setDescription("description")
-        .setAmount(TEN)
+        .setPoints(TEN)
         .setLocation("location")
         .setType(AdType.GIVE);
     Ad result = service.updateAd(operator, command);
@@ -250,7 +250,7 @@ public class AdServiceTest {
     assertThat(result).isEqualTo(targetAd);
     assertThat(result.getTitle()).isEqualTo(command.getTitle());
     assertThat(result.getDescription()).isEqualTo(command.getDescription());
-    assertThat(result.getPoints()).isEqualTo(command.getAmount());
+    assertThat(result.getPoints()).isEqualTo(command.getPoints());
     assertThat(result.getLocation()).isEqualTo(command.getLocation());
     assertThat(result.getType()).isEqualTo(command.getType());
   }

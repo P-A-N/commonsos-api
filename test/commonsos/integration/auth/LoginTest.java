@@ -1,4 +1,4 @@
-package commonsos.integration.login;
+package commonsos.integration.auth;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
@@ -13,16 +13,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.user.User;
-import commonsos.service.auth.PasswordService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoginTest extends IntegrationTest {
   
   @Before
   public void createUser() {
-    PasswordService passwordService = new PasswordService();
-    User user = new User().setUsername("user").setPasswordHash(passwordService.hash("pass"));
-    emService.runInTransaction(() -> emService.get().persist(user));
+    create(new User().setUsername("user").setPasswordHash(passwordService.hash("pass")));
   }
   
   @Test
