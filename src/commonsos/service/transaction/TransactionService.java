@@ -74,11 +74,10 @@ public class TransactionService {
     if (command.getAdId() != null) {
       Ad ad = adService.ad(command.getAdId());
       if (!adService.isPayableByUser(user, ad)) throw new BadRequestException();
+      if (!user.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
     }
     BigDecimal balance = balance(user);
     if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
-
-    if (!user.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
 
     Transaction transaction = new Transaction()
       .setRemitterId(user.getId())
