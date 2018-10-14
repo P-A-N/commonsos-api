@@ -11,8 +11,6 @@ import java.math.BigDecimal;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.ad.Ad;
@@ -20,7 +18,6 @@ import commonsos.repository.community.Community;
 import commonsos.repository.message.MessageThread;
 import commonsos.repository.user.User;
 
-@RunWith(MockitoJUnitRunner.class)
 public class MessageThreadForAdTest extends IntegrationTest {
 
   private Community community;

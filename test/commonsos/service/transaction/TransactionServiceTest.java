@@ -115,9 +115,10 @@ public class TransactionServiceTest {
   @Test
   public void createTransaction_insufficientBalance() {
     TransactionCreateCommand command = command("beneficiary", "10.2", "description", "ad id");
-    User user = new User().setId(id("remitter"));
+    User user = new User().setId(id("remitter")).setCommunityId(id("community"));
     doReturn(BigDecimal.TEN).when(service).balance(user);
-    Ad ad = new Ad().setCreatedBy(id("beneficiary"));
+    Ad ad = new Ad().setCreatedBy(id("beneficiary")).setCommunityId(id("community"));
+    when(userService.user(id("beneficiary"))).thenReturn(new User().setId(id("beneficiary")).setCommunityId(id("community")));
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);
     DisplayableException thrown = catchThrowableOfType(() -> service.create(user, command), DisplayableException.class);
@@ -155,7 +156,6 @@ public class TransactionServiceTest {
     TransactionCreateCommand command = command("beneficiary", "0.1", "description", "ad id");
     User user = new User().setId(id("remitter")).setCommunityId(id("community"));
     when(userService.user(id("beneficiary"))).thenReturn(new User().setCommunityId(id("other community")));
-    doReturn(new BigDecimal("0.2")).when(service).balance(user);
     Ad ad = new Ad();
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);

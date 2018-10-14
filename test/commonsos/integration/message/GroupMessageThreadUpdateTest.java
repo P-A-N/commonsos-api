@@ -13,15 +13,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.community.Community;
 import commonsos.repository.message.MessageThread;
 import commonsos.repository.user.User;
 
-@RunWith(MockitoJUnitRunner.class)
 public class GroupMessageThreadUpdateTest extends IntegrationTest {
 
   private Community community;
