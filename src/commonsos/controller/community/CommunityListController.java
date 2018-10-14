@@ -1,6 +1,7 @@
 package commonsos.controller.community;
 
-import commonsos.domain.community.CommunityService;
+import commonsos.service.community.CommunityService;
+import commonsos.service.community.CommunityView;
 import spark.Request;
 import spark.Response;
 import spark.Route;

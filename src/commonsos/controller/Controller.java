@@ -1,8 +1,8 @@
 package commonsos.controller;
 
 import commonsos.UserSession;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
+import commonsos.repository.user.User;
+import commonsos.service.user.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Route;

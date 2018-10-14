@@ -1,8 +1,9 @@
 package commonsos;
 
-import commonsos.domain.auth.User;
 import org.junit.Before;
 import org.junit.Test;
+
+import commonsos.repository.user.User;
 import spark.Request;
 import spark.Session;
 

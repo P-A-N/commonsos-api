@@ -6,22 +6,23 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import commonsos.EntityManagerService;
 import commonsos.Web3jProvider;
-import commonsos.domain.auth.AccountCreateCommand;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserRepository;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.blockchain.BlockchainService;
-import commonsos.domain.community.Community;
-import commonsos.domain.community.CommunityRepository;
+import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
+import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
+import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.user.UserService;
+
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 
+import static commonsos.service.blockchain.BlockchainService.*;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.Scanner;
-
-import static commonsos.domain.blockchain.BlockchainService.*;
 
 public class AddCommunity {
 

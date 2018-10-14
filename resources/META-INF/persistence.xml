@@ -9,13 +9,13 @@
 
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-    <class>commonsos.domain.auth.User</class>
-    <class>commonsos.domain.ad.Ad</class>
-    <class>commonsos.domain.transaction.Transaction</class>
-    <class>commonsos.domain.message.Message</class>
-    <class>commonsos.domain.message.MessageThread</class>
-    <class>commonsos.domain.message.MessageThreadParty</class>
-    <class>commonsos.domain.community.Community</class>
+    <class>commonsos.repository.user.User</class>
+    <class>commonsos.repository.ad.Ad</class>
+    <class>commonsos.repository.transaction.Transaction</class>
+    <class>commonsos.repository.message.Message</class>
+    <class>commonsos.repository.message.MessageThread</class>
+    <class>commonsos.repository.message.MessageThreadParty</class>
+    <class>commonsos.repository.community.Community</class>
 
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
 

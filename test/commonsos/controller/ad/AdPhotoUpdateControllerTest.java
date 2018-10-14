@@ -1,8 +1,13 @@
 package commonsos.controller.ad;
 
-import commonsos.domain.ad.AdPhotoUpdateCommand;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.auth.User;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.InputStream;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -10,12 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import commonsos.repository.ad.AdPhotoUpdateCommand;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
 import spark.Request;
-
-import java.io.InputStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdPhotoUpdateControllerTest {

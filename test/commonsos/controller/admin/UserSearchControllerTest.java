@@ -1,13 +1,14 @@
 package commonsos.controller.admin;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.auth.UserView;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import commonsos.repository.user.User;
+import commonsos.service.user.UserService;
+import commonsos.service.view.UserView;
 import spark.Request;
 
 import java.util.ArrayList;

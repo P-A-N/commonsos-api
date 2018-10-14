@@ -1,6 +1,8 @@
 package commonsos.controller.community;
 
-import commonsos.domain.community.CommunityService;
+import commonsos.service.community.CommunityService;
+import commonsos.service.community.CommunityView;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

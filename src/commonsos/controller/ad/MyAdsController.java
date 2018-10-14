@@ -5,9 +5,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import commonsos.controller.Controller;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdView;
 import spark.Request;
 import spark.Response;
 

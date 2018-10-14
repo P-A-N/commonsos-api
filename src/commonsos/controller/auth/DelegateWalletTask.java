@@ -1,16 +1,17 @@
 package commonsos.controller.auth;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.blockchain.BlockchainService;
+import commonsos.repository.user.User;
+import commonsos.service.blockchain.BlockchainService;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import java.math.BigInteger;
 
-import static commonsos.domain.blockchain.BlockchainService.GAS_PRICE;
-import static commonsos.domain.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
+import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
+
+import java.math.BigInteger;
 
 @Slf4j
 @EqualsAndHashCode @ToString

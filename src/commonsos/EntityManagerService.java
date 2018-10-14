@@ -1,9 +1,7 @@
 package commonsos;
 
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.hibernate.internal.SessionFactoryImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -12,8 +10,11 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.hibernate.internal.SessionFactoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class EntityManagerService {
@@ -21,8 +22,8 @@ public class EntityManagerService {
 
   @Inject Configuration configuration;
 
-  EntityManagerFactory entityManagerFactory;
-  ThreadLocal<EntityManager> em = new ThreadLocal<>();
+  protected EntityManagerFactory entityManagerFactory;
+  protected ThreadLocal<EntityManager> em = new ThreadLocal<>();
 
   @Inject
   public void init() {

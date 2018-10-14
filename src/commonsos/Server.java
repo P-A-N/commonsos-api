@@ -25,17 +25,11 @@ import commonsos.controller.ad.AdDeleteController;
 import commonsos.controller.ad.AdListController;
 import commonsos.controller.ad.AdPhotoUpdateController;
 import commonsos.controller.ad.AdUpdateController;
-import commonsos.controller.ad.MessageThreadWithUserController;
 import commonsos.controller.ad.MyAdsController;
 import commonsos.controller.admin.UserSearchController;
 import commonsos.controller.auth.AccountCreateController;
 import commonsos.controller.auth.LoginController;
 import commonsos.controller.auth.LogoutController;
-import commonsos.controller.auth.UserAvatarUpdateController;
-import commonsos.controller.auth.UserController;
-import commonsos.controller.auth.UserDeleteController;
-import commonsos.controller.auth.UserMobileDeviceUpdateController;
-import commonsos.controller.auth.UserUpdateController;
 import commonsos.controller.community.CommunityListController;
 import commonsos.controller.message.GroupMessageThreadController;
 import commonsos.controller.message.GroupMessageThreadUpdateController;
@@ -45,10 +39,16 @@ import commonsos.controller.message.MessageThreadController;
 import commonsos.controller.message.MessageThreadForAdController;
 import commonsos.controller.message.MessageThreadListController;
 import commonsos.controller.message.MessageThreadUnreadCountController;
+import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
-import commonsos.domain.blockchain.BlockchainEventService;
+import commonsos.controller.user.UserAvatarUpdateController;
+import commonsos.controller.user.UserController;
+import commonsos.controller.user.UserDeleteController;
+import commonsos.controller.user.UserMobileDeviceUpdateController;
+import commonsos.controller.user.UserUpdateController;
+import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;
 
@@ -59,12 +59,13 @@ public class Server {
   @Inject private DatabaseMigrator databaseMigrator;
   @Inject private DemoData demoData;
   @Inject private BlockchainEventService blockchainEventService;
+  private Injector injector;
 
-  private void start(String[] args) {
-    Injector injector = initDependencies();
+  public void start(String[] args) {
+    injector = initDependencies();
     databaseMigrator.execute();
     CookieSecuringEmbeddedJettyFactory.register();
-    initRoutes(injector);
+    initRoutes();
     blockchainEventService.listenEvents();
     if (demoDataEnabled(args)) demoData.install();
   }
@@ -73,7 +74,7 @@ public class Server {
     return Stream.of(args).map(String::toLowerCase).anyMatch(s -> s.equals("--demodata"));
   }
 
-  private Injector initDependencies() {
+  protected Injector initDependencies() {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         bind(Gson.class).toProvider(GsonProvider.class);
@@ -87,8 +88,9 @@ public class Server {
     return injector;
   }
 
-  private void initRoutes(Injector injector) {
+  private void initRoutes() {
 
+    before((request, response) -> response.type("application/json"));
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
 //    before(new CSRFFilter(asList("/login", "/logout", "/create-account")));

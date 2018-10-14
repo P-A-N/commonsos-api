@@ -1,19 +1,20 @@
 package commonsos.controller.ad;
 
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdView;
 import spark.Request;
-
-import java.util.ArrayList;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdListControllerTest {

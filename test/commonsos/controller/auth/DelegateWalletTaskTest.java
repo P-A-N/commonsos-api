@@ -1,7 +1,8 @@
 package commonsos.controller.auth;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.blockchain.BlockchainService;
+import commonsos.repository.user.User;
+import commonsos.service.blockchain.BlockchainService;
+
 import org.junit.Test;
 
 import java.math.BigInteger;

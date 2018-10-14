@@ -7,11 +7,11 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.controller.Controller;
-import commonsos.domain.ad.Ad;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdUpdateCommand;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
+import commonsos.repository.ad.Ad;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdUpdateCommand;
+import commonsos.service.ad.AdView;
 import spark.Request;
 import spark.Response;
 

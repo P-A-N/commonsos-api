@@ -1,7 +1,8 @@
 package commonsos;
 
 import com.google.inject.Injector;
-import commonsos.domain.auth.User;
+
+import commonsos.repository.user.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 

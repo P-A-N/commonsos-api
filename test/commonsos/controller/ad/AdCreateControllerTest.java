@@ -1,11 +1,12 @@
 package commonsos.controller.ad;
 
-import com.google.gson.Gson;
-import commonsos.domain.ad.AdCreateCommand;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdType;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,14 +14,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.google.gson.Gson;
+
+import commonsos.repository.ad.AdType;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdCreateCommand;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdView;
 import spark.Request;
-
-import java.math.BigDecimal;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdCreateControllerTest {

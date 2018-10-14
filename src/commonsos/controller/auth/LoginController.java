@@ -10,10 +10,10 @@ import com.google.gson.Gson;
 
 import commonsos.CSRF;
 import commonsos.LogFilter;
-import commonsos.domain.auth.LoginCommand;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserPrivateView;
-import commonsos.domain.auth.UserService;
+import commonsos.repository.user.User;
+import commonsos.service.auth.LoginCommand;
+import commonsos.service.user.UserService;
+import commonsos.service.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Route;

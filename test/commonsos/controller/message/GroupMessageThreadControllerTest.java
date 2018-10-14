@@ -1,10 +1,11 @@
 package commonsos.controller.message;
 
 import commonsos.GsonProvider;
-import commonsos.domain.auth.User;
-import commonsos.domain.message.CreateGroupCommand;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageThreadView;
+import commonsos.repository.user.User;
+import commonsos.service.message.CreateGroupCommand;
+import commonsos.service.message.MessageService;
+import commonsos.service.message.MessageThreadView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

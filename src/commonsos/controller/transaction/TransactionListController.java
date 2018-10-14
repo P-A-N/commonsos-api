@@ -1,8 +1,8 @@
 package commonsos.controller.transaction;
 
 import commonsos.controller.Controller;
-import commonsos.domain.auth.User;
-import commonsos.domain.transaction.TransactionService;
+import commonsos.repository.user.User;
+import commonsos.service.transaction.TransactionService;
 import spark.Request;
 import spark.Response;
 

@@ -1,7 +1,8 @@
 package commonsos.controller.message;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessageService;
+import commonsos.repository.user.User;
+import commonsos.service.message.MessageService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

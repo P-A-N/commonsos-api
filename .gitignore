@@ -6,3 +6,8 @@ out
 .gradle
 dataSources
 .ideaDataSources
+/bin/
+.classpath
+.project
+.settings
+add_community.sh

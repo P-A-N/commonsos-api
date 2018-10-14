@@ -1,21 +1,21 @@
 package commonsos;
 
-import commonsos.domain.ad.AdCreateCommand;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.AccountCreateCommand;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserRepository;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.blockchain.BlockchainService;
-import commonsos.domain.community.Community;
-import commonsos.domain.community.CommunityRepository;
-import commonsos.domain.message.MessagePostCommand;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageThreadView;
-import commonsos.domain.transaction.Transaction;
-import commonsos.domain.transaction.TransactionCreateCommand;
-import commonsos.domain.transaction.TransactionService;
+import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
+import commonsos.repository.transaction.Transaction;
+import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
+import commonsos.service.ad.AdCreateCommand;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdView;
+import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.message.MessagePostCommand;
+import commonsos.service.message.MessageService;
+import commonsos.service.message.MessageThreadView;
+import commonsos.service.transaction.TransactionCreateCommand;
+import commonsos.service.transaction.TransactionService;
+import commonsos.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -27,9 +27,9 @@ import javax.inject.Singleton;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static commonsos.domain.ad.AdType.GIVE;
-import static commonsos.domain.ad.AdType.WANT;
-import static commonsos.domain.blockchain.BlockchainService.*;
+import static commonsos.repository.ad.AdType.GIVE;
+import static commonsos.repository.ad.AdType.WANT;
+import static commonsos.service.blockchain.BlockchainService.*;
 
 @Singleton
 @Slf4j

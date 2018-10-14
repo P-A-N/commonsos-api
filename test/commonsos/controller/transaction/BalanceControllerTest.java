@@ -1,7 +1,8 @@
 package commonsos.controller.transaction;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.transaction.TransactionService;
+import commonsos.repository.user.User;
+import commonsos.service.transaction.TransactionService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

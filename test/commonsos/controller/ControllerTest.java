@@ -1,8 +1,9 @@
 package commonsos.controller;
 
 import commonsos.UserSession;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
+import commonsos.repository.user.User;
+import commonsos.service.user.UserService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

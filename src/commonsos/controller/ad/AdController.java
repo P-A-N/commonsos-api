@@ -1,15 +1,15 @@
 package commonsos.controller.ad;
 
-import commonsos.controller.Controller;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
-import spark.Request;
-import spark.Response;
+import static java.lang.Long.parseLong;
 
 import javax.inject.Inject;
 
-import static java.lang.Long.parseLong;
+import commonsos.controller.Controller;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
+import commonsos.service.ad.AdView;
+import spark.Request;
+import spark.Response;
 
 public class AdController extends Controller {
   @Inject AdService service;

@@ -1,13 +1,13 @@
 package commonsos.controller.ad;
 
+import javax.inject.Inject;
+
 import commonsos.controller.Controller;
-import commonsos.domain.ad.AdPhotoUpdateCommand;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.auth.User;
+import commonsos.repository.ad.AdPhotoUpdateCommand;
+import commonsos.repository.user.User;
+import commonsos.service.ad.AdService;
 import spark.Request;
 import spark.Response;
-
-import javax.inject.Inject;
 
 public class AdPhotoUpdateController extends Controller {
   @Inject AdService service;
