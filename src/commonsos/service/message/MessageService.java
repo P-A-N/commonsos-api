@@ -103,12 +103,6 @@ public class MessageService {
   List<User> validatePartiesCommunity(Long communityId, List<Long> memberIds) {
     List<User> users = memberIds.stream().map(id -> userService.user(id)).collect(toList());
     if (users.isEmpty()) throw new BadRequestException("No group members specified");
-    users.forEach(user1 -> {
-      if (!communityId.equals(user1.getCommunityId())) {
-        String message = format("Tried to create group chat with user %s from different community", user1.getUsername());
-        throw new ForbiddenException(message);
-      }
-    });
     return users;
   }
 

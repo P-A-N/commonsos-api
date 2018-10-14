@@ -2,6 +2,7 @@ package commonsos.integration.ad;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ public class AdCreateTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    user =  create(new User().setUsername("user").setPasswordHash(passwordService.hash("pass")).setCommunityId(community.getId()));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
 
     sessionId = login("user", "pass");
   }
@@ -49,7 +50,16 @@ public class AdCreateTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/ads")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("title", equalTo("title"))
+      .body("description", equalTo("description"))
+      .body("points", equalTo(10))
+      .body("location", equalTo("location"))
+      .body("own", equalTo(true))
+      .body("payable", equalTo(false))
+      .body("type", equalTo("GIVE"))
+      .body("createdBy.id", equalTo(user.getId().intValue()))
+      .body("createdBy.username", equalTo("user"));
     
     // verify
     Ad ad = emService.get().createQuery("FROM Ad WHERE title = 'title'", Ad.class).getSingleResult();

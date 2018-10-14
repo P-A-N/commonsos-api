@@ -19,7 +19,7 @@ public class LoginTest extends IntegrationTest {
   
   @Before
   public void createUser() {
-    create(new User().setUsername("user").setPasswordHash(passwordService.hash("pass")));
+    create(new User().setUsername("user").setPasswordHash(hash("pass")));
   }
   
   @Test

@@ -487,13 +487,6 @@ public class MessageServiceTest {
     assertThat(result).containsExactly(user1, user2);
   }
 
-  @Test(expected = ForbiddenException.class)
-  public void validatePartiesCommunity_requiresSameCommunity() {
-    when(userService.user(id("user"))).thenReturn(new User().setCommunityId(id("other community")));
-
-    service.validatePartiesCommunity(id("community"), asList(id("user")));
-  }
-
   @Test(expected = BadRequestException.class)
   public void validatePartiesCommunity_requiresUser() {
     service.validatePartiesCommunity(id("community"), emptyList());

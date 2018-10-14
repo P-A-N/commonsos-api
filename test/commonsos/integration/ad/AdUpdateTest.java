@@ -2,6 +2,7 @@ package commonsos.integration.ad;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class AdUpdateTest extends IntegrationTest {
   @Before
   public void setupData() {
     community =  create(new Community().setName("community"));
-    user =  create(new User().setUsername("user").setPasswordHash(passwordService.hash("pass")).setCommunityId(community.getId()));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
     
     sessionId = login("user", "pass");
@@ -50,7 +51,16 @@ public class AdUpdateTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/ads/{id}", ad.getId())
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("title", equalTo("title"))
+      .body("description", equalTo("description"))
+      .body("points", equalTo(10))
+      .body("location", equalTo("location"))
+      .body("own", equalTo(true))
+      .body("payable", equalTo(false))
+      .body("type", equalTo("GIVE"))
+      .body("createdBy.id", equalTo(user.getId().intValue()))
+      .body("createdBy.username", equalTo("user"));
     
     // verify
     emService.get().refresh(ad);

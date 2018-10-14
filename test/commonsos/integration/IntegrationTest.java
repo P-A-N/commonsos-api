@@ -25,8 +25,15 @@ public class IntegrationTest {
   
   protected static Gson gson = new Gson();
   protected static EntityManagerService emService = new TestEntityManagerService();
-  protected static Operation DELETE_ALL = deleteAllFrom("users", "ads", "messages", "message_threads", "message_thread_parties", "transactions", "communities");
-  protected PasswordService passwordService = new PasswordService();
+  protected static Operation DELETE_ALL = deleteAllFrom(
+      "message_thread_parties",
+      "users",
+      "ads",
+      "messages",
+      "message_threads",
+      "transactions",
+      "communities");
+  protected static PasswordService passwordService = new PasswordService();
   
   @BeforeClass
   public static void startUp() {
@@ -72,5 +79,9 @@ public class IntegrationTest {
   public static <T> T create(T entity) {
     emService.runInTransaction(() -> emService.get().persist(entity));
     return entity;
+  }
+
+  public static String hash(String text) {
+    return passwordService.hash(text);
   }
 }
