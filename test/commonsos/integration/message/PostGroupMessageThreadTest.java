@@ -19,7 +19,7 @@ import commonsos.repository.community.Community;
 import commonsos.repository.message.MessageThread;
 import commonsos.repository.user.User;
 
-public class GroupMessageThreadTest extends IntegrationTest {
+public class PostGroupMessageThreadTest extends IntegrationTest {
 
   private Community community;
   private Community otherCommunity;

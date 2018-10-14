@@ -17,8 +17,6 @@ import org.junit.Test;
 
 import commonsos.DBTest;
 import commonsos.repository.ad.Ad;
-import commonsos.repository.transaction.Transaction;
-import commonsos.repository.transaction.TransactionRepository;
 import commonsos.repository.user.User;
 
 public class TransactionRepositoryTest extends DBTest {
@@ -73,7 +71,7 @@ public class TransactionRepositoryTest extends DBTest {
     Long id2 = inTransaction(() -> repository.create(transaction(id("worker"), id("elderly2"))).getId());
     inTransaction(() -> repository.create(transaction(id("foo"), id("bar"))).getId());
 
-    assertThat(repository.transactions(user)).extracting("id").containsExactly(id1, id2);
+    assertThat(repository.transactions(user, id("community"))).extracting("id").containsExactly(id1, id2);
   }
 
   @Test

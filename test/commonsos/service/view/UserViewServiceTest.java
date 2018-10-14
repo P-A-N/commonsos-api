@@ -44,13 +44,13 @@ public class UserViewServiceTest {
         .setDescription("description")
         .setAvatarUrl("/avatar.png")
         .setEmailAddress("test@test.com");
-    when(transactionService.balance(user)).thenReturn(BigDecimal.TEN);
+    when(transactionService.balance(user, user.getCommunityId())).thenReturn(BigDecimal.TEN);
 
     // execute
     UserPrivateView view = viewService.privateView(user);
 
     // verify
-    verify(transactionService, times(1)).balance(user);
+    verify(transactionService, times(1)).balance(user, user.getCommunityId());
     assertThat(view.getId()).isEqualTo(id("user id"));
     assertThat(view.isAdmin()).isTrue();
     assertThat(view.getBalance()).isEqualTo(BigDecimal.TEN);

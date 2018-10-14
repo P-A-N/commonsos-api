@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
 public class AdCreateCommand {
+  private Long communityId;
   private String title;
   private String description;
   private BigDecimal points;

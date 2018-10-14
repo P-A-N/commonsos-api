@@ -34,8 +34,8 @@ public class TestServer extends Server {
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     
     BlockchainService blockchainService = mock(BlockchainService.class);
-    when(blockchainService.tokenBalance(any())).thenReturn(BigDecimal.TEN);
-    when(blockchainService.transferTokens(any(), any(), any())).thenReturn("0x1");
+    when(blockchainService.tokenBalance(any(), any())).thenReturn(BigDecimal.TEN);
+    when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
     
     Module module = new AbstractModule() {
       @Override protected void configure() {

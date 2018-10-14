@@ -330,25 +330,13 @@ public class UserServiceTest {
 
   @Test
   public void searchUsers() {
-    User user = new User().setId(1L);
-    when(repository.search(user.getCommunityId(), "foobar")).thenReturn(asList(user));
-    UserView userView = new UserView();
-    doReturn(userView).when(userService).view(user);
-
-    List<UserView> users = userService.searchUsers(new User().setId(2L), "foobar");
-
-    assertThat(users).isEqualTo(asList(userView));
-  }
-
-  @Test
-  public void searchUsers_excludesSearchingUser() {
     User myself = new User().setId(id("myself"));
     User other = new User().setId(id("other"));
-    when(repository.search(myself.getCommunityId(), "foobar")).thenReturn(asList(myself, other));
+    when(repository.search(id("community"), "foobar")).thenReturn(asList(myself, other));
     UserView userView = new UserView();
     doReturn(userView).when(userService).view(other);
 
-    List<UserView> users = userService.searchUsers(myself, "foobar");
+    List<UserView> users = userService.searchUsers(myself, id("community"), "foobar");
 
     assertThat(users).isEqualTo(asList(userView));
   }

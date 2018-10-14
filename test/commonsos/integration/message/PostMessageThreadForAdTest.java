@@ -18,7 +18,7 @@ import commonsos.repository.community.Community;
 import commonsos.repository.message.MessageThread;
 import commonsos.repository.user.User;
 
-public class MessageThreadForAdTest extends IntegrationTest {
+public class PostMessageThreadForAdTest extends IntegrationTest {
 
   private Community community;
   private User adCreator;

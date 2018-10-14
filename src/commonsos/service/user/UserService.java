@@ -133,8 +133,8 @@ public class UserService {
     return userViewService.view(user);
   }
 
-  public List<UserView> searchUsers(User user, String query) {
-    return repository.search(user.getCommunityId(), query).stream().filter(u -> !u.getId().equals(user.getId())).map(this::view).collect(toList());
+  public List<UserView> searchUsers(User user, Long communityId, String query) {
+    return repository.search(communityId, query).stream().filter(u -> !u.getId().equals(user.getId())).map(this::view).collect(toList());
   }
 
   public String updateAvatar(User user, InputStream image) {

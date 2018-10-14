@@ -12,7 +12,7 @@ import org.junit.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.user.User;
 
-public class LoginTest extends IntegrationTest {
+public class PostLoginTest extends IntegrationTest {
   
   @Before
   public void createUser() {

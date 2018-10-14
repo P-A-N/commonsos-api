@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import commonsos.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.ad.AdService;
 import commonsos.service.ad.AdView;
@@ -25,11 +26,17 @@ public class AdListControllerTest {
 
   @Test
   public void handle() throws Exception {
+    when(request.queryParams("communityId")).thenReturn("123");
     ArrayList<AdView> ads = new ArrayList<>();
     User user = new User();
-    when(service.listFor(user, "filter text")).thenReturn(ads);
+    when(service.listFor(user, 123L, "filter text")).thenReturn(ads);
     when(request.queryParams("filter")).thenReturn("filter text");
 
     assertThat(controller.handle(user, request, null)).isSameAs(ads);
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void handle_noCommunityId() {
+    controller.handle(new User(), request, null);
   }
 }

@@ -17,37 +17,37 @@ import commonsos.repository.ad.AdType;
 import commonsos.repository.community.Community;
 import commonsos.repository.user.User;
 
-public class AdUpdateTest extends IntegrationTest {
+public class PostAdCreateTest extends IntegrationTest {
 
   private Community community;
   private User user;
-  private Ad ad;
   private String sessionId;
   
   @Before
-  public void setupData() {
+  public void setup() {
     community =  create(new Community().setName("community"));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
-    
+
     sessionId = login("user", "pass");
   }
   
   @Test
-  public void adUpdate() {
+  public void adCreate() {
     // prepare
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("title", "title");
     requestParam.put("description", "description");
     requestParam.put("points", 10);
     requestParam.put("location", "location");
     requestParam.put("type", "GIVE");
+    requestParam.put("photoUrl", "http://localhost/hoge");
 
     // call api
     given()
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}", ad.getId())
+      .when().post("/ads")
       .then().statusCode(200)
       .body("title", equalTo("title"))
       .body("description", equalTo("description"))
@@ -60,12 +60,15 @@ public class AdUpdateTest extends IntegrationTest {
       .body("createdBy.username", equalTo("user"));
     
     // verify
-    emService.get().refresh(ad);
+    Ad ad = emService.get().createQuery("FROM Ad WHERE title = 'title'", Ad.class).getSingleResult();
     assertThat(ad.getTitle()).isEqualTo("title");
     assertThat(ad.getDescription()).isEqualTo("description");
     assertThat(ad.getPoints()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(ad.getLocation()).isEqualTo("location");
     assertThat(ad.getType()).isEqualTo(AdType.GIVE);
+    assertThat(ad.getPhotoUrl()).isEqualTo("http://localhost/hoge");
+    assertThat(ad.getCommunityId()).isEqualTo(community.getId());
+    assertThat(ad.getCreatedBy()).isEqualTo(user.getId());
     assertThat(ad.isDeleted()).isEqualTo(false);
   }
 }

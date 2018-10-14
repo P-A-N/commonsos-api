@@ -59,6 +59,7 @@ public class AdServiceTest {
   @Test
   public void create() {
     AdCreateCommand command = new AdCreateCommand()
+      .setCommunityId(id("community id"))
       .setTitle("title")
       .setDescription("description")
       .setPoints(TEN)
@@ -86,16 +87,24 @@ public class AdServiceTest {
     assertThat(ad.getCommunityId()).isEqualTo(id("community id"));
   }
 
+  @Test(expected = ForbiddenException.class)
+  public void create_forbidden() {
+    AdCreateCommand command = new AdCreateCommand().setCommunityId(id("community id"));
+    User user = new User().setCommunityId(id("other community id"));
+
+    AdView result = service.create(user, command);
+  }
+
   @Test
   public void listForUser() {
     Ad ad = new Ad();
     AdView view = new AdView();
     User user = new User();
     AdService service = spy(this.service);
-    when(repository.ads(user.getCommunityId())).thenReturn(asList(ad));
+    when(repository.ads(id("community"))).thenReturn(asList(ad));
     doReturn(view).when(service).view(ad, user);
 
-    List<AdView> result = service.listFor(user, null);
+    List<AdView> result = service.listFor(user, id("community"), null);
 
     assertThat(result).containsExactly(view);
   }
@@ -106,10 +115,10 @@ public class AdServiceTest {
     AdView view = new AdView();
     User user = new User();
     AdService service = spy(this.service);
-    when(repository.ads(user.getCommunityId(), "filter text")).thenReturn(asList(ad));
+    when(repository.ads(id("community"), "filter text")).thenReturn(asList(ad));
     doReturn(view).when(service).view(ad, user);
 
-    List<AdView> result = service.listFor(user, "filter text");
+    List<AdView> result = service.listFor(user, id("community"), "filter text");
 
     assertThat(result).containsExactly(view);
   }

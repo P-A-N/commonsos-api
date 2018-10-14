@@ -137,6 +137,7 @@ public class DemoData {
 
     AdView workerAd = emService.runInTransaction(() -> adService.create(worker, new AdCreateCommand()
       .setType(GIVE)
+      .setCommunityId(worker.getCommunityId())
       .setTitle("House cleaning")
       .setDescription("Vacuum cleaning, moist cleaning, floors etc")
       .setPoints(new BigDecimal("1299.01"))
@@ -146,6 +147,7 @@ public class DemoData {
 
     AdView elderly1Ad = emService.runInTransaction(() -> adService.create(elderly1, new AdCreateCommand()
       .setType(WANT)
+      .setCommunityId(elderly1.getCommunityId())
       .setTitle("Shopping agent")
       .setDescription("Thank you for reading this article. I had traffic accident last year and chronic pain on left leg\uD83D\uDE22 I want anyone to help me by going shopping to a grocery shop once a week.")
       .setPoints(new BigDecimal("300"))
@@ -155,6 +157,7 @@ public class DemoData {
 
     AdView elderly2Ad = emService.runInTransaction(() -> adService.create(elderly2, new AdCreateCommand()
       .setType(WANT)
+      .setCommunityId(elderly2.getCommunityId())
       .setTitle("小川くん、醤油かってきて")
       .setDescription("刺し身買ってきたから")
       .setPoints(new BigDecimal("20"))

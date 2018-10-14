@@ -93,7 +93,7 @@ public class BlockchainServiceTest {
     doReturn(response).when(service).contractTransfer("contract address", credentials, "beneficiary address", new BigInteger("10000000000000000000"));
 
 
-    String result = service.transferTokens(remitter, beneficiary, TEN);
+    String result = service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN);
 
 
     assertThat(result).isEqualTo("transaction hash");
@@ -150,7 +150,7 @@ public class BlockchainServiceTest {
     doReturn(response).when(service).contractTransferFrom(credentials, "contract address", "remitter address", "beneficiary address", new BigInteger("10000000000000000000"));
 
 
-    String result = service.transferTokens(remitter, beneficiary, TEN);
+    String result = service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN);
 
 
     assertThat(result).isEqualTo("transaction hash");
@@ -177,7 +177,7 @@ public class BlockchainServiceTest {
 
 
     RuntimeException thrown = catchThrowableOfType(
-      ()-> service.transferTokens(remitter, beneficiary, TEN),
+      ()-> service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN),
       RuntimeException.class);
     assertThat(thrown).hasMessage("Error processing transaction request: blockchain error");
   }
@@ -241,7 +241,7 @@ public class BlockchainServiceTest {
     when(token.balanceOf("wallet address").send()).thenReturn(new BigInteger("10000000000000000000"));
 
 
-    BigDecimal result = service.tokenBalance(user);
+    BigDecimal result = service.tokenBalance(user, user.getCommunityId());
 
 
     assertThat(result).isEqualByComparingTo(TEN);

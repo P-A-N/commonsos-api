@@ -17,7 +17,7 @@ import commonsos.repository.community.Community;
 import commonsos.repository.transaction.Transaction;
 import commonsos.repository.user.User;
 
-public class TransactionCreateTest extends IntegrationTest {
+public class PostTransactionCreateTest extends IntegrationTest {
 
   private Community community;
   private Community otherCommunity;
@@ -44,6 +44,7 @@ public class TransactionCreateTest extends IntegrationTest {
   @Test
   public void transactionForAd_give() {
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -71,6 +72,7 @@ public class TransactionCreateTest extends IntegrationTest {
     sessionId = login("otherCommunityUser", "pass");
     
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", otherCommunity.getId());
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -89,6 +91,7 @@ public class TransactionCreateTest extends IntegrationTest {
     sessionId = login("adCreator", "pass");
     
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", user.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -116,6 +119,7 @@ public class TransactionCreateTest extends IntegrationTest {
     sessionId = login("adCreator", "pass");
     
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", otherCommunityUser.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -132,6 +136,7 @@ public class TransactionCreateTest extends IntegrationTest {
   @Test
   public void transactionBetweenUser() {
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -158,6 +163,7 @@ public class TransactionCreateTest extends IntegrationTest {
   @Test
   public void transactionBetweenUser_otherCommunityUser() {
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", otherCommunityUser.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");

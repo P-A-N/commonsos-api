@@ -109,14 +109,14 @@ public class BlockchainService {
     }
   }
 
-  public String transferTokens(User remitter, User beneficiary, BigDecimal amount) {
+  public String transferTokens(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
     return remitter.isAdmin() ?
-      transferTokensAdmin(remitter, beneficiary, amount) :
-      transferTokensRegular(remitter, beneficiary, amount);
+      transferTokensAdmin(remitter, beneficiary, communityId, amount) :
+      transferTokensRegular(remitter, beneficiary, communityId, amount);
   }
 
-  private String transferTokensRegular(User remitter, User beneficiary, BigDecimal amount) {
-    Community community = communityRepository.findById(remitter.getCommunityId()).orElseThrow(RuntimeException::new);
+  private String transferTokensRegular(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
+    Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
     User walletUser = userRepository.findAdminByCommunityId(community.getId());
 
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
@@ -152,8 +152,8 @@ public class BlockchainService {
     });
   }
 
-  private String transferTokensAdmin(User remitter, User beneficiary, BigDecimal amount) {
-    Community community = communityRepository.findById(remitter.getCommunityId()).orElseThrow(RuntimeException::new);
+  private String transferTokensAdmin(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
+    Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
 
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
 
@@ -273,10 +273,10 @@ public class BlockchainService {
     return token.getContractAddress();
   }
 
-  public BigDecimal tokenBalance(User user) {
+  public BigDecimal tokenBalance(User user, Long communityId) {
     try {
       log.info("Token balance request for: " + user.getWalletAddress());
-      Community community = communityRepository.findById(user.getCommunityId()).orElseThrow(RuntimeException::new);
+      Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
       TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
       log.info("Token balance request complete, balance " + balance.toString());

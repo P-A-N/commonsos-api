@@ -36,8 +36,8 @@ public class TransactionService {
   @Inject AdService adService;
   @Inject PushNotificationService pushNotificationService;
 
-  public BigDecimal balance(User user) {
-    BigDecimal tokenBalance = blockchainService.tokenBalance(user);
+  public BigDecimal balance(User user, Long communityId) {
+    BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
     return tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId()));
   }
 
@@ -45,8 +45,8 @@ public class TransactionService {
     return transaction.getRemitterId().equals(user.getId());
   }
 
-  public List<TransactionView> transactions(User user) {
-    return repository.transactions(user).stream()
+  public List<TransactionView> transactions(User user, Long communityId) {
+    return repository.transactions(user, communityId).stream()
       .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
       .map(transaction -> view(user, transaction))
       .collect(toList());
@@ -74,9 +74,10 @@ public class TransactionService {
     if (command.getAdId() != null) {
       Ad ad = adService.ad(command.getAdId());
       if (!adService.isPayableByUser(user, ad)) throw new BadRequestException();
-      if (!user.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
+      if (command.getCommunityId() == null ||
+          !command.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
     }
-    BigDecimal balance = balance(user);
+    BigDecimal balance = balance(user, command.getCommunityId());
     if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
     Transaction transaction = new Transaction()
@@ -89,7 +90,7 @@ public class TransactionService {
 
     repository.create(transaction);
 
-    String blockchainTransactionId = blockchainService.transferTokens(user, beneficiary, transaction.getAmount());
+    String blockchainTransactionId = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
     transaction.setBlockchainTransactionHash(blockchainTransactionId);
 
     repository.update(transaction);

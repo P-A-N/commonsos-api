@@ -29,6 +29,9 @@ public class AdService {
   @Inject ImageService imageService;
 
   public AdView create(User user, AdCreateCommand command) {
+    if (user.getCommunityId() == null ||
+        !user.getCommunityId().equals(command.getCommunityId())) throw new ForbiddenException("forbidden community id");
+    
     Ad ad = new Ad()
       .setCreatedBy(user.getId())
       .setCreatedAt(now())
@@ -38,15 +41,15 @@ public class AdService {
       .setLocation(command.getLocation())
       .setPoints(command.getPoints())
       .setPhotoUrl(command.getPhotoUrl())
-      .setCommunityId(user.getCommunityId());
+      .setCommunityId(command.getCommunityId());
 
     return view(repository.create(ad), user);
   }
 
-  public List<AdView> listFor(User user, String filter) {
+  public List<AdView> listFor(User user, Long communityId, String filter) {
     List<Ad> ads = filter != null ?
-      repository.ads(user.getCommunityId(), filter) :
-      repository.ads(user.getCommunityId());
+      repository.ads(communityId, filter) :
+      repository.ads(communityId);
 
     return ads.stream().map(ad -> view(ad, user)).collect(toList());
   }

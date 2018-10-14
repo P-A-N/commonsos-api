@@ -18,7 +18,7 @@ public class UserViewService {
   @Inject TransactionService transactionService;
 
   public UserPrivateView privateView(User user) {
-    BigDecimal balance = transactionService.balance(user);
+    BigDecimal balance = transactionService.balance(user, user.getCommunityId());
     return new UserPrivateView()
       .setId(user.getId())
       .setAdmin(user.isAdmin())

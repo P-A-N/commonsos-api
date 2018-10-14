@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -29,6 +30,7 @@ public class AdCreateControllerTest {
 
   @Mock Request request;
   @Mock AdService service;
+  @Captor ArgumentCaptor<AdCreateCommand> commandCaptor;
   @InjectMocks AdCreateController controller;
 
   @Before
@@ -38,16 +40,16 @@ public class AdCreateControllerTest {
 
   @Test
   public void handle() throws Exception {
-    when(request.body()).thenReturn("{\"title\": \"title\", \"description\": \"description\", \"points\": \"123.456\", \"location\": \"location\", \"type\": \"GIVE\"}");
+    when(request.body()).thenReturn("{\"communityId\": 123, \"title\": \"title\", \"description\": \"description\", \"points\": \"123.456\", \"location\": \"location\", \"type\": \"GIVE\"}");
     User user = new User();
-    ArgumentCaptor<AdCreateCommand> captor = ArgumentCaptor.forClass(AdCreateCommand.class);
     AdView adView = new AdView();
-    when(service.create(eq(user), captor.capture())).thenReturn(adView);
+    when(service.create(eq(user), commandCaptor.capture())).thenReturn(adView);
 
     AdView result = controller.handle(user, request, null);
 
     assertThat(result).isEqualTo(adView);
-    AdCreateCommand ad = captor.getValue();
+    AdCreateCommand ad = commandCaptor.getValue();
+    assertEquals(Long.valueOf(123L), ad.getCommunityId());
     assertEquals("title", ad.getTitle());
     assertEquals("description", ad.getDescription());
     assertEquals(new BigDecimal("123.456"), ad.getPoints());

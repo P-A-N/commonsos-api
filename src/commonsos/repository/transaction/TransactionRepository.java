@@ -30,7 +30,7 @@ public class TransactionRepository extends Repository {
     return transaction;
   }
 
-  public List<Transaction> transactions(User user) {
+  public List<Transaction> transactions(User user, Long communityId) {
     return em()
       .createQuery("FROM Transaction WHERE beneficiaryId = :userId OR remitterId = :userId", Transaction.class)
       .setParameter("userId", user.getId())

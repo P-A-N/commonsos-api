@@ -1,18 +1,25 @@
 package commonsos.controller.transaction;
 
+import static java.lang.Long.parseLong;
+import static spark.utils.StringUtils.isEmpty;
+
+import javax.inject.Inject;
+
+import commonsos.BadRequestException;
 import commonsos.controller.Controller;
 import commonsos.repository.user.User;
 import commonsos.service.transaction.TransactionService;
 import spark.Request;
 import spark.Response;
 
-import javax.inject.Inject;
-
 public class BalanceController extends Controller {
 
   @Inject TransactionService service;
 
   @Override protected Object handle(User user, Request request, Response response) {
-    return service.balance(user);
+    String communityId = request.queryParams("communityId");
+    if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
+    
+    return service.balance(user, parseLong(communityId));
   }
 }
