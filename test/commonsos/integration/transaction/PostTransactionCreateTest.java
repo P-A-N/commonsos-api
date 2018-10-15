@@ -1,6 +1,7 @@
 package commonsos.integration.transaction;
 
 import static io.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -32,9 +33,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityId(otherCommunity.getId()));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setJoinedCommunities(asList(otherCommunity)));
     giveAd =  create(new Ad().setCreatedBy(adCreator.getId()).setType(AdType.GIVE).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
     wantAd =  create(new Ad().setCreatedBy(adCreator.getId()).setType(AdType.WANT).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 

@@ -7,6 +7,7 @@ import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,6 +17,7 @@ import commonsos.ForbiddenException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdPhotoUpdateCommand;
 import commonsos.repository.ad.AdRepository;
+import commonsos.repository.community.Community;
 import commonsos.repository.transaction.TransactionRepository;
 import commonsos.repository.user.User;
 import commonsos.service.ImageService;
@@ -29,8 +31,9 @@ public class AdService {
   @Inject ImageService imageService;
 
   public AdView create(User user, AdCreateCommand command) {
-    if (user.getCommunityId() == null ||
-        !user.getCommunityId().equals(command.getCommunityId())) throw new ForbiddenException("forbidden community id");
+    if (!user.getJoinedCommunities().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) {
+      throw new ForbiddenException("forbidden community id");
+    }
     
     Ad ad = new Ad()
       .setCreatedBy(user.getId())
@@ -59,12 +62,15 @@ public class AdService {
   }
 
   public List<Ad> myAds(User user) {
-    return repository.ads(user.getCommunityId()).stream().filter(a -> a.getCreatedBy().equals(user.getId())).collect(toList());
+    return repository.myAds(
+        user.getJoinedCommunities().stream().map(Community::getId).collect(Collectors.toList()),
+        user.getId());
   }
 
   public AdView view(Ad ad, User user) {
     return new AdView()
       .setId(ad.getId())
+      .setCommunityId(ad.getCommunityId())
       .setCreatedBy(userService.view(ad.getCreatedBy()))
       .setType(ad.getType())
       .setTitle(ad.getTitle())

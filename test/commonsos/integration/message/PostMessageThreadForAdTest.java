@@ -1,6 +1,7 @@
 package commonsos.integration.message;
 
 import static io.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -29,10 +30,10 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
+    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
     ad =  create(new Ad().setCreatedBy(adCreator.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
 
     sessionId = login("user", "pass");
   }

@@ -8,4 +8,5 @@ import lombok.experimental.Accessors;
 public class CommunityView {
   private Long id;
   private String name;
+  private Long adminUserId;
 }

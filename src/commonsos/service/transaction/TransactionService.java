@@ -78,7 +78,7 @@ public class TransactionService {
     if (command.getAdId() != null) {
       Ad ad = adService.ad(command.getAdId());
       if (!adService.isPayableByUser(user, ad)) throw new BadRequestException();
-      if (!command.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
+      if (!beneficiary.getJoinedCommunities().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
     }
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");

@@ -4,6 +4,7 @@ import static commonsos.TestId.id;
 import static commonsos.repository.ad.AdType.GIVE;
 import static java.math.BigDecimal.TEN;
 import static java.time.Instant.parse;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 
@@ -118,9 +119,17 @@ public class AdRepositoryTest extends DBTest {
     Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedBy(id("user2"))).getId());
     Long id5 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2")).setCreatedBy(id("user1"))).getId());
 
-    List<Ad> list = repository.myAds(id("community1"), id("user1"));
+    // execute
+    List<Ad> list = repository.myAds(asList(id("community1")), id("user1"));
 
+    // verify
     assertThat(list).extracting("id").containsExactly(id1, id2);
+
+    // execute
+    list = repository.myAds(asList(id("community1"), id("community2")), id("user1"));
+
+    // verify
+    assertThat(list).extracting("id").containsExactly(id1, id2, id5);
   }
 
   @Test

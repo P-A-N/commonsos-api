@@ -54,10 +54,10 @@ public class UserRepository extends Repository {
   public List<User> search(Long communityId, String query) {
     if (isBlank(query)) return emptyList();
     return em().createQuery(
-      "FROM User " +
-      "WHERE communityId = :communityId " +
-      "AND deleted = FALSE " +
-      "AND LOWER(username) LIKE LOWER(:query)", User.class)
+      "SELECT u FROM User u JOIN u.joinedCommunities c " +
+      "WHERE c.id = :communityId " +
+      "AND u.deleted = FALSE " +
+      "AND LOWER(u.username) LIKE LOWER(:query)", User.class)
       .setParameter("communityId", communityId)
       .setParameter("query", "%"+query+"%")
       .setMaxResults(10)

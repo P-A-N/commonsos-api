@@ -20,8 +20,9 @@ public class CommunityService {
     return repository.list().stream().map(this::view).collect(toList());
   }
 
-  CommunityView view(Community community) {
-    return new CommunityView().setId(community.getId()).setName(community.getName());
+  public CommunityView view(Community community) {
+    Long adminUserId = community.getAdminUser() == null ? null : community.getAdminUser().getId();
+    return new CommunityView().setId(community.getId()).setName(community.getName()).setAdminUserId(adminUserId);
   }
 
   public CommunityView view(Long id) {

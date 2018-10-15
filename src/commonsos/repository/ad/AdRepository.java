@@ -44,10 +44,10 @@ public class AdRepository extends Repository {
       .getResultList();
   }
 
-  public List<Ad> myAds(Long communityId, Long userId) {
+  public List<Ad> myAds(List<Long> communityIdList, Long userId) {
     return em()
-      .createQuery("FROM Ad WHERE communityId = :communityId AND createdBy = :userId AND deleted = FALSE", Ad.class)
-      .setParameter("communityId", communityId)
+      .createQuery("FROM Ad WHERE communityId in :communityIdList AND createdBy = :userId AND deleted = FALSE", Ad.class)
+      .setParameter("communityIdList", communityIdList)
       .setParameter("userId", userId)
       .getResultList();
   }

@@ -2,6 +2,7 @@ package commonsos.service.view;
 
 import java.util.List;
 
+import commonsos.service.community.CommunityView;
 import commonsos.service.transaction.BalanceView;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public class UserPrivateView {
   private String firstName;
   private String lastName;
   private String username;
+  private List<CommunityView> communityList;
   private String description;
   private List<BalanceView> balanceList;
   private String location;

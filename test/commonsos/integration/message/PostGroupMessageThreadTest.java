@@ -33,10 +33,10 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityId(otherCommunity.getId()));
+    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setJoinedCommunities(asList(otherCommunity)));
 
     sessionId = login("user1", "pass");
   }

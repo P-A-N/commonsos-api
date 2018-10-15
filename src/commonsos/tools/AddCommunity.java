@@ -138,7 +138,6 @@ public class AddCommunity {
     String tokenAddress = blockchainService.createToken(admin, tokenSymbol, tokenName);
     Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setTokenContractAddress(tokenAddress)));
 
-    admin.setCommunityId(community.getId());
     emService.runInTransaction(() -> userRepository.update(admin));
     return community;
   }

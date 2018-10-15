@@ -1,6 +1,7 @@
 package commonsos.integration.transaction;
 
 import static io.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -20,7 +21,7 @@ public class GetBalanceTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
+    create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
 
     sessionId = login("user", "pass");
   }

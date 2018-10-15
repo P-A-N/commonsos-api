@@ -1,6 +1,7 @@
 package commonsos.integration.ad;
 
 import static io.restassured.RestAssured.given;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -27,7 +28,7 @@ public class PostAdUpdateTest extends IntegrationTest {
   @Before
   public void setupData() {
     community =  create(new Community().setName("community"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityId(community.getId()));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
     
     sessionId = login("user", "pass");

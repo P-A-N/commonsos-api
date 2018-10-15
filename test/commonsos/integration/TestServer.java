@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
+import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,11 @@ public class TestServer extends Server {
     BlockchainService blockchainService = mock(BlockchainService.class);
     when(blockchainService.tokenBalance(any(), any())).thenReturn(BigDecimal.TEN);
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
+    when(blockchainService.isConnected()).thenReturn(true);
+    when(blockchainService.createWallet(any())).thenReturn("wallet");
+    Credentials credentials = mock(Credentials.class);
+    when(credentials.getAddress()).thenReturn("wallet address");
+    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
     
     Module module = new AbstractModule() {
       @Override protected void configure() {

@@ -3,7 +3,9 @@ package commonsos.service.user;
 import static java.util.stream.Collectors.toList;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,12 +71,12 @@ public class UserService {
     validate(command);
     if (!blockchainService.isConnected()) throw new RuntimeException("Cannot create user, technical error with blockchain");
     if (repository.findByUsername(command.getUsername()).isPresent()) throw new DisplayableException("error.usernameTaken");
-    Community community = null;
-    if (command.getCommunityId() != null) {
-      community = community(command);
+    List<Community> communityList = new ArrayList<>();
+    if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
+      communityList = communityList(command.getCommunityList());
     }
     User user = new User()
-      .setCommunityId(command.getCommunityId())
+      .setJoinedCommunities(communityList)
       .setUsername(command.getUsername())
       .setPasswordHash(passwordService.hash(command.getPassword()))
       .setFirstName(command.getFirstName())
@@ -89,26 +91,30 @@ public class UserService {
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());
 
-    if (community != null) {
-      DelegateWalletTask task = new DelegateWalletTask(user, community.getAdminUser());
+    communityList.forEach(c -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, c);
       if (command.isWaitUntilCompleted())
         jobService.execute(task);
       else
         jobService.submit(user, task);
-    }
+    });
 
     return repository.create(user);
   }
 
-  private Community community(AccountCreateCommand command) {
-    return communityRepository.findById(command.getCommunityId()).orElseThrow(BadRequestException::new);
+  private List<Community> communityList(List<Long> communityList) {
+    List<Community> result = new ArrayList<>();
+    communityList.forEach(id -> {
+      result.add(communityRepository.findById(id).orElseThrow(BadRequestException::new));
+    });
+    return result;
   }
 
   void validate(AccountCreateCommand command) {
     if (command.getUsername() == null || command.getUsername().length() < 4) throw new BadRequestException("invalid username");
     if (command.getPassword() == null || command.getPassword().length() < 8) throw new BadRequestException("invalid password");
-    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");
-    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
+//    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");
+//    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
     if (command.getEmailAddress() == null || !validateEmailAddress(command.getEmailAddress())) throw new BadRequestException("invalid email address");
   }
 
@@ -156,7 +162,8 @@ public class UserService {
 
   public User deleteUserLogically(User user) {
     // delete my ads logically
-    List<Ad> myAds = adRepository.myAds(user.getCommunityId(), user.getId());
+    List<Ad> myAds = adRepository.myAds(
+        user.getJoinedCommunities().stream().map(Community::getId).collect(Collectors.toList()), user.getId());
     myAds.forEach(ad -> {
       ad.setDeleted(true);
       adRepository.update(ad);

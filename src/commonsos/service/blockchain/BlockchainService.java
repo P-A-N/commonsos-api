@@ -285,25 +285,23 @@ public class BlockchainService {
     }
   }
 
-  public void delegateTokenTransferRight(User walletOwner, User delegate) {
+  public void delegateTokenTransferRight(User walletOwner, Community community) {
     try {
-      TokenERC20 token = userCommunityToken(walletOwner);
-      TransactionReceipt receipt = token.approve(delegate.getWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
-      log.info(format("Wallet %s delegated %s. Gas used %d", walletOwner.getWalletAddress(), delegate.getWalletAddress(), receipt.getGasUsed()));
+      TokenERC20 token = userCommunityToken(walletOwner, community);
+      TransactionReceipt receipt = token.approve(community.getAdminUser().getWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
+      log.info(format("Wallet %s delegated %s. Gas used %d", walletOwner.getWalletAddress(), community.getAdminUser().getWalletAddress(), receipt.getGasUsed()));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  TokenERC20 userCommunityToken(User user) {
-    Community community = communityRepository.findById(user.getCommunityId()).orElseThrow(RuntimeException::new);
+  TokenERC20 userCommunityToken(User user, Community community) {
     Credentials credentials = credentials(user.getWallet(), WALLET_PASSWORD);
     return loadToken(credentials, community.getTokenContractAddress());
   }
 
-  TokenERC20 userCommunityTokenAsAdmin(User user) {
-    Community community = communityRepository.findById(user.getCommunityId()).orElseThrow(RuntimeException::new);
+  TokenERC20 userCommunityTokenAsAdmin(User user, Community community) {
     User walletUser = community.getAdminUser();
     Credentials credentials = credentials(walletUser.getWallet(), WALLET_PASSWORD);
     return loadToken(credentials, community.getTokenContractAddress());

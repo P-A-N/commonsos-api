@@ -1,30 +1,16 @@
 package commonsos.controller.auth;
 
-import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
-import static commonsos.LogFilter.USERNAME_MDC_KEY;
-import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.slf4j.MDC;
 
 import commonsos.CSRF;
 import commonsos.GsonProvider;
-import commonsos.UserSession;
-import commonsos.repository.user.User;
-import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.user.UserService;
-import commonsos.service.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -45,7 +31,8 @@ public class AccountCreateControllerTest {
     when(request.session()).thenReturn(session);
   }
 
-  @Test
+  // TODO
+  /*@Test
   public void handle() {
     // prepare
     when(request.body()).thenReturn(
@@ -92,5 +79,5 @@ public class AccountCreateControllerTest {
     verify(csrf, times(1)).setToken(request, response);
     verify(userService, times(1)).privateView(user);
     assertThat(result).isSameAs(userView);
-  }
+  }*/
 }

@@ -93,7 +93,6 @@ public class DemoData {
         .setLastName("Sato")
         .setLocation("Shibuya, Tokyo, Japan")
         .setDescription("I am an Engineer, currently unemployed. I like helping elderly people, I can help with daily chores.")
-        .setCommunityId(community.getId())
         .setWaitUntilCompleted(true)
       )
       .setAvatarUrl("https://image.jimcdn.com/app/cms/image/transf/none/path/s09a03e3ad80f8a02/image/i788e42d25ed4115e/version/1493969515/image.jpg")
@@ -107,7 +106,6 @@ public class DemoData {
         .setLastName("Suzuki")
         .setLocation("Kaga, Ishikawa Prefecture, Japan")
         .setDescription("I'm a retired person. I need personal assistance daily basis.")
-        .setCommunityId(community.getId())
         .setWaitUntilCompleted(true)
       )
       .setAvatarUrl("https://i.pinimg.com/originals/df/5c/70/df5c70b3b4895c4d9424de3845771182.jpg")
@@ -121,23 +119,21 @@ public class DemoData {
         .setLastName("Takahashi")
         .setLocation("Kaga, Ishikawa Prefecture, Japan")
         .setDescription("Just jump in and lets play poker!")
-        .setCommunityId(community.getId())
         .setWaitUntilCompleted(true)
       )
       .setAvatarUrl("https://qph.fs.quoracdn.net/main-qimg-42b85e5f162e21ce346da83e8fa569bd-c")
     );
 
     waitTransactionCompleted(
-      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(admin.getCommunityId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly1.getId()).setDescription("Funds from municipality"))
+      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(community.getId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly1.getId()).setDescription("Funds from municipality"))
     );
 
     waitTransactionCompleted(
-      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(admin.getCommunityId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly2.getId()).setDescription("Funds from municipality"))
+      transactionService.create(admin, new TransactionCreateCommand().setCommunityId(community.getId()).setAmount(new BigDecimal("2000")).setBeneficiaryId(elderly2.getId()).setDescription("Funds from municipality"))
     );
 
     AdView workerAd = emService.runInTransaction(() -> adService.create(worker, new AdCreateCommand()
       .setType(GIVE)
-      .setCommunityId(worker.getCommunityId())
       .setTitle("House cleaning")
       .setDescription("Vacuum cleaning, moist cleaning, floors etc")
       .setPoints(new BigDecimal("1299.01"))
@@ -147,7 +143,6 @@ public class DemoData {
 
     AdView elderly1Ad = emService.runInTransaction(() -> adService.create(elderly1, new AdCreateCommand()
       .setType(WANT)
-      .setCommunityId(elderly1.getCommunityId())
       .setTitle("Shopping agent")
       .setDescription("Thank you for reading this article. I had traffic accident last year and chronic pain on left leg\uD83D\uDE22 I want anyone to help me by going shopping to a grocery shop once a week.")
       .setPoints(new BigDecimal("300"))
@@ -157,7 +152,6 @@ public class DemoData {
 
     AdView elderly2Ad = emService.runInTransaction(() -> adService.create(elderly2, new AdCreateCommand()
       .setType(WANT)
-      .setCommunityId(elderly2.getCommunityId())
       .setTitle("小川くん、醤油かってきて")
       .setDescription("刺し身買ってきたから")
       .setPoints(new BigDecimal("20"))
@@ -171,21 +165,21 @@ public class DemoData {
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("Hi, what about tomorrow in the afternoon?"));
     messageService.postMessage(elderly1, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("But I have a very little appartement, could it be cheaper?"));
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly1Thread.getId()).setText("No problem, it will be special price for you: 999.99"));
-    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(elderly1.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning (agreed price)").setAmount(new BigDecimal("999.99")));
+    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(community.getId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning (agreed price)").setAmount(new BigDecimal("999.99")));
 
 
     MessageThreadView workerAdElderly2Thread = emService.runInTransaction(() -> messageService.threadForAd(elderly2, workerAd.getId()));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Hi! Would like to arrange cleaning on a weekly basis"));
     messageService.postMessage(worker, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Hi! Ok, would it be ok to do the first cleaning next Tuesday?"));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(workerAdElderly2Thread.getId()).setText("Yes, waiting for you."));
-    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(elderly2.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning").setAmount(new BigDecimal("1299.01")));
+    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(community.getId()).setBeneficiaryId(worker.getId()).setAdId(workerAd.getId()).setDescription("Ad: House cleaning").setAmount(new BigDecimal("1299.01")));
 
     MessageThreadView elderly1AdThread = emService.runInTransaction(() -> messageService.threadForAd(elderly2, elderly1Ad.getId()));
     messageService.postMessage(elderly2, new MessagePostCommand().setThreadId(elderly1AdThread.getId()).setText("Hi, I can bring you some food from the shop"));
-    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(elderly1.getCommunityId()).setBeneficiaryId(elderly2.getId()).setAdId(elderly1Ad.getId()).setDescription("Ad: Shopping agent").setAmount(new BigDecimal("300")));
+    transactionService.create(elderly1, new TransactionCreateCommand().setCommunityId(community.getId()).setBeneficiaryId(elderly2.getId()).setAdId(elderly1Ad.getId()).setDescription("Ad: Shopping agent").setAmount(new BigDecimal("300")));
 
     MessageThreadView elderly2AdThread = emService.runInTransaction(() -> messageService.threadForAd(worker, elderly2Ad.getId()));
-    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(elderly2.getCommunityId()).setBeneficiaryId(worker.getId()).setAdId(elderly2Ad.getId()).setDescription("Ad: 小川くん、醤油かってきて").setAmount(BigDecimal.TEN.add(BigDecimal.TEN)));
+    transactionService.create(elderly2, new TransactionCreateCommand().setCommunityId(community.getId()).setBeneficiaryId(worker.getId()).setAdId(elderly2Ad.getId()).setDescription("Ad: 小川くん、醤油かってきて").setAmount(BigDecimal.TEN.add(BigDecimal.TEN)));
   }
 
   private void waitTransactionCompleted(Transaction transaction) {
@@ -204,7 +198,6 @@ public class DemoData {
     String tokenAddress = blockchainService.createToken(admin, tokenSymbol, tokenName);
     Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setAdminUser(admin).setTokenContractAddress(tokenAddress)));
 
-    admin.setCommunityId(community.getId());
     emService.runInTransaction(() -> userRepository.update(admin));
     return community;
   }

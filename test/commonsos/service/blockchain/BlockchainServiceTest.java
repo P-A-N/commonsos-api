@@ -175,7 +175,8 @@ public class BlockchainServiceTest {
     assertThat(thrown).hasMessage("Error processing transaction request: blockchain error");
   }
 
-  @Test
+  // TODO
+  /*@Test
   public void userCommunityToken() {
     User user = new User().setCommunityId(id("community")).setWallet("wallet");
     when(communityRepository.findById(id("community"))).thenReturn(Optional.of(new Community().setTokenContractAddress("contract address")));
@@ -237,7 +238,7 @@ public class BlockchainServiceTest {
 
 
     assertThat(result).isEqualByComparingTo(TEN);
-  }
+  }*/
 
   @Test
   public void handleBlockchainException() {

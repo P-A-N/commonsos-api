@@ -64,7 +64,7 @@ public class MessageService {
   }
 
   public MessageThreadView group(User user, CreateGroupCommand command) {
-    List<User> users = validatePartiesCommunity(user.getCommunityId(), command.getMemberIds());
+    List<User> users = validatePartiesCommunity(command.getMemberIds());
     List<MessageThreadParty> parties = usersToParties(users);
     parties.add(new MessageThreadParty().setUser(user));
 
@@ -87,7 +87,7 @@ public class MessageService {
     if (!isUserAllowedToAccessMessageThread(user, messageThread)) throw new ForbiddenException("Not a thread member");
 
     List<User> existingUsers = messageThread.getParties().stream().map(MessageThreadParty::getUser).collect(toList());
-    List<User> givenUsers = validatePartiesCommunity(user.getCommunityId(), command.getMemberIds());
+    List<User> givenUsers = validatePartiesCommunity(command.getMemberIds());
     List<User> newUsers = givenUsers.stream()
       .filter(u -> !existingUsers.stream().anyMatch(eu -> eu.getId().equals(u.getId())))
       .collect(toList());
@@ -100,7 +100,7 @@ public class MessageService {
     return view(user, messageThread);
   }
 
-  List<User> validatePartiesCommunity(Long communityId, List<Long> memberIds) {
+  List<User> validatePartiesCommunity(List<Long> memberIds) {
     List<User> users = memberIds.stream().map(id -> userService.user(id)).collect(toList());
     if (users.isEmpty()) throw new BadRequestException("No group members specified");
     return users;

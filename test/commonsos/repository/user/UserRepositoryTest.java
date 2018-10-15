@@ -1,6 +1,7 @@
 package commonsos.repository.user;
 
 import static commonsos.TestId.id;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -9,15 +10,18 @@ import java.util.Optional;
 import org.junit.Test;
 
 import commonsos.DBTest;
+import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
 
 public class UserRepositoryTest extends DBTest {
 
   private UserRepository repository = new UserRepository(entityManagerService);
+  private CommunityRepository communityRepository = new CommunityRepository(entityManagerService);
 
   @Test
   public void findByUsername() {
     // prepare
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtOneCommunity();
 
     // execute
     Optional<User> result = repository.findByUsername(testUser.getUsername());
@@ -30,7 +34,7 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void findByUsername_deleted() {
     // prepare
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtOneCommunity();
     testUser.setDeleted(true);
     inTransaction(() -> repository.update(testUser));
 
@@ -51,9 +55,29 @@ public class UserRepositoryTest extends DBTest {
   }
 
   @Test
-  public void create() {
+  public void create_BelongAtZeroCommunity() {
     // execute
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtZeroCommunity();
+    
+    // verify
+    User createdUser = em().find(User.class, testUser.getId());
+    assertUser(createdUser, testUser);
+  }
+
+  @Test
+  public void create_BelongAtOneCommunity() {
+    // execute
+    User testUser = createTestUser_BelongAtOneCommunity();
+    
+    // verify
+    User createdUser = em().find(User.class, testUser.getId());
+    assertUser(createdUser, testUser);
+  }
+
+  @Test
+  public void create_BelongAtTwoCommunity() {
+    // execute
+    User testUser = createTestUser_BelongAtTwoCommunity();
     
     // verify
     User createdUser = em().find(User.class, testUser.getId());
@@ -63,7 +87,7 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void findById() {
     // prepare
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtOneCommunity();
     
     // execute
     Optional<User> result = repository.findById(testUser.getId());
@@ -76,7 +100,7 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void findById_deleted() {
     // prepare
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtOneCommunity();
     testUser.setDeleted(true);
     inTransaction(() -> repository.update(testUser));
 
@@ -99,7 +123,7 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void update() {
     // prepare
-    User testUser = createTestUser();
+    User testUser = createTestUser_BelongAtOneCommunity();
     
     // execute
     testUser.setFirstName("new first name")
@@ -117,36 +141,61 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void search() {
     // prepare
-    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("foobarUser").setCommunityId(id("community2"))));
-    inTransaction(() -> repository.create(new User().setUsername("hogeUser").setCommunityId(id("community2"))));
+    User admin = inTransaction(() -> repository.create(new User().setUsername("fooUser")));
+    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1").setAdminUser(admin)));
+    Community community2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")));
+    Community community3 = inTransaction(() -> communityRepository.create(new Community().setName("community3")));
+    Community community4 = inTransaction(() -> communityRepository.create(new Community().setName("community4")));
+    inTransaction(() -> repository.update(admin.setJoinedCommunities(asList(community1, community2))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("foobarUser").setJoinedCommunities(asList(community2, community3))));
+    inTransaction(() -> repository.create(new User().setUsername("hogeUser").setJoinedCommunities(asList(community2))));
     
     // execute
-    List<User> results = repository.search(id("community1"), "foo");
+    List<User> results = repository.search(community1.getId(), "foo");
     
     // verify
     assertThat(results.size()).isEqualTo(1);
     assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
-    
-    // execute
-    results = repository.search(id("community2"), "user");
 
+    // execute
+    results = repository.search(community2.getId(), "foo");
+    
     // verify
     results.sort((a,b) -> a.getId().compareTo(b.getId()));
+    results.get(0).getJoinedCommunities().sort((a,b) -> a.getId().compareTo(b.getId()));
     assertThat(results.size()).isEqualTo(2);
+    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(results.get(0).getJoinedCommunities().get(0).getName()).isEqualTo("community1");
+    assertThat(results.get(0).getJoinedCommunities().get(0).getAdminUser().getUsername()).isEqualTo("fooUser");
+    assertThat(results.get(0).getJoinedCommunities().get(0).getAdminUser().getJoinedCommunities().get(0).getName()).isEqualTo("community1");
+    assertThat(results.get(0).getJoinedCommunities().get(1).getName()).isEqualTo("community2");
+    assertThat(results.get(0).getJoinedCommunities().get(1).getAdminUser()).isNull();
+    assertThat(results.get(1).getUsername()).isEqualTo("foobarUser");
+
+    // execute
+    results = repository.search(community3.getId(), "foo");
+    
+    // verify
+    assertThat(results.size()).isEqualTo(1);
     assertThat(results.get(0).getUsername()).isEqualTo("foobarUser");
-    assertThat(results.get(1).getUsername()).isEqualTo("hogeUser");
+
+    // execute
+    results = repository.search(community4.getId(), "foo");
+    
+    // verify
+    assertThat(results.size()).isEqualTo(0);
   }
 
   @Test
   public void search_deleted() {
     // prepare
-    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1")).setDeleted(true)));
+    Long community1Id = inTransaction(() -> communityRepository.create(new Community().setName("community1"))).getId();
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setJoinedCommunities(asList(new Community().setId(community1Id)))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setJoinedCommunities(asList(new Community().setId(community1Id))).setDeleted(true)));
     
     // execute
-    List<User> results = repository.search(id("community1"), "user");
+    List<User> results = repository.search(community1Id, "user");
 
     // verify
     assertThat(results.size()).isEqualTo(1);
@@ -156,11 +205,12 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void search_emptyQuery() {
     // prepare
-    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
+    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setJoinedCommunities(asList(community1))));
     
     // execute
-    List<User> results = repository.search(id("community1"), null);
+    List<User> results = repository.search(community1.getId(), null);
     
     // verify
     assertThat(results.size()).isEqualTo(0);
@@ -175,11 +225,12 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void search_notFound() {
     // prepare
-    inTransaction(() -> repository.create(new User().setUsername("fooUser").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityId(id("community1"))));
+    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
+    inTransaction(() -> repository.create(new User().setUsername("fooUser").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("barUser").setJoinedCommunities(asList(community1))));
     
     // execute
-    List<User> results = repository.search(id("community1"), "hogehoge");
+    List<User> results = repository.search(community1.getId(), "hogehoge");
     
     // verify
     assertThat(results.size()).isEqualTo(0);
@@ -188,29 +239,74 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void search_maxResults() {
     // prepare
-    inTransaction(() -> repository.create(new User().setUsername("user1").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user2").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user3").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user4").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user5").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user6").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user7").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user8").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user9").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user10").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user11").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user12").setCommunityId(id("community1"))));
+    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
+    inTransaction(() -> repository.create(new User().setUsername("user1").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user2").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user3").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user4").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user5").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user6").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user7").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user8").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user9").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user10").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user11").setJoinedCommunities(asList(community1))));
+    inTransaction(() -> repository.create(new User().setUsername("user12").setJoinedCommunities(asList(community1))));
     
     // execute
-    List<User> results = repository.search(id("community1"), "user");
+    List<User> results = repository.search(community1.getId(), "user");
     
     // verify
     assertThat(results.size()).isEqualTo(10);
   }
 
-  private User createTestUser() {
+  private User createTestUser_BelongAtZeroCommunity() {
     User testUser =  new User()
-        .setCommunityId(id("community id"))
+        .setJoinedCommunities(asList())
+        .setUsername("worker")
+        .setPasswordHash("password hash")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setDescription("description")
+        .setLocation("location")
+        .setAvatarUrl("avatar url")
+        .setWallet("wallet")
+        .setWalletAddress("wallet address")
+        .setPushNotificationToken("push notification token")
+        .setEmailAddress("test@test.com");
+    
+    return inTransaction(() -> repository.create(testUser));
+  }
+
+  private User createTestUser_BelongAtOneCommunity() {
+    Community community1 = new Community().setName("community1").setTokenContractAddress("0x1");
+    inTransaction(() -> communityRepository.create(community1));
+    
+    User testUser =  new User()
+        .setJoinedCommunities(asList(community1))
+        .setUsername("worker")
+        .setPasswordHash("password hash")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setDescription("description")
+        .setLocation("location")
+        .setAvatarUrl("avatar url")
+        .setWallet("wallet")
+        .setWalletAddress("wallet address")
+        .setPushNotificationToken("push notification token")
+        .setEmailAddress("test@test.com");
+    
+    return inTransaction(() -> repository.create(testUser));
+  }
+
+  private User createTestUser_BelongAtTwoCommunity() {
+    Community community1 = new Community().setName("community1").setTokenContractAddress("0x1");
+    communityRepository.create(community1);
+    Community community2 = new Community().setName("community2").setTokenContractAddress("0x2");
+    communityRepository.create(community2);
+
+    User testUser =  new User()
+        .setJoinedCommunities(asList(community1, community2))
         .setUsername("worker")
         .setPasswordHash("password hash")
         .setFirstName("first name")
@@ -228,7 +324,6 @@ public class UserRepositoryTest extends DBTest {
   
   private void assertUser(User actual, User expect) {
     assertThat(actual.getId()).isEqualTo(expect.getId());
-    assertThat(actual.getCommunityId()).isEqualTo(expect.getCommunityId());
     assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
     assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
     assertThat(actual.getFirstName()).isEqualTo(expect.getFirstName());
@@ -241,5 +336,14 @@ public class UserRepositoryTest extends DBTest {
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
     assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
+
+    assertThat(actual.getJoinedCommunities().size()).isEqualTo(expect.getJoinedCommunities().size());
+    actual.getJoinedCommunities().sort((a,b) -> a.getId().compareTo(b.getId()));
+    expect.getJoinedCommunities().sort((a,b) -> a.getId().compareTo(b.getId()));
+    for (int i = 0; i < actual.getJoinedCommunities().size(); i++) {
+      assertThat(actual.getJoinedCommunities().get(i).getId()).isEqualTo(expect.getJoinedCommunities().get(i).getId());
+      assertThat(actual.getJoinedCommunities().get(i).getName()).isEqualTo(expect.getJoinedCommunities().get(i).getName());
+      assertThat(actual.getJoinedCommunities().get(i).getTokenContractAddress()).isEqualTo(expect.getJoinedCommunities().get(i).getTokenContractAddress());
+    }
   }
 }
