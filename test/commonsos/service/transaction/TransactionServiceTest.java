@@ -1,6 +1,7 @@
 package commonsos.service.transaction;
 
 import static commonsos.TestId.id;
+import static java.math.BigDecimal.TEN;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -56,7 +57,7 @@ public class TransactionServiceTest {
   public void createTransaction() {
     TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id");
     User user = new User().setId(id("remitter")).setCommunityId(id("community"));
-    doReturn(BigDecimal.TEN).when(service).balance(user, id("community"));
+    doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad();
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);
@@ -70,7 +71,7 @@ public class TransactionServiceTest {
     verify(repository).create(captor.capture());
     Transaction transaction = captor.getValue();
     assertThat(transaction.getCommunityId()).isEqualTo(id("community"));
-    assertThat(transaction.getAmount()).isEqualTo(BigDecimal.TEN);
+    assertThat(transaction.getAmount()).isEqualTo(TEN);
     assertThat(transaction.getBeneficiaryId()).isEqualTo(id("beneficiary"));
     assertThat(transaction.getRemitterId()).isEqualTo(id("remitter"));
     assertThat(transaction.getDescription()).isEqualTo("description");
@@ -99,7 +100,7 @@ public class TransactionServiceTest {
   public void createTransaction_withoutAd() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "").setAdId(null);
     User user = new User().setId(id("remitter")).setCommunityId(id("community"));
-    doReturn(new BigDecimal("10.20")).when(service).balance(user, id("community"));
+    doReturn(new BalanceView().setBalance(new BigDecimal("10.20"))).when(service).balance(user, id("community"));
 
     service.create(user, command);
 
@@ -119,7 +120,7 @@ public class TransactionServiceTest {
   public void createTransaction_insufficientBalance() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "ad id");
     User user = new User().setId(id("remitter")).setCommunityId(id("community"));
-    doReturn(BigDecimal.TEN).when(service).balance(user, id("community"));
+    doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad().setCreatedBy(id("beneficiary")).setCommunityId(id("community"));
     when(userService.user(id("beneficiary"))).thenReturn(new User().setId(id("beneficiary")).setCommunityId(id("community")));
     when(adService.ad(id("ad id"))).thenReturn(ad);
@@ -172,9 +173,10 @@ public class TransactionServiceTest {
     when(blockchainService.tokenBalance(user, id("community"))).thenReturn(BigDecimal.TEN);
     when(repository.pendingTransactionsAmount(id("user id"), id("community"))).thenReturn(BigDecimal.ONE);
 
-    BigDecimal result = service.balance(user, id("community"));
+    BalanceView result = service.balance(user, id("community"));
 
-    assertThat(result).isEqualByComparingTo(new BigDecimal("9"));
+    assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("9"));
+    assertThat(result.getCommunityId()).isEqualTo(id("community"));
   }
 
   @Test

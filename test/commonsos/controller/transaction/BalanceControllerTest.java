@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.BadRequestException;
 import commonsos.repository.user.User;
+import commonsos.service.transaction.BalanceView;
 import commonsos.service.transaction.TransactionService;
 import spark.Request;
 
@@ -26,9 +27,10 @@ public class BalanceControllerTest {
   public void handle() {
     when(request.queryParams("communityId")).thenReturn("123");
     User user = new User();
-    when(service.balance(user, 123L)).thenReturn(TEN);
+    when(service.balance(user, 123L)).thenReturn(new BalanceView().setBalance(TEN).setCommunityId(123L));
 
-    assertThat(controller.handle(user, request, null)).isEqualTo(TEN);
+    assertThat(controller.handle(user, request, null).getBalance()).isEqualTo(TEN);
+    assertThat(controller.handle(user, request, null).getCommunityId()).isEqualTo(123L);
   }
 
   @Test(expected = BadRequestException.class)

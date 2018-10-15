@@ -1,7 +1,8 @@
 package commonsos.service.view;
 
-import java.math.BigDecimal;
+import java.util.List;
 
+import commonsos.service.transaction.BalanceView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -14,7 +15,7 @@ public class UserPrivateView {
   private String lastName;
   private String username;
   private String description;
-  private BigDecimal balance;
+  private List<BalanceView> balanceList;
   private String location;
   private String avatarUrl;
   private String emailAddress;

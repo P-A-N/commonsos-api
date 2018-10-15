@@ -1,6 +1,7 @@
 package commonsos.service.view;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -10,6 +11,7 @@ import commonsos.ForbiddenException;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
+import commonsos.service.transaction.BalanceView;
 import commonsos.service.transaction.TransactionService;
 
 @Singleton
@@ -20,10 +22,11 @@ public class UserViewService {
   @Inject TransactionService transactionService;
 
   public UserPrivateView privateView(User user) {
-    BigDecimal balance = transactionService.balance(user, user.getCommunityId());
+    List<BalanceView> balanceList = new ArrayList<>();
+    balanceList.add(transactionService.balance(user, user.getCommunityId()));
     return new UserPrivateView()
       .setId(user.getId())
-      .setBalance(balance)
+      .setBalanceList(balanceList)
       .setFullName(fullName(user))
       .setFirstName(user.getFirstName())
       .setLastName(user.getLastName())

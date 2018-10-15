@@ -1,6 +1,8 @@
 package commonsos.integration.transaction;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +31,8 @@ public class GetBalanceTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/balance?communityId={communityId}", community.getId())
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
   }
 }

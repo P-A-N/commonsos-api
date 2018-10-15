@@ -36,11 +36,14 @@ public class TransactionService {
   @Inject AdService adService;
   @Inject PushNotificationService pushNotificationService;
 
-  public BigDecimal balance(User user, Long communityId) {
+  public BalanceView balance(User user, Long communityId) {
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
-    return tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId));
+    BalanceView view = new BalanceView()
+        .setCommunityId(communityId)
+        .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
+    return view;
   }
-
+  
   private boolean isDebit(User user, Transaction transaction) {
     return transaction.getRemitterId().equals(user.getId());
   }
@@ -77,8 +80,8 @@ public class TransactionService {
       if (!adService.isPayableByUser(user, ad)) throw new BadRequestException();
       if (!command.getCommunityId().equals(beneficiary.getCommunityId())) throw new BadRequestException();
     }
-    BigDecimal balance = balance(user, command.getCommunityId());
-    if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
+    BalanceView balanceView = balance(user, command.getCommunityId());
+    if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
     Transaction transaction = new Transaction()
       .setCommunityId(command.getCommunityId())

@@ -23,6 +23,7 @@ import commonsos.ForbiddenException;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
+import commonsos.service.transaction.BalanceView;
 import commonsos.service.transaction.TransactionService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,7 +46,7 @@ public class UserViewServiceTest {
         .setDescription("description")
         .setAvatarUrl("/avatar.png")
         .setEmailAddress("test@test.com");
-    when(transactionService.balance(user, user.getCommunityId())).thenReturn(BigDecimal.TEN);
+    when(transactionService.balance(user, user.getCommunityId())).thenReturn(new BalanceView().setBalance(BigDecimal.TEN).setCommunityId(id("community")));
 
     // execute
     UserPrivateView view = viewService.privateView(user);
@@ -53,7 +54,8 @@ public class UserViewServiceTest {
     // verify
     verify(transactionService, times(1)).balance(user, user.getCommunityId());
     assertThat(view.getId()).isEqualTo(id("user id"));
-    assertThat(view.getBalance()).isEqualTo(BigDecimal.TEN);
+    assertThat(view.getBalanceList().get(0).getBalance()).isEqualTo(BigDecimal.TEN);
+    assertThat(view.getBalanceList().get(0).getCommunityId()).isEqualTo(id("community"));
     assertThat(view.getFullName()).isEqualTo("last first");
     assertThat(view.getFirstName()).isEqualTo("first");
     assertThat(view.getLastName()).isEqualTo("last");
