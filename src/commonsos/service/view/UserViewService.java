@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import commonsos.BadRequestException;
 import commonsos.ForbiddenException;
+import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
 import commonsos.service.transaction.TransactionService;
@@ -15,13 +16,13 @@ import commonsos.service.transaction.TransactionService;
 public class UserViewService {
 
   @Inject UserRepository userRepository;
+  @Inject CommunityRepository communityRepository;
   @Inject TransactionService transactionService;
 
   public UserPrivateView privateView(User user) {
     BigDecimal balance = transactionService.balance(user, user.getCommunityId());
     return new UserPrivateView()
       .setId(user.getId())
-      .setAdmin(user.isAdmin())
       .setBalance(balance)
       .setFullName(fullName(user))
       .setFirstName(user.getFirstName())
@@ -34,8 +35,9 @@ public class UserViewService {
   }
 
   public UserPrivateView privateView(User currentUser, Long userId) {
-    if (!currentUser.getId().equals(userId) && !currentUser.isAdmin()) throw new ForbiddenException();
-    User user = userRepository.findById(userId).orElseThrow(BadRequestException::new);
+    User user = userRepository.findById(userId).orElseThrow(() -> new BadRequestException("user not found"));
+    if (!currentUser.getId().equals(userId)
+        && !communityRepository.isAdmin(currentUser.getId(), user.getCommunityId())) throw new ForbiddenException();
     return privateView(user);
   }
 

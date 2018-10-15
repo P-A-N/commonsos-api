@@ -6,12 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.NoResultException;
-
 import org.junit.Test;
 
 import commonsos.DBTest;
-import commonsos.repository.user.UserRepository;
 
 public class UserRepositoryTest extends DBTest {
 
@@ -211,31 +208,9 @@ public class UserRepositoryTest extends DBTest {
     assertThat(results.size()).isEqualTo(10);
   }
 
-  @Test
-  public void findAdminByCommunityId() {
-    // prepare
-    inTransaction(() -> repository.create(new User().setUsername("user1").setCommunityId(id("community1")).setAdmin(true)));
-    inTransaction(() -> repository.create(new User().setUsername("user2").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user3").setCommunityId(id("community1"))));
-    inTransaction(() -> repository.create(new User().setUsername("user4").setCommunityId(id("community1")).setAdmin(true).setDeleted(true)));
-    
-    // execute
-    User result = repository.findAdminByCommunityId(id("community1"));
-    
-    // verify
-    assertThat(result.getUsername()).isEqualTo("user1");
-  }
-
-  @Test(expected = NoResultException.class)
-  public void findAdminByCommunityId_notFound() {
-    // execute
-    repository.findAdminByCommunityId(id("community1"));
-  }
-
   private User createTestUser() {
     User testUser =  new User()
         .setCommunityId(id("community id"))
-        .setAdmin(false)
         .setUsername("worker")
         .setPasswordHash("password hash")
         .setFirstName("first name")
@@ -254,7 +229,6 @@ public class UserRepositoryTest extends DBTest {
   private void assertUser(User actual, User expect) {
     assertThat(actual.getId()).isEqualTo(expect.getId());
     assertThat(actual.getCommunityId()).isEqualTo(expect.getCommunityId());
-    assertThat(actual.isAdmin()).isEqualTo(expect.isAdmin());
     assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
     assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
     assertThat(actual.getFirstName()).isEqualTo(expect.getFirstName());

@@ -20,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.BadRequestException;
 import commonsos.ForbiddenException;
+import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
 import commonsos.service.transaction.TransactionService;
@@ -28,6 +29,7 @@ import commonsos.service.transaction.TransactionService;
 public class UserViewServiceTest {
 
   @Mock UserRepository userRepository;
+  @Mock CommunityRepository communityRepository;
   @Mock TransactionService transactionService;
   @InjectMocks @Spy UserViewService viewService;
 
@@ -36,7 +38,6 @@ public class UserViewServiceTest {
     // prepare
     User user = new User()
         .setId(id("user id"))
-        .setAdmin(true)
         .setFirstName("first")
         .setLastName("last")
         .setUsername("user")
@@ -52,7 +53,6 @@ public class UserViewServiceTest {
     // verify
     verify(transactionService, times(1)).balance(user, user.getCommunityId());
     assertThat(view.getId()).isEqualTo(id("user id"));
-    assertThat(view.isAdmin()).isTrue();
     assertThat(view.getBalance()).isEqualTo(BigDecimal.TEN);
     assertThat(view.getFullName()).isEqualTo("last first");
     assertThat(view.getFirstName()).isEqualTo("first");
@@ -67,51 +67,48 @@ public class UserViewServiceTest {
   @Test
   public void privateView_adminAccessesOtherUser() {
     // prepare
-    User user = new User();
+    User user = new User().setCommunityId(id("community")).setId(id("otherUSer"));
     when(userRepository.findById(any())).thenReturn(Optional.of(user));
+    when(communityRepository.isAdmin(id("currentUser"), id("community"))).thenReturn(true);
     UserPrivateView userView = new UserPrivateView();
     doReturn(userView).when(viewService).privateView(any());
     
-    when(viewService.privateView(any())).thenReturn(userView);
-    
     // execute
-    User currentUser = new User()
-        .setId(id("currentUser"))
-        .setAdmin(true);
-    Long userId = id("otherUSer");
-    UserPrivateView result = viewService.privateView(currentUser, userId);
+    User currentUser = new User().setId(id("currentUser"));
+    UserPrivateView result = viewService.privateView(currentUser, id("otherUSer"));
     
     // verify
-    verify(userRepository, times(1)).findById(userId);
+    verify(userRepository, times(1)).findById(id("otherUSer"));
     assertThat(result).isSameAs(userView);
   }
 
   @Test
-  public void privateView_notAdminAccessOwnUser() {
+  public void privateView_ownUser() {
     // prepare
-    User user = new User();
+    User user = new User().setCommunityId(id("community")).setId(id("currentUser"));
     when(userRepository.findById(any())).thenReturn(Optional.of(user));
     UserPrivateView userView = new UserPrivateView();
     doReturn(userView).when(viewService).privateView(any());
     
     // execute
-    User currentUser = new User()
-        .setId(id("currentUser"))
-        .setAdmin(false);
-    Long userId = id("currentUser");
-    UserPrivateView result = viewService.privateView(currentUser, userId);
+    User currentUser = new User().setId(id("currentUser"));
+    UserPrivateView result = viewService.privateView(currentUser, id("currentUser"));
     
     // verify
-    verify(userRepository, times(1)).findById(userId);
+    verify(userRepository, times(1)).findById(id("currentUser"));
     assertThat(result).isSameAs(userView);
   }
 
   @Test(expected = ForbiddenException.class)
   public void privateView_notAdminAccessOtherUser() {
+    // prepare
+    User user = new User().setCommunityId(id("community")).setId(id("otherUser"));
+    when(userRepository.findById(any())).thenReturn(Optional.of(user));
+    when(communityRepository.isAdmin(any(), any())).thenReturn(false);
+    
     // execute
     User currentUser = new User()
-        .setId(id("currentUser"))
-        .setAdmin(false);
+        .setId(id("currentUser"));
     Long userId = id("otherUser");
     viewService.privateView(currentUser, userId);
   }
@@ -123,8 +120,8 @@ public class UserViewServiceTest {
     
     // execute
     User currentUser = new User()
-        .setId(id("currentUser"))
-        .setAdmin(false);
+        .setId(id("currentUser"));
+//        .setAdmin(false);
     Long userId = id("currentUser");
     viewService.privateView(currentUser, userId);
   }

@@ -1,14 +1,15 @@
 package commonsos.repository.community;
 
-import commonsos.EntityManagerService;
-import commonsos.Repository;
+import static java.util.Optional.ofNullable;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import commonsos.EntityManagerService;
+import commonsos.Repository;
 
 @Singleton
 public class CommunityRepository extends Repository {
@@ -29,5 +30,12 @@ public class CommunityRepository extends Repository {
   public Community create(Community community) {
     em().persist(community);
     return community;
+  }
+
+  public boolean isAdmin(Long userId, Long communityId) {
+    Optional<Community> community = findById(communityId);
+    return community.isPresent()
+        && community.get().getAdminUser() != null
+        && community.get().getAdminUser().getId().equals(userId);
   }
 }

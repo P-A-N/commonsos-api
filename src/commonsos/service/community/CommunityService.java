@@ -1,14 +1,15 @@
 package commonsos.service.community;
 
-import commonsos.BadRequestException;
-import commonsos.repository.community.Community;
-import commonsos.repository.community.CommunityRepository;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
 
-import static java.util.stream.Collectors.toList;
+import commonsos.BadRequestException;
+import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
 
 @Singleton
 public class CommunityService {
@@ -29,5 +30,9 @@ public class CommunityService {
 
   public Community community(Long id) {
     return repository.findById(id).orElseThrow(BadRequestException::new);
+  }
+
+  public boolean isAdmin(Long userId, Long communityId) {
+    return repository.isAdmin(userId, communityId);
   }
 }

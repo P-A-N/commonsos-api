@@ -18,7 +18,6 @@ import lombok.experimental.Accessors;
 public class User {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
   private Long communityId;
-  private boolean admin;
   private String username;
   private String passwordHash;
   private String firstName;

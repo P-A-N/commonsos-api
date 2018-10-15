@@ -20,6 +20,7 @@ import commonsos.controller.auth.DelegateWalletTask;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdRepository;
 import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
@@ -27,7 +28,6 @@ import commonsos.service.ImageService;
 import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.community.CommunityService;
 import commonsos.service.view.UserPrivateView;
 import commonsos.service.view.UserView;
 import commonsos.service.view.UserViewService;
@@ -38,11 +38,11 @@ public class UserService {
 
   @Inject UserViewService userViewService;
   @Inject UserRepository repository;
+  @Inject CommunityRepository communityRepository;
   @Inject MessageThreadRepository messageThreadRepository;
   @Inject AdRepository adRepository;
   @Inject BlockchainService blockchainService;
   @Inject PasswordService passwordService;
-  @Inject CommunityService communityService;
   @Inject ImageService imageService;
   @Inject JobService jobService;
 
@@ -90,8 +90,7 @@ public class UserService {
     user.setWalletAddress(credentials.getAddress());
 
     if (community != null) {
-      User admin = walletUser(community);
-      DelegateWalletTask task = new DelegateWalletTask(user, admin);
+      DelegateWalletTask task = new DelegateWalletTask(user, community.getAdminUser());
       if (command.isWaitUntilCompleted())
         jobService.execute(task);
       else
@@ -101,20 +100,16 @@ public class UserService {
     return repository.create(user);
   }
 
-  public User walletUser(Community community) {
-    return repository.findAdminByCommunityId(community.getId());
-  }
-
   private Community community(AccountCreateCommand command) {
-    return communityService.community(command.getCommunityId());
+    return communityRepository.findById(command.getCommunityId()).orElseThrow(BadRequestException::new);
   }
 
   void validate(AccountCreateCommand command) {
-    if (command.getUsername() == null || command.getUsername().length() < 4) throw new BadRequestException();
-    if (command.getPassword() == null || command.getPassword().length() < 8) throw new BadRequestException();
-    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException();
-    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException();
-    if (command.getEmailAddress() == null || !validateEmailAddress(command.getEmailAddress())) throw new BadRequestException();
+    if (command.getUsername() == null || command.getUsername().length() < 4) throw new BadRequestException("invalid username");
+    if (command.getPassword() == null || command.getPassword().length() < 8) throw new BadRequestException("invalid password");
+    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");
+    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
+    if (command.getEmailAddress() == null || !validateEmailAddress(command.getEmailAddress())) throw new BadRequestException("invalid email address");
   }
 
   boolean validateEmailAddress(String emailAddress) {

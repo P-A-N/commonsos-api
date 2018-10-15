@@ -1,9 +1,22 @@
 package commonsos.tools;
 
+import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_DEPLOYMENT_GAS_LIMIT;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
+
+import java.io.File;
+import java.math.BigInteger;
+import java.util.Scanner;
+
+import org.web3j.crypto.Credentials;
+import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
 import commonsos.EntityManagerService;
 import commonsos.Web3jProvider;
 import commonsos.repository.community.Community;
@@ -13,16 +26,6 @@ import commonsos.repository.user.UserRepository;
 import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.user.UserService;
-
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
-import org.web3j.protocol.Web3j;
-
-import static commonsos.service.blockchain.BlockchainService.*;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.util.Scanner;
 
 public class AddCommunity {
 
@@ -119,7 +122,6 @@ public class AddCommunity {
       .setFirstName(adminFirstName)
       .setLastName(adminLastName)
       .setLocation(adminLocation))
-      .setAdmin(true)
       .setDescription(adminDescription));
 
     blockchainService.transferEther(commonsos, admin.getWalletAddress(), initialEtherAmountForAdmin(numberOfPrepaidTransactions));

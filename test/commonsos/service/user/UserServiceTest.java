@@ -39,6 +39,7 @@ import commonsos.controller.auth.DelegateWalletTask;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdRepository;
 import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
@@ -46,7 +47,6 @@ import commonsos.service.ImageService;
 import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.community.CommunityService;
 import commonsos.service.transaction.TransactionService;
 import commonsos.service.view.UserView;
 
@@ -54,15 +54,17 @@ import commonsos.service.view.UserView;
 public class UserServiceTest {
 
   @Mock UserRepository repository;
+  @Mock CommunityRepository communityRepository;
   @Mock AdRepository adRepository;
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock TransactionService transactionService;
   @Mock PasswordService passwordService;
   @Mock BlockchainService blockchainService;
-  @Mock CommunityService communityService;
   @Mock ImageService imageService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
+  @Captor ArgumentCaptor<AccountCreateCommand> accountCreatecommandCaptor;
+  @Captor ArgumentCaptor<User> userCaptor;
   @Captor ArgumentCaptor<Ad> adCaptor;
 
   @Test
@@ -106,15 +108,14 @@ public class UserServiceTest {
     // prepare
     when(blockchainService.isConnected()).thenReturn(true);
     when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    Community community = new Community().setId(id("community"));
-    when(communityService.community(id("community"))).thenReturn(community);
-    when(passwordService.hash(any())).thenReturn("hash");
+    User admin = new User().setId(id("admin")).setUsername("admin");
+    Community community = new Community().setId(id("community")).setAdminUser(admin);
+    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
+    when(passwordService.hash("secret78")).thenReturn("hash");
     when(blockchainService.createWallet(WALLET_PASSWORD)).thenReturn("wallet");
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
-    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
-    User communityAdmin = new User().setAdmin(true);
-    when(repository.findAdminByCommunityId(id("community"))).thenReturn(communityAdmin);
+    when(blockchainService.credentials("wallet", WALLET_PASSWORD)).thenReturn(credentials);
     User createdUser = new User();
     when(repository.create(any())).thenReturn(createdUser);
 
@@ -135,18 +136,15 @@ public class UserServiceTest {
     verify(userService, times(1)).validate(command);
     verify(blockchainService, times(1)).isConnected();
     verify(repository, times(1)).findByUsername("user name");
-    verify(communityService, times(1)).community(id("community"));
+    verify(communityRepository, times(1)).findById(id("community"));
     verify(passwordService, times(1)).hash("secret78");
     verify(blockchainService, times(1)).createWallet(WALLET_PASSWORD);
     verify(blockchainService, times(1)).credentials("wallet", WALLET_PASSWORD);
-    verify(repository, times(1)).findAdminByCommunityId(id("community"));
     
-    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
     verify(repository, times(1)).create(userCaptor.capture());
     User actualUser = userCaptor.getValue();
     assertThat(actualUser.getId()).isNull();
     assertThat(actualUser.getCommunityId()).isEqualTo(id("community"));
-    assertThat(actualUser.isAdmin()).isEqualTo(false);
     assertThat(actualUser.getUsername()).isEqualTo(command.getUsername());
     assertThat(actualUser.getPasswordHash()).isEqualTo("hash");
     assertThat(actualUser.getFirstName()).isEqualTo(command.getFirstName());
@@ -159,7 +157,7 @@ public class UserServiceTest {
     assertThat(actualUser.getPushNotificationToken()).isEqualTo(null);
     assertThat(actualUser.getEmailAddress()).isEqualTo(command.getEmailAddress());
     
-    DelegateWalletTask task = new DelegateWalletTask(actualUser, communityAdmin);
+    DelegateWalletTask task = new DelegateWalletTask(actualUser, admin);
     verify(jobService, times(1)).submit(actualUser, task);
     verify(jobService, never()).execute(task);
     
@@ -240,7 +238,7 @@ public class UserServiceTest {
     doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
     when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityService.community(any())).thenReturn(mock(Community.class));
+    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
     when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
 
     // execute
@@ -260,7 +258,7 @@ public class UserServiceTest {
     doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
     when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityService.community(any())).thenReturn(mock(Community.class));
+    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
     when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
 
     // execute
@@ -341,7 +339,7 @@ public class UserServiceTest {
     assertThat(users).isEqualTo(asList(userView));
   }
 
-  @Test
+  /*@Test
   public void walletUser() {
     User admin = new User();
     when(repository.findAdminByCommunityId(id("community"))).thenReturn(admin);
@@ -349,7 +347,7 @@ public class UserServiceTest {
     User result = userService.walletUser(new Community().setId(id("community")));
 
     assertThat(result).isEqualTo(admin);
-  }
+  }*/
 
   @Test
   public void updateAvatar() {

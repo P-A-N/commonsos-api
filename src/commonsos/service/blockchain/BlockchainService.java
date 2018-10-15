@@ -43,7 +43,6 @@ import commonsos.DisplayableException;
 import commonsos.repository.community.Community;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
-import commonsos.repository.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -61,7 +60,6 @@ public class BlockchainService {
   private static final BigInteger INITIAL_TOKEN_AMOUNT = MAX_UINT_256.divide(TEN.pow(NUMBER_OF_DECIMALS)).subtract(ONE);
 
   @Inject CommunityRepository communityRepository;
-  @Inject UserRepository userRepository;
   @Inject ObjectMapper objectMapper;
   @Inject Web3j web3j;
   @Inject NonceProvider nonceProvider;
@@ -110,14 +108,14 @@ public class BlockchainService {
   }
 
   public String transferTokens(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    return remitter.isAdmin() ?
+    return communityRepository.isAdmin(remitter.getId(), communityId) ?
       transferTokensAdmin(remitter, beneficiary, communityId, amount) :
       transferTokensRegular(remitter, beneficiary, communityId, amount);
   }
 
   private String transferTokensRegular(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
     Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
-    User walletUser = userRepository.findAdminByCommunityId(community.getId());
+    User walletUser = community.getAdminUser();
 
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
 
@@ -306,7 +304,7 @@ public class BlockchainService {
 
   TokenERC20 userCommunityTokenAsAdmin(User user) {
     Community community = communityRepository.findById(user.getCommunityId()).orElseThrow(RuntimeException::new);
-    User walletUser = userRepository.findAdminByCommunityId(community.getId());
+    User walletUser = community.getAdminUser();
     Credentials credentials = credentials(walletUser.getWallet(), WALLET_PASSWORD);
     return loadToken(credentials, community.getTokenContractAddress());
   }

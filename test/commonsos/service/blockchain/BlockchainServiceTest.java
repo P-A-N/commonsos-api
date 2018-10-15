@@ -40,16 +40,12 @@ import commonsos.DisplayableException;
 import commonsos.repository.community.Community;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
-import commonsos.repository.user.UserRepository;
-import commonsos.service.user.UserService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlockchainServiceTest {
 
   @Rule public TemporaryFolder tempDirectory = new TemporaryFolder();
   @Mock CommunityRepository communityRepository;
-  @Mock UserRepository userRepository;
-  @Mock UserService userService;
   @Mock(answer = RETURNS_DEEP_STUBS) Web3j web3j;
   @InjectMocks @Spy BlockchainService service;
 
@@ -79,11 +75,12 @@ public class BlockchainServiceTest {
 
   @Test
   public void transferTokens_asAdmin() throws Exception {
-    User remitter = new User().setAdmin(true).setCommunityId(id("community")).setWallet("remitter wallet");
+    User remitter = new User().setId(id("remitter")).setWallet("remitter wallet");
     User beneficiary = new User().setWalletAddress("beneficiary address");
+    when(communityRepository.isAdmin(remitter.getId(), id("community"))).thenReturn(true);
 
     Community community = new Community().setTokenContractAddress("contract address");
-    when(communityRepository.findById(remitter.getCommunityId())).thenReturn(Optional.of(community));
+    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
 
     EthSendTransaction response = mock(EthSendTransaction.class);
     when(response.getTransactionHash()).thenReturn("transaction hash");
@@ -93,7 +90,7 @@ public class BlockchainServiceTest {
     doReturn(response).when(service).contractTransfer("contract address", credentials, "beneficiary address", new BigInteger("10000000000000000000"));
 
 
-    String result = service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN);
+    String result = service.transferTokens(remitter, beneficiary, id("community"), TEN);
 
 
     assertThat(result).isEqualTo("transaction hash");
@@ -132,14 +129,13 @@ public class BlockchainServiceTest {
 
   @Test
   public void transferTokens_asRegularUser() {
-    User remitter = new User().setCommunityId(id("community")).setWalletAddress("remitter address");
+    User remitter = new User().setId(id("remitter")).setWallet("remitter wallet").setWalletAddress("remitter address");
     User beneficiary = new User().setWalletAddress("beneficiary address");
-
-    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address");
-    when(communityRepository.findById(remitter.getCommunityId())).thenReturn(Optional.of(community));
+    when(communityRepository.isAdmin(remitter.getId(), id("community"))).thenReturn(false);
 
     User walletUser = new User().setWalletAddress("admin wallet address").setWallet("admin wallet");
-    when(userRepository.findAdminByCommunityId(id("community"))).thenReturn(walletUser);
+    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address").setAdminUser(walletUser);
+    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
 
     EthSendTransaction response = mock(EthSendTransaction.class);
     when(response.hasError()).thenReturn(false);
@@ -149,23 +145,20 @@ public class BlockchainServiceTest {
     doReturn(credentials).when(service).credentials("admin wallet", WALLET_PASSWORD);
     doReturn(response).when(service).contractTransferFrom(credentials, "contract address", "remitter address", "beneficiary address", new BigInteger("10000000000000000000"));
 
-
-    String result = service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN);
-
+    String result = service.transferTokens(remitter, beneficiary, id("community"), TEN);
 
     assertThat(result).isEqualTo("transaction hash");
   }
 
   @Test
   public void transferTokens_asRegularUser_fails() {
-    User remitter = new User().setCommunityId(id("community")).setWalletAddress("remitter address");
+    User remitter = new User().setWalletAddress("remitter address");
     User beneficiary = new User().setWalletAddress("beneficiary address");
 
-    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address");
-    when(communityRepository.findById(remitter.getCommunityId())).thenReturn(Optional.of(community));
-
     User walletUser = new User().setWalletAddress("admin wallet address").setWallet("admin wallet");
-    when(userRepository.findAdminByCommunityId(id("community"))).thenReturn(walletUser);
+    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address").setAdminUser(walletUser);
+    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
+
 
     EthSendTransaction response = mock(EthSendTransaction.class, Mockito.RETURNS_DEEP_STUBS);
     when(response.hasError()).thenReturn(true);
@@ -177,7 +170,7 @@ public class BlockchainServiceTest {
 
 
     RuntimeException thrown = catchThrowableOfType(
-      ()-> service.transferTokens(remitter, beneficiary, remitter.getCommunityId(), TEN),
+      ()-> service.transferTokens(remitter, beneficiary, id("community"), TEN),
       RuntimeException.class);
     assertThat(thrown).hasMessage("Error processing transaction request: blockchain error");
   }
@@ -201,10 +194,9 @@ public class BlockchainServiceTest {
   @Test
   public void userCommunityTokenAsAdmin() {
     User user = new User().setCommunityId(id("community")).setWallet("wallet");
-    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address");
-    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
     User admin = new User().setWallet("wallet");
-    when(userRepository.findAdminByCommunityId(id("community"))).thenReturn(admin);
+    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address").setAdminUser(admin);
+    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
 
     Credentials remitterCredentials = mock(Credentials.class);
     doReturn(remitterCredentials).when(service).credentials("wallet", WALLET_PASSWORD);

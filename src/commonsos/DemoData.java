@@ -63,7 +63,7 @@ public class DemoData {
     Credentials commonsos = commonsosCredentials();
 
     User admin = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin").setPassword("secret00").setFirstName("Coordinator").setLastName("Community").setLocation("Kaga, Ishikawa Prefecture, Japan"))
-      .setAdmin(true).setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
+      .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Kaga City community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin.getWalletAddress(), initialEtherAmountForAdmin);
     Community kagaCommunity = createCommunity(admin, "Kaga city", "KAGA", "Kaga coin");
@@ -71,14 +71,14 @@ public class DemoData {
 
     // second community
     User admin2 = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin2").setPassword("secret02").setFirstName("Coordinator").setLastName("Community").setLocation("Shibuya, Tokyo"))
-      .setAdmin(true).setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
+      .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Shibuya People community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin2.getWalletAddress(), initialEtherAmountForAdmin);
     createCommunity(admin2, "Shibuya People", "SHI", "Shibuya coin");
 
     // third community
     User admin3 = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin3").setPassword("secret03").setFirstName("Coordinator").setLastName("Community").setLocation("Tokyo, Japan"))
-      .setAdmin(true).setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
+      .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Commons Inc community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin3.getWalletAddress(), initialEtherAmountForAdmin);
     createCommunity(admin3, "Commons Inc", "ICOM", "Commons Inc coin");
@@ -202,7 +202,7 @@ public class DemoData {
 
   private Community createCommunity(User admin, String name, String tokenSymbol, String tokenName) {
     String tokenAddress = blockchainService.createToken(admin, tokenSymbol, tokenName);
-    Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setTokenContractAddress(tokenAddress)));
+    Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setAdminUser(admin).setTokenContractAddress(tokenAddress)));
 
     admin.setCommunityId(community.getId());
     emService.runInTransaction(() -> userRepository.update(admin));
