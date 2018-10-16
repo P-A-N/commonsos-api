@@ -15,11 +15,6 @@ import java.util.Optional;
 import org.junit.Test;
 
 import commonsos.DBTest;
-import commonsos.repository.message.Message;
-import commonsos.repository.message.MessageRepository;
-import commonsos.repository.message.MessageThread;
-import commonsos.repository.message.MessageThreadParty;
-import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
 
@@ -61,10 +56,10 @@ public class MessageThreadRepositoryTest extends DBTest {
     MessageThreadParty party1 = result.getParties().get(0);
     MessageThreadParty party2 = result.getParties().get(1);
 
-    assertThat(party1.getUser()).isEqualTo(myself);
+    assertThat(party1.getUser().getUsername()).isEqualTo("myself");
     assertThat(party1.getVisitedAt()).isNull();
 
-    assertThat(party2.getUser()).isEqualTo(counterparty);
+    assertThat(party2.getUser().getUsername()).isEqualTo("counterparty");
     assertThat(party2.getVisitedAt()).isNull();
   }
 
@@ -165,8 +160,8 @@ public class MessageThreadRepositoryTest extends DBTest {
 
     MessageThread result = repository.thread(threadId).orElseThrow(RuntimeException::new);
     assertThat(result.getParties()).hasSize(2);
-    assertThat(result.getParties().get(0).getUser()).isEqualTo(user);
-    assertThat(result.getParties().get(1).getUser()).isEqualTo(user2);
+    assertThat(result.getParties().get(0).getUser().getUsername()).isEqualTo("first");
+    assertThat(result.getParties().get(1).getUser().getUsername()).isEqualTo("second");
   }
 
   @Test

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.GsonProvider;
-import commonsos.controller.user.UserUpdateController;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
 import commonsos.service.user.UserUpdateCommand;
