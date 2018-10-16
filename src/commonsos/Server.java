@@ -48,6 +48,7 @@ import commonsos.controller.user.UserController;
 import commonsos.controller.user.UserDeleteController;
 import commonsos.controller.user.UserMobileDeviceUpdateController;
 import commonsos.controller.user.UserUpdateController;
+import commonsos.exception.BadRequestException;
 import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;

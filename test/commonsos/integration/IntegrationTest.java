@@ -20,9 +20,11 @@ import com.ninja_squad.dbsetup.operation.Operation;
 import commonsos.EntityManagerService;
 import commonsos.service.auth.PasswordService;
 import io.restassured.RestAssured;
+import spark.Spark;
 
 public class IntegrationTest {
   
+  protected static int TEST_SERVER_PORT = 4568;
   protected static Gson gson = new Gson();
   protected static EntityManagerService emService = new TestEntityManagerService();
   protected static Operation DELETE_ALL = deleteAllFrom(
@@ -37,13 +39,14 @@ public class IntegrationTest {
   
   @BeforeClass
   public static void startUp() {
+    Spark.port(TEST_SERVER_PORT);
     new TestServer().start(new String[]{});
     awaitInitialization();
   }
   
   @BeforeClass
   public static void setupRestAssured() {
-    RestAssured.port = 4567;
+    RestAssured.port = TEST_SERVER_PORT;
   }
   
   @BeforeClass
@@ -78,6 +81,11 @@ public class IntegrationTest {
   
   public static <T> T create(T entity) {
     emService.runInTransaction(() -> emService.get().persist(entity));
+    return entity;
+  }
+  
+  public static <T> T update(T entity) {
+    emService.runInTransaction(() -> emService.get().merge(entity));
     return entity;
   }
 

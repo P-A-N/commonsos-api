@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import commonsos.repository.ad.AdType;
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

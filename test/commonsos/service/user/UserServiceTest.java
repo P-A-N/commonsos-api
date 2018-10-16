@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,14 +25,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.web3j.crypto.Credentials;
 
 import commonsos.AuthenticationException;
-import commonsos.BadRequestException;
 import commonsos.DisplayableException;
 import commonsos.JobService;
 import commonsos.UserSession;
+import commonsos.exception.BadRequestException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdRepository;
+import commonsos.repository.community.Community;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
@@ -41,18 +44,21 @@ import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.transaction.TransactionService;
-import commonsos.service.view.UserView;
+import commonsos.util.CommunityUtil;
+import commonsos.util.UserUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UserServiceTest {
 
-  @Mock UserRepository repository;
+  @Mock UserRepository userRepository;
   @Mock CommunityRepository communityRepository;
-  @Mock AdRepository adRepository;
   @Mock MessageThreadRepository messageThreadRepository;
-  @Mock TransactionService transactionService;
-  @Mock PasswordService passwordService;
+  @Mock AdRepository adRepository;
+  @Mock UserUtil userUtil;
+  @Mock CommunityUtil communityUtil;
   @Mock BlockchainService blockchainService;
+  @Mock PasswordService passwordService;
+  @Mock TransactionService transactionService;
   @Mock ImageService imageService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
@@ -64,14 +70,14 @@ public class UserServiceTest {
   public void checkPassword_withValidUser() {
     // prepare
     User user = new User().setPasswordHash("hash");
-    when(repository.findByUsername("worker")).thenReturn(Optional.of(user));
+    when(userRepository.findByUsername("worker")).thenReturn(Optional.of(user));
     when(passwordService.passwordMatchesHash("valid password", "hash")).thenReturn(true);
 
     // execute
     User result = userService.checkPassword("worker", "valid password");
     
     // verify
-    verify(repository, times(1)).findByUsername("worker");
+    verify(userRepository, times(1)).findByUsername("worker");
     verify(passwordService, times(1)).passwordMatchesHash("valid password", "hash");
     assertThat(result).isEqualTo(user);
   }
@@ -79,7 +85,7 @@ public class UserServiceTest {
   @Test(expected = AuthenticationException.class)
   public void checkPassword_withInvalidUsername() {
     // prepare
-    when(repository.findByUsername("invalid")).thenReturn(Optional.empty());
+    when(userRepository.findByUsername("invalid")).thenReturn(Optional.empty());
 
     // execute
     userService.checkPassword("invalid", "secret");
@@ -89,75 +95,58 @@ public class UserServiceTest {
   public void checkPassword_withInvalidPassword() {
     // prepare
     User user = new User().setPasswordHash("hash");
-    when(repository.findByUsername("user")).thenReturn(Optional.of(user));
+    when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
     when(passwordService.passwordMatchesHash("wrong password", "hash")).thenReturn(false);
 
     // execute
     userService.checkPassword("user", "wrong password");
   }
 
-  // TODO
-  /*@Test
-  public void create() {
+  @Test
+  public void create_noWait() {
     // prepare
+    doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
-    when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    User admin = new User().setId(id("admin")).setUsername("admin");
-    Community community = new Community().setId(id("community")).setAdminUser(admin);
-    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
-    when(passwordService.hash("secret78")).thenReturn("hash");
-    when(blockchainService.createWallet(WALLET_PASSWORD)).thenReturn("wallet");
+    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
-    when(blockchainService.credentials("wallet", WALLET_PASSWORD)).thenReturn(credentials);
-    User createdUser = new User();
-    when(repository.create(any())).thenReturn(createdUser);
+    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
 
     // execute
     AccountCreateCommand command = new AccountCreateCommand()
-        .setUsername("user name")
-        .setPassword("secret78")
-        .setFirstName("first")
-        .setLastName("last")
-        .setDescription("description")
-        .setLocation("Shibuya")
-        .setCommunityId(id("community"))
-        .setEmailAddress("test@test.com")
-        .setWaitUntilCompleted(false);
-    User result = userService.create(command);
-
+        .setCommunityList(asList(1L,2L))
+        .setWaitUntilCompleted(true);
+    userService.create(command);
+    
     // verify
-    verify(userService, times(1)).validate(command);
-    verify(blockchainService, times(1)).isConnected();
-    verify(repository, times(1)).findByUsername("user name");
-    verify(communityRepository, times(1)).findById(id("community"));
-    verify(passwordService, times(1)).hash("secret78");
-    verify(blockchainService, times(1)).createWallet(WALLET_PASSWORD);
-    verify(blockchainService, times(1)).credentials("wallet", WALLET_PASSWORD);
-    
-    verify(repository, times(1)).create(userCaptor.capture());
-    User actualUser = userCaptor.getValue();
-    assertThat(actualUser.getId()).isNull();
-    assertThat(actualUser.getCommunityId()).isEqualTo(id("community"));
-    assertThat(actualUser.getUsername()).isEqualTo(command.getUsername());
-    assertThat(actualUser.getPasswordHash()).isEqualTo("hash");
-    assertThat(actualUser.getFirstName()).isEqualTo(command.getFirstName());
-    assertThat(actualUser.getLastName()).isEqualTo(command.getLastName());
-    assertThat(actualUser.getDescription()).isEqualTo(command.getDescription());
-    assertThat(actualUser.getLocation()).isEqualTo(command.getLocation());
-    assertThat(actualUser.getAvatarUrl()).isEqualTo(null);
-    assertThat(actualUser.getWallet()).isEqualTo("wallet");
-    assertThat(actualUser.getWalletAddress()).isEqualTo("wallet address");
-    assertThat(actualUser.getPushNotificationToken()).isEqualTo(null);
-    assertThat(actualUser.getEmailAddress()).isEqualTo(command.getEmailAddress());
-    
-    DelegateWalletTask task = new DelegateWalletTask(actualUser, admin);
-    verify(jobService, times(1)).submit(actualUser, task);
-    verify(jobService, never()).execute(task);
-    
-    assertThat(result).isEqualTo(createdUser);
-  }*/
+    verify(jobService, never()).submit(any(), any());
+    verify(jobService, times(2)).execute(any());
+  }
 
+  @Test
+  public void create_wait() {
+    // prepare
+    doNothing().when(userService).validate(any());
+    when(blockchainService.isConnected()).thenReturn(true);
+    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
+    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
+    Credentials credentials = mock(Credentials.class);
+    when(credentials.getAddress()).thenReturn("wallet address");
+    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
+
+    // execute
+    AccountCreateCommand command = new AccountCreateCommand()
+        .setCommunityList(asList(1L,2L))
+        .setWaitUntilCompleted(false);
+    userService.create(command);
+    
+    // verify
+    verify(jobService, times(2)).submit(any(), any());
+    verify(jobService, never()).execute(any());
+  }
+
+  @Test
   public void validate() {
     userService.validate(validCommand());
   }
@@ -180,26 +169,6 @@ public class UserServiceTest {
   @Test(expected = BadRequestException.class)
   public void validate_password_less_length() {
     userService.validate(validCommand().setPassword("1234567"));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_firstName_null() {
-    userService.validate(validCommand().setFirstName(null));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_firstName_less_length() {
-    userService.validate(validCommand().setFirstName(""));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_lastName_null() {
-    userService.validate(validCommand().setLastName(null));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_lastName_less_length() {
-    userService.validate(validCommand().setLastName(""));
   }
 
   @Test(expected = BadRequestException.class)
@@ -226,48 +195,6 @@ public class UserServiceTest {
     userService.validate(validCommand().setEmailAddress("a@a.b.c.com"));
   }
 
-  // TODO
-  /*@Test
-  public void create_execute_task_when_waitUntilCompleted_is_true() {
-    // prepare
-    doNothing().when(userService).validate(any());
-    when(blockchainService.isConnected()).thenReturn(true);
-    when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
-    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
-
-    // execute
-    AccountCreateCommand command = new AccountCreateCommand()
-        .setCommunityId(id("community"))
-        .setWaitUntilCompleted(true);
-    userService.create(command);
-
-    // verify
-    verify(jobService, times(1)).execute(any());
-    verify(jobService, never()).submit(any(), any());
-  }*/
-
-  // TODO
-  /*@Test
-  public void create_submit_task_when_waitUntilCompleted_is_false() {
-    // prepare
-    doNothing().when(userService).validate(any());
-    when(blockchainService.isConnected()).thenReturn(true);
-    when(repository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
-    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
-
-    // execute
-    AccountCreateCommand command = new AccountCreateCommand()
-        .setCommunityId(id("community"))
-        .setWaitUntilCompleted(false);
-    userService.create(command);
-
-    // verify
-    verify(jobService, never()).execute(any());
-    verify(jobService, times(1)).submit(any(), any());
-  }*/
-
   @Test
   public void create_failFastIfBlockchainIsDown() {
     // prepare
@@ -287,7 +214,7 @@ public class UserServiceTest {
     // prepare
     doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
-    when(repository.findByUsername(any())).thenReturn(Optional.of(new User()));
+    when(userRepository.findByUsername(any())).thenReturn(Optional.of(new User()));
 
     // execute
     AccountCreateCommand command = new AccountCreateCommand();
@@ -297,37 +224,27 @@ public class UserServiceTest {
     assertThat(thrown).hasMessage("error.usernameTaken");
   }
 
-  // TODO
-  /*@Test
+  @Test
   public void create_communityIsOptional() {
     // prepare
+    doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
-    when(repository.findByUsername(any())).thenReturn(Optional.empty());
+    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
     when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
     
     // execute
-    AccountCreateCommand command = new AccountCreateCommand()
-        .setUsername("user name")
-        .setPassword("secret78")
-        .setFirstName("first")
-        .setLastName("last")
-        .setEmailAddress("test@test.com")
-        .setCommunityId(null);
-    userService.create(command);
+    userService.create(new AccountCreateCommand());
 
     // verify
-    ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-    verify(repository, times(1)).create(userCaptor.capture());
-    User actualUser = userCaptor.getValue();
-    
-    assertThat(actualUser.getCommunityId()).isNull();
-  }*/
+    verify(jobService, never()).submit(any(), any());
+    verify(jobService, never()).execute(any());
+  }
 
   @Test
   public void searchUsers() {
     User myself = new User().setId(id("myself"));
     User other = new User().setId(id("other"));
-    when(repository.search(id("community"), "foobar")).thenReturn(asList(myself, other));
+    when(userRepository.search(id("community"), "foobar")).thenReturn(asList(myself, other));
     UserView userView = new UserView();
     doReturn(userView).when(userService).view(other);
 
@@ -335,16 +252,6 @@ public class UserServiceTest {
 
     assertThat(users).isEqualTo(asList(userView));
   }
-
-  /*@Test
-  public void walletUser() {
-    User admin = new User();
-    when(repository.findAdminByCommunityId(id("community"))).thenReturn(admin);
-
-    User result = userService.walletUser(new Community().setId(id("community")));
-
-    assertThat(result).isEqualTo(admin);
-  }*/
 
   @Test
   public void updateAvatar() {
@@ -356,7 +263,7 @@ public class UserServiceTest {
 
     assertThat(result).isEqualTo("/url");
     assertThat(user.getAvatarUrl()).isEqualTo("/url");
-    verify(repository).update(user);
+    verify(userRepository).update(user);
     verify(imageService).delete("/old");
   }
 
@@ -370,7 +277,7 @@ public class UserServiceTest {
 
     assertThat(result).isEqualTo("/url");
     assertThat(user.getAvatarUrl()).isEqualTo("/url");
-    verify(repository).update(user);
+    verify(userRepository).update(user);
     verify(imageService, never()).delete(any());
   }
 
@@ -390,7 +297,7 @@ public class UserServiceTest {
   @Test
   public void updateUser() {
     User user = new User();
-    when(repository.update(user)).thenReturn(user);
+    when(userRepository.update(user)).thenReturn(user);
     
     // execute
     UserUpdateCommand command = new UserUpdateCommand()
@@ -401,7 +308,7 @@ public class UserServiceTest {
     User result = userService.updateUser(user, command);
     
     // verify
-    verify(repository, times(1)).update(user);
+    verify(userRepository, times(1)).update(user);
     assertThat(user.getFirstName()).isEqualTo(command.getFirstName());
     assertThat(user.getLastName()).isEqualTo(command.getLastName());
     assertThat(user.getDescription()).isEqualTo(command.getDescription());
@@ -410,55 +317,13 @@ public class UserServiceTest {
     assertThat(result).isEqualTo(user);
   }
 
-  // TODO
-  /*@Test
-  public void deleteUserLogically() {
-    // prepare
-    User targetUser = new User().setId(id("user")).setCommunityId(id("community"));
-    
-    List<Ad> myAds = new ArrayList<>();
-    myAds.addAll(Arrays.asList(new Ad(), new Ad()));
-    when(adRepository.myAds(id("community"), id("user"))).thenReturn(myAds);
-    
-    when(repository.update(targetUser)).thenReturn(targetUser);
-    
-    // execute
-    User result = userService.deleteUserLogically(targetUser);
-    
-    // verify
-    assertThat(result).isEqualTo(targetUser);
-    assertThat(result.isDeleted()).isEqualTo(true);
-    
-    verify(adRepository, times(2)).update(adCaptor.capture());
-    List<Ad> actualAdList = adCaptor.getAllValues();
-    assertThat(actualAdList.size()).isEqualTo(2);
-    assertThat(actualAdList.get(0).isDeleted()).isTrue();
-    assertThat(actualAdList.get(1).isDeleted()).isTrue();
-    
-    verify(messageThreadRepository, times(1)).deleteMessageThreadParty(targetUser);
-  }*/
-
-  // TODO
-  /*@Test
-  public void deleteUserLogically_noAds() {
-    // prepare
-    List<Ad> myAds = new ArrayList<>();
-    when(adRepository.myAds(any(), any())).thenReturn(myAds);
-    
-    // execute
-    userService.deleteUserLogically(new User());
-    
-    // verify
-    verify(adRepository, never()).update(any(Ad.class));
-  }*/
-  
   @Test
   public void updateMobileDevice() {
     MobileDeviceUpdateCommand command = new MobileDeviceUpdateCommand().setPushNotificationToken("12345");
 
     userService.updateMobileDevice(new User(), command);
 
-    verify(repository).update(new User().setPushNotificationToken("12345"));
+    verify(userRepository).update(new User().setPushNotificationToken("12345"));
   }
 
   private AccountCreateCommand validCommand() {
@@ -467,6 +332,6 @@ public class UserServiceTest {
         .setPassword("12345678")
         .setFirstName("1")
         .setLastName("1")
-        .setLastName("test@test.com");
+        .setEmailAddress("test@test.com");
   }
 }

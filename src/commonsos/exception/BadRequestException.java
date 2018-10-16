@@ -1,4 +1,4 @@
-package commonsos;
+package commonsos.exception;
 
 public class BadRequestException extends RuntimeException {
   public BadRequestException() {

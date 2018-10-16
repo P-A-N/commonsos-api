@@ -16,8 +16,9 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableMap;
 
-import commonsos.BadRequestException;
 import commonsos.ForbiddenException;
+import commonsos.exception.BadRequestException;
+import commonsos.exception.UserNotFoundException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.message.Message;
 import commonsos.repository.message.MessageRepository;
@@ -25,11 +26,12 @@ import commonsos.repository.message.MessageThread;
 import commonsos.repository.message.MessageThreadParty;
 import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
 import commonsos.service.PushNotificationService;
 import commonsos.service.ad.AdService;
 import commonsos.service.ad.AdView;
-import commonsos.service.user.UserService;
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
+import commonsos.util.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -38,8 +40,9 @@ public class MessageService {
 
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
+  @Inject private UserRepository userRepository;
+  @Inject private UserUtil userUtil;
   @Inject private AdService adService;
-  @Inject private UserService userService;
   @Inject PushNotificationService pushNotificationService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
@@ -54,7 +57,7 @@ public class MessageService {
   }
 
   MessageThread createMessageThreadWithUser(User user, Long otherUserId) {
-    User otherUser = userService.user(otherUserId);
+    User otherUser = userRepository.findById(otherUserId).orElseThrow(UserNotFoundException::new);
     MessageThread messageThread = new MessageThread()
       .setCreatedBy(user.getId())
       .setCreatedAt(now())
@@ -101,7 +104,8 @@ public class MessageService {
   }
 
   List<User> validatePartiesCommunity(List<Long> memberIds) {
-    List<User> users = memberIds.stream().map(id -> userService.user(id)).collect(toList());
+    List<User> users = memberIds.stream().map(
+        id -> userRepository.findById(id).orElseThrow(UserNotFoundException::new)).collect(toList());
     if (users.isEmpty()) throw new BadRequestException("No group members specified");
     return users;
   }
@@ -120,7 +124,7 @@ public class MessageService {
 
   MessageThread createMessageThreadForAd(User user, Long adId) {
     Ad ad = adService.ad(adId);
-    User adCreator = userService.user(ad.getCreatedBy());
+    User adCreator = userRepository.findById(ad.getCreatedBy()).orElseThrow(UserNotFoundException::new);
 
     MessageThread messageThread = new MessageThread()
       .setCreatedBy(user.getId())
@@ -135,13 +139,13 @@ public class MessageService {
     List<UserView> parties = thread.getParties().stream()
       .filter(p -> !p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(userService::view)
+      .map(userUtil::view)
       .collect(toList());
 
     UserView creator = thread.getParties().stream()
       .filter(p -> p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(userService::view).findFirst().orElseThrow(RuntimeException::new);
+      .map(userUtil::view).findFirst().orElseThrow(RuntimeException::new);
 
     UserView counterParty = concat(parties.stream(), of(creator))
       .filter(uv -> uv.getId() != user.getId())
@@ -208,7 +212,7 @@ public class MessageService {
     messageThread.getParties().stream()
       .filter(p -> !p.getUser().equals(senderUser))
       .forEach(p -> {
-        String messageText = format("%s:\n\n%s", userService.fullName(senderUser), message.getText());
+        String messageText = format("%s:\n\n%s", senderUser.getUsername(), message.getText());
         Map<String, String> params = ImmutableMap.of(
           "type", "new_message",
           "threadId", Long.toString(messageThread.getId()));

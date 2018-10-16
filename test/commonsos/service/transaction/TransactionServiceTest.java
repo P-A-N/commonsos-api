@@ -1,6 +1,7 @@
 package commonsos.service.transaction;
 
 import static commonsos.TestId.id;
+import static java.math.BigDecimal.TEN;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
@@ -8,15 +9,17 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.within;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,38 +30,41 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.BadRequestException;
+import commonsos.DisplayableException;
+import commonsos.exception.BadRequestException;
+import commonsos.repository.ad.Ad;
+import commonsos.repository.community.Community;
 import commonsos.repository.transaction.Transaction;
 import commonsos.repository.transaction.TransactionRepository;
 import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
 import commonsos.service.PushNotificationService;
 import commonsos.service.ad.AdService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.user.UserService;
-import commonsos.service.view.UserView;
+import commonsos.util.UserUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TransactionServiceTest {
 
-  @Mock AdService adService;
-  @Mock UserService userService;
-  @Mock BlockchainService blockchainService;
-  @Captor ArgumentCaptor<Transaction> captor;
   @Mock TransactionRepository repository;
+  @Mock UserRepository userRepository;
+  @Mock UserUtil userUtil;
+  @Mock BlockchainService blockchainService;
+  @Mock AdService adService;
   @Mock PushNotificationService pushNotificationService;
+  @Captor ArgumentCaptor<Transaction> captor;
   @InjectMocks @Spy TransactionService service;
 
-  // TODO
-  /*@Test
+  @Test
   public void createTransaction() {
     TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityId(id("community"));
+    User user = new User().setId(id("remitter")).setJoinedCommunities(asList(new Community().setId(id("community"))));
     doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad();
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);
-    User beneficiary = new User().setCommunityId(id("community"));
-    when(userService.user(id("beneficiary"))).thenReturn(beneficiary);
+    User beneficiary = new User().setJoinedCommunities(asList(new Community().setId(id("community"))));
+    when(userRepository.findById(id("beneficiary"))).thenReturn(Optional.of(beneficiary));
     when(blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), new BigDecimal("10"))).thenReturn("blockchain hash");
 
     Transaction result = service.create(user, command);
@@ -67,7 +73,7 @@ public class TransactionServiceTest {
     verify(repository).create(captor.capture());
     Transaction transaction = captor.getValue();
     assertThat(transaction.getCommunityId()).isEqualTo(id("community"));
-    assertThat(transaction.getAmount()).isEqualTo(TEN);
+    assertThat(transaction.getAmount()).isEqualByComparingTo(TEN);
     assertThat(transaction.getBeneficiaryId()).isEqualTo(id("beneficiary"));
     assertThat(transaction.getRemitterId()).isEqualTo(id("remitter"));
     assertThat(transaction.getDescription()).isEqualTo("description");
@@ -75,7 +81,7 @@ public class TransactionServiceTest {
     assertThat(transaction.getCreatedAt()).isCloseTo(now(), within(1, SECONDS));
     verify(repository).update(transaction);
     assertThat(transaction.getBlockchainTransactionHash()).isEqualTo("blockchain hash");
-  }*/
+  }
 
   @Test(expected = BadRequestException.class)
   public void createTransaction_negativeAmount() {
@@ -92,17 +98,23 @@ public class TransactionServiceTest {
     service.create(new User(), command("community", "beneficiary", "10.2", " ", null));
   }
 
-  // TODO
-  /*@Test
+  @Test(expected = BadRequestException.class)
+  public void createTransaction_communityIdIsRequired() {
+    service.create(new User(), command("community", "beneficiary", "10", "description", "ad id").setCommunityId(null));
+  }
+
+  @Test
   public void createTransaction_withoutAd() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "").setAdId(null);
-    User user = new User().setId(id("remitter")).setCommunityId(id("community"));
-    doReturn(new BalanceView().setBalance(new BigDecimal("10.20"))).when(service).balance(user, id("community"));
+    User remitter = new User().setId(id("remitter")).setJoinedCommunities(asList(new Community().setId(id("community"))));
+    User beneficiary = new User().setId(id("beneficiary")).setJoinedCommunities(asList(new Community().setId(id("community"))));
+    when(userRepository.findById(any())).thenReturn(Optional.of(beneficiary));
+    doReturn(new BalanceView().setBalance(new BigDecimal("10.20"))).when(service).balance(remitter, id("community"));
 
-    service.create(user, command);
+    service.create(remitter, command);
 
     verify(repository).create(any());
-  }*/
+  }
 
   private TransactionCreateCommand command(String communityId, String beneficiary, String amount, String description, String adId) {
     return new TransactionCreateCommand()
@@ -113,24 +125,24 @@ public class TransactionServiceTest {
       .setAdId(id(adId));
   }
 
-  // TODO
-  /*@Test
+  @Test
   public void createTransaction_insufficientBalance() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityId(id("community"));
+    User user = new User().setId(id("remitter")).setJoinedCommunities(asList(new Community().setId(id("community"))));
     doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad().setCreatedBy(id("beneficiary")).setCommunityId(id("community"));
-    when(userService.user(id("beneficiary"))).thenReturn(new User().setId(id("beneficiary")).setCommunityId(id("community")));
+    when(userRepository.findById(id("beneficiary"))).thenReturn(
+        Optional.of(new User().setId(id("beneficiary")).setJoinedCommunities(asList(new Community().setId(id("community"))))));
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);
     DisplayableException thrown = catchThrowableOfType(() -> service.create(user, command), DisplayableException.class);
 
     assertThat(thrown).hasMessage("error.notEnoughFunds");
-  }*/
+  }
 
   @Test(expected = BadRequestException.class)
   public void createTransaction_unknownBeneficiary() {
-    when(userService.user(id("unknown"))).thenThrow(new BadRequestException());
+    when(userRepository.findById(id("unknown"))).thenThrow(new BadRequestException());
     TransactionCreateCommand command = command("community", "unknown", "10.2", "description", "33");
 
     service.create(new User().setId(id("remitter")), command);
@@ -140,7 +152,6 @@ public class TransactionServiceTest {
   public void createTransaction_unknownAd() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "unknown ad");
     User user = new User().setId(id("remitter"));
-    when(adService.ad(id("unknown ad"))).thenThrow(new BadRequestException());
 
     service.create(user, command);
   }
@@ -153,57 +164,17 @@ public class TransactionServiceTest {
     service.create(user, command);
   }
 
-  // TODO
-  /*@Test(expected = BadRequestException.class)
+  @Test(expected = BadRequestException.class)
   public void createTransaction_communitiesDiffer() {
     TransactionCreateCommand command = command("community", "beneficiary", "0.1", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityId(id("community"));
-    when(userService.user(id("beneficiary"))).thenReturn(new User().setCommunityId(id("other community")));
+    User user = new User().setId(id("remitter")).setJoinedCommunities(asList(new Community().setId(id("community"))));
+    when(userRepository.findById(id("beneficiary"))).thenReturn(
+        Optional.of(new User().setJoinedCommunities(asList(new Community().setId(id("other community"))))));
     Ad ad = new Ad();
     when(adService.ad(id("ad id"))).thenReturn(ad);
     when(adService.isPayableByUser(user, ad)).thenReturn(true);
 
     service.create(user, command);
-  }*/
-
-  // TODO
-  /*@Test
-  public void balance() {
-    User user = new User().setId(id("user id")).setCommunityId(id("community"));
-    when(blockchainService.tokenBalance(user, id("community"))).thenReturn(BigDecimal.TEN);
-    when(repository.pendingTransactionsAmount(id("user id"), id("community"))).thenReturn(BigDecimal.ONE);
-
-    BalanceView result = service.balance(user, id("community"));
-
-    assertThat(result.getBalance()).isEqualByComparingTo(new BigDecimal("9"));
-    assertThat(result.getCommunityId()).isEqualTo(id("community"));
-  }*/
-
-  @Test
-  public void view() {
-    Instant createdAt = Instant.now();
-    UserView beneficiary = new UserView();
-    UserView remitter = new UserView();
-    when(userService.view(id("beneficiary id"))).thenReturn(beneficiary);
-    when(userService.view(id("remitter id"))).thenReturn(remitter);
-
-    TransactionView view = service.view(
-      new User().setId(id("remitter id")),
-      new Transaction()
-        .setBeneficiaryId(id("beneficiary id"))
-        .setRemitterId(id("remitter id"))
-        .setAmount(BigDecimal.TEN)
-        .setDescription("description")
-        .setBlockchainCompletedAt(now())
-        .setCreatedAt(createdAt));
-
-    assertThat(view.getBeneficiary()).isEqualTo(beneficiary);
-    assertThat(view.getRemitter()).isEqualTo(remitter);
-    assertThat(view.getAmount()).isEqualTo(BigDecimal.TEN);
-    assertThat(view.getDescription()).isEqualTo("description");
-    assertThat(view.getCreatedAt()).isEqualTo(createdAt);
-    assertThat(view.isCompleted()).isEqualTo(true);
-    assertThat(view.isDebit()).isTrue();
   }
 
   @Test
@@ -220,31 +191,6 @@ public class TransactionServiceTest {
     List<TransactionView> result = service.transactions(user, id("community"));
 
     assertThat(result).isEqualTo(asList(transactionView2, transactionView1));
-  }
-
-  @Test
-  public void markTransactionCompleted() {
-    Transaction transaction = new Transaction()
-      .setRemitterId(id("remitter id"))
-      .setBeneficiaryId(id("beneficiary id"))
-      .setAmount(new BigDecimal("100.005"))
-      .setDescription("Gift");
-    when(repository.findByBlockchainTransactionHash("hash")).thenReturn(of(transaction));
-
-    User remitter = new User();
-    when(userService.user(id("remitter id"))).thenReturn(remitter);
-    when(userService.fullName(remitter)).thenReturn("John Doe");
-
-    User beneficiary = new User();
-    when(userService.user(id("beneficiary id"))).thenReturn(beneficiary);
-
-
-    service.markTransactionCompleted("hash");
-
-
-    assertThat(transaction.getBlockchainCompletedAt()).isCloseTo(now(), within(1, SECONDS));
-    verify(repository).update(transaction);
-    verify(pushNotificationService).send(beneficiary, "John Doe\n+100.01 Gift");
   }
 
   @Test

@@ -1,18 +1,19 @@
 package commonsos.controller;
 
+import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Base64;
+
+import javax.inject.Inject;
+
 import commonsos.UserSession;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-
-import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Base64;
-
-import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 
 public abstract class Controller implements Route {
 

@@ -1,7 +1,7 @@
 package commonsos.controller.user;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,9 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.repository.user.User;
-import commonsos.service.community.CommunityService;
 import commonsos.service.user.UserService;
-import commonsos.service.view.UserPrivateView;
+import commonsos.util.UserUtil;
 import spark.Request;
 import spark.Response;
 
@@ -25,62 +24,40 @@ public class UserControllerTest {
   @Mock Request request;
   @Mock Response response;
   @Mock UserService userService;
-  @Mock CommunityService communityService;
+  @Mock UserUtil userUtil;
   @InjectMocks UserController controller;
 
   @Test
   public void handle_noId() {
-    // prepare
-    when(request.params("id")).thenReturn(null);
-    UserPrivateView userView = new UserPrivateView();
-    when(userService.privateView(any())).thenReturn(userView);
-
-    // execute
-    User user = new User();
-    Object result = controller.handle(user, request, response);
-
-    // verify
-    verify(userService, times(1)).privateView(user);
-    assertThat(result).isEqualTo(userView);
+    controller.handle(new User(), request, response);
+    verify(userService, times(1)).privateView(any(User.class));
   }
 
-  // TODO
-  /*@Test
-  public void handle_withRequestedId() {
+  @Test
+  public void handle_adminUser() {
     // prepare
     when(request.params("id")).thenReturn("123");
-    User requestedUser = new User().setId(id("requestedId")).setCommunityId(id("community"));
-    when(userService.user(123L)).thenReturn(requestedUser);
-    when(communityService.isAdmin(id("user"), id("community"))).thenReturn(false);
-    UserView userView = new UserView();
-    when(userService.view(123L)).thenReturn(userView);
+    when(userUtil.isAdminOfUser(any(), any())).thenReturn(true);
 
     // execute
-    User user = new User().setId(id("user"));
-    Object result = controller.handle(user, request, response);
+    controller.handle(new User(), request, response);
 
     // verify
-    verify(userService, times(1)).view(123L);
-    assertThat(result).isEqualTo(userView);
-  }*/
+    verify(userService, times(1)).privateView(any(User.class), any(Long.class));
+    verify(userService, never()).view(any(Long.class));
+  }
 
-  // TODO
-  /*@Test
-  public void handle_withOtherUserId_admin() {
+  @Test
+  public void handle_generalUser() {
     // prepare
     when(request.params("id")).thenReturn("123");
-    User requestedUser = new User().setId(id("requestedId")).setCommunityId(id("community"));
-    when(userService.user(123L)).thenReturn(requestedUser);
-    when(communityService.isAdmin(id("user"), id("community"))).thenReturn(true);
-    UserPrivateView userView = new UserPrivateView();
-    when(userService.privateView(any(), any())).thenReturn(userView);
+    when(userUtil.isAdminOfUser(any(), any())).thenReturn(false);
 
     // execute
-    User user = new User().setId(id("user"));
-    Object result = controller.handle(user, request, response);
+    controller.handle(new User(), request, response);
 
     // verify
-    verify(userService, times(1)).privateView(user, 123L);
-    assertThat(result).isEqualTo(userView);
-  }*/
+    verify(userService, never()).privateView(any(User.class), any(Long.class));
+    verify(userService, times(1)).view(any(Long.class));
+  }
 }

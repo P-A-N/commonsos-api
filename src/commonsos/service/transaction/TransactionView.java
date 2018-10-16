@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
 
 @Getter @Setter @Accessors(chain=true)
 public class TransactionView {

@@ -5,8 +5,8 @@ import static spark.utils.StringUtils.isEmpty;
 
 import javax.inject.Inject;
 
-import commonsos.BadRequestException;
 import commonsos.controller.Controller;
+import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.transaction.BalanceView;
 import commonsos.service.transaction.TransactionService;

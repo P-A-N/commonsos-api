@@ -1,4 +1,4 @@
-package commonsos.service.view;
+package commonsos.service.user;
 
 import java.util.List;
 

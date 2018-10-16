@@ -14,25 +14,27 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import commonsos.BadRequestException;
 import commonsos.DisplayableException;
+import commonsos.exception.BadRequestException;
+import commonsos.exception.UserNotFoundException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.transaction.Transaction;
 import commonsos.repository.transaction.TransactionRepository;
 import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
 import commonsos.service.PushNotificationService;
 import commonsos.service.ad.AdService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.user.UserService;
-import commonsos.service.view.UserView;
+import commonsos.util.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
 public class TransactionService {
   @Inject TransactionRepository repository;
+  @Inject UserRepository userRepository;
+  @Inject UserUtil userUtil;
   @Inject BlockchainService blockchainService;
-  @Inject UserService userService;
   @Inject AdService adService;
   @Inject PushNotificationService pushNotificationService;
 
@@ -56,11 +58,11 @@ public class TransactionService {
   }
 
   public TransactionView view(User user, Transaction transaction) {
-    UserView remitter = userService.view(transaction.getRemitterId());
-    UserView beneficiary = userService.view(transaction.getBeneficiaryId());
+    User remitter = userRepository.findById(transaction.getRemitterId()).orElseThrow(UserNotFoundException::new);
+    User beneficiary = userRepository.findById(transaction.getBeneficiaryId()).orElseThrow(UserNotFoundException::new);
     return new TransactionView()
-      .setRemitter(remitter)
-      .setBeneficiary(beneficiary)
+      .setRemitter(userUtil.view(remitter))
+      .setBeneficiary(userUtil.view(beneficiary))
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
       .setCreatedAt(transaction.getCreatedAt())
@@ -69,11 +71,11 @@ public class TransactionService {
   }
 
   public Transaction create(User user, TransactionCreateCommand command) {
-    if (command.getCommunityId() == null) throw new BadRequestException("community id is required");
+    if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
     if (isBlank(command.getDescription()))  throw new BadRequestException();
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException();
     if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException();
-    User beneficiary = userService.user(command.getBeneficiaryId());
+    User beneficiary = userRepository.findById(command.getBeneficiaryId()).orElseThrow(UserNotFoundException::new);
 
     if (command.getAdId() != null) {
       Ad ad = adService.ad(command.getAdId());
@@ -119,9 +121,9 @@ public class TransactionService {
     transaction.setBlockchainCompletedAt(now());
     repository.update(transaction);
 
-    User beneficiary = userService.user(transaction.getBeneficiaryId());
-    String remitterName = userService.fullName(userService.user(transaction.getRemitterId()));
-    pushNotificationService.send(beneficiary, format("%s\n+%.2f %s", remitterName, transaction.getAmount(), transaction.getDescription()));
+    User beneficiary = userRepository.findById(transaction.getBeneficiaryId()).orElseThrow(UserNotFoundException::new);
+    User remitter = userRepository.findById(transaction.getRemitterId()).orElseThrow(UserNotFoundException::new);
+    pushNotificationService.send(beneficiary, format("%s\n+%.2f %s", remitter.getUsername(), transaction.getAmount(), transaction.getDescription()));
 
     log.info(format("Transaction %s marked completed", transaction.getBlockchainTransactionHash()));
   }

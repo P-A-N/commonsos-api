@@ -12,10 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.BadRequestException;
+import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
 import spark.Request;
 
 @RunWith(MockitoJUnitRunner.class)

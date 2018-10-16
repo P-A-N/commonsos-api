@@ -7,11 +7,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import commonsos.BadRequestException;
 import commonsos.controller.Controller;
+import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
 import spark.Request;
 import spark.Response;
 

@@ -12,7 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -175,73 +174,8 @@ public class BlockchainServiceTest {
     assertThat(thrown).hasMessage("Error processing transaction request: blockchain error");
   }
 
-  // TODO
-  /*@Test
-  public void userCommunityToken() {
-    User user = new User().setCommunityId(id("community")).setWallet("wallet");
-    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(new Community().setTokenContractAddress("contract address")));
-
-    Credentials remitterCredentials = mock(Credentials.class);
-    doReturn(remitterCredentials).when(service).credentials("wallet", WALLET_PASSWORD);
-
-    TokenERC20 token = mock(TokenERC20.class, RETURNS_DEEP_STUBS);
-    doReturn(token).when(service).loadToken(remitterCredentials, "contract address");
-
-    TokenERC20 result = service.userCommunityToken(user);
-
-    assertThat(result).isEqualTo(token);
-  }
-
   @Test
-  public void userCommunityTokenAsAdmin() {
-    User user = new User().setCommunityId(id("community")).setWallet("wallet");
-    User admin = new User().setWallet("wallet");
-    Community community = new Community().setId(id("community")).setTokenContractAddress("contract address").setAdminUser(admin);
-    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(community));
-
-    Credentials remitterCredentials = mock(Credentials.class);
-    doReturn(remitterCredentials).when(service).credentials("wallet", WALLET_PASSWORD);
-
-    TokenERC20 token = mock(TokenERC20.class, RETURNS_DEEP_STUBS);
-    doReturn(token).when(service).loadToken(remitterCredentials, "contract address");
-
-
-    TokenERC20 result = service.userCommunityTokenAsAdmin(user);
-
-
-    assertThat(result).isEqualTo(token);
-  }
-
-  @Test
-  public void createToken() throws Exception {
-    User owner = new User().setWallet("wallet");
-    Credentials credentials = mock(Credentials.class);
-    doReturn(credentials).when(service).credentials("wallet", "test");
-    doReturn("0x543210").when(service).deploy(credentials, "COM", "COM token");
-
-    String tokenAddress = service.createToken(owner, "COM", "COM token");
-
-    assertThat(tokenAddress).isEqualTo("0x543210");
-  }
-
-  @Test
-  public void tokenBalance() throws Exception {
-    User user = new User().setWalletAddress("wallet address").setCommunityId(id("community"));
-    when(communityRepository.findById(id("community"))).thenReturn(Optional.of(new Community().setTokenContractAddress("contract address")));
-
-    TokenERC20 token = mock(TokenERC20.class, RETURNS_DEEP_STUBS);
-    doReturn(token).when(service).loadTokenReadOnly("wallet address", "contract address");
-    when(token.balanceOf("wallet address").send()).thenReturn(new BigInteger("10000000000000000000"));
-
-
-    BigDecimal result = service.tokenBalance(user, user.getCommunityId());
-
-
-    assertThat(result).isEqualByComparingTo(TEN);
-  }*/
-
-  @Test
-  public void handleBlockchainException() {
+  public void handleBlockchainException_noError() {
     Callable<String> action = () -> "result";
 
     String result = service.handleBlockchainException(action);
@@ -250,22 +184,16 @@ public class BlockchainServiceTest {
   }
 
   @Test(expected = DisplayableException.class)
-  public void handleBlockchainException_handlesInsufficientEtherError() {
-    Callable<Void> failingAction = () -> {
-      if (true) throw new RuntimeException("insufficient funds for gas");
-      return null;
-    };
+  public void handleBlockchainException_error() {
+    Callable<Void> action = () -> {throw new RuntimeException("insufficient funds for gas");};
 
-    service.handleBlockchainException(failingAction);
+    service.handleBlockchainException(action);
   }
 
   @Test(expected = RuntimeException.class)
   public void handleBlockchainException_passesThroughRandomError() {
-    Callable<Void> failingAction = () -> {
-      if (true) throw new RuntimeException("bad luck");
-      return null;
-    };
+    Callable<Void> action = () -> {throw new RuntimeException();};
 
-    service.handleBlockchainException(failingAction);
+    service.handleBlockchainException(action);
   }
 }

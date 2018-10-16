@@ -3,9 +3,9 @@ package commonsos.controller.user;
 import com.google.gson.Gson;
 import commonsos.controller.Controller;
 import commonsos.repository.user.User;
+import commonsos.service.user.UserPrivateView;
 import commonsos.service.user.UserService;
 import commonsos.service.user.UserUpdateCommand;
-import commonsos.service.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 

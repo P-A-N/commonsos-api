@@ -14,11 +14,12 @@ import org.apache.commons.validator.routines.EmailValidator;
 import org.web3j.crypto.Credentials;
 
 import commonsos.AuthenticationException;
-import commonsos.BadRequestException;
 import commonsos.DisplayableException;
+import commonsos.ForbiddenException;
 import commonsos.JobService;
 import commonsos.UserSession;
 import commonsos.controller.auth.DelegateWalletTask;
+import commonsos.exception.BadRequestException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdRepository;
 import commonsos.repository.community.Community;
@@ -30,47 +31,63 @@ import commonsos.service.ImageService;
 import commonsos.service.auth.AccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.view.UserPrivateView;
-import commonsos.service.view.UserView;
-import commonsos.service.view.UserViewService;
+import commonsos.service.community.CommunityView;
+import commonsos.service.transaction.BalanceView;
+import commonsos.service.transaction.TransactionService;
+import commonsos.util.CommunityUtil;
+import commonsos.util.UserUtil;
 
 @Singleton
 public class UserService {
   public static final String WALLET_PASSWORD = "test";
 
-  @Inject UserViewService userViewService;
-  @Inject UserRepository repository;
+  @Inject UserRepository userRepository;
   @Inject CommunityRepository communityRepository;
   @Inject MessageThreadRepository messageThreadRepository;
   @Inject AdRepository adRepository;
+  @Inject UserUtil userUtil;
+  @Inject CommunityUtil communityUtil;
   @Inject BlockchainService blockchainService;
   @Inject PasswordService passwordService;
+  @Inject TransactionService transactionService;
   @Inject ImageService imageService;
   @Inject JobService jobService;
 
 
   public User checkPassword(String username, String password) {
-    User user = repository.findByUsername(username).orElseThrow(AuthenticationException::new);
+    User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
     if (!passwordService.passwordMatchesHash(password, user.getPasswordHash())) throw new AuthenticationException();
     return user;
   }
 
   public UserPrivateView privateView(User user) {
-    return userViewService.privateView(user);
+    List<BalanceView> balanceList = new ArrayList<>();
+    List<CommunityView> communityList = new ArrayList<>();
+    if (user.getJoinedCommunities() != null) {
+      user.getJoinedCommunities().forEach(c -> {
+        balanceList.add(transactionService.balance(user, c.getId()));
+        communityList.add(communityUtil.view(c));
+      });
+    }
+    
+    return userUtil.privateView(user, balanceList, communityList);
   }
 
   public UserPrivateView privateView(User currentUser, Long userId) {
-    return userViewService.privateView(currentUser, userId);
-  }
-
-  public String fullName(User user) {
-    return userViewService.fullName(user);
+    User user = userRepository.findById(userId).orElseThrow(() -> new BadRequestException("user not found"));
+    boolean isAdmin = user.getJoinedCommunities().stream().anyMatch(c -> {
+      return c.getAdminUser() != null && c.getAdminUser().getId().equals(currentUser.getId());
+    });
+    if (!currentUser.getId().equals(user.getId()) && !isAdmin) throw new ForbiddenException();
+    
+    // TODO filter balance
+    return privateView(user);
   }
 
   public User create(AccountCreateCommand command) {
     validate(command);
     if (!blockchainService.isConnected()) throw new RuntimeException("Cannot create user, technical error with blockchain");
-    if (repository.findByUsername(command.getUsername()).isPresent()) throw new DisplayableException("error.usernameTaken");
+    if (userRepository.findByUsername(command.getUsername()).isPresent()) throw new DisplayableException("error.usernameTaken");
     List<Community> communityList = new ArrayList<>();
     if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
       communityList = communityList(command.getCommunityList());
@@ -99,7 +116,7 @@ public class UserService {
         jobService.submit(user, task);
     });
 
-    return repository.create(user);
+    return userRepository.create(user);
   }
 
   private List<Community> communityList(List<Long> communityList) {
@@ -123,19 +140,19 @@ public class UserService {
   }
   
   public UserView view(Long id) {
-    return userViewService.view(id);
+    return view(userRepository.findById(id).orElseThrow(BadRequestException::new));
   }
 
   public User user(Long id) {
-    return repository.findById(id).orElseThrow(BadRequestException::new);
+    return userRepository.findById(id).orElseThrow(BadRequestException::new);
   }
 
   public UserView view(User user) {
-    return userViewService.view(user);
+    return userUtil.view(user);
   }
 
   public List<UserView> searchUsers(User user, Long communityId, String query) {
-    return repository.search(communityId, query).stream().filter(u -> !u.getId().equals(user.getId())).map(this::view).collect(toList());
+    return userRepository.search(communityId, query).stream().filter(u -> !u.getId().equals(user.getId())).map(this::view).collect(toList());
   }
 
   public String updateAvatar(User user, InputStream image) {
@@ -144,7 +161,7 @@ public class UserService {
       imageService.delete(user.getAvatarUrl());
     }
     user.setAvatarUrl(url);
-    repository.update(user);
+    userRepository.update(user);
     return url;
   }
 
@@ -157,7 +174,7 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
-    return repository.update(user);
+    return userRepository.update(user);
   }
 
   public User deleteUserLogically(User user) {
@@ -174,11 +191,11 @@ public class UserService {
     
     // delete user logically
     user.setDeleted(true);
-    return repository.update(user);
+    return userRepository.update(user);
   }
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
     user.setPushNotificationToken(command.getPushNotificationToken());
-    repository.update(user);
+    userRepository.update(user);
   }
 }

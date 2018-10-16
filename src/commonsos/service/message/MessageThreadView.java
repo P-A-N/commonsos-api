@@ -1,7 +1,7 @@
 package commonsos.service.message;
 
 import commonsos.service.ad.AdView;
-import commonsos.service.view.UserView;
+import commonsos.service.user.UserView;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

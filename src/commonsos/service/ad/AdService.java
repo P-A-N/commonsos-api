@@ -12,29 +12,32 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import commonsos.BadRequestException;
 import commonsos.ForbiddenException;
+import commonsos.exception.BadRequestException;
+import commonsos.exception.UserNotFoundException;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.ad.AdPhotoUpdateCommand;
 import commonsos.repository.ad.AdRepository;
 import commonsos.repository.community.Community;
+import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.transaction.TransactionRepository;
 import commonsos.repository.user.User;
+import commonsos.repository.user.UserRepository;
 import commonsos.service.ImageService;
-import commonsos.service.user.UserService;
+import commonsos.util.UserUtil;
 
 @Singleton
 public class AdService {
-  @Inject AdRepository repository;
-  @Inject UserService userService;
+  @Inject AdRepository adRepository;
+  @Inject UserRepository userRepository;
+  @Inject CommunityRepository communityRepository;
   @Inject TransactionRepository transactionRepository;
+  @Inject UserUtil userUtil;
   @Inject ImageService imageService;
 
   public AdView create(User user, AdCreateCommand command) {
-    if (!user.getJoinedCommunities().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) {
-      throw new ForbiddenException("forbidden community id");
-    }
-    
+    if (!userUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
+
     Ad ad = new Ad()
       .setCreatedBy(user.getId())
       .setCreatedAt(now())
@@ -46,13 +49,13 @@ public class AdService {
       .setPhotoUrl(command.getPhotoUrl())
       .setCommunityId(command.getCommunityId());
 
-    return view(repository.create(ad), user);
+    return view(adRepository.create(ad), user);
   }
 
   public List<AdView> listFor(User user, Long communityId, String filter) {
     List<Ad> ads = filter != null ?
-      repository.ads(communityId, filter) :
-      repository.ads(communityId);
+      adRepository.ads(communityId, filter) :
+      adRepository.ads(communityId);
 
     return ads.stream().map(ad -> view(ad, user)).collect(toList());
   }
@@ -62,16 +65,18 @@ public class AdService {
   }
 
   public List<Ad> myAds(User user) {
-    return repository.myAds(
+    return adRepository.myAds(
         user.getJoinedCommunities().stream().map(Community::getId).collect(Collectors.toList()),
         user.getId());
   }
 
   public AdView view(Ad ad, User user) {
+    User createdBy = userRepository.findById(ad.getCreatedBy()).orElseThrow(UserNotFoundException::new);
+    
     return new AdView()
       .setId(ad.getId())
       .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(userService.view(ad.getCreatedBy()))
+      .setCreatedBy(userUtil.view(createdBy))
       .setType(ad.getType())
       .setTitle(ad.getTitle())
       .setDescription(ad.getDescription())
@@ -99,7 +104,7 @@ public class AdService {
   }
 
   public Ad ad(Long id) {
-    return repository.find(id).orElseThrow(BadRequestException::new);
+    return adRepository.find(id).orElseThrow(BadRequestException::new);
   }
 
   public Ad updateAd(User operator, AdUpdateCommand command) {
@@ -112,18 +117,18 @@ public class AdService {
       .setPoints(command.getPoints())
       .setLocation(command.getLocation())
       .setType(command.getType());
-    return repository.update(ad);
+    return adRepository.update(ad);
   }
 
   public String updatePhoto(User user, AdPhotoUpdateCommand command) {
-    Ad ad = repository.find(command.getAdId()).orElseThrow(BadRequestException::new);
+    Ad ad = adRepository.find(command.getAdId()).orElseThrow(BadRequestException::new);
     if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
     String url = imageService.create(command.getPhoto());
     if (ad.getPhotoUrl() != null) {
       imageService.delete(ad.getPhotoUrl());
     }
     ad.setPhotoUrl(url);
-    repository.update(ad);
+    adRepository.update(ad);
     return url;
   }
 
@@ -136,6 +141,6 @@ public class AdService {
     if (!ad.getCreatedBy().equals(operator.getId())) throw new ForbiddenException();
 
     ad.setDeleted(true);
-    return repository.update(ad);
+    return adRepository.update(ad);
   }
 }
