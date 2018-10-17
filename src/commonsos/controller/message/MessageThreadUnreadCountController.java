@@ -1,7 +1,7 @@
 package commonsos.controller.message;
 
 import com.google.common.collect.ImmutableMap;
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.message.MessageService;
 import spark.Request;
@@ -10,7 +10,7 @@ import spark.Response;
 import javax.inject.Inject;
 import java.util.Map;
 
-public class MessageThreadUnreadCountController extends Controller {
+public class MessageThreadUnreadCountController extends AfterLoginController {
 
   @Inject MessageService service;
 

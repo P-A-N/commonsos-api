@@ -23,7 +23,7 @@ import commonsos.repository.community.Community;
 import commonsos.repository.community.CommunityRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
-import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.auth.ProvisionalAccountCreateCommand;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.user.UserService;
 
@@ -116,7 +116,7 @@ public class AddCommunity {
       return;
     }
 
-    User admin = emService.runInTransaction(() -> userService.create(new AccountCreateCommand()
+    User admin = emService.runInTransaction(() -> userService.create(new ProvisionalAccountCreateCommand()
       .setUsername(adminUsername)
       .setPassword(adminPassword)
       .setFirstName(adminFirstName)

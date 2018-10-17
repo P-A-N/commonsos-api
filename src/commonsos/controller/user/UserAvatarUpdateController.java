@@ -1,6 +1,6 @@
 package commonsos.controller.user;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import spark.Response;
 import javax.inject.Inject;
 
 @Slf4j
-public class UserAvatarUpdateController extends Controller {
+public class UserAvatarUpdateController extends AfterLoginController {
 
   @Inject UserService userService;
 

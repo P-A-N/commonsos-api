@@ -5,14 +5,14 @@ import static spark.utils.StringUtils.isBlank;
 
 import javax.inject.Inject;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
 import commonsos.util.UserUtil;
 import spark.Request;
 import spark.Response;
 
-public class UserController extends Controller {
+public class UserController extends AfterLoginController {
 
   @Inject private UserService userService;
   @Inject private UserUtil userUtil;

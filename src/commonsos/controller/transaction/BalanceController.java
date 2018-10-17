@@ -5,7 +5,7 @@ import static spark.utils.StringUtils.isEmpty;
 
 import javax.inject.Inject;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.transaction.BalanceView;
@@ -13,7 +13,7 @@ import commonsos.service.transaction.TransactionService;
 import spark.Request;
 import spark.Response;
 
-public class BalanceController extends Controller {
+public class BalanceController extends AfterLoginController {
 
   @Inject TransactionService service;
 

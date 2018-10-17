@@ -1,6 +1,5 @@
 package commonsos;
 
-import static java.util.Arrays.asList;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
@@ -27,9 +26,13 @@ import commonsos.controller.ad.AdPhotoUpdateController;
 import commonsos.controller.ad.AdUpdateController;
 import commonsos.controller.ad.MyAdsController;
 import commonsos.controller.admin.UserSearchController;
-import commonsos.controller.auth.AccountCreateController;
+import commonsos.controller.auth.AccountCreateCompleteController;
+import commonsos.controller.auth.CheckPasswordResetRequestController;
 import commonsos.controller.auth.LoginController;
 import commonsos.controller.auth.LogoutController;
+import commonsos.controller.auth.PasswordResetController;
+import commonsos.controller.auth.PasswordResetRequestController;
+import commonsos.controller.auth.ProvisionalAccountCreateController;
 import commonsos.controller.community.CommunityListController;
 import commonsos.controller.message.GroupMessageThreadController;
 import commonsos.controller.message.GroupMessageThreadUpdateController;
@@ -43,6 +46,8 @@ import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
+import commonsos.controller.user.EmailUpdateCompleteController;
+import commonsos.controller.user.ProvisionalEmailUpdateController;
 import commonsos.controller.user.UserAvatarUpdateController;
 import commonsos.controller.user.UserController;
 import commonsos.controller.user.UserDeleteController;
@@ -95,11 +100,12 @@ public class Server {
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
 //    before(new CSRFFilter(asList("/login", "/logout", "/create-account")));
-    before(new AuthenticationFilter(asList("/login", "/logout", "/create-account", "/communities")));
+//    before(new AuthenticationFilter(asList("/login", "/logout", "/create-account", "/communities")));
 
     post("/login", injector.getInstance(LoginController.class), toJson);
-    post("/create-account", injector.getInstance(AccountCreateController.class), toJson);
     post("/logout", injector.getInstance(LogoutController.class), toJson);
+    post("/create-account", injector.getInstance(ProvisionalAccountCreateController.class), toJson);
+    post("/create-account/:accessId", injector.getInstance(AccountCreateCompleteController.class), toJson);
     get("/user", injector.getInstance(UserController.class), toJson);
     get("/users/:id", injector.getInstance(UserController.class), toJson);
     post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);
@@ -107,6 +113,11 @@ public class Server {
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
+    post("/users/:id/emailaddress", injector.getInstance(ProvisionalEmailUpdateController.class), toJson);
+    post("/users/:id/emailaddress/:accessId", injector.getInstance(EmailUpdateCompleteController.class), toJson);
+    post("/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);
+    get("/passwordreset/:accessId", injector.getInstance(CheckPasswordResetRequestController.class), toJson);
+    post("/passwordreset/:accessId", injector.getInstance(PasswordResetController.class), toJson);
 
     post("/ads", injector.getInstance(AdCreateController.class), toJson);
     get("/ads", injector.getInstance(AdListController.class), toJson);

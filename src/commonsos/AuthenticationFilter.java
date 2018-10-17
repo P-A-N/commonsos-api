@@ -1,13 +1,13 @@
 package commonsos;
 
+import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import spark.Filter;
 import spark.Request;
 import spark.Response;
-
-import java.util.List;
-
-import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 
 @Slf4j
 public class AuthenticationFilter implements Filter {

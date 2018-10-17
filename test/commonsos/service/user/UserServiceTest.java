@@ -40,7 +40,7 @@ import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
 import commonsos.service.ImageService;
-import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.auth.ProvisionalAccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.transaction.TransactionService;
@@ -62,7 +62,7 @@ public class UserServiceTest {
   @Mock ImageService imageService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
-  @Captor ArgumentCaptor<AccountCreateCommand> accountCreatecommandCaptor;
+  @Captor ArgumentCaptor<ProvisionalAccountCreateCommand> accountCreatecommandCaptor;
   @Captor ArgumentCaptor<User> userCaptor;
   @Captor ArgumentCaptor<Ad> adCaptor;
 
@@ -114,7 +114,7 @@ public class UserServiceTest {
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
 
     // execute
-    AccountCreateCommand command = new AccountCreateCommand()
+    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand()
         .setCommunityList(asList(1L,2L))
         .setWaitUntilCompleted(true);
     userService.create(command);
@@ -136,7 +136,7 @@ public class UserServiceTest {
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
 
     // execute
-    AccountCreateCommand command = new AccountCreateCommand()
+    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand()
         .setCommunityList(asList(1L,2L))
         .setWaitUntilCompleted(false);
     userService.create(command);
@@ -202,7 +202,7 @@ public class UserServiceTest {
     when(blockchainService.isConnected()).thenReturn(false);
     
     // execute
-    AccountCreateCommand command = new AccountCreateCommand();
+    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand();
     RuntimeException thrown = catchThrowableOfType(() -> userService.create(command), RuntimeException.class);
 
     // verify
@@ -217,7 +217,7 @@ public class UserServiceTest {
     when(userRepository.findByUsername(any())).thenReturn(Optional.of(new User()));
 
     // execute
-    AccountCreateCommand command = new AccountCreateCommand();
+    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand();
     DisplayableException thrown = catchThrowableOfType(() -> userService.create(command), DisplayableException.class);
 
     // verify
@@ -233,7 +233,7 @@ public class UserServiceTest {
     when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
     
     // execute
-    userService.create(new AccountCreateCommand());
+    userService.create(new ProvisionalAccountCreateCommand());
 
     // verify
     verify(jobService, never()).submit(any(), any());
@@ -326,8 +326,8 @@ public class UserServiceTest {
     verify(userRepository).update(new User().setPushNotificationToken("12345"));
   }
 
-  private AccountCreateCommand validCommand() {
-    return new AccountCreateCommand()
+  private ProvisionalAccountCreateCommand validCommand() {
+    return new ProvisionalAccountCreateCommand()
         .setUsername("1234")
         .setPassword("12345678")
         .setFirstName("1")

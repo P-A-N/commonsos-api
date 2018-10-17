@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain=true)
-public class AccountCreateCommand {
+public class ProvisionalAccountCreateCommand {
   private String username;
   private String password;
   private String firstName;

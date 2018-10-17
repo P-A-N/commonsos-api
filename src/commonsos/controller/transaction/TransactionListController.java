@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.transaction.TransactionService;
@@ -15,7 +15,7 @@ import commonsos.service.transaction.TransactionView;
 import spark.Request;
 import spark.Response;
 
-public class TransactionListController extends Controller {
+public class TransactionListController extends AfterLoginController {
 
   @Inject private TransactionService service;
 

@@ -12,7 +12,7 @@ import com.google.gson.Gson;
 import commonsos.CSRF;
 import commonsos.LogFilter;
 import commonsos.repository.user.User;
-import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.auth.ProvisionalAccountCreateCommand;
 import commonsos.service.user.UserPrivateView;
 import commonsos.service.user.UserService;
 import spark.Request;
@@ -20,14 +20,14 @@ import spark.Response;
 import spark.Route;
 import spark.Session;
 
-public class AccountCreateController implements Route {
+public class ProvisionalAccountCreateController implements Route {
 
   @Inject Gson gson;
   @Inject UserService userService;
   @Inject CSRF csrf;
 
-  @Override public UserPrivateView handle(Request request, Response response) {
-    AccountCreateCommand command = gson.fromJson(request.body(), AccountCreateCommand.class);
+  @Override public String handle(Request request, Response response) {
+    ProvisionalAccountCreateCommand command = gson.fromJson(request.body(), ProvisionalAccountCreateCommand.class);
     User user = userService.create(command);
 
     Session session = request.session();
@@ -37,6 +37,7 @@ public class AccountCreateController implements Route {
     MDC.put(LogFilter.USERNAME_MDC_KEY, user.getUsername());
     csrf.setToken(request, response);
     
-    return userService.privateView(user);
+    UserPrivateView privateView = userService.privateView(user);
+    return "";
   }
 }

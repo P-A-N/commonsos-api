@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.user.User;
 import commonsos.service.user.UserService;
@@ -15,7 +15,7 @@ import commonsos.service.user.UserView;
 import spark.Request;
 import spark.Response;
 
-public class UserSearchController extends Controller {
+public class UserSearchController extends AfterLoginController {
 
   @Inject UserService service;
 

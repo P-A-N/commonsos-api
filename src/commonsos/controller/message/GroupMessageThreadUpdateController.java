@@ -1,7 +1,7 @@
 package commonsos.controller.message;
 
 import com.google.gson.Gson;
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.message.GroupMessageThreadUpdateCommand;
 import commonsos.service.message.MessageService;
@@ -13,7 +13,7 @@ import javax.inject.Inject;
 
 import static java.lang.Long.parseLong;
 
-public class GroupMessageThreadUpdateController extends Controller {
+public class GroupMessageThreadUpdateController extends AfterLoginController {
 
   @Inject Gson gson;
   @Inject MessageService service;

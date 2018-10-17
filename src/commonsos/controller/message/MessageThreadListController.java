@@ -1,6 +1,6 @@
 package commonsos.controller.message;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.message.MessageService;
 import commonsos.service.message.MessageThreadView;
@@ -10,7 +10,7 @@ import spark.Response;
 import javax.inject.Inject;
 import java.util.List;
 
-public class MessageThreadListController extends Controller {
+public class MessageThreadListController extends AfterLoginController {
 
   @Inject MessageService service;
 

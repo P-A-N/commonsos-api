@@ -1,6 +1,6 @@
 package commonsos.controller.message;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.message.MessageService;
 import commonsos.service.message.MessageView;
@@ -12,7 +12,7 @@ import java.util.List;
 
 import static java.lang.Long.parseLong;
 
-public class MessageListController extends Controller {
+public class MessageListController extends AfterLoginController {
 
   @Inject MessageService service;
 

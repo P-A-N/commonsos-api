@@ -25,7 +25,7 @@ import commonsos.repository.user.UserRepository;
 import commonsos.service.ad.AdCreateCommand;
 import commonsos.service.ad.AdService;
 import commonsos.service.ad.AdView;
-import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.auth.ProvisionalAccountCreateCommand;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.message.MessagePostCommand;
 import commonsos.service.message.MessageService;
@@ -62,7 +62,7 @@ public class DemoData {
 
     Credentials commonsos = commonsosCredentials();
 
-    User admin = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin").setPassword("secret00").setFirstName("Coordinator").setLastName("Community").setLocation("Kaga, Ishikawa Prefecture, Japan"))
+    User admin = emService.runInTransaction(() -> userService.create(new ProvisionalAccountCreateCommand().setUsername("admin").setPassword("secret00").setFirstName("Coordinator").setLastName("Community").setLocation("Kaga, Ishikawa Prefecture, Japan"))
       .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Kaga City community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin.getWalletAddress(), initialEtherAmountForAdmin);
@@ -70,14 +70,14 @@ public class DemoData {
     sampleData(admin, kagaCommunity);
 
     // second community
-    User admin2 = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin2").setPassword("secret02").setFirstName("Coordinator").setLastName("Community").setLocation("Shibuya, Tokyo"))
+    User admin2 = emService.runInTransaction(() -> userService.create(new ProvisionalAccountCreateCommand().setUsername("admin2").setPassword("secret02").setFirstName("Coordinator").setLastName("Community").setLocation("Shibuya, Tokyo"))
       .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Shibuya People community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin2.getWalletAddress(), initialEtherAmountForAdmin);
     createCommunity(admin2, "Shibuya People", "SHI", "Shibuya coin");
 
     // third community
-    User admin3 = emService.runInTransaction(() -> userService.create(new AccountCreateCommand().setUsername("admin3").setPassword("secret03").setFirstName("Coordinator").setLastName("Community").setLocation("Tokyo, Japan"))
+    User admin3 = emService.runInTransaction(() -> userService.create(new ProvisionalAccountCreateCommand().setUsername("admin3").setPassword("secret03").setFirstName("Coordinator").setLastName("Community").setLocation("Tokyo, Japan"))
       .setAvatarUrl("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTPlkwhBse_JCK37_0WA3m_PHUpFncOVLM0s0c4cCqpV27UteuJ")
       .setDescription("I'm a coordinator of Commons Inc community. Contact me if you have problem to solve."));
     blockchainService.transferEther(commonsos, admin3.getWalletAddress(), initialEtherAmountForAdmin);
@@ -86,7 +86,7 @@ public class DemoData {
 
   private void sampleData(User admin, Community community) {
     User worker = emService.runInTransaction(() ->
-      userService.create(new AccountCreateCommand()
+      userService.create(new ProvisionalAccountCreateCommand()
         .setUsername("worker")
         .setPassword("secret00")
         .setFirstName("Haruto")
@@ -99,7 +99,7 @@ public class DemoData {
     );
 
     User elderly1 = emService.runInTransaction(() ->
-      userService.create(new AccountCreateCommand()
+      userService.create(new ProvisionalAccountCreateCommand()
         .setUsername("elderly1")
         .setPassword("secret00")
         .setFirstName("Riku")
@@ -112,7 +112,7 @@ public class DemoData {
     );
 
     User elderly2 = emService.runInTransaction(() ->
-      userService.create(new AccountCreateCommand()
+      userService.create(new ProvisionalAccountCreateCommand()
         .setUsername("elderly2")
         .setPassword("secret00")
         .setFirstName("Haru")

@@ -1,6 +1,6 @@
 package commonsos.controller.message;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.message.MessageService;
 import commonsos.service.message.MessageThreadView;
@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 import static java.lang.Long.parseLong;
 
-public class MessageThreadController extends Controller {
+public class MessageThreadController extends AfterLoginController {
   @Inject MessageService service;
 
   @Override protected MessageThreadView handle(User user, Request request, Response response) {

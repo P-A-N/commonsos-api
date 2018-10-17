@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.ad.Ad;
 import commonsos.repository.user.User;
 import commonsos.service.ad.AdService;
@@ -15,7 +15,7 @@ import commonsos.service.ad.AdView;
 import spark.Request;
 import spark.Response;
 
-public class AdUpdateController extends Controller {
+public class AdUpdateController extends AfterLoginController {
 
   @Inject AdService adService;
   @Inject Gson gson;

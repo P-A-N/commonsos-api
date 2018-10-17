@@ -4,13 +4,13 @@ import static java.lang.Long.parseLong;
 
 import javax.inject.Inject;
 
-import commonsos.controller.Controller;
+import commonsos.controller.AfterLoginController;
 import commonsos.repository.user.User;
 import commonsos.service.ad.AdService;
 import spark.Request;
 import spark.Response;
 
-public class AdDeleteController extends Controller {
+public class AdDeleteController extends AfterLoginController {
 
   @Inject AdService adService;
 

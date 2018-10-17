@@ -28,7 +28,7 @@ import commonsos.repository.message.MessageThreadRepository;
 import commonsos.repository.user.User;
 import commonsos.repository.user.UserRepository;
 import commonsos.service.ImageService;
-import commonsos.service.auth.AccountCreateCommand;
+import commonsos.service.auth.ProvisionalAccountCreateCommand;
 import commonsos.service.auth.PasswordService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.community.CommunityView;
@@ -84,7 +84,7 @@ public class UserService {
     return privateView(user);
   }
 
-  public User create(AccountCreateCommand command) {
+  public User create(ProvisionalAccountCreateCommand command) {
     validate(command);
     if (!blockchainService.isConnected()) throw new RuntimeException("Cannot create user, technical error with blockchain");
     if (userRepository.findByUsername(command.getUsername()).isPresent()) throw new DisplayableException("error.usernameTaken");
@@ -127,7 +127,7 @@ public class UserService {
     return result;
   }
 
-  void validate(AccountCreateCommand command) {
+  void validate(ProvisionalAccountCreateCommand command) {
     if (command.getUsername() == null || command.getUsername().length() < 4) throw new BadRequestException("invalid username");
     if (command.getPassword() == null || command.getPassword().length() < 8) throw new BadRequestException("invalid password");
 //    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");

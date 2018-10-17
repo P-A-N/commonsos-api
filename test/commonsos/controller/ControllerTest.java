@@ -53,7 +53,7 @@ public class ControllerTest {
     assertThat(result).hasSameContentAs(new ByteArrayInputStream("ABC".getBytes()));
   }
 
-  private static class SampleController extends Controller {
+  private static class SampleController extends AfterLoginController {
     @Override protected Object handle(User user, Request request, Response response) {
       return null;
     }
