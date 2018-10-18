@@ -138,8 +138,7 @@ public class DemoData {
       .setDescription("Vacuum cleaning, moist cleaning, floors etc")
       .setPoints(new BigDecimal("1299.01"))
       .setLocation("Kaga city")
-      .setPhotoUrl("/static/temp/sample-photo-apartment1.jpg"))
-    );
+    ));
 
     AdView elderly1Ad = emService.runInTransaction(() -> adService.create(elderly1, new AdCreateCommand()
       .setType(WANT)
@@ -147,7 +146,6 @@ public class DemoData {
       .setDescription("Thank you for reading this article. I had traffic accident last year and chronic pain on left leg\uD83D\uDE22 I want anyone to help me by going shopping to a grocery shop once a week.")
       .setPoints(new BigDecimal("300"))
       .setLocation("Kumasakamachi 熊坂町")
-      .setPhotoUrl("/static/temp/shop.jpeg")
     ));
 
     AdView elderly2Ad = emService.runInTransaction(() -> adService.create(elderly2, new AdCreateCommand()
@@ -156,7 +154,6 @@ public class DemoData {
       .setDescription("刺し身買ってきたから")
       .setPoints(new BigDecimal("20"))
       .setLocation("kaga")
-      .setPhotoUrl("/static/temp/soy.jpeg")
     ));
 
     MessageThreadView workerAdElderly1Thread = emService.runInTransaction(() -> messageService.threadForAd(elderly1, workerAd.getId()));

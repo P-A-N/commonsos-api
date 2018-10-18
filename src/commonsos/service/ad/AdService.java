@@ -46,7 +46,6 @@ public class AdService {
       .setDescription(command.getDescription())
       .setLocation(command.getLocation())
       .setPoints(command.getPoints())
-      .setPhotoUrl(command.getPhotoUrl())
       .setCommunityId(command.getCommunityId());
 
     return view(adRepository.create(ad), user);

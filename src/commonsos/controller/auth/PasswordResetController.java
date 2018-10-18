@@ -22,6 +22,6 @@ public class PasswordResetController implements Route {
     Map<String, String> map = gson.fromJson(request.body(), Map.class);
     if(map == null || !map.containsKey("newPassword")) throw new BadRequestException("newPassword is required");
     
-    return "";
+    return null;
   }
 }

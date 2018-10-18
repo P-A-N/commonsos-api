@@ -42,7 +42,6 @@ public class PostAdCreateTest extends IntegrationTest {
     requestParam.put("points", 10);
     requestParam.put("location", "location");
     requestParam.put("type", "GIVE");
-    requestParam.put("photoUrl", "http://localhost/hoge");
 
     // call api
     given()
@@ -67,7 +66,6 @@ public class PostAdCreateTest extends IntegrationTest {
     assertThat(ad.getPoints()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(ad.getLocation()).isEqualTo("location");
     assertThat(ad.getType()).isEqualTo(AdType.GIVE);
-    assertThat(ad.getPhotoUrl()).isEqualTo("http://localhost/hoge");
     assertThat(ad.getCommunityId()).isEqualTo(community.getId());
     assertThat(ad.getCreatedBy()).isEqualTo(user.getId());
     assertThat(ad.isDeleted()).isEqualTo(false);

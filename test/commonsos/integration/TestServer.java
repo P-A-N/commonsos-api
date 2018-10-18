@@ -32,6 +32,7 @@ public class TestServer extends Server {
     Web3j web3j = mock(Web3j.class);
     PushNotificationService pushNotificationService = mock(PushNotificationService.class);
     ImageService imageService = mock(ImageService.class);
+    when(imageService.create(any())).thenReturn("http://test.com/ad/photo");
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     
     BlockchainService blockchainService = mock(BlockchainService.class);
