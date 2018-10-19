@@ -33,6 +33,8 @@ dependencies {
   compile 'org.codehaus.janino:janino:3.0.6'
   compile 'commons-validator:commons-validator:1.6'
 
+  compile 'javax.mail:mail:1.4.7'
+
   compile 'org.hibernate:hibernate-core:5.2.16.Final'
   compile 'org.hibernate:hibernate-c3p0:5.2.16.Final'
   compile 'org.flywaydb:flyway-core:5.0.7'

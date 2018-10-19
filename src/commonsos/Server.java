@@ -5,7 +5,16 @@ import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
+import java.util.Properties;
 import java.util.stream.Stream;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.web3j.protocol.Web3j;
 
@@ -145,6 +154,35 @@ public class Server {
 
     get("/communities", injector.getInstance(CommunityListController.class), toJson);
 
+    get("/mail", (req, res) -> {
+      String to = "yushi.quist@gmail.com";
+      String from = "app.test.commons.love";
+      Properties props = new Properties();
+      
+      log.info("props size:" + props.size());
+      props.forEach((key, value) -> /*log.info*/System.out.println(String.format("%s=%s", key, value)));
+      
+      Session session = Session.getDefaultInstance(props, null);
+      String msgBody = "Sending email using JavaMail API.";
+      try {
+        Message msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress(from, "NoReply"));
+        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, "Mr. Recipient"));
+        msg.setSubject("Welcome To Java Mail API");
+        msg.setText(msgBody);
+        Transport.send(msg);
+        log.info("Email sent successfully.");
+      } catch (AddressException e) {
+        log.info("Email sent fail.");
+        throw new RuntimeException(e);
+      } catch (MessagingException e) {
+        log.info("Email sent fail.");
+        throw new RuntimeException(e);
+      }
+      
+      return "";
+    });
+    
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);
       response.status(400);
