@@ -160,7 +160,7 @@ public class Server {
       Properties props = new Properties();
       
       log.info("props size:" + props.size());
-      props.forEach((key, value) -> /*log.info*/System.out.println(String.format("%s=%s", key, value)));
+      props.forEach((key, value) -> log.info(String.format("%s=%s", key, value)));
       
       Session session = Session.getDefaultInstance(props, null);
       String msgBody = "Sending email using JavaMail API.";
