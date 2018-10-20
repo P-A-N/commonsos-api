@@ -6,7 +6,6 @@ import static spark.Spark.get;
 import static spark.Spark.post;
 
 import java.util.Properties;
-import java.util.stream.Stream;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -72,7 +71,6 @@ public class Server {
 
   @Inject private JsonTransformer toJson;
   @Inject private DatabaseMigrator databaseMigrator;
-  @Inject private DemoData demoData;
   @Inject private BlockchainEventService blockchainEventService;
   private Injector injector;
 
@@ -80,13 +78,13 @@ public class Server {
     injector = initDependencies();
     databaseMigrator.execute();
     CookieSecuringEmbeddedJettyFactory.register();
+    setupServer();
     initRoutes();
     blockchainEventService.listenEvents();
-    if (demoDataEnabled(args)) demoData.install();
   }
-
-  private boolean demoDataEnabled(String[] args) {
-    return Stream.of(args).map(String::toLowerCase).anyMatch(s -> s.equals("--demodata"));
+  
+  protected void setupServer() {
+    // nothing to setup in production server.
   }
 
   protected Injector initDependencies() {
@@ -158,6 +156,36 @@ public class Server {
       String to = "yushi.quist@gmail.com";
       String from = "app.test.commons.love";
       Properties props = new Properties();
+      
+      log.info("props size:" + props.size());
+      props.forEach((key, value) -> log.info(String.format("%s=%s", key, value)));
+      
+      Session session = Session.getDefaultInstance(props, null);
+      String msgBody = "Sending email using JavaMail API.";
+      try {
+        Message msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress(from, "NoReply"));
+        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, "Mr. Recipient"));
+        msg.setSubject("Welcome To Java Mail API");
+        msg.setText(msgBody);
+        Transport.send(msg);
+        log.info("Email sent successfully.");
+      } catch (AddressException e) {
+        log.info("Email sent fail.");
+        throw new RuntimeException(e);
+      } catch (MessagingException e) {
+        log.info("Email sent fail.");
+        throw new RuntimeException(e);
+      }
+      
+      return "";
+    });
+
+    get("/securemail", (req, res) -> {
+      String to = "yushi.quist@gmail.com";
+      String from = "app.test.commons.love";
+      Properties props = new Properties();
+      props.put("mail.smtp.ssl.enable", "true");
       
       log.info("props size:" + props.size());
       props.forEach((key, value) -> log.info(String.format("%s=%s", key, value)));

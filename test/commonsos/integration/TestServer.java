@@ -24,8 +24,17 @@ import commonsos.service.ImageService;
 import commonsos.service.PushNotificationService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import spark.Spark;
 
 public class TestServer extends Server {
+
+  public static int TEST_SERVER_PORT = 4568;
+  
+  @Override
+  protected void setupServer() {
+    super.setupServer();
+    Spark.port(TEST_SERVER_PORT);
+  }
   
   @Override
   protected Injector initDependencies() {
