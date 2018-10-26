@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
-import commonsos.repository.community.Community;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 public class GetBalanceTest extends IntegrationTest {
 
@@ -21,7 +21,7 @@ public class GetBalanceTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
+    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
 
     sessionId = login("user", "pass");
   }

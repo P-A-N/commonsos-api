@@ -3,9 +3,9 @@ package commonsos.controller.auth;
 import static java.math.BigDecimal.TEN;
 import static java.util.Arrays.asList;
 
-import commonsos.service.community.CommunityView;
-import commonsos.service.transaction.BalanceView;
-import commonsos.service.user.UserPrivateView;
+import commonsos.view.BalanceView;
+import commonsos.view.CommunityView;
+import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Route;

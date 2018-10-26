@@ -18,12 +18,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.google.gson.Gson;
 
-import commonsos.repository.ad.Ad;
-import commonsos.repository.ad.AdType;
-import commonsos.repository.user.User;
-import commonsos.service.ad.AdService;
-import commonsos.service.ad.AdUpdateCommand;
-import commonsos.service.ad.AdView;
+import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.AdType;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.service.command.AdUpdateCommand;
+import commonsos.view.AdView;
 import spark.Request;
 
 @RunWith(MockitoJUnitRunner.class)

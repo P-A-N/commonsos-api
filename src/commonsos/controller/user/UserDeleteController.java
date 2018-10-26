@@ -3,8 +3,8 @@ package commonsos.controller.user;
 import javax.inject.Inject;
 
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
 import spark.Request;
 import spark.Response;
 

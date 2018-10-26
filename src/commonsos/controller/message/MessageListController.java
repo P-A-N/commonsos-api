@@ -1,9 +1,9 @@
 package commonsos.controller.message;
 
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.message.MessageService;
-import commonsos.service.message.MessageView;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.view.MessageView;
 import spark.Request;
 import spark.Response;
 

@@ -1,8 +1,8 @@
 package commonsos.controller.user;
 
 import commonsos.controller.user.UserAvatarUpdateController;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

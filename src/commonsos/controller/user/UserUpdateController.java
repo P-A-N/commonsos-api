@@ -2,10 +2,10 @@ package commonsos.controller.user;
 
 import com.google.gson.Gson;
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserPrivateView;
-import commonsos.service.user.UserService;
-import commonsos.service.user.UserUpdateCommand;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.service.command.UserUpdateCommand;
+import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 

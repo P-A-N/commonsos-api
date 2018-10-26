@@ -1,10 +1,10 @@
 package commonsos.controller.user;
 
-import commonsos.GsonProvider;
 import commonsos.controller.user.UserMobileDeviceUpdateController;
-import commonsos.repository.user.User;
-import commonsos.service.user.MobileDeviceUpdateCommand;
-import commonsos.service.user.UserService;
+import commonsos.di.GsonProvider;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.service.command.MobileDeviceUpdateCommand;
 
 import org.junit.Before;
 import org.junit.Test;

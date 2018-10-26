@@ -8,10 +8,10 @@ import java.util.Base64;
 
 import javax.inject.Inject;
 
-import commonsos.AuthenticationException;
-import commonsos.UserSession;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
+import commonsos.exception.AuthenticationException;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.session.UserSession;
 import spark.Request;
 import spark.Response;
 import spark.Route;

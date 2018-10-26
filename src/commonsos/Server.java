@@ -5,16 +5,6 @@ import static spark.Spark.exception;
 import static spark.Spark.get;
 import static spark.Spark.post;
 
-import java.util.Properties;
-
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import org.web3j.protocol.Web3j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +16,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import commonsos.controller.JsonTransformer;
 import commonsos.controller.ad.AdController;
 import commonsos.controller.ad.AdCreateController;
 import commonsos.controller.ad.AdDeleteController;
@@ -61,7 +52,15 @@ import commonsos.controller.user.UserController;
 import commonsos.controller.user.UserDeleteController;
 import commonsos.controller.user.UserMobileDeviceUpdateController;
 import commonsos.controller.user.UserUpdateController;
+import commonsos.di.GsonProvider;
+import commonsos.di.Web3jProvider;
+import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
+import commonsos.exception.ForbiddenException;
+import commonsos.filter.LogFilter;
+import commonsos.interceptor.TransactionInterceptor;
+import commonsos.repository.DatabaseMigrator;
 import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;
@@ -107,7 +106,6 @@ public class Server {
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
 //    before(new CSRFFilter(asList("/login", "/logout", "/create-account")));
-//    before(new AuthenticationFilter(asList("/login", "/logout", "/create-account", "/communities")));
 
     post("/login", injector.getInstance(LoginController.class), toJson);
     post("/logout", injector.getInstance(LogoutController.class), toJson);
@@ -152,65 +150,6 @@ public class Server {
 
     get("/communities", injector.getInstance(CommunityListController.class), toJson);
 
-    get("/mail", (req, res) -> {
-      String to = "yushi.quist@gmail.com";
-      String from = "app.test.commons.love";
-      Properties props = new Properties();
-      
-      log.info("props size:" + props.size());
-      props.forEach((key, value) -> log.info(String.format("%s=%s", key, value)));
-      
-      Session session = Session.getDefaultInstance(props, null);
-      String msgBody = "Sending email using JavaMail API.";
-      try {
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(from, "NoReply"));
-        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, "Mr. Recipient"));
-        msg.setSubject("Welcome To Java Mail API");
-        msg.setText(msgBody);
-        Transport.send(msg);
-        log.info("Email sent successfully.");
-      } catch (AddressException e) {
-        log.info("Email sent fail.");
-        throw new RuntimeException(e);
-      } catch (MessagingException e) {
-        log.info("Email sent fail.");
-        throw new RuntimeException(e);
-      }
-      
-      return "";
-    });
-
-    get("/securemail", (req, res) -> {
-      String to = "yushi.quist@gmail.com";
-      String from = "app.test.commons.love";
-      Properties props = new Properties();
-      props.put("mail.smtp.ssl.enable", "true");
-      
-      log.info("props size:" + props.size());
-      props.forEach((key, value) -> log.info(String.format("%s=%s", key, value)));
-      
-      Session session = Session.getDefaultInstance(props, null);
-      String msgBody = "Sending email using JavaMail API.";
-      try {
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress(from, "NoReply"));
-        msg.addRecipient(Message.RecipientType.TO, new InternetAddress(to, "Mr. Recipient"));
-        msg.setSubject("Welcome To Java Mail API");
-        msg.setText(msgBody);
-        Transport.send(msg);
-        log.info("Email sent successfully.");
-      } catch (AddressException e) {
-        log.info("Email sent fail.");
-        throw new RuntimeException(e);
-      } catch (MessagingException e) {
-        log.info("Email sent fail.");
-        throw new RuntimeException(e);
-      }
-      
-      return "";
-    });
-    
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);
       response.status(400);

@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
-import commonsos.repository.community.Community;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 public class GetUserTest extends IntegrationTest {
 
@@ -27,13 +27,13 @@ public class GetUserTest extends IntegrationTest {
   public void setup() {
     community1 =  create(new Community().setName("community1"));
     community2 =  create(new Community().setName("community2"));
-    admin = create(new User().setUsername("admin").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community1)));
+    admin = create(new User().setUsername("admin").setPasswordHash(hash("pass")).setCommunityList(asList(community1)));
     update(community1.setAdminUser(admin));
     update(community2.setAdminUser(admin));
     
-    user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community1)));
-    user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community2)));
-    user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community1,community2)));
+    user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityList(asList(community1)));
+    user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community2)));
+    user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community1,community2)));
 
     sessionId = login("user1", "pass");
   }

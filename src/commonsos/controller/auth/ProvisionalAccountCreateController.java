@@ -9,12 +9,12 @@ import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 
-import commonsos.CSRF;
-import commonsos.LogFilter;
-import commonsos.repository.user.User;
-import commonsos.service.auth.ProvisionalAccountCreateCommand;
-import commonsos.service.user.UserPrivateView;
-import commonsos.service.user.UserService;
+import commonsos.filter.CSRF;
+import commonsos.filter.LogFilter;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.service.command.ProvisionalAccountCreateCommand;
+import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Route;

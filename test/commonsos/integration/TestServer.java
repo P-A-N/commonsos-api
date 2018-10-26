@@ -16,14 +16,14 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
-import commonsos.EntityManagerService;
-import commonsos.GsonProvider;
 import commonsos.Server;
-import commonsos.TransactionInterceptor;
-import commonsos.service.ImageService;
-import commonsos.service.PushNotificationService;
+import commonsos.di.GsonProvider;
+import commonsos.interceptor.TransactionInterceptor;
+import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.image.ImageService;
+import commonsos.service.notification.PushNotificationService;
 import spark.Spark;
 
 public class TestServer extends Server {

@@ -9,9 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.repository.user.User;
-import commonsos.service.ad.AdService;
-import commonsos.service.ad.AdView;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.view.AdView;
 import spark.Request;
 
 @RunWith(MockitoJUnitRunner.class)

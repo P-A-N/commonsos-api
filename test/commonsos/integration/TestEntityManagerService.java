@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.Persistence;
 
-import commonsos.EntityManagerService;
+import commonsos.repository.EntityManagerService;
 
 @Singleton
 public class TestEntityManagerService extends EntityManagerService {

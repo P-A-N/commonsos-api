@@ -17,8 +17,8 @@ import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.operation.Operation;
 
-import commonsos.EntityManagerService;
-import commonsos.service.auth.PasswordService;
+import commonsos.repository.EntityManagerService;
+import commonsos.service.crypto.PasswordService;
 import io.restassured.RestAssured;
 
 public class IntegrationTest {

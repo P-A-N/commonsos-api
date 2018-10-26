@@ -1,8 +1,8 @@
 package commonsos.service.blockchain;
 
+import static commonsos.service.UserService.WALLET_PASSWORD;
 import static commonsos.service.blockchain.TokenERC20.FUNC_TRANSFER;
 import static commonsos.service.blockchain.TokenERC20.FUNC_TRANSFERFROM;
-import static commonsos.service.user.UserService.WALLET_PASSWORD;
 import static java.lang.String.format;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
@@ -39,10 +39,10 @@ import org.web3j.utils.Files;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import commonsos.DisplayableException;
-import commonsos.repository.community.Community;
-import commonsos.repository.community.CommunityRepository;
-import commonsos.repository.user.User;
+import commonsos.exception.DisplayableException;
+import commonsos.repository.CommunityRepository;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton

@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.User;
 
 public class PostLoginTest extends IntegrationTest {
   

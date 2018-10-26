@@ -1,7 +1,7 @@
 package commonsos.service.blockchain;
 
 import static commonsos.TestId.id;
-import static commonsos.service.user.UserService.WALLET_PASSWORD;
+import static commonsos.service.UserService.WALLET_PASSWORD;
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -35,10 +35,10 @@ import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import commonsos.DisplayableException;
-import commonsos.repository.community.Community;
-import commonsos.repository.community.CommunityRepository;
-import commonsos.repository.user.User;
+import commonsos.exception.DisplayableException;
+import commonsos.repository.CommunityRepository;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlockchainServiceTest {

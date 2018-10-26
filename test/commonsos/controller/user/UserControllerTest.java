@@ -1,5 +1,7 @@
 package commonsos.controller.user;
 
+import static commonsos.TestId.id;
+import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -12,9 +14,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
-import commonsos.util.UserUtil;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
 import spark.Request;
 import spark.Response;
 
@@ -24,7 +26,6 @@ public class UserControllerTest {
   @Mock Request request;
   @Mock Response response;
   @Mock UserService userService;
-  @Mock UserUtil userUtil;
   @InjectMocks UserController controller;
 
   @Test
@@ -36,11 +37,13 @@ public class UserControllerTest {
   @Test
   public void handle_adminUser() {
     // prepare
+    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
     when(request.params("id")).thenReturn("123");
-    when(userUtil.isAdminOfUser(any(), any())).thenReturn(true);
+    when(userService.user(any())).thenReturn(
+        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(user))));
 
     // execute
-    controller.handle(new User(), request, response);
+    controller.handle(user, request, response);
 
     // verify
     verify(userService, times(1)).privateView(any(User.class), any(Long.class));
@@ -50,11 +53,13 @@ public class UserControllerTest {
   @Test
   public void handle_generalUser() {
     // prepare
+    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
     when(request.params("id")).thenReturn("123");
-    when(userUtil.isAdminOfUser(any(), any())).thenReturn(false);
+    when(userService.user(any())).thenReturn(
+        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2"))))));
 
     // execute
-    controller.handle(new User(), request, response);
+    controller.handle(user, request, response);
 
     // verify
     verify(userService, never()).privateView(any(User.class), any(Long.class));

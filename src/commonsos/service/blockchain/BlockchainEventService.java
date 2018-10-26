@@ -1,7 +1,7 @@
 package commonsos.service.blockchain;
 
-import commonsos.EntityManagerService;
-import commonsos.service.transaction.TransactionService;
+import commonsos.repository.EntityManagerService;
+import commonsos.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.web3j.protocol.Web3j;
 

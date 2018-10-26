@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.User;
 import spark.Request;
 import spark.Response;
 

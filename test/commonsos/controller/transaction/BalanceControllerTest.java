@@ -11,9 +11,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.exception.BadRequestException;
-import commonsos.repository.user.User;
-import commonsos.service.transaction.BalanceView;
-import commonsos.service.transaction.TransactionService;
+import commonsos.repository.entity.User;
+import commonsos.service.TransactionService;
+import commonsos.view.BalanceView;
 import spark.Request;
 
 @RunWith(MockitoJUnitRunner.class)

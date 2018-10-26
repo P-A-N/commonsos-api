@@ -1,8 +1,8 @@
 package commonsos.controller.user;
 
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;
 import spark.Response;

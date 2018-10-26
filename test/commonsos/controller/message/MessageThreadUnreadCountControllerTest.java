@@ -1,7 +1,7 @@
 package commonsos.controller.message;
 
-import commonsos.repository.user.User;
-import commonsos.service.message.MessageService;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

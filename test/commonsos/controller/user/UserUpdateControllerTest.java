@@ -15,11 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.GsonProvider;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserPrivateView;
-import commonsos.service.user.UserService;
-import commonsos.service.user.UserUpdateCommand;
+import commonsos.di.GsonProvider;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.service.command.UserUpdateCommand;
+import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 

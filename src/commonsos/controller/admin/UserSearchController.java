@@ -9,9 +9,9 @@ import javax.inject.Inject;
 
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
-import commonsos.service.user.UserView;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 

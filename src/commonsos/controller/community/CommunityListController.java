@@ -1,12 +1,14 @@
 package commonsos.controller.community;
 
-import commonsos.service.community.CommunityService;
-import commonsos.service.community.CommunityView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 import javax.inject.Inject;
+
+import commonsos.service.CommunityService;
+import commonsos.view.CommunityView;
+
 import java.util.List;
 
 public class CommunityListController implements Route {

@@ -1,13 +1,13 @@
 package commonsos.controller.community;
 
-import commonsos.service.community.CommunityService;
-import commonsos.service.community.CommunityView;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import commonsos.service.CommunityService;
+import commonsos.view.CommunityView;
 import spark.Request;
 import spark.Response;
 

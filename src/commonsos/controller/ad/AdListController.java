@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
-import commonsos.repository.user.User;
-import commonsos.service.ad.AdService;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
 import spark.Request;
 import spark.Response;
 

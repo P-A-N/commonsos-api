@@ -1,8 +1,8 @@
 package commonsos.controller.auth;
 
 import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
-import static commonsos.LogFilter.USERNAME_MDC_KEY;
 import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+import static commonsos.filter.LogFilter.USERNAME_MDC_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,12 +16,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.MDC;
 
-import commonsos.CSRF;
-import commonsos.GsonProvider;
-import commonsos.UserSession;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserPrivateView;
-import commonsos.service.user.UserService;
+import commonsos.di.GsonProvider;
+import commonsos.filter.CSRF;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.session.UserSession;
+import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Session;

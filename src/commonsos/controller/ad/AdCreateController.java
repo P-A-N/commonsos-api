@@ -5,10 +5,10 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.ad.AdCreateCommand;
-import commonsos.service.ad.AdService;
-import commonsos.service.ad.AdView;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.service.command.AdCreateCommand;
+import commonsos.view.AdView;
 import spark.Request;
 import spark.Response;
 

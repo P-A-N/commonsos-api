@@ -9,8 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
-import commonsos.repository.community.Community;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 public class PostPasswordResetRequestTest extends IntegrationTest {
 

@@ -9,9 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
-import commonsos.repository.ad.Ad;
-import commonsos.repository.community.Community;
-import commonsos.repository.user.User;
+import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 public class GetAdListTest extends IntegrationTest {
 
@@ -33,10 +33,10 @@ public class GetAdListTest extends IntegrationTest {
   public void setupData() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
-    fooUser =  create(new User().setUsername("fooUser").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
-    barUser =  create(new User().setUsername("barUser").setPasswordHash(hash("pass")).setJoinedCommunities(asList(community)));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setJoinedCommunities(asList(otherCommunity)));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    fooUser =  create(new User().setUsername("fooUser").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    barUser =  create(new User().setUsername("barUser").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
     ad =  create(new Ad().setCreatedBy(fooUser.getId()).setCommunityId(community.getId()).setPoints(TEN));
     ad2 =  create(new Ad().setCreatedBy(barUser.getId()).setCommunityId(community.getId()).setPoints(TEN));
     fooAd =  create(new Ad().setCreatedBy(barUser.getId()).setCommunityId(community.getId()).setPoints(TEN).setTitle("foo"));

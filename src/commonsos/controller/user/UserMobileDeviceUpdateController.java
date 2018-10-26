@@ -2,9 +2,9 @@ package commonsos.controller.user;
 
 import com.google.gson.Gson;
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.user.MobileDeviceUpdateCommand;
-import commonsos.service.user.UserService;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.service.command.MobileDeviceUpdateCommand;
 import spark.Request;
 import spark.Response;
 

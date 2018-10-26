@@ -13,9 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.exception.BadRequestException;
-import commonsos.repository.user.User;
-import commonsos.service.user.UserService;
-import commonsos.service.user.UserView;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.view.UserView;
 import spark.Request;
 
 @RunWith(MockitoJUnitRunner.class)

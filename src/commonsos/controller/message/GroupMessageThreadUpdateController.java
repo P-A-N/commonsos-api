@@ -2,10 +2,10 @@ package commonsos.controller.message;
 
 import com.google.gson.Gson;
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.message.GroupMessageThreadUpdateCommand;
-import commonsos.service.message.MessageService;
-import commonsos.service.message.MessageThreadView;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.service.command.GroupMessageThreadUpdateCommand;
+import commonsos.view.MessageThreadView;
 import spark.Request;
 import spark.Response;
 

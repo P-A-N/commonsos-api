@@ -17,15 +17,15 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import commonsos.EntityManagerService;
-import commonsos.Web3jProvider;
-import commonsos.repository.community.Community;
-import commonsos.repository.community.CommunityRepository;
-import commonsos.repository.user.User;
-import commonsos.repository.user.UserRepository;
-import commonsos.service.auth.ProvisionalAccountCreateCommand;
+import commonsos.di.Web3jProvider;
+import commonsos.repository.CommunityRepository;
+import commonsos.repository.EntityManagerService;
+import commonsos.repository.UserRepository;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.user.UserService;
+import commonsos.service.command.ProvisionalAccountCreateCommand;
 
 public class AddCommunity {
 

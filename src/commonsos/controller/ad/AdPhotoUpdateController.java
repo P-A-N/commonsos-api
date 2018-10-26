@@ -3,9 +3,9 @@ package commonsos.controller.ad;
 import javax.inject.Inject;
 
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.ad.AdPhotoUpdateCommand;
-import commonsos.repository.user.User;
-import commonsos.service.ad.AdService;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.service.command.AdPhotoUpdateCommand;
 import spark.Request;
 import spark.Response;
 

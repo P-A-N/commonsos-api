@@ -2,8 +2,8 @@ package commonsos.controller.message;
 
 import com.google.common.collect.ImmutableMap;
 import commonsos.controller.AfterLoginController;
-import commonsos.repository.user.User;
-import commonsos.service.message.MessageService;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
 import spark.Request;
 import spark.Response;
 
