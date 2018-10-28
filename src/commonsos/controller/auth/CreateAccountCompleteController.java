@@ -7,28 +7,27 @@ import javax.inject.Inject;
 
 import org.slf4j.MDC;
 
-import com.google.gson.Gson;
-
+import commonsos.exception.BadRequestException;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.ProvisionalAccountCreateCommand;
 import commonsos.view.UserPrivateView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Session;
 
-public class ProvisionalAccountCreateController implements Route {
+public class CreateAccountCompleteController implements Route {
 
-  @Inject Gson gson;
   @Inject UserService userService;
   @Inject CSRF csrf;
+  
+  @Override public UserPrivateView handle(Request request, Response response) {
+    String accessId = request.params("accessId");
+    if(accessId == null || accessId.isEmpty()) throw new BadRequestException("accessId is required");
 
-  @Override public String handle(Request request, Response response) {
-    ProvisionalAccountCreateCommand command = gson.fromJson(request.body(), ProvisionalAccountCreateCommand.class);
-    User user = userService.create(command);
+    User user = userService.createAccountComplete(accessId);
 
     Session session = request.session();
     session.attribute(USER_SESSION_ATTRIBUTE_NAME, userService.session(user));
@@ -36,8 +35,7 @@ public class ProvisionalAccountCreateController implements Route {
 
     MDC.put(LogFilter.USERNAME_MDC_KEY, user.getUsername());
     csrf.setToken(request, response);
-    
-    UserPrivateView privateView = userService.privateView(user);
-    return "";
+
+    return userService.privateView(user);
   }
 }

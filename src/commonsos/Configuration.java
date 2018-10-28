@@ -33,6 +33,30 @@ public class Configuration {
     return environmentVariable("ETHEREUM_URL", "http://localhost:8545/");
   }
 
+  public String smtpHost() {
+    return environmentVariable("SMTP_HOST", "localhost");
+  }
+
+  public String smtpPort() {
+    return environmentVariable("SMTP_PORT", "587");
+  }
+
+  public String smtpUser() {
+    return environmentVariable("SMTP_USER", "testuser");
+  }
+
+  public String smtpPassword() {
+    return environmentVariable("SMTP_PASSWORD", "test");
+  }
+
+  public String smtpFromAddress() {
+    return environmentVariable("SMTP_FROM_ADDRESS", "no-replay@app.test.commons.love");
+  }
+
+  public String commonsosHost() {
+    return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
+  }
+
   String environmentVariable(String key) {
     return environmentVariable(key, null);
   }

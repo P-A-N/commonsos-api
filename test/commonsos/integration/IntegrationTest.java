@@ -7,10 +7,14 @@ import static spark.Spark.stop;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.subethamail.wiser.Wiser;
+import org.subethamail.wiser.WiserMessage;
 
 import com.google.gson.Gson;
 import com.ninja_squad.dbsetup.DbSetup;
@@ -18,7 +22,7 @@ import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 import com.ninja_squad.dbsetup.operation.Operation;
 
 import commonsos.repository.EntityManagerService;
-import commonsos.service.crypto.PasswordService;
+import commonsos.service.crypto.CryptoService;
 import io.restassured.RestAssured;
 
 public class IntegrationTest {
@@ -32,34 +36,49 @@ public class IntegrationTest {
       "messages",
       "message_threads",
       "transactions",
-      "communities");
-  protected static PasswordService passwordService = new PasswordService();
+      "communities",
+      "temporary_community_users",
+      "temporary_users",
+      "temporary_email_address",
+      "password_reset_request");
+  protected static Wiser wiser;
+  protected static CryptoService cryptoService = new CryptoService();
   
   @BeforeClass
-  public static void startUp() {
+  public static void setupIntegrationTest() {
+    // Test Server
     new TestServer().start(new String[]{});
     awaitInitialization();
-  }
-  
-  @BeforeClass
-  public static void setupRestAssured() {
+
+    // RestAssured
     RestAssured.port = TestServer.TEST_SERVER_PORT;
-  }
-  
-  @BeforeClass
-  public static void setupDB() {
+
+    // DB
     emService.init();
+    
+    // SMTP Server
+    wiser = new Wiser();
+    wiser.setPort(TestEmailService.TEST_SMTP_SERVER_PORT);
+    wiser.start();
   }
 
   @After
-  public void deleteALL() {
+  public void cleanupTestData() {
+    // DB
     DbSetup dbSetup = new DbSetup(new DataSourceDestination(emService.dataSource()), DELETE_ALL);
     dbSetup.launch();
+    
+    // SMTP Server
+    wiser.getMessages().clear();
   }
   
   @AfterClass
-  public static void stopServer() {
+  public static void stopIntegrationTest() {
+    // TestServer
     stop();
+    
+    // SMTP Server
+    wiser.stop();
   }
   
   public static String login(String username, String password) {
@@ -87,6 +106,19 @@ public class IntegrationTest {
   }
 
   public static String hash(String text) {
-    return passwordService.hash(text);
+    return cryptoService.encryptoPassword(text);
+  }
+  
+  public static String extractAccessId(WiserMessage wiseMessage) throws Exception {
+    String content = wiseMessage.getMimeMessage().getContent().toString();
+    Pattern p = Pattern.compile("^https://.*$", Pattern.MULTILINE);
+    Matcher m = p.matcher(content);
+    if (m.find()) {
+      String url = m.group();
+      String accessId = url.substring(url.lastIndexOf('/') + 1);
+      return accessId;
+    }
+    
+    return "";
   }
 }

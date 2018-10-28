@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import commonsos.exception.CommunityNotFoundException;
 import commonsos.repository.entity.Community;
 
 @Singleton
@@ -20,6 +21,10 @@ public class CommunityRepository extends Repository {
 
   public Optional<Community> findById(Long id) {
     return ofNullable(em().find(Community.class, id));
+  }
+
+  public Community findStrictById(Long id) {
+    return findById(id).orElseThrow(CommunityNotFoundException::new);
   }
 
   public List<Community> list() {

@@ -33,6 +33,7 @@ dependencies {
   compile 'com.google.firebase:firebase-admin:6.2.0'
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.338'
   
+  compile 'org.apache.commons:commons-lang3:3.8.1'
   compile 'org.apache.velocity:velocity:1.7'
   compile 'org.projectlombok:lombok:1.16.18'
   compile 'org.postgresql:postgresql:42.2.2'
@@ -53,6 +54,7 @@ dependencies {
   testCompile 'com.h2database:h2:1.4.197'
   testCompile 'com.ninja-squad:DbSetup:2.1.0'
   testCompile 'io.rest-assured:rest-assured:3.1.1'
+  testCompile 'org.subethamail:subethasmtp:3.1.7'
 }
 
 jar {

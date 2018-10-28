@@ -4,14 +4,16 @@ import static commonsos.TestId.id;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
 
-import commonsos.repository.CommunityRepository;
-import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.PasswordResetRequest;
+import commonsos.repository.entity.TemporaryEmailAddress;
+import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 
 public class UserRepositoryTest extends DBTest {
@@ -56,6 +58,136 @@ public class UserRepositoryTest extends DBTest {
   }
 
   @Test
+  public void findByEmailAddress() {
+    // prepare
+    User testUser = createTestUser_BelongAtOneCommunity();
+
+    // execute
+    Optional<User> result = repository.findByEmailAddress(testUser.getEmailAddress());
+    
+    // verify
+    assertThat(result.isPresent());
+    assertUser(result.get(), testUser);
+  }
+
+  @Test
+  public void findByEmailAddress_deleted() {
+    // prepare
+    User testUser = createTestUser_BelongAtOneCommunity();
+    inTransaction(() -> repository.update(testUser.setDeleted(true)));
+
+    // execute
+    Optional<User> result = repository.findByEmailAddress(testUser.getEmailAddress());
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findByEmailAddress_notFound() {
+    // execute
+    Optional<User> result = repository.findByEmailAddress("not@exists.address");
+    
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void isUsernameTaken() {
+    // prepare
+    User testUser = createTestUser_BelongAtOneCommunity();
+    TemporaryUser temporaryUser = createTemporaryUser_BelongAtOneCommunity("temporaryUser");
+    TemporaryUser invalidTemporaryUser = createTemporaryUser_BelongAtOneCommunity("invalidTemporaryUser");
+    inTransaction(() -> repository.updateTemporary(invalidTemporaryUser.setUsername("itu").setInvalid(true)));
+    TemporaryUser expiredTemporaryUser = createTemporaryUser_BelongAtOneCommunity("expirationTemporaryUser");
+    inTransaction(() -> repository.updateTemporary(expiredTemporaryUser.setUsername("etu").setExpirationTime(Instant.now().minusSeconds(60))));
+    
+
+    // execute
+    boolean result = repository.isUsernameTaken(testUser.getUsername());
+    // verify
+    assertThat(result).isTrue();
+
+    // execute
+    result = repository.isUsernameTaken(temporaryUser.getUsername());
+    // verify
+    assertThat(result).isTrue();
+
+    // execute
+    result = repository.isUsernameTaken("newUser");
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isUsernameTaken(invalidTemporaryUser.getUsername());
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isUsernameTaken(expiredTemporaryUser.getUsername());
+    // verify
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  public void isEmailAddressTaken() {
+    // prepare
+    User testUser = createTestUser_BelongAtOneCommunity();
+    
+    TemporaryUser temporaryUser = createTemporaryUser_BelongAtOneCommunity("temporaryUser");
+    TemporaryUser invalidTemporaryUser = createTemporaryUser_BelongAtOneCommunity("invalidTemporaryUser");
+    inTransaction(() -> repository.updateTemporary(invalidTemporaryUser.setEmailAddress("itu@test.com").setInvalid(true)));
+    TemporaryUser expiredTemporaryUser = createTemporaryUser_BelongAtOneCommunity("expirationTemporaryUser");
+    inTransaction(() -> repository.updateTemporary(expiredTemporaryUser.setEmailAddress("etu@test.com").setExpirationTime(Instant.now().minusSeconds(60))));
+
+    TemporaryEmailAddress tempEmailAddress = createTemporaryEmailAddress("tempEmailAddress");
+    TemporaryEmailAddress invalidTempEmailAddress = createTemporaryEmailAddress("invalidTempEmailAddress");
+    inTransaction(() -> repository.updateTemporaryEmailAddress(invalidTempEmailAddress.setEmailAddress("itea@test.com").setInvalid(true)));
+    TemporaryEmailAddress expiredTempEmailAddress = createTemporaryEmailAddress("expiredTempEmailAddress");
+    inTransaction(() -> repository.updateTemporaryEmailAddress(expiredTempEmailAddress.setEmailAddress("etea@test.com").setExpirationTime(Instant.now().minusSeconds(60))));
+
+    // execute
+    boolean result = repository.isEmailAddressTaken(testUser.getEmailAddress());
+    // verify
+    assertThat(result).isTrue();
+
+    // execute
+    result = repository.isEmailAddressTaken(temporaryUser.getEmailAddress());
+    // verify
+    assertThat(result).isTrue();
+
+    // execute
+    result = repository.isEmailAddressTaken("notexists@text.com");
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isEmailAddressTaken(invalidTemporaryUser.getEmailAddress());
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isEmailAddressTaken(expiredTemporaryUser.getEmailAddress());
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isEmailAddressTaken(tempEmailAddress.getEmailAddress());
+    // verify
+    assertThat(result).isTrue();
+
+    // execute
+    result = repository.isEmailAddressTaken(invalidTempEmailAddress.getEmailAddress());
+    // verify
+    assertThat(result).isFalse();
+
+    // execute
+    result = repository.isEmailAddressTaken(expiredTempEmailAddress.getEmailAddress());
+    // verify
+    assertThat(result).isFalse();
+  }
+
+  @Test
   public void create_BelongAtZeroCommunity() {
     // execute
     User testUser = createTestUser_BelongAtZeroCommunity();
@@ -83,6 +215,36 @@ public class UserRepositoryTest extends DBTest {
     // verify
     User createdUser = em().find(User.class, testUser.getId());
     assertUser(createdUser, testUser);
+  }
+
+  @Test
+  public void createTemporary_BelongAtZeroCommunity() {
+    // execute
+    TemporaryUser tempUser = createTemporaryUser_BelongAtZeroCommunity("tempUser");
+    
+    // verify
+    TemporaryUser createdTempUser = em().find(TemporaryUser.class, tempUser.getId());
+    assertTempUser(createdTempUser, tempUser);
+  }
+
+  @Test
+  public void createTemporary_BelongAtOneCommunity() {
+    // execute
+    TemporaryUser tempUser = createTemporaryUser_BelongAtOneCommunity("tempUser");
+    
+    // verify
+    TemporaryUser createdTempUser = em().find(TemporaryUser.class, tempUser.getId());
+    assertTempUser(createdTempUser, tempUser);
+  }
+
+  @Test
+  public void createTemporary_BelongAtTwoCommunity() {
+    // execute
+    TemporaryUser tempUser = createTemporaryUser_BelongAtTwoCommunity("tempUser");
+    
+    // verify
+    TemporaryUser createdTempUser = em().find(TemporaryUser.class, tempUser.getId());
+    assertTempUser(createdTempUser, tempUser);
   }
 
   @Test
@@ -117,6 +279,186 @@ public class UserRepositoryTest extends DBTest {
     // execute
     Optional<User> result = repository.findById(id("invalid id"));
     
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryUser() {
+    // prepare
+    TemporaryUser tmpUser = createTemporaryUser_BelongAtOneCommunity("tmpUser");
+    
+    // execute
+    Optional<TemporaryUser> result = repository.findTemporaryUser(tmpUser.getAccessIdHash());
+
+    // verify
+    assertThat(result.isPresent());
+    assertTempUser(result.get(), tmpUser);
+  }
+
+  @Test
+  public void findTemporaryUser_caseSensitive() {
+    // prepare
+    createTemporaryUser_BelongAtOneCommunity("tmpUser");
+    
+    // execute
+    Optional<TemporaryUser> result = repository.findTemporaryUser("tmpuser");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryUser_isInvalid() {
+    // prepare
+    TemporaryUser tmpUser = createTemporaryUser_BelongAtOneCommunity("tmpUser");
+    inTransaction(() -> repository.updateTemporary(tmpUser.setInvalid(true)));
+    
+    // execute
+    Optional<TemporaryUser> result = repository.findTemporaryUser(tmpUser.getAccessIdHash());
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryUser_isExpired() {
+    // prepare
+    TemporaryUser tmpUser = createTemporaryUser_BelongAtOneCommunity("tmpUser");
+    inTransaction(() -> repository.updateTemporary(tmpUser.setExpirationTime(Instant.now().minusSeconds(60))));
+    
+    // execute
+    Optional<TemporaryUser> result = repository.findTemporaryUser(tmpUser.getAccessIdHash());
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryUser_notFound() {
+    // execute
+    Optional<TemporaryUser> result = repository.findTemporaryUser("invalid id");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryEmailAddress() {
+    // prepare
+    TemporaryEmailAddress tmpEmailAddr = createTemporaryEmailAddress("accessIdHash");
+    
+    // execute
+    Optional<TemporaryEmailAddress> result = repository.findTemporaryEmailAddress("accessIdHash");
+
+    // verify
+    assertThat(result.isPresent());
+    assertThat(result.get().getEmailAddress()).isEqualTo(tmpEmailAddr.getEmailAddress());
+  }
+
+  @Test
+  public void findTemporaryEmailAddress_caseSensitive() {
+    // prepare
+    createTemporaryEmailAddress("accessIdHash");
+    
+    // execute
+    Optional<TemporaryEmailAddress> result = repository.findTemporaryEmailAddress("accessidhash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryEmailAddress_isInvalid() {
+    // prepare
+    TemporaryEmailAddress tmpEmailAddr = createTemporaryEmailAddress("accessIdHash");
+    inTransaction(() -> repository.updateTemporaryEmailAddress(tmpEmailAddr.setInvalid(true)));
+    
+    // execute
+    Optional<TemporaryEmailAddress> result = repository.findTemporaryEmailAddress("accessIdHash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryEmailAddress_isExpired() {
+    // prepare
+    TemporaryEmailAddress tmpEmailAddr = createTemporaryEmailAddress("accessIdHash");
+    inTransaction(() -> repository.updateTemporaryEmailAddress(tmpEmailAddr.setExpirationTime(Instant.now().minusSeconds(60))));
+    
+    // execute
+    Optional<TemporaryEmailAddress> result = repository.findTemporaryEmailAddress("accessIdHash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findTemporaryEmailAddress_notFound() {
+    // execute
+    Optional<TemporaryEmailAddress> result = repository.findTemporaryEmailAddress("accessIdHash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findPasswordResetRequest() {
+    // prepare
+    PasswordResetRequest passReset = createPasswordResetRequest("accessIdHash");
+    
+    // execute
+    Optional<PasswordResetRequest> result = repository.findPasswordResetRequest("accessIdHash");
+
+    // verify
+    assertThat(result.isPresent());
+    assertThat(result.get().getUserId()).isEqualTo(passReset.getUserId());
+  }
+
+  @Test
+  public void findPasswordResetRequest_caseSensitive() {
+    // prepare
+    createPasswordResetRequest("accessIdHash");
+    
+    // execute
+    Optional<PasswordResetRequest> result = repository.findPasswordResetRequest("accessidhash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findPasswordResetRequest_isInvalid() {
+    // prepare
+    PasswordResetRequest passReset = createPasswordResetRequest("accessIdHash");
+    inTransaction(() -> repository.updatePasswordResetRequest(passReset.setInvalid(true)));
+    
+    // execute
+    Optional<PasswordResetRequest> result = repository.findPasswordResetRequest("accessIdHash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findPasswordResetRequest_isExpired() {
+    // prepare
+    PasswordResetRequest passReset = createPasswordResetRequest("accessIdHash");
+    inTransaction(() -> repository.updatePasswordResetRequest(passReset.setExpirationTime(Instant.now().minusSeconds(60))));
+    
+    // execute
+    Optional<PasswordResetRequest> result = repository.findPasswordResetRequest("accessIdHash");
+
+    // verify
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void findPasswordResetRequest_notFound() {
+    // execute
+    Optional<PasswordResetRequest> result = repository.findPasswordResetRequest("accessIdHash");
+
     // verify
     assertThat(result).isEmpty();
   }
@@ -302,9 +644,9 @@ public class UserRepositoryTest extends DBTest {
 
   private User createTestUser_BelongAtTwoCommunity() {
     Community community1 = new Community().setName("community1").setTokenContractAddress("0x1");
-    communityRepository.create(community1);
+    inTransaction(() -> communityRepository.create(community1));
     Community community2 = new Community().setName("community2").setTokenContractAddress("0x2");
-    communityRepository.create(community2);
+    inTransaction(() -> communityRepository.create(community2));
 
     User testUser =  new User()
         .setCommunityList(asList(community1, community2))
@@ -322,7 +664,88 @@ public class UserRepositoryTest extends DBTest {
     
     return inTransaction(() -> repository.create(testUser));
   }
+
+  private TemporaryUser createTemporaryUser_BelongAtZeroCommunity(String accessIdHash) {
+    TemporaryUser testUser =  new TemporaryUser()
+        .setAccessIdHash(accessIdHash)
+        .setExpirationTime(Instant.now().plusSeconds(60))
+        .setInvalid(false)
+        .setDescription("description")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setLocation("location")
+        .setPasswordHash("password hash")
+        .setUsername("worker")
+        .setEmailAddress("test@test.com")
+        .setWaitUntilCompleted(false)
+        .setCommunityList(asList());
+    
+    return inTransaction(() -> repository.createTemporary(testUser));
+  }
+
+  private TemporaryUser createTemporaryUser_BelongAtOneCommunity(String accessIdHash) {
+    Community community1 = new Community().setName("community1").setTokenContractAddress("0x1");
+    inTransaction(() -> communityRepository.create(community1));
+    
+    TemporaryUser testUser =  new TemporaryUser()
+        .setAccessIdHash(accessIdHash)
+        .setExpirationTime(Instant.now().plusSeconds(60))
+        .setInvalid(false)
+        .setDescription("description")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setLocation("location")
+        .setPasswordHash("password hash")
+        .setUsername("worker")
+        .setEmailAddress("test@test.com")
+        .setWaitUntilCompleted(false)
+        .setCommunityList(asList(community1));
+    
+    return inTransaction(() -> repository.createTemporary(testUser));
+  }
+
+  private TemporaryUser createTemporaryUser_BelongAtTwoCommunity(String accessIdHash) {
+    Community community1 = new Community().setName("community1").setTokenContractAddress("0x1");
+    inTransaction(() -> communityRepository.create(community1));
+    Community community2 = new Community().setName("ommunity2").setTokenContractAddress("0x2");
+    inTransaction(() -> communityRepository.create(community2));
+    
+    TemporaryUser testUser =  new TemporaryUser()
+        .setAccessIdHash(accessIdHash)
+        .setExpirationTime(Instant.now().plusSeconds(60))
+        .setInvalid(false)
+        .setDescription("description")
+        .setFirstName("first name")
+        .setLastName("last name")
+        .setLocation("location")
+        .setPasswordHash("password hash")
+        .setUsername("worker")
+        .setEmailAddress("test@test.com")
+        .setWaitUntilCompleted(false)
+        .setCommunityList(asList(community1, community2));
+    
+    return inTransaction(() -> repository.createTemporary(testUser));
+  }
   
+  private TemporaryEmailAddress createTemporaryEmailAddress(String accessIdHash) {
+    TemporaryEmailAddress tmpEmailAddr = new TemporaryEmailAddress()
+        .setAccessIdHash(accessIdHash)
+        .setExpirationTime(Instant.now().plusSeconds(60))
+        .setInvalid(false)
+        .setUserId(id("user"))
+        .setEmailAddress("test@test.com");
+    return inTransaction(() -> repository.createTemporaryEmailAddress(tmpEmailAddr));
+  }
+  
+  private PasswordResetRequest createPasswordResetRequest(String accessIdHash) {
+    PasswordResetRequest passReset = new PasswordResetRequest()
+        .setAccessIdHash(accessIdHash)
+        .setExpirationTime(Instant.now().plusSeconds(60))
+        .setInvalid(false)
+        .setUserId(id("user"));
+    return inTransaction(() -> repository.createPasswordResetRequest(passReset));
+  }
+
   private void assertUser(User actual, User expect) {
     assertThat(actual.getId()).isEqualTo(expect.getId());
     assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
@@ -337,6 +760,29 @@ public class UserRepositoryTest extends DBTest {
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
     assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
+
+    assertThat(actual.getCommunityList().size()).isEqualTo(expect.getCommunityList().size());
+    actual.getCommunityList().sort((a,b) -> a.getId().compareTo(b.getId()));
+    expect.getCommunityList().sort((a,b) -> a.getId().compareTo(b.getId()));
+    for (int i = 0; i < actual.getCommunityList().size(); i++) {
+      assertThat(actual.getCommunityList().get(i).getId()).isEqualTo(expect.getCommunityList().get(i).getId());
+      assertThat(actual.getCommunityList().get(i).getName()).isEqualTo(expect.getCommunityList().get(i).getName());
+      assertThat(actual.getCommunityList().get(i).getTokenContractAddress()).isEqualTo(expect.getCommunityList().get(i).getTokenContractAddress());
+    }
+  }
+
+  private void assertTempUser(TemporaryUser actual, TemporaryUser expect) {
+    assertThat(actual.getAccessIdHash()).isEqualTo(expect.getAccessIdHash());
+    assertThat(actual.isInvalid()).isEqualTo(expect.isInvalid());
+    assertThat(actual.getExpirationTime()).isEqualTo(expect.getExpirationTime());
+    assertThat(actual.getDescription()).isEqualTo(expect.getDescription());
+    assertThat(actual.getFirstName()).isEqualTo(expect.getFirstName());
+    assertThat(actual.getLastName()).isEqualTo(expect.getLastName());
+    assertThat(actual.getLocation()).isEqualTo(expect.getLocation());
+    assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
+    assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
+    assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
+    assertThat(actual.isWaitUntilCompleted()).isEqualTo(expect.isWaitUntilCompleted());
 
     assertThat(actual.getCommunityList().size()).isEqualTo(expect.getCommunityList().size());
     actual.getCommunityList().sort((a,b) -> a.getId().compareTo(b.getId()));

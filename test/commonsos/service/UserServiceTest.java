@@ -37,13 +37,12 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
-import commonsos.service.TransactionService;
-import commonsos.service.UserService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.command.CreateAccountTemporaryCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
-import commonsos.service.command.ProvisionalAccountCreateCommand;
 import commonsos.service.command.UserUpdateCommand;
-import commonsos.service.crypto.PasswordService;
+import commonsos.service.crypto.CryptoService;
+import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageService;
 import commonsos.session.UserSession;
 import commonsos.view.UserView;
@@ -56,12 +55,13 @@ public class UserServiceTest {
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock AdRepository adRepository;
   @Mock BlockchainService blockchainService;
-  @Mock PasswordService passwordService;
+  @Mock CryptoService cryptoService;
   @Mock TransactionService transactionService;
   @Mock ImageService imageService;
+  @Mock EmailService EmailService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
-  @Captor ArgumentCaptor<ProvisionalAccountCreateCommand> accountCreatecommandCaptor;
+  @Captor ArgumentCaptor<CreateAccountTemporaryCommand> accountCreatecommandCaptor;
   @Captor ArgumentCaptor<User> userCaptor;
   @Captor ArgumentCaptor<Ad> adCaptor;
 
@@ -70,14 +70,14 @@ public class UserServiceTest {
     // prepare
     User user = new User().setPasswordHash("hash");
     when(userRepository.findByUsername("worker")).thenReturn(Optional.of(user));
-    when(passwordService.passwordMatchesHash("valid password", "hash")).thenReturn(true);
+    when(cryptoService.checkPassword("valid password", "hash")).thenReturn(true);
 
     // execute
     User result = userService.checkPassword("worker", "valid password");
     
     // verify
     verify(userRepository, times(1)).findByUsername("worker");
-    verify(passwordService, times(1)).passwordMatchesHash("valid password", "hash");
+    verify(cryptoService, times(1)).checkPassword("valid password", "hash");
     assertThat(result).isEqualTo(user);
   }
 
@@ -95,7 +95,7 @@ public class UserServiceTest {
     // prepare
     User user = new User().setPasswordHash("hash");
     when(userRepository.findByUsername("user")).thenReturn(Optional.of(user));
-    when(passwordService.passwordMatchesHash("wrong password", "hash")).thenReturn(false);
+    when(cryptoService.checkPassword("wrong password", "hash")).thenReturn(false);
 
     // execute
     userService.checkPassword("user", "wrong password");
@@ -107,13 +107,13 @@ public class UserServiceTest {
     doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
     when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
+    when(communityRepository.findStrictById(any())).thenReturn(new Community());
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
 
     // execute
-    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand()
+    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand()
         .setCommunityList(asList(1L,2L))
         .setWaitUntilCompleted(true);
     userService.create(command);
@@ -129,13 +129,13 @@ public class UserServiceTest {
     doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
     when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findById(any())).thenReturn(Optional.of(new Community()));
+    when(communityRepository.findStrictById(any())).thenReturn(new Community());
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
 
     // execute
-    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand()
+    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand()
         .setCommunityList(asList(1L,2L))
         .setWaitUntilCompleted(false);
     userService.create(command);
@@ -201,7 +201,7 @@ public class UserServiceTest {
     when(blockchainService.isConnected()).thenReturn(false);
     
     // execute
-    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand();
+    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
     RuntimeException thrown = catchThrowableOfType(() -> userService.create(command), RuntimeException.class);
 
     // verify
@@ -216,7 +216,7 @@ public class UserServiceTest {
     when(userRepository.findByUsername(any())).thenReturn(Optional.of(new User()));
 
     // execute
-    ProvisionalAccountCreateCommand command = new ProvisionalAccountCreateCommand();
+    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
     DisplayableException thrown = catchThrowableOfType(() -> userService.create(command), DisplayableException.class);
 
     // verify
@@ -232,7 +232,7 @@ public class UserServiceTest {
     when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
     
     // execute
-    userService.create(new ProvisionalAccountCreateCommand());
+    userService.create(new CreateAccountTemporaryCommand());
 
     // verify
     verify(jobService, never()).submit(any(), any());
@@ -324,8 +324,8 @@ public class UserServiceTest {
     verify(userRepository).update(new User().setPushNotificationToken("12345"));
   }
 
-  private ProvisionalAccountCreateCommand validCommand() {
-    return new ProvisionalAccountCreateCommand()
+  private CreateAccountTemporaryCommand validCommand() {
+    return new CreateAccountTemporaryCommand()
         .setUsername("1234")
         .setPassword("12345678")
         .setFirstName("1")

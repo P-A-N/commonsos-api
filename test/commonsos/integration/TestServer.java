@@ -22,6 +22,7 @@ import commonsos.interceptor.TransactionInterceptor;
 import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageService;
 import commonsos.service.notification.PushNotificationService;
 import spark.Spark;
@@ -64,6 +65,7 @@ public class TestServer extends Server {
         bind(BlockchainEventService.class).toInstance(blockchainEventService);
         bind(BlockchainService.class).toInstance(blockchainService);
         bind(EntityManagerService.class).to(TestEntityManagerService.class);
+        bind(EmailService.class).to(TestEmailService.class);
       }
     };
 
