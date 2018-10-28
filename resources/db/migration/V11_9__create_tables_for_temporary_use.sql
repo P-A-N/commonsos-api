@@ -21,10 +21,6 @@ CREATE TABLE temporary_community_users (
   PRIMARY KEY (id)
 );
 
-ALTER TABLE temporary_community_users
-  ADD CONSTRAINT fk_temporary_community_users_access_id_hash
-FOREIGN KEY (access_id_hash) REFERENCES temporary_users;
-
 CREATE TABLE temporary_email_address (
   id                   BIGSERIAL NOT NULL,
   access_id_hash       VARCHAR NOT NULL,
