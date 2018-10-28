@@ -6,6 +6,7 @@ import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_
 
 import java.io.File;
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.Scanner;
 
 import org.web3j.crypto.Credentials;
@@ -76,6 +77,9 @@ public class AddCommunity {
     System.out.print("Please enter admin username (min 4): ");
     String adminUsername = scanner.nextLine();
 
+    System.out.print("Please enter admin email address: ");
+    String adminEmailAddress = scanner.nextLine();
+
     System.out.print("Please enter admin password (min 8): ");
     String adminPassword = scanner.nextLine();
 
@@ -105,6 +109,7 @@ public class AddCommunity {
     System.out.println("Token symbol:\t"+tokenSymbol);
     System.out.println("Number of prepaid transactions:\t"+numberOfPrepaidTransactions);
     System.out.println("Admin username:\t"+adminUsername);
+    System.out.println("Admin email address:\t"+adminEmailAddress);
     System.out.println("Admin first name:\t"+adminFirstName);
     System.out.println("Admin last name:\t"+adminLastName);
     System.out.println("Admin location:\t"+adminLocation);
@@ -116,14 +121,36 @@ public class AddCommunity {
       return;
     }
 
-    User admin = emService.runInTransaction(() -> userService.create(new CreateAccountTemporaryCommand()
-      .setUsername(adminUsername)
-      .setPassword(adminPassword)
-      .setFirstName(adminFirstName)
-      .setLastName(adminLastName)
-      .setLocation(adminLocation))
-      .setDescription(adminDescription));
+    emService.runInTransaction(() -> {
+      userService.createAccountTemporary(new CreateAccountTemporaryCommand()
+          .setUsername(adminUsername)
+          .setEmailAddress(adminEmailAddress)
+          .setPassword(adminPassword)
+          .setFirstName(adminFirstName)
+          .setLastName(adminLastName)
+          .setLocation(adminLocation)
+          .setDescription(adminDescription));
+      return "";
+    });
 
+    System.out.println("Admin account creation is not completed yet.");
+    System.out.println("Please click the url on the verification-email to complete the creation.");
+    System.out.println("Press the enter button after admin account creation is completed.");
+    
+    User admin = null;
+    boolean isAdminCreated = false;
+    while (!isAdminCreated) {
+      scanner.nextLine();
+      Optional<User> result = userRepository.findByUsername(adminUsername);
+      if (result.isPresent()) {
+        admin = result.get();
+        isAdminCreated = true;
+      } else {
+        System.out.println("Admin account creation is not completed.");
+      }
+    }
+    
+    
     blockchainService.transferEther(commonsos, admin.getWalletAddress(), initialEtherAmountForAdmin(numberOfPrepaidTransactions));
     createCommunity(admin, communityName, tokenSymbol, tokenName);
 
@@ -136,7 +163,7 @@ public class AddCommunity {
 
   private static Community createCommunity(User admin, String name, String tokenSymbol, String tokenName) {
     String tokenAddress = blockchainService.createToken(admin, tokenSymbol, tokenName);
-    Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setTokenContractAddress(tokenAddress)));
+    Community community = emService.runInTransaction(() -> communityRepository.create(new Community().setName(name).setTokenContractAddress(tokenAddress)).setAdminUser(admin));
 
     emService.runInTransaction(() -> userRepository.update(admin));
     return community;

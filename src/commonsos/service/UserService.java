@@ -94,8 +94,7 @@ public class UserService {
       return c.getAdminUser() != null && c.getAdminUser().getId().equals(currentUser.getId());
     });
     if (!currentUser.getId().equals(user.getId()) && !isAdmin) throw new ForbiddenException();
-    
-    // TODO filter balance
+
     return privateView(user);
   }
 
