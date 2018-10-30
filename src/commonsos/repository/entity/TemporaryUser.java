@@ -38,7 +38,7 @@ public class TemporaryUser {
   @ManyToMany
   @JoinTable(
     name = "temporary_community_users",
-    joinColumns = @JoinColumn(name="access_id_hash"),
+    joinColumns = @JoinColumn(name="temporary_user_id"),
     inverseJoinColumns = @JoinColumn(name="community_id"))
   private List<Community> communityList;
 }

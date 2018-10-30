@@ -16,8 +16,8 @@ CREATE TABLE temporary_users (
 
 CREATE TABLE temporary_community_users (
   id                   BIGSERIAL NOT NULL,
-  access_id_hash       VARCHAR NOT NULL,
   community_id         BIGINT NOT NULL,
+  temporary_user_id    BIGINT NOT NULL,
   PRIMARY KEY (id)
 );
 
