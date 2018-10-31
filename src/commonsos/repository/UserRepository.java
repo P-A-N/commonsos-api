@@ -16,8 +16,10 @@ import commonsos.repository.entity.PasswordResetRequest;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
+@Slf4j
 public class UserRepository extends Repository {
 
   @Inject
@@ -26,27 +28,23 @@ public class UserRepository extends Repository {
   }
 
   public Optional<User> findByUsername(String username) {
-    try {
-      return Optional.of(em().createQuery("FROM User WHERE username = :username AND deleted = FALSE", User.class)
-        .setParameter("username", username)
-        .getSingleResult()
-      );
-    }
-    catch (NoResultException e) {
-      return empty();
-    }
+    List<User> result = em().createQuery(
+        "FROM User WHERE username = :username AND deleted = FALSE", User.class)
+        .setParameter("username", username).getResultList();
+    
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 user has the same name. username = %s", username));
+    return Optional.of(result.get(0));
   }
 
   public Optional<User> findByEmailAddress(String emailAddress) {
-    try {
-      return Optional.of(em().createQuery("FROM User WHERE emailAddress = :emailAddress AND deleted = FALSE", User.class)
-        .setParameter("emailAddress", emailAddress)
-        .getSingleResult()
-      );
-    }
-    catch (NoResultException e) {
-      return empty();
-    }
+    List<User> result = em().createQuery(
+        "FROM User WHERE emailAddress = :emailAddress AND deleted = FALSE", User.class)
+        .setParameter("emailAddress", emailAddress).getResultList();
+
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 user has the same email address."));
+    return Optional.of(result.get(0));
   }
 
   public boolean isUsernameTaken(String username) {
@@ -128,18 +126,16 @@ public class UserRepository extends Repository {
   }
 
   public Optional<TemporaryUser> findTemporaryUser(String accessIdHash) {
-    try {
-      return Optional.of(em().createQuery("FROM TemporaryUser"
-          + " WHERE accessIdHash = :accessIdHash"
-          + " AND invalid is FALSE"
-          + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryUser.class)
-        .setParameter("accessIdHash", accessIdHash)
-        .getSingleResult()
-      );
-    }
-    catch (NoResultException e) {
-        return empty();
-    }
+    List<TemporaryUser> result = em().createQuery(
+        "FROM TemporaryUser"
+            + " WHERE accessIdHash = :accessIdHash"
+            + " AND invalid is FALSE"
+            + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryUser.class)
+        .setParameter("accessIdHash", accessIdHash).getResultList();
+    
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 temporary user has the same access id hash. accessIdHash = %s", accessIdHash));
+    return Optional.of(result.get(0));
   }
 
   public TemporaryUser findStrictTemporaryUser(String accessIdHash) {
@@ -147,18 +143,16 @@ public class UserRepository extends Repository {
   }
 
   public Optional<TemporaryEmailAddress> findTemporaryEmailAddress(String accessIdHash) {
-    try {
-      return Optional.of(em().createQuery("FROM TemporaryEmailAddress"
-          + " WHERE accessIdHash = :accessIdHash"
-          + " AND invalid is FALSE"
-          + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryEmailAddress.class)
-        .setParameter("accessIdHash", accessIdHash)
-        .getSingleResult()
-      );
-    }
-    catch (NoResultException e) {
-        return empty();
-    }
+    List<TemporaryEmailAddress> result = em().createQuery(
+        "FROM TemporaryEmailAddress"
+            + " WHERE accessIdHash = :accessIdHash"
+            + " AND invalid is FALSE"
+            + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryEmailAddress.class)
+        .setParameter("accessIdHash", accessIdHash).getResultList();
+    
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 temporary email address has the same access id hash. accessIdHash = %s", accessIdHash));
+    return Optional.of(result.get(0));
   }
 
   public TemporaryEmailAddress findStrictTemporaryEmailAddress(String accessIdHash) {
@@ -166,18 +160,16 @@ public class UserRepository extends Repository {
   }
 
   public Optional<PasswordResetRequest> findPasswordResetRequest(String accessIdHash) {
-    try {
-      return Optional.of(em().createQuery("FROM PasswordResetRequest"
-          + " WHERE accessIdHash = :accessIdHash"
-          + " AND invalid is FALSE"
-          + " AND expirationTime > CURRENT_TIMESTAMP", PasswordResetRequest.class)
-        .setParameter("accessIdHash", accessIdHash)
-        .getSingleResult()
-      );
-    }
-    catch (NoResultException e) {
-        return empty();
-    }
+    List<PasswordResetRequest> result = em().createQuery(
+        "FROM PasswordResetRequest"
+            + " WHERE accessIdHash = :accessIdHash"
+            + " AND invalid is FALSE"
+            + " AND expirationTime > CURRENT_TIMESTAMP", PasswordResetRequest.class)
+        .setParameter("accessIdHash", accessIdHash).getResultList();
+    
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 passward reset request has the same access id hash. accessIdHash = %s", accessIdHash));
+    return Optional.of(result.get(0));
   }
 
   public PasswordResetRequest findStrictPasswordResetRequest(String accessIdHash) {
