@@ -25,6 +25,7 @@ public class MessageThreadRepository extends Repository {
   public Optional<MessageThread> byAdId(User user, Long adId) {
     try {
       return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy", MessageThread.class)
+        .setLockMode(lockMode())
         .setParameter("adId", adId)
         .setParameter("createdBy", user.getId())
         .getSingleResult());
@@ -45,6 +46,8 @@ public class MessageThreadRepository extends Repository {
         .setParameter("user2", userId2)
         .getSingleResult();
 
+      em().lock(singleResult, lockMode());
+      
       return Optional.of((MessageThread)singleResult);
     }
     catch (NoResultException e) {
@@ -60,12 +63,13 @@ public class MessageThreadRepository extends Repository {
   public List<MessageThread> listByUser(User user) {
     return em()
       .createQuery("SELECT mt FROM MessageThread mt JOIN mt.parties p WHERE p.user = :user", MessageThread.class)
+      .setLockMode(lockMode())
       .setParameter("user", user)
       .getResultList();
   }
 
   public Optional<MessageThread> thread(Long id) {
-    return ofNullable(em().find(MessageThread.class, id));
+    return ofNullable(em().find(MessageThread.class, id, lockMode()));
   }
 
   public void update(MessageThreadParty party) {

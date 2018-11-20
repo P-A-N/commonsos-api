@@ -1,12 +1,12 @@
 package commonsos.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import commonsos.repository.entity.Message;
-
-import java.util.List;
-import java.util.Optional;
 
 @Singleton
 public class MessageRepository extends Repository {
@@ -24,12 +24,14 @@ public class MessageRepository extends Repository {
   public List<Message> listByThread(Long threadId) {
     return em()
       .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt", Message.class)
+      .setLockMode(lockMode())
       .setParameter("threadId", threadId)
       .getResultList();
   }
 
   public Optional<Message> lastMessage(Long threadId) {
     List<Message> messages = em().createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt DESC", Message.class)
+      .setLockMode(lockMode())
       .setParameter("threadId", threadId)
       .setMaxResults(1)
       .getResultList();

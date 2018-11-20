@@ -20,7 +20,7 @@ public class CommunityRepository extends Repository {
   }
 
   public Optional<Community> findById(Long id) {
-    return ofNullable(em().find(Community.class, id));
+    return ofNullable(em().find(Community.class, id, lockMode()));
   }
 
   public Community findStrictById(Long id) {
@@ -28,7 +28,9 @@ public class CommunityRepository extends Repository {
   }
 
   public List<Community> list() {
-    return em().createQuery("FROM Community WHERE tokenContractAddress IS NOT NULL", Community.class).getResultList();
+    return em().createQuery("FROM Community WHERE tokenContractAddress IS NOT NULL", Community.class)
+        .setLockMode(lockMode())
+        .getResultList();
   }
 
   public Community create(Community community) {

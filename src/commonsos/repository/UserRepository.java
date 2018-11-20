@@ -30,6 +30,7 @@ public class UserRepository extends Repository {
   public Optional<User> findByUsername(String username) {
     List<User> result = em().createQuery(
         "FROM User WHERE username = :username AND deleted = FALSE", User.class)
+        .setLockMode(lockMode())
         .setParameter("username", username).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -40,6 +41,7 @@ public class UserRepository extends Repository {
   public Optional<User> findByEmailAddress(String emailAddress) {
     List<User> result = em().createQuery(
         "FROM User WHERE emailAddress = :emailAddress AND deleted = FALSE", User.class)
+        .setLockMode(lockMode())
         .setParameter("emailAddress", emailAddress).getResultList();
 
     if (result.isEmpty()) return empty();
@@ -132,6 +134,7 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryUser.class)
+        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -149,6 +152,7 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryEmailAddress.class)
+        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -166,6 +170,7 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", PasswordResetRequest.class)
+        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -184,6 +189,7 @@ public class UserRepository extends Repository {
       "WHERE c.id = :communityId " +
       "AND u.deleted = FALSE " +
       "AND LOWER(u.username) LIKE LOWER(:query)", User.class)
+      .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("query", "%"+query+"%")
       .setMaxResults(10)

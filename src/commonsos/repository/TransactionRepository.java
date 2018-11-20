@@ -33,6 +33,7 @@ public class TransactionRepository extends Repository {
     return em()
       .createQuery("FROM Transaction WHERE communityId = :communityId " +
           "AND (beneficiaryId = :userId OR remitterId = :userId)", Transaction.class)
+      .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getResultList();
@@ -46,6 +47,7 @@ public class TransactionRepository extends Repository {
     try {
       return of(em()
         .createQuery("From Transaction WHERE blockchainTransactionHash = :hash", Transaction.class)
+        .setLockMode(lockMode())
         .setParameter("hash", blockchainTransactionHash)
         .getSingleResult());
     }
@@ -57,6 +59,7 @@ public class TransactionRepository extends Repository {
   public boolean hasPaid(Ad ad) {
     List<Transaction> resultList = em()
       .createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
+      .setLockMode(lockMode())
       .setParameter("adId", ad.getId()).getResultList();
     
     return !resultList.isEmpty();
