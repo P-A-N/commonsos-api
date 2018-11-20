@@ -1,12 +1,14 @@
 package commonsos.controller.auth;
 
 import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
+import static commonsos.annotation.SyncObject.USERNAME_AND_EMAIL_ADDRESS;
 import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 
 import javax.inject.Inject;
 
 import org.slf4j.MDC;
 
+import commonsos.annotation.Synchronized;
 import commonsos.exception.BadRequestException;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
@@ -18,6 +20,7 @@ import spark.Response;
 import spark.Route;
 import spark.Session;
 
+@Synchronized(USERNAME_AND_EMAIL_ADDRESS)
 public class CreateAccountCompleteController implements Route {
 
   @Inject UserService userService;

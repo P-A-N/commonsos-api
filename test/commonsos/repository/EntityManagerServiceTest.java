@@ -1,5 +1,23 @@
 package commonsos.repository;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -8,16 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import commonsos.repository.EntityManagerService;
 import commonsos.repository.EntityManagerService.Executable;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import java.util.Collections;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EntityManagerServiceTest {
@@ -164,17 +173,6 @@ public class EntityManagerServiceTest {
       inOrder.verify(transaction).rollback();
       verify(transaction, never()).commit();
     }
-  }
-
-  @Test
-  public void runInTransactionWithoutReturnValue() throws Throwable {
-    Runnable runnable = mock(Runnable.class);
-    doAnswer(invocation -> ((Executable)invocation.getArgument(0)).execute())
-      .when(entityManagerService).runInTransaction(any(Executable.class));
-
-    entityManagerService.runInTransaction(runnable);
-
-    verify(runnable).run();
   }
 
   @Test

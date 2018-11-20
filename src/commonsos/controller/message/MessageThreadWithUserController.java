@@ -1,13 +1,17 @@
 package commonsos.controller.message;
 
+import static commonsos.annotation.SyncObject.MESSAGE_THRED_BETWEEN_USER;
+
+import javax.inject.Inject;
+
+import commonsos.annotation.Synchronized;
 import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import spark.Request;
 import spark.Response;
 
-import javax.inject.Inject;
-
+@Synchronized(MESSAGE_THRED_BETWEEN_USER)
 public class MessageThreadWithUserController extends AfterLoginController {
   @Inject MessageService service;
 

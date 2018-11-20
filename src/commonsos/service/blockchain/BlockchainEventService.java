@@ -1,12 +1,14 @@
 package commonsos.service.blockchain;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.web3j.protocol.Web3j;
+
+import commonsos.ThreadValue;
 import commonsos.repository.EntityManagerService;
 import commonsos.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
-import org.web3j.protocol.Web3j;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 @Slf4j
@@ -20,7 +22,11 @@ public class BlockchainEventService {
     web3j.transactionObservable().subscribe(tx -> {
       log.info(String.format("New transaction event received: hash=%s, from=%s, to=%s, gas=%d ", tx.getHash(), tx.getFrom(), tx.getTo(), tx.getGas()));
 
-      entityManagerService.runInTransaction(() -> transactionService.markTransactionCompleted(tx.getHash()));
+      entityManagerService.runInTransaction(() -> {
+        ThreadValue.setReadOnly(false);
+        transactionService.markTransactionCompleted(tx.getHash());
+        return Void.class;
+      });
     });
   }
 }

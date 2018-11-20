@@ -1,9 +1,12 @@
 package commonsos.controller.user;
 
+import static commonsos.annotation.SyncObject.USERNAME_AND_EMAIL_ADDRESS;
+
 import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
+import commonsos.annotation.Synchronized;
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
@@ -13,6 +16,7 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
+@Synchronized(USERNAME_AND_EMAIL_ADDRESS)
 public class UpdateEmailTemporaryController extends AfterLoginController {
 
   @Inject UserService userService;

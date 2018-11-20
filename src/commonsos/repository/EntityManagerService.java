@@ -95,11 +95,4 @@ public class EntityManagerService {
       logger.error("Could not rollback the transaction", e);
     }
   }
-
-  public void runInTransaction(Runnable code) {
-    runInTransaction((Executable<Void>) () -> {
-      code.run();
-      return null;
-    });
-  }
 }

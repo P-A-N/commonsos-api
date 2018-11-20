@@ -32,22 +32,29 @@ public class TransactionInterceptor extends AbstractModule implements MethodInte
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
     try {
-      Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
-      
       // setup sync
-      Synchronized sync = invocation.getMethod().getAnnotation(Synchronized.class);
+      Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
+      Synchronized sync = handleClass.getAnnotation(Synchronized.class);
       
-      // setup read-only
-      if (handleClass.isAnnotationPresent(ReadOnly.class)) {
-        ThreadValue.setReadOnly(true);
-        return invocation.proceed();
+      if (sync != null) {
+        synchronized(sync.value()) {
+          return proceedMethod(invocation);
+        }
       } else {
-        return entityManagerService.runInTransaction(invocation::proceed);
+        return proceedMethod(invocation);
       }
-    }
-    finally {
+      
+    } finally {
       close(entityManagerService);
     }
+  }
+  
+  private Object proceedMethod(MethodInvocation invocation) throws Throwable {
+    Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
+
+    // setup read-only
+    ThreadValue.setReadOnly(handleClass.isAnnotationPresent(ReadOnly.class));
+    return entityManagerService.runInTransaction(invocation::proceed);
   }
 
   private void close(EntityManagerService entityManagerService) {

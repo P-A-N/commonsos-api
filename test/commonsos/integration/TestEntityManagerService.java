@@ -80,4 +80,11 @@ public class TestEntityManagerService extends EntityManagerService {
       
     }
   }
+
+  public void runInTransaction(Runnable code) {
+    runInTransaction((Executable<Void>) () -> {
+      code.run();
+      return null;
+    });
+  }
 }

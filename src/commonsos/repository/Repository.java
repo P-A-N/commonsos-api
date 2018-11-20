@@ -1,6 +1,6 @@
 package commonsos.repository;
 
-import static javax.persistence.LockModeType.NONE;
+import static javax.persistence.LockModeType.PESSIMISTIC_READ;
 import static javax.persistence.LockModeType.PESSIMISTIC_WRITE;
 
 import javax.persistence.EntityManager;
@@ -20,6 +20,6 @@ public abstract class Repository {
   }
 
   protected LockModeType lockMode() {
-    return ThreadValue.isReadOnly() ? NONE : PESSIMISTIC_WRITE;
+    return ThreadValue.isReadOnly() ? PESSIMISTIC_READ : PESSIMISTIC_WRITE;
   }
 }
