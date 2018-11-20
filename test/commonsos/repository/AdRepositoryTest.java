@@ -18,10 +18,10 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
 
-public class AdRepositoryTest extends DBTest {
+public class AdRepositoryTest extends RepositoryTest {
 
-  private AdRepository repository = new AdRepository(entityManagerService);
-  private UserRepository userRepository = new UserRepository(entityManagerService);
+  private AdRepository repository = new AdRepository(emService);
+  private UserRepository userRepository = new UserRepository(emService);
 
   @Test
   public void create() {

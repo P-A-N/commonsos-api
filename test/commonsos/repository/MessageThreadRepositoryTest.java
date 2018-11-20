@@ -22,11 +22,11 @@ import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 
-public class MessageThreadRepositoryTest extends DBTest {
+public class MessageThreadRepositoryTest extends RepositoryTest {
 
-  UserRepository userRepository = new UserRepository(entityManagerService);
-  MessageThreadRepository repository = new MessageThreadRepository(entityManagerService);
-  MessageRepository messageRepository = new MessageRepository(entityManagerService);
+  UserRepository userRepository = new UserRepository(emService);
+  MessageThreadRepository repository = new MessageThreadRepository(emService);
+  MessageRepository messageRepository = new MessageRepository(emService);
 
   @Test
   public void byAdId() {

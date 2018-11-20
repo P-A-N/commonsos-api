@@ -22,7 +22,7 @@ import commonsos.Configuration;
 public class EntityManagerService {
   private Logger logger = LoggerFactory.getLogger(EntityManagerService.class);
 
-  @Inject Configuration configuration;
+  @Inject protected Configuration configuration;
 
   protected EntityManagerFactory entityManagerFactory;
   protected ThreadLocal<EntityManager> em = new ThreadLocal<>();

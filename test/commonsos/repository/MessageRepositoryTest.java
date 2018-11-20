@@ -14,9 +14,9 @@ import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MessageRepositoryTest extends DBTest {
+public class MessageRepositoryTest extends RepositoryTest {
 
-  private MessageRepository repository = new MessageRepository(entityManagerService);
+  private MessageRepository repository = new MessageRepository(emService);
 
   @Test
   public void createMessage() {

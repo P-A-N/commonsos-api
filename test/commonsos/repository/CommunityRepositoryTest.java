@@ -12,10 +12,10 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 
-public class CommunityRepositoryTest extends DBTest {
+public class CommunityRepositoryTest extends RepositoryTest {
 
-  UserRepository userRepository = new UserRepository(entityManagerService);
-  CommunityRepository repository = new CommunityRepository(entityManagerService);
+  UserRepository userRepository = new UserRepository(emService);
+  CommunityRepository repository = new CommunityRepository(emService);
 
   @Test
   public void findById() {

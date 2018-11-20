@@ -1,6 +1,6 @@
 package commonsos.integration;
 
-import static com.ninja_squad.dbsetup.Operations.deleteAllFrom;
+import static commonsos.integration.TestEntityManagerService.DELETE_ALL;
 import static io.restassured.RestAssured.given;
 import static spark.Spark.awaitInitialization;
 import static spark.Spark.stop;
@@ -19,33 +19,23 @@ import org.subethamail.wiser.WiserMessage;
 import com.google.gson.Gson;
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
-import com.ninja_squad.dbsetup.operation.Operation;
 
-import commonsos.repository.EntityManagerService;
 import commonsos.service.crypto.CryptoService;
 import io.restassured.RestAssured;
 
 public class IntegrationTest {
   
   protected static Gson gson = new Gson();
-  protected static EntityManagerService emService = new TestEntityManagerService();
-  protected static Operation DELETE_ALL = deleteAllFrom(
-      "message_thread_parties",
-      "users",
-      "ads",
-      "messages",
-      "message_threads",
-      "transactions",
-      "communities",
-      "temporary_community_users",
-      "temporary_users",
-      "temporary_email_address",
-      "password_reset_request");
+  protected static TestEntityManagerService emService = new TestEntityManagerService();
   protected static Wiser wiser;
   protected static CryptoService cryptoService = new CryptoService();
   
   @BeforeClass
   public static void setupIntegrationTest() {
+    // DB
+    emService.init();
+    emService.clearDbAndMigrate();
+
     // Test Server
     new TestServer().start(new String[]{});
     awaitInitialization();
@@ -53,9 +43,6 @@ public class IntegrationTest {
     // RestAssured
     RestAssured.port = TestServer.TEST_SERVER_PORT;
 
-    // DB
-    emService.init();
-    
     // SMTP Server
     wiser = new Wiser();
     wiser.setPort(TestEmailService.TEST_SMTP_SERVER_PORT);
@@ -74,6 +61,9 @@ public class IntegrationTest {
   
   @AfterClass
   public static void stopIntegrationTest() {
+    // DB
+    emService.close();
+    
     // TestServer
     stop();
     

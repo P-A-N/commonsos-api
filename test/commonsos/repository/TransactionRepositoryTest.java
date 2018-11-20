@@ -20,9 +20,9 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 
-public class TransactionRepositoryTest extends DBTest {
+public class TransactionRepositoryTest extends RepositoryTest {
 
-  TransactionRepository repository = new TransactionRepository(entityManagerService);
+  TransactionRepository repository = new TransactionRepository(emService);
 
   @Test
   public void create() {

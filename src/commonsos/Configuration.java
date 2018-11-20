@@ -18,15 +18,15 @@ public class Configuration {
   }
 
   public String databaseUrl() {
-    return environmentVariable("DATABASE_URL", "jdbc:postgresql://localhost:5432/commonsos");
+    return environmentVariable("DATABASE_URL", "jdbc:postgresql://localhost:5432/commonsos_test");
   }
 
   public String databaseUsername() {
-    return environmentVariable("DATABASE_USERNAME", "commonsos");
+    return environmentVariable("DATABASE_USERNAME", "commonsos_test");
   }
 
   public String databasePassword() {
-    return environmentVariable("DATABASE_PASSWORD", "commonsos");
+    return environmentVariable("DATABASE_PASSWORD", "test");
   }
 
   public String ethererumUrl() {

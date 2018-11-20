@@ -7,7 +7,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import commonsos.repository.entity.Community;
@@ -16,10 +21,10 @@ import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 
-public class UserRepositoryTest extends DBTest {
+public class UserRepositoryTest extends RepositoryTest {
 
-  private UserRepository repository = new UserRepository(entityManagerService);
-  private CommunityRepository communityRepository = new CommunityRepository(entityManagerService);
+  private UserRepository repository = new UserRepository(emService);
+  private CommunityRepository communityRepository = new CommunityRepository(emService);
 
   @Test
   public void findByUsername() {
@@ -466,19 +471,52 @@ public class UserRepositoryTest extends DBTest {
   @Test
   public void update() {
     // prepare
-    User testUser = createTestUser_BelongAtOneCommunity();
+    Long userId = createTestUser_BelongAtOneCommunity().getId();
     
     // execute
-    testUser.setFirstName("new first name")
-        .setLastName("new last name")
-        .setDescription("new description")
+    inTransaction(() -> {
+      User target = repository.findStrictById(userId);
+      target.setFirstName("new first name")
+        .setLastName("new last name").setDescription("new description")
         .setLocation("new location")
         .setEmailAddress("new@test.com");
-    repository.update(testUser);
+      repository.update(target);
+    });
 
     // verify
-    User updatedUser = em().find(User.class, testUser.getId());
-    assertUser(updatedUser, testUser);
+    User updatedUser = em().find(User.class, userId);
+    assertThat(updatedUser.getFirstName()).isEqualTo("new first name");
+  }
+
+  @Ignore
+  @Test
+  public void transactionTest() throws Exception {
+    // prepare
+    Long userId = createTestUser_BelongAtOneCommunity().getId();
+    
+    // execute
+    Runnable r = () -> {
+      inTransaction(() -> {
+        User target = repository.findStrictById(userId);
+        Integer num = NumberUtils.isParsable(target.getFirstName()) ? Integer.parseInt(target.getFirstName()) : 0;
+        System.out.println(num);
+        target.setFirstName(String.valueOf(num + 1));
+        repository.update(target);
+      });
+    };
+    ExecutorService es = Executors.newFixedThreadPool(10);
+    try {
+      for (int i = 0; i < 100; i++) {
+        es.execute(r);
+      }
+    } finally {
+      es.shutdown();
+      es.awaitTermination(1, TimeUnit.MINUTES);
+    }
+
+    // verify
+    User updatedUser = em().find(User.class, userId);
+    assertThat(updatedUser.getFirstName()).isEqualTo("100");
   }
 
   @Test

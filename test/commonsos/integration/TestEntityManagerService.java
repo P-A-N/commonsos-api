@@ -1,22 +1,77 @@
 package commonsos.integration;
 
-import java.util.HashMap;
-import java.util.Map;
+import static com.ninja_squad.dbsetup.Operations.deleteAllFrom;
+import static com.ninja_squad.dbsetup.Operations.sql;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.persistence.Persistence;
 
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+
+import com.ninja_squad.dbsetup.DbSetup;
+import com.ninja_squad.dbsetup.destination.DataSourceDestination;
+import com.ninja_squad.dbsetup.operation.Operation;
+
+import commonsos.Configuration;
 import commonsos.repository.EntityManagerService;
 
 @Singleton
 public class TestEntityManagerService extends EntityManagerService {
 
+  private static Flyway flyway = new Flyway();
+  
+  public static Operation DELETE_ALL = deleteAllFrom(
+      "message_thread_parties",
+      "users",
+      "ads",
+      "messages",
+      "message_threads",
+      "transactions",
+      "communities",
+      "community_users",
+      "temporary_community_users",
+      "temporary_users",
+      "temporary_email_address",
+      "password_reset_request");
+  
+  public static Operation DROP_ALL = sql(
+      "DROP TABLE IF EXISTS "
+      + "flyway_schema_history, "
+      + "users, "
+      + "communities, "
+      + "community_users, "
+      + "ads, "
+      + "messages, "
+      + "message_threads, "
+      + "message_thread_parties, "
+      + "transactions, "
+      + "temporary_users, "
+      + "temporary_community_users, "
+      + "temporary_email_address, "
+      + "password_reset_request "
+      + "CASCADE;");
+
   @Inject
   @Override
   public void init() {
-    Map<String, String> config = new HashMap<>();
-    config.put("hibernate.connection.url", "jdbc:h2:mem:test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1");
-    this.entityManagerFactory = Persistence.createEntityManagerFactory("commonsos", config);
+    configuration = new Configuration();
+    super.init();
+  }
+  
+  public void clearDbAndMigrate() {
+    flyway.setDataSource(dataSource());
+    try {
+      flyway.validate();
+      flyway.migrate();
+      DbSetup dbSetup = new DbSetup(new DataSourceDestination(dataSource()), DELETE_ALL);
+      dbSetup.launch();
+      
+    } catch (FlywayException e) {
+      DbSetup dbSetup = new DbSetup(new DataSourceDestination(dataSource()), DROP_ALL);
+      dbSetup.launch();
+      flyway.migrate();
+      
+    }
   }
 }
