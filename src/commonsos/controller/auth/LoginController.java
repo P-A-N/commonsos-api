@@ -8,6 +8,7 @@ import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 
+import commonsos.annotation.ReadOnly;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
@@ -19,6 +20,7 @@ import spark.Response;
 import spark.Route;
 import spark.Session;
 
+@ReadOnly
 public class LoginController implements Route {
 
   public static final String USER_SESSION_ATTRIBUTE_NAME = "user";

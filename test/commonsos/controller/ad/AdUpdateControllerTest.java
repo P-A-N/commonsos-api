@@ -58,7 +58,7 @@ public class AdUpdateControllerTest {
     when(adService.view(ad, user)).thenReturn(adView);
     
     // execute
-    AdView result = controller.handle(user, request, null);
+    AdView result = controller.handleAfterLogin(user, request, null);
     
     // verify
     assertThat(result).isEqualTo(adView);
@@ -79,6 +79,6 @@ public class AdUpdateControllerTest {
     when(request.params("id")).thenReturn("string");
     
     // execute
-    controller.handle(null, request, null);
+    controller.handleAfterLogin(null, request, null);
   }
 }

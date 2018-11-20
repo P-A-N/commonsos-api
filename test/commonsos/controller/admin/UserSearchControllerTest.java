@@ -33,13 +33,13 @@ public class UserSearchControllerTest {
     User user = new User();
     when(service.searchUsers(user, 123L, "john doe")).thenReturn(users);
 
-    List<UserView> result = controller.handle(user, request, null);
+    List<UserView> result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(users);
   }
   
   @Test(expected = BadRequestException.class)
   public void handle_noCommunityId() {
-    controller.handle(new User(), request, null);
+    controller.handleAfterLogin(new User(), request, null);
   }
 }

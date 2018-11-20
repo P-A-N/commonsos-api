@@ -54,7 +54,7 @@ public class UserUpdateControllerTest {
 
     // execute
     User user = new User();
-    UserPrivateView result = controller.handle(user, request, response);
+    UserPrivateView result = controller.handleAfterLogin(user, request, response);
 
     // verify
     ArgumentCaptor<UserUpdateCommand> commandCaptor = ArgumentCaptor.forClass(UserUpdateCommand.class);

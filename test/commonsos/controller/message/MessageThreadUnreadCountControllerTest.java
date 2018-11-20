@@ -25,7 +25,7 @@ public class MessageThreadUnreadCountControllerTest {
     User user = new User();
     when(service.unreadMessageThreadCount(user)).thenReturn(3);
 
-    Map<String, Object> result = controller.handle(user, null, null);
+    Map<String, Object> result = controller.handleAfterLogin(user, null, null);
 
     assertThat(result.get("count")).isEqualTo(3);
   }

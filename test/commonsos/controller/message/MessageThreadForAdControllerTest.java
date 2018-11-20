@@ -28,7 +28,7 @@ public class MessageThreadForAdControllerTest {
     MessageThreadView view = new MessageThreadView();
     when(service.threadForAd(user, 123L)).thenReturn(view);
 
-    MessageThreadView result = controller.handle(user, request, null);
+    MessageThreadView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(view);
   }

@@ -2,19 +2,11 @@ package commonsos.repository;
 
 import static commonsos.integration.TestEntityManagerService.DELETE_ALL;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
-import org.hibernate.internal.SessionImpl;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -40,57 +32,43 @@ public class RepositoryTest {
   @Before
   public void prepare() {
     ThreadValue.setReadOnly(false);
-    
-//    EntityTransaction tran = emService.get().getTransaction();
-//    if (!tran.isActive()) tran.begin();
+    beginTran();
   }
 
   @After
   public void cleanup() throws Exception {
-//    EntityTransaction tran = emService.get().getTransaction();
-//    if (tran.isActive()) tran.commit();
+    commitTran();
     
     DbSetup dbSetup = new DbSetup(new DataSourceDestination(emService.dataSource()), DELETE_ALL);
     dbSetup.launch();
   }
-
-  protected static void executeSQL(String sql, EntityManagerFactory entityManagerFactory) {
-    EntityManager entityManager = entityManagerFactory.createEntityManager();
-    EntityTransaction transaction = entityManager.getTransaction();
-    transaction.begin();
-    Connection connection = ((SessionImpl) entityManager).connection();
-    try {
-      connection.createStatement().execute(sql);
-    }
-    catch (SQLException e) {
-      throw new RuntimeException(e);
-    }
-    transaction.commit();
-  }
-
-  protected static Path createTempFile() {
-    try {
-      return Files.createTempFile("", "");
-    }
-    catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
+  
+  @AfterClass
+  public static void stopIntegrationTest() {
+    emService.closeFactory();
   }
 
   protected <T> T inTransaction(EntityManagerService.Executable<T> code) {
-    try {
-      return emService.runInTransaction(code);
-    }
-    finally {
-      emService.close();
-    }
+    T result = emService.runInTransaction(code);
+    beginTran();
+    return result;
   }
 
   protected void inTransaction(Runnable code) {
-    inTransaction(() -> {
-      code.run();
-      return null;
-    });
+    emService.runInTransaction(code);
+    beginTran();
+  }
+  
+  private void beginTran() {
+    emService.close();
+    EntityTransaction tran = emService.get().getTransaction();
+    if (!tran.isActive()) tran.begin();
+  }
+  
+  private void commitTran() {
+    EntityTransaction tran = emService.get().getTransaction();
+    if (tran.isActive()) tran.commit();
+    emService.close();
   }
 }
 

@@ -31,7 +31,7 @@ public class MessageListControllerTest {
     when(request.params("id")).thenReturn("123");
     when(service.messages(user, 123L)).thenReturn(messages);
 
-    List<MessageView> result = controller.handle(user, request, null);
+    List<MessageView> result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isSameAs(messages);
   }

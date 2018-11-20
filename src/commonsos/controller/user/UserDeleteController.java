@@ -12,7 +12,7 @@ public class UserDeleteController extends AfterLoginController {
 
   @Inject UserService userService;
 
-  @Override public Object handle(User user, Request request, Response response) {
+  @Override public Object handleAfterLogin(User user, Request request, Response response) {
     userService.deleteUserLogically(user);
     return "";
   }

@@ -11,7 +11,7 @@ import javax.inject.Inject;
 public class MessageThreadWithUserController extends AfterLoginController {
   @Inject MessageService service;
 
-  @Override protected Object handle(User user, Request request, Response response) {
+  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
     return service.threadWithUser(user, Long.parseLong(request.params("userId")));
   }
 }

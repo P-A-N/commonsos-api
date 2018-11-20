@@ -1,16 +1,17 @@
 package commonsos.controller.community;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import commonsos.annotation.ReadOnly;
+import commonsos.service.CommunityService;
+import commonsos.view.CommunityView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-import javax.inject.Inject;
-
-import commonsos.service.CommunityService;
-import commonsos.view.CommunityView;
-
-import java.util.List;
-
+@ReadOnly
 public class CommunityListController implements Route {
 
   @Inject CommunityService service;

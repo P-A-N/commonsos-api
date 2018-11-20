@@ -18,7 +18,7 @@ public class UpdateEmailTemporaryController extends AfterLoginController {
   @Inject UserService userService;
   @Inject Gson gson;
 
-  @Override protected Object handle(User user, Request request, Response response) {
+  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
     UpdateEmailTemporaryCommand command = gson.fromJson(request.body(), UpdateEmailTemporaryCommand.class);
     if(StringUtils.isEmpty(command.getNewEmailAddress())) throw new BadRequestException("newEmailAddress is required");
     

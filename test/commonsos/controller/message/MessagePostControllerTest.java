@@ -37,7 +37,7 @@ public class MessagePostControllerTest {
     MessageView messageView = new MessageView();
     when(service.postMessage(user, command)).thenReturn(messageView);
 
-    MessageView result = controller.handle(user, request, null);
+    MessageView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(messageView);
   }

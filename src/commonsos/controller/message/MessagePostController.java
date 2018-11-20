@@ -16,7 +16,7 @@ public class MessagePostController extends AfterLoginController {
   @Inject Gson gson;
   @Inject MessageService service;
 
-  @Override protected MessageView handle(User user, Request request, Response response) {
+  @Override protected MessageView handleAfterLogin(User user, Request request, Response response) {
     return service.postMessage(user, gson.fromJson(request.body(), MessagePostCommand.class));
   }
 }

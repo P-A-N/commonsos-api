@@ -26,7 +26,7 @@ public class AdDeleteControllerTest {
     when(request.params("id")).thenReturn("123");
     User user = new User();
 
-    Object result = controller.handle(user, request, null);
+    Object result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo("");
     verify(service).deleteAdLogically(123L, user);
@@ -37,6 +37,6 @@ public class AdDeleteControllerTest {
     when(request.params("id")).thenReturn("string");
     User user = new User();
 
-    controller.handle(user, request, null);
+    controller.handleAfterLogin(user, request, null);
   }
 }

@@ -1,18 +1,23 @@
 package commonsos.interceptor;
 
 
+import java.lang.reflect.Method;
+
+import javax.inject.Inject;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 
+import commonsos.ThreadValue;
+import commonsos.annotation.ReadOnly;
+import commonsos.annotation.Synchronized;
 import commonsos.repository.EntityManagerService;
 import lombok.extern.slf4j.Slf4j;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import spark.Route;
-
-import javax.inject.Inject;
-import java.lang.reflect.Method;
 
 @Slf4j
 public class TransactionInterceptor extends AbstractModule implements MethodInterceptor {
@@ -27,7 +32,18 @@ public class TransactionInterceptor extends AbstractModule implements MethodInte
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
     try {
-      return entityManagerService.runInTransaction(invocation::proceed);
+      Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
+      
+      // setup sync
+      Synchronized sync = invocation.getMethod().getAnnotation(Synchronized.class);
+      
+      // setup read-only
+      if (handleClass.isAnnotationPresent(ReadOnly.class)) {
+        ThreadValue.setReadOnly(true);
+        return invocation.proceed();
+      } else {
+        return entityManagerService.runInTransaction(invocation::proceed);
+      }
     }
     finally {
       close(entityManagerService);

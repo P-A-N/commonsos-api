@@ -17,7 +17,7 @@ public class GroupMessageThreadController extends AfterLoginController {
   @Inject Gson gson;
   @Inject MessageService service;
 
-  @Override protected MessageThreadView handle(User user, Request request, Response response) {
+  @Override protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
     CreateGroupCommand command = gson.fromJson(request.body(), CreateGroupCommand.class);
     return service.group(user, command);
   }

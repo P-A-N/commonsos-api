@@ -30,7 +30,7 @@ public class MyAdsControllerTest {
     List<AdView> adViewList = new ArrayList<>();
     when(service.myAdsView(user)).thenReturn(adViewList);
 
-    List<AdView> result = controller.handle(user, request, null);
+    List<AdView> result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(adViewList);
   }

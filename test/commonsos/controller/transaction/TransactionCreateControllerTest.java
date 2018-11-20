@@ -34,7 +34,7 @@ public class TransactionCreateControllerTest {
     Request request = mock(Request.class);
     when(request.body()).thenReturn("{\"amount\": 10.2, \"beneficiaryId\": \"22\", \"description\": \"description\", \"adId\": \"33\" }");
 
-    controller.handle(user, request, null);
+    controller.handleAfterLogin(user, request, null);
 
     verify(service).create(user, new TransactionCreateCommand().setAmount(new BigDecimal("10.2")).setBeneficiaryId(22L).setDescription("description").setAdId(33L));
   }

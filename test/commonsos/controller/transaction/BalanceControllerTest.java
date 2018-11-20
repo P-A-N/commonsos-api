@@ -29,12 +29,12 @@ public class BalanceControllerTest {
     User user = new User();
     when(service.balance(user, 123L)).thenReturn(new BalanceView().setBalance(TEN).setCommunityId(123L));
 
-    assertThat(controller.handle(user, request, null).getBalance()).isEqualTo(TEN);
-    assertThat(controller.handle(user, request, null).getCommunityId()).isEqualTo(123L);
+    assertThat(controller.handleAfterLogin(user, request, null).getBalance()).isEqualTo(TEN);
+    assertThat(controller.handleAfterLogin(user, request, null).getCommunityId()).isEqualTo(123L);
   }
 
   @Test(expected = BadRequestException.class)
   public void handle_noCommunityId() {
-    controller.handle(new User(), request, null);
+    controller.handleAfterLogin(new User(), request, null);
   }
 }

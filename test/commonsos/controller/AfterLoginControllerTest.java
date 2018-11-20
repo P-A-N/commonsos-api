@@ -41,7 +41,7 @@ public class AfterLoginControllerTest {
 
     controller.handle(request, response);
 
-    verify(controller).handle(user, request, response);
+    verify(controller).handleAfterLogin(user, request, response);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class AfterLoginControllerTest {
   }
 
   private static class SampleController extends AfterLoginController {
-    @Override protected Object handle(User user, Request request, Response response) {
+    @Override protected Object handleAfterLogin(User user, Request request, Response response) {
       return null;
     }
   }

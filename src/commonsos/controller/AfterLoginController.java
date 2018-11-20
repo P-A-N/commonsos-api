@@ -20,15 +20,15 @@ public abstract class AfterLoginController implements Route {
 
   @Inject UserService userService;
 
-  @Override final public Object handle(Request request, Response response) {
+  @Override public Object handle(Request request, Response response) {
     if (request.session().attribute(USER_SESSION_ATTRIBUTE_NAME) == null) throw new AuthenticationException();
     
     UserSession session = request.session().attribute(USER_SESSION_ATTRIBUTE_NAME);
     User user = userService.user(session.getUserId());
-    return handle(user, request, response);
+    return handleAfterLogin(user, request, response);
   }
 
-  abstract protected Object handle(User user, Request request, Response response);
+  abstract protected Object handleAfterLogin(User user, Request request, Response response);
 
   public InputStream image(Request request) {
     String base64 = request.body().replaceFirst("data:image/.*;base64,", "");

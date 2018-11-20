@@ -31,7 +31,7 @@ public class UserDeleteControllerTest {
   public void handle_noId() {
     // execute
     User user = new User();
-    Object result = controller.handle(user, request, response);
+    Object result = controller.handleAfterLogin(user, request, response);
 
     // verify
     assertThat(result).isEqualTo("");

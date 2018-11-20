@@ -17,7 +17,7 @@ public class AdCreateController extends AfterLoginController {
   @Inject AdService service;
   @Inject Gson gson;
 
-  @Override public AdView handle(User user, Request request, Response response) {
+  @Override public AdView handleAfterLogin(User user, Request request, Response response) {
     AdCreateCommand command = gson.fromJson(request.body(), AdCreateCommand.class);
     return service.create(user, command);
   }

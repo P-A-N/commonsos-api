@@ -30,11 +30,11 @@ public class TransactionListControllerTest {
     ArrayList<TransactionView> transactions = new ArrayList<>();
     User user = new User();
     when(service.transactions(user, 123L)).thenReturn(transactions);
-    assertThat(controller.handle(user, request, null)).isSameAs(transactions);
+    assertThat(controller.handleAfterLogin(user, request, null)).isSameAs(transactions);
   }
 
   @Test(expected = BadRequestException.class)
   public void handle_noCommunityId() {
-    controller.handle(new User(), request, null);
+    controller.handleAfterLogin(new User(), request, null);
   }
 }

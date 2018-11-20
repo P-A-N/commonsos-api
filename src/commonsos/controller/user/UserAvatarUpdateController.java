@@ -14,7 +14,7 @@ public class UserAvatarUpdateController extends AfterLoginController {
 
   @Inject UserService userService;
 
-  @Override public String handle(User user, Request request, Response response) {
+  @Override public String handleAfterLogin(User user, Request request, Response response) {
     return userService.updateAvatar(user, image(request));
   }
 }

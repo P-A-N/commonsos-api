@@ -16,7 +16,7 @@ public class MessageListController extends AfterLoginController {
 
   @Inject MessageService service;
 
-  @Override protected List<MessageView> handle(User user, Request request, Response response) {
+  @Override protected List<MessageView> handleAfterLogin(User user, Request request, Response response) {
     return service.messages(user, parseLong(request.params("id")));
   }
 }

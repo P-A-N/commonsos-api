@@ -3,7 +3,8 @@ package commonsos.integration;
 import static com.ninja_squad.dbsetup.Operations.deleteAllFrom;
 import static com.ninja_squad.dbsetup.Operations.sql;
 
-import javax.inject.Inject;
+import java.util.Map;
+
 import javax.inject.Singleton;
 
 import org.flywaydb.core.Flyway;
@@ -52,11 +53,16 @@ public class TestEntityManagerService extends EntityManagerService {
       + "password_reset_request "
       + "CASCADE;");
 
-  @Inject
   @Override
-  public void init() {
+  protected Map<String, String> getConfig() {
     configuration = new Configuration();
-    super.init();
+    Map<String, String> config = super.getConfig();
+    
+    return config;
+  }
+  
+  public void closeFactory() {
+    entityManagerFactory.close();
   }
   
   public void clearDbAndMigrate() {

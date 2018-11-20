@@ -29,11 +29,16 @@ public class EntityManagerService {
 
   @Inject
   public void init() {
+    Map<String, String> config = getConfig();
+    this.entityManagerFactory = Persistence.createEntityManagerFactory("commonsos", config);
+  }
+  
+  protected Map<String, String> getConfig() {
     Map<String, String> config = new HashMap<>();
     config.put("hibernate.connection.url", configuration.databaseUrl());
     config.put("hibernate.connection.username", configuration.databaseUsername());
     config.put("hibernate.connection.password", configuration.databasePassword());
-    this.entityManagerFactory = Persistence.createEntityManagerFactory("commonsos", config);
+    return config;
   }
 
   public EntityManager get() {

@@ -52,6 +52,7 @@ public class IntegrationTest {
   @After
   public void cleanupTestData() {
     // DB
+    emService.close();
     DbSetup dbSetup = new DbSetup(new DataSourceDestination(emService.dataSource()), DELETE_ALL);
     dbSetup.launch();
     
@@ -62,7 +63,7 @@ public class IntegrationTest {
   @AfterClass
   public static void stopIntegrationTest() {
     // DB
-    emService.close();
+    emService.closeFactory();
     
     // TestServer
     stop();
@@ -87,11 +88,13 @@ public class IntegrationTest {
   
   public static <T> T create(T entity) {
     emService.runInTransaction(() -> emService.get().persist(entity));
+    emService.close();
     return entity;
   }
   
   public static <T> T update(T entity) {
     emService.runInTransaction(() -> emService.get().merge(entity));
+    emService.close();
     return entity;
   }
 

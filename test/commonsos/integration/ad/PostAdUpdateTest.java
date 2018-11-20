@@ -61,12 +61,12 @@ public class PostAdUpdateTest extends IntegrationTest {
       .body("createdBy.username", equalTo("user"));
     
     // verify
-    emService.get().refresh(ad);
-    assertThat(ad.getTitle()).isEqualTo("title");
-    assertThat(ad.getDescription()).isEqualTo("description");
-    assertThat(ad.getPoints()).isEqualByComparingTo(BigDecimal.TEN);
-    assertThat(ad.getLocation()).isEqualTo("location");
-    assertThat(ad.getType()).isEqualTo(AdType.GIVE);
-    assertThat(ad.isDeleted()).isEqualTo(false);
+    Ad actual = emService.get().find(Ad.class, ad.getId());
+    assertThat(actual.getTitle()).isEqualTo("title");
+    assertThat(actual.getDescription()).isEqualTo("description");
+    assertThat(actual.getPoints()).isEqualByComparingTo(BigDecimal.TEN);
+    assertThat(actual.getLocation()).isEqualTo("location");
+    assertThat(actual.getType()).isEqualTo(AdType.GIVE);
+    assertThat(actual.isDeleted()).isEqualTo(false);
   }
 }

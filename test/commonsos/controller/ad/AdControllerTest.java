@@ -28,7 +28,7 @@ public class AdControllerTest {
     AdView adView = new AdView();
     when(service.view(user, 123L)).thenReturn(adView);
 
-    AdView result = controller.handle(user, request, null);
+    AdView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(adView);
   }

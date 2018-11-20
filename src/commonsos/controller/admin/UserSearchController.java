@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import commonsos.annotation.ReadOnly;
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
@@ -15,11 +16,12 @@ import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
+@ReadOnly
 public class UserSearchController extends AfterLoginController {
 
   @Inject UserService service;
 
-  @Override public List<UserView> handle(User user, Request request, Response response) {
+  @Override public List<UserView> handleAfterLogin(User user, Request request, Response response) {
     String communityId = request.queryParams("communityId");
     if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
     String q = request.queryParams("q");

@@ -37,7 +37,7 @@ public class GroupMessageThreadControllerTest {
     MessageThreadView view = new MessageThreadView();
     when(service.group(user, new CreateGroupCommand().setMemberIds(asList(11, 33)).setTitle("hello"))).thenReturn(view);
 
-    MessageThreadView result = controller.handle(user, request, null);
+    MessageThreadView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isSameAs(view);
   }

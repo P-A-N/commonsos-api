@@ -30,7 +30,7 @@ public class UserControllerTest {
 
   @Test
   public void handle_noId() {
-    controller.handle(new User(), request, response);
+    controller.handleAfterLogin(new User(), request, response);
     verify(userService, times(1)).privateView(any(User.class));
   }
 
@@ -43,7 +43,7 @@ public class UserControllerTest {
         new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(user))));
 
     // execute
-    controller.handle(user, request, response);
+    controller.handleAfterLogin(user, request, response);
 
     // verify
     verify(userService, times(1)).privateView(any(User.class), any(Long.class));
@@ -59,7 +59,7 @@ public class UserControllerTest {
         new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2"))))));
 
     // execute
-    controller.handle(user, request, response);
+    controller.handleAfterLogin(user, request, response);
 
     // verify
     verify(userService, never()).privateView(any(User.class), any(Long.class));

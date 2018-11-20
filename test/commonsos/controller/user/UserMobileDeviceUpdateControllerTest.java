@@ -34,7 +34,7 @@ public class UserMobileDeviceUpdateControllerTest {
   public void handle() {
     when(request.body()).thenReturn("{\"pushNotificationToken\":\"12345\"}");
 
-    controller.handle(user, request, null);
+    controller.handleAfterLogin(user, request, null);
 
     MobileDeviceUpdateCommand expectedCommand = new MobileDeviceUpdateCommand().setPushNotificationToken("12345");
     verify(userService).updateMobileDevice(user, expectedCommand);

@@ -32,11 +32,11 @@ public class AdListControllerTest {
     when(service.listFor(user, 123L, "filter text")).thenReturn(ads);
     when(request.queryParams("filter")).thenReturn("filter text");
 
-    assertThat(controller.handle(user, request, null)).isSameAs(ads);
+    assertThat(controller.handleAfterLogin(user, request, null)).isSameAs(ads);
   }
 
   @Test(expected = BadRequestException.class)
   public void handle_noCommunityId() {
-    controller.handle(new User(), request, null);
+    controller.handleAfterLogin(new User(), request, null);
   }
 }

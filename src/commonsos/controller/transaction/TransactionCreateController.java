@@ -15,7 +15,7 @@ public class TransactionCreateController extends AfterLoginController {
   @Inject TransactionService service;
   @Inject Gson gson;
 
-  @Override protected Object handle(User user, Request request, Response response) {
+  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
     TransactionCreateCommand command = gson.fromJson(request.body(), TransactionCreateCommand.class);
     service.create(user, command);
     return "";

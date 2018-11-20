@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
+import commonsos.annotation.ReadOnly;
 import commonsos.exception.BadRequestException;
 import commonsos.service.UserService;
 import spark.Request;
@@ -11,6 +12,7 @@ import spark.Response;
 import spark.Route;
 import spark.utils.StringUtils;
 
+@ReadOnly
 public class PasswordResetRequestCheckController implements Route {
 
   @Inject UserService userService;

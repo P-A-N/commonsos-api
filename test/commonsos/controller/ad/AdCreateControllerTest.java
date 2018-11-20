@@ -45,7 +45,7 @@ public class AdCreateControllerTest {
     AdView adView = new AdView();
     when(service.create(eq(user), commandCaptor.capture())).thenReturn(adView);
 
-    AdView result = controller.handle(user, request, null);
+    AdView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(adView);
     AdCreateCommand ad = commandCaptor.getValue();

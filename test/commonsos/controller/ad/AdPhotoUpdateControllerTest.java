@@ -37,7 +37,7 @@ public class AdPhotoUpdateControllerTest {
     InputStream image = mock(InputStream.class);
     doReturn(image).when(controller).image(request);
 
-    String result = controller.handle(user, request, null);
+    String result = controller.handleAfterLogin(user, request, null);
 
     assertThat(commandArgument.getValue().getAdId()).isEqualTo(123);
     assertThat(commandArgument.getValue().getPhoto()).isEqualTo(image);

@@ -28,7 +28,7 @@ public class MessageThreadListControllerTest {
     MessageThreadView messageThreadView = new MessageThreadView();
     when(service.threads(user)).thenReturn(asList(messageThreadView));
 
-    List<MessageThreadView> threads = controller.handle(user, null, null);
+    List<MessageThreadView> threads = controller.handleAfterLogin(user, null, null);
 
     assertThat(threads).containsExactly(messageThreadView);
   }

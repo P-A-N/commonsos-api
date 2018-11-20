@@ -31,7 +31,7 @@ public class UserAvatarUpdateControllerTest {
     doReturn(image).when(controller).image(request);
     when(userService.updateAvatar(user, image)).thenReturn("/url");
 
-    String result = controller.handle(user, request, null);
+    String result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo("/url");
   }

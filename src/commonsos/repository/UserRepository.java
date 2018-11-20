@@ -112,7 +112,7 @@ public class UserRepository extends Repository {
   public Optional<User> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM User WHERE id = :id AND deleted = FALSE", User.class)
-//        .setLockMode(lockMode())
+        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
