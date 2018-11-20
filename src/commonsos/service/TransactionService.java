@@ -60,16 +60,20 @@ public class TransactionService {
   }
 
   public TransactionView view(User user, Transaction transaction) {
-    User remitter = userRepository.findStrictById(transaction.getRemitterId());
-    User beneficiary = userRepository.findStrictById(transaction.getBeneficiaryId());
-    return new TransactionView()
-      .setRemitter(UserUtil.view(remitter))
-      .setBeneficiary(UserUtil.view(beneficiary))
+    TransactionView view = new TransactionView()
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
       .setCreatedAt(transaction.getCreatedAt())
       .setCompleted(transaction.getBlockchainCompletedAt() != null)
       .setDebit(isDebit(user, transaction));
+
+    Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
+    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
+    
+    if (remitter.isPresent()) view.setRemitter(UserUtil.view(remitter.get()));
+    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.view(beneficiary.get()));
+    
+    return view;
   }
 
   public Transaction create(User user, TransactionCreateCommand command) {
