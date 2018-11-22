@@ -85,8 +85,15 @@ public class TransactionService {
 
     if (command.getAdId() != null) {
       Ad ad = adRepository.findStrict(command.getAdId());
-      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException();
-      if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
+      
+      // TODO this is temporary solution.
+//      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException();
+//      if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
+      if (AdUtil.isPayableByUser(user, ad)) {
+        if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
+      } else {
+        command.setAdId(null);
+      }
     }
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
