@@ -49,10 +49,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BlockchainService {
 
-  public static final BigInteger ETHER_TRANSFER_GAS_LIMIT = new BigInteger("21000");
-  public static final BigInteger TOKEN_TRANSFER_GAS_LIMIT = new BigInteger("90000");
-  public static final BigInteger TOKEN_TRANSFER_FROM_GAS_LIMIT = new BigInteger("90000");
-  public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("2625681");
+  public static final BigInteger ETHER_TRANSFER_GAS_LIMIT = new BigInteger("100000"); // 21000 original
+  public static final BigInteger TOKEN_TRANSFER_GAS_LIMIT = new BigInteger("200000"); // 90000 original
+  public static final BigInteger TOKEN_TRANSFER_FROM_GAS_LIMIT = new BigInteger("200000"); // 90000 original
+  public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("10000000"); // 2625681 original
   public static final BigInteger GAS_PRICE = new BigInteger("18000000000");
 
   private static final int NUMBER_OF_DECIMALS = 18;
