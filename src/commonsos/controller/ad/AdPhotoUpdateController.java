@@ -1,18 +1,18 @@
 package commonsos.controller.ad;
 
-import commonsos.controller.Controller;
-import commonsos.domain.ad.AdPhotoUpdateCommand;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.auth.User;
+import javax.inject.Inject;
+
+import commonsos.controller.AfterLoginController;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.service.command.AdPhotoUpdateCommand;
 import spark.Request;
 import spark.Response;
 
-import javax.inject.Inject;
-
-public class AdPhotoUpdateController extends Controller {
+public class AdPhotoUpdateController extends AfterLoginController {
   @Inject AdService service;
 
-  @Override protected String handle(User user, Request request, Response response) {
+  @Override protected String handleAfterLogin(User user, Request request, Response response) {
     long adId = Long.parseLong(request.params("id"));
     return service.updatePhoto(user, new AdPhotoUpdateCommand().setAdId(adId).setPhoto(image(request)));
   }

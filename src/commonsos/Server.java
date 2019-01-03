@@ -1,49 +1,92 @@
 package commonsos;
 
+import static spark.Spark.before;
+import static spark.Spark.exception;
+import static spark.Spark.get;
+import static spark.Spark.post;
+
+import org.web3j.protocol.Web3j;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-import com.google.inject.*;
-import commonsos.controller.ad.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.Module;
+
+import commonsos.controller.JsonTransformer;
+import commonsos.controller.ad.AdController;
+import commonsos.controller.ad.AdCreateController;
+import commonsos.controller.ad.AdDeleteController;
+import commonsos.controller.ad.AdListController;
+import commonsos.controller.ad.AdPhotoUpdateController;
+import commonsos.controller.ad.AdUpdateController;
+import commonsos.controller.ad.MyAdsController;
 import commonsos.controller.admin.UserSearchController;
-import commonsos.controller.auth.*;
+import commonsos.controller.auth.PasswordResetRequestCheckController;
+import commonsos.controller.auth.CreateAccountCompleteController;
+import commonsos.controller.auth.CreateAccountTemporaryController;
+import commonsos.controller.auth.LoginController;
+import commonsos.controller.auth.LogoutController;
+import commonsos.controller.auth.PasswordResetController;
+import commonsos.controller.auth.PasswordResetRequestController;
 import commonsos.controller.community.CommunityListController;
-import commonsos.controller.message.*;
+import commonsos.controller.message.GroupMessageThreadController;
+import commonsos.controller.message.GroupMessageThreadUpdateController;
+import commonsos.controller.message.MessageListController;
+import commonsos.controller.message.MessagePostController;
+import commonsos.controller.message.MessageThreadController;
+import commonsos.controller.message.MessageThreadForAdController;
+import commonsos.controller.message.MessageThreadListController;
+import commonsos.controller.message.MessageThreadUnreadCountController;
+import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
-import commonsos.domain.blockchain.BlockchainEventService;
+import commonsos.controller.user.UpdateEmailCompleteController;
+import commonsos.controller.user.UpdateEmailTemporaryController;
+import commonsos.controller.user.UserAvatarUpdateController;
+import commonsos.controller.user.UserController;
+import commonsos.controller.user.UserDeleteController;
+import commonsos.controller.user.UserMobileDeviceUpdateController;
+import commonsos.controller.user.UserUpdateController;
+import commonsos.di.GsonProvider;
+import commonsos.di.Web3jProvider;
+import commonsos.exception.AuthenticationException;
+import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
+import commonsos.exception.ForbiddenException;
+import commonsos.filter.LogFilter;
+import commonsos.interceptor.TransactionInterceptor;
+import commonsos.repository.DatabaseMigrator;
+import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
-import org.web3j.protocol.Web3j;
 import spark.Request;
-
-import java.util.stream.Stream;
-
-import static java.util.Arrays.asList;
-import static spark.Spark.*;
 
 @Slf4j
 public class Server {
 
   @Inject private JsonTransformer toJson;
   @Inject private DatabaseMigrator databaseMigrator;
-  @Inject private DemoData demoData;
   @Inject private BlockchainEventService blockchainEventService;
+  private Injector injector;
 
-  private void start(String[] args) {
-    Injector injector = initDependencies();
+  public void start(String[] args) {
+    injector = initDependencies();
     databaseMigrator.execute();
     CookieSecuringEmbeddedJettyFactory.register();
-    initRoutes(injector);
+    setupServer();
+    initRoutes();
     blockchainEventService.listenEvents();
-    if (demoDataEnabled(args)) demoData.install();
+  }
+  
+  protected void setupServer() {
+    // nothing to setup in production server.
   }
 
-  private boolean demoDataEnabled(String[] args) {
-    return Stream.of(args).map(String::toLowerCase).anyMatch(s -> s.equals("--demodata"));
-  }
-
-  private Injector initDependencies() {
+  protected Injector initDependencies() {
     Module module = new AbstractModule() {
       @Override protected void configure() {
         bind(Gson.class).toProvider(GsonProvider.class);
@@ -57,26 +100,35 @@ public class Server {
     return injector;
   }
 
-  private void initRoutes(Injector injector) {
+  private void initRoutes() {
 
+    before((request, response) -> response.type("application/json"));
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
 //    before(new CSRFFilter(asList("/login", "/logout", "/create-account")));
-    before(new AuthenticationFilter(asList("/login", "/logout", "/create-account", "/communities")));
 
     post("/login", injector.getInstance(LoginController.class), toJson);
-    post("/create-account", injector.getInstance(AccountCreateController.class), toJson);
     post("/logout", injector.getInstance(LogoutController.class), toJson);
+    post("/create-account", injector.getInstance(CreateAccountTemporaryController.class), toJson);
+    post("/create-account/:accessId", injector.getInstance(CreateAccountCompleteController.class), toJson);
     get("/user", injector.getInstance(UserController.class), toJson);
     get("/users/:id", injector.getInstance(UserController.class), toJson);
     post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);
+    post("/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
+    post("/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
+    post("/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
+    post("/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);
+    get("/passwordreset/:accessId", injector.getInstance(PasswordResetRequestCheckController.class), toJson);
+    post("/passwordreset/:accessId", injector.getInstance(PasswordResetController.class), toJson);
 
     post("/ads", injector.getInstance(AdCreateController.class), toJson);
     get("/ads", injector.getInstance(AdListController.class), toJson);
     get("/ads/:id", injector.getInstance(AdController.class), toJson);
+    post("/ads/:id", injector.getInstance(AdUpdateController.class), toJson);
+    post("/ads/:id/delete", injector.getInstance(AdDeleteController.class), toJson);
     post("/ads/:id/photo", injector.getInstance(AdPhotoUpdateController.class), toJson);
     get("/my-ads", injector.getInstance(MyAdsController.class), toJson);
 

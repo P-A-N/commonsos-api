@@ -1,20 +1,22 @@
 package commonsos.controller.ad;
 
-import commonsos.controller.Controller;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.ad.AdView;
-import commonsos.domain.auth.User;
-import spark.Request;
-import spark.Response;
+import static java.lang.Long.parseLong;
 
 import javax.inject.Inject;
 
-import static java.lang.Long.parseLong;
+import commonsos.annotation.ReadOnly;
+import commonsos.controller.AfterLoginController;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import commonsos.view.AdView;
+import spark.Request;
+import spark.Response;
 
-public class AdController extends Controller {
+@ReadOnly
+public class AdController extends AfterLoginController {
   @Inject AdService service;
 
-  @Override public AdView handle(User user, Request request, Response response) {
+  @Override public AdView handleAfterLogin(User user, Request request, Response response) {
     return service.view(user, parseLong(request.params("id")));
   }
 }

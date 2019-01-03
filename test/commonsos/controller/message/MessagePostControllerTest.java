@@ -1,10 +1,11 @@
 package commonsos.controller.message;
 
-import commonsos.GsonProvider;
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessagePostCommand;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageView;
+import commonsos.di.GsonProvider;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.service.command.MessagePostCommand;
+import commonsos.view.MessageView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +37,7 @@ public class MessagePostControllerTest {
     MessageView messageView = new MessageView();
     when(service.postMessage(user, command)).thenReturn(messageView);
 
-    MessageView result = controller.handle(user, request, null);
+    MessageView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(messageView);
   }

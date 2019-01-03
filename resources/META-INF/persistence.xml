@@ -9,13 +9,16 @@
 
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-    <class>commonsos.domain.auth.User</class>
-    <class>commonsos.domain.ad.Ad</class>
-    <class>commonsos.domain.transaction.Transaction</class>
-    <class>commonsos.domain.message.Message</class>
-    <class>commonsos.domain.message.MessageThread</class>
-    <class>commonsos.domain.message.MessageThreadParty</class>
-    <class>commonsos.domain.community.Community</class>
+    <class>commonsos.repository.entity.User</class>
+    <class>commonsos.repository.entity.Ad</class>
+    <class>commonsos.repository.entity.Transaction</class>
+    <class>commonsos.repository.entity.Message</class>
+    <class>commonsos.repository.entity.MessageThread</class>
+    <class>commonsos.repository.entity.MessageThreadParty</class>
+    <class>commonsos.repository.entity.Community</class>
+    <class>commonsos.repository.entity.TemporaryUser</class>
+    <class>commonsos.repository.entity.TemporaryEmailAddress</class>
+    <class>commonsos.repository.entity.PasswordResetRequest</class>
 
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
@@ -23,9 +26,9 @@
       <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL95Dialect" />
       <property name="hibernate.hbm2ddl.auto" value="none" />
-      <property name="hibernate.physical_naming_strategy" value="commonsos.PhysicalNamingStrategyImpl"/>
+      <property name="hibernate.physical_naming_strategy" value="commonsos.repository.PhysicalNamingStrategyImpl"/>
       <property name="hibernate.show_sql" value="false" />
-      <property name="hibernate.format_sql" value="true" />
+      <property name="hibernate.format_sql" value="false" />
       <property name="hibernate.connection.provider_class"
                 value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" />
       <property name="hibernate.c3p0.max_size" value="100" />
