@@ -188,7 +188,8 @@ public class UserRepository extends Repository {
       "SELECT u FROM User u JOIN u.communityList c " +
       "WHERE c.id = :communityId " +
       "AND u.deleted = FALSE " +
-      "AND LOWER(u.username) LIKE LOWER(:query)", User.class)
+      "AND LOWER(u.username) LIKE LOWER(:query) " +
+      "ORDER BY u.id", User.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("query", "%"+query+"%")

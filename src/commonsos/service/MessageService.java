@@ -35,10 +35,8 @@ import commonsos.view.AdView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
 import commonsos.view.UserView;
-import lombok.extern.slf4j.Slf4j;
 
 @Singleton
-@Slf4j
 public class MessageService {
 
   @Inject private MessageThreadRepository messageThreadRepository;
@@ -141,6 +139,7 @@ public class MessageService {
       .filter(p -> !p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
       .map(UserUtil::view)
+      .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .collect(toList());
 
     UserView creator = thread.getParties().stream()
@@ -150,6 +149,7 @@ public class MessageService {
 
     UserView counterParty = concat(parties.stream(), of(creator))
       .filter(uv -> uv != null && uv.getId() != user.getId())
+      .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .findFirst().orElse(null);
 
     AdView ad = thread.getAdId() == null ? null : adService.view(user, thread.getAdId());

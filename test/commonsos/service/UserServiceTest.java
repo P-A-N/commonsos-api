@@ -36,6 +36,7 @@ import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.CreateAccountTemporaryCommand;
@@ -102,21 +103,19 @@ public class UserServiceTest {
   }
 
   @Test
-  public void create_noWait() {
+  public void createAccountComplete_noWait() {
     // prepare
-    doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
-    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findStrictById(any())).thenReturn(new Community());
-    Credentials credentials = mock(Credentials.class);
-    when(credentials.getAddress()).thenReturn("wallet address");
-    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
+    
+    TemporaryUser tempUser = new TemporaryUser()
+        .setWaitUntilCompleted(true)
+        .setCommunityList(asList(new Community(), new Community()));
+    when(userRepository.findStrictTemporaryUser(any())).thenReturn(tempUser);
+    
+    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
 
     // execute
-    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand()
-        .setCommunityList(asList(1L,2L))
-        .setWaitUntilCompleted(true);
-    userService.create(command);
+    userService.createAccountComplete("accessId");
     
     // verify
     verify(jobService, never()).submit(any(), any());
@@ -124,21 +123,19 @@ public class UserServiceTest {
   }
 
   @Test
-  public void create_wait() {
+  public void createAccountComplete_wait() {
     // prepare
-    doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(true);
-    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-    when(communityRepository.findStrictById(any())).thenReturn(new Community());
-    Credentials credentials = mock(Credentials.class);
-    when(credentials.getAddress()).thenReturn("wallet address");
-    when(blockchainService.credentials(any(), any())).thenReturn(credentials);
+    
+    TemporaryUser tempUser = new TemporaryUser()
+        .setWaitUntilCompleted(false)
+        .setCommunityList(asList(new Community(), new Community()));
+    when(userRepository.findStrictTemporaryUser(any())).thenReturn(tempUser);
+    
+    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
 
     // execute
-    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand()
-        .setCommunityList(asList(1L,2L))
-        .setWaitUntilCompleted(false);
-    userService.create(command);
+    userService.createAccountComplete("accessId");
     
     // verify
     verify(jobService, times(2)).submit(any(), any());
@@ -156,8 +153,23 @@ public class UserServiceTest {
   }
 
   @Test(expected = BadRequestException.class)
-  public void validate_username_less_length() {
+  public void validate_username_less_length1() {
     userService.validate(validCommand().setUsername("123"));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validate_username_less_length2() {
+    userService.validate(validCommand().setUsername("１２３"));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validate_username_less_length3() {
+    userService.validate(validCommand().setUsername("🍺🍺🍺"));
+  }
+
+  @Test
+  public void validate_password_valid() {
+    userService.validatePassword("abcdefghijklmnopqrstuvwxyz!\"#$%&'()-=~^\\|@`[{;+:*]},<.>/?_");
   }
 
   @Test(expected = BadRequestException.class)
@@ -170,20 +182,58 @@ public class UserServiceTest {
     userService.validate(validCommand().setPassword("1234567"));
   }
 
+  @Test(expected = DisplayableException.class)
+  public void validate_password_unicode() {
+    userService.validate(validCommand().setPassword("１２３４５６７８"));
+  }
+
+  @Test(expected = DisplayableException.class)
+  public void validate_password_space() {
+    userService.validate(validCommand().setPassword("1 2 3 4 5 6 7 8"));
+  }
+
   @Test(expected = BadRequestException.class)
   public void validate_emailAddress_null() {
     userService.validate(validCommand().setEmailAddress(null));
   }
 
   @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid() {
+  public void validate_emailAddress_invalid1() {
     userService.validate(validCommand().setEmailAddress(""));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid2() {
     userService.validate(validCommand().setEmailAddress("aaa"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid3() {
     userService.validate(validCommand().setEmailAddress("a.@test.com"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid4() {
     userService.validate(validCommand().setEmailAddress("a<b@test.com"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid5() {
     userService.validate(validCommand().setEmailAddress("a>b@test.com"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid6() {
     userService.validate(validCommand().setEmailAddress("a@test<com"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid7() {
     userService.validate(validCommand().setEmailAddress("a@test>com"));
+  }
+  
+  @Test(expected = BadRequestException.class)
+  public void validate_emailAddress_invalid8() {
     userService.validate(validCommand().setEmailAddress("a@a@a.com"));
   }
 
@@ -195,48 +245,68 @@ public class UserServiceTest {
   }
 
   @Test
-  public void create_failFastIfBlockchainIsDown() {
+  public void validate_status_valid() {
+    userService.validateStatus(null);
+    userService.validateStatus("");
+    userService.validateStatus("12345678901234567890123456789012345678901234567890"); // length = 50, ascii
+    userService.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０"); // length = 50, utf-8
+    userService.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 50, 4 byte unicode
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validate_status_invalid1() {
+    userService.validateStatus("123456789012345678901234567890123456789012345678901"); // length = 51, ascii
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validate_status_invalid2() {
+    userService.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１"); // length = 51, utf-8
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validate_status_invalid3() {
+    userService.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 51, 4 byte unicode
+  }
+
+  @Test
+  public void createAccountComplete_failFastIfBlockchainIsDown() {
     // prepare
-    doNothing().when(userService).validate(any());
     when(blockchainService.isConnected()).thenReturn(false);
     
     // execute
-    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
-    RuntimeException thrown = catchThrowableOfType(() -> userService.create(command), RuntimeException.class);
+    RuntimeException thrown = catchThrowableOfType(() -> userService.createAccountComplete("accessId"), RuntimeException.class);
 
     // verify
     assertThat(thrown).hasMessage("Cannot create user, technical error with blockchain");
   }
 
   @Test
-  public void create_usernameAlreadyTaken() {
+  public void createAccountTemporary_usernameAlreadyTaken() {
     // prepare
     doNothing().when(userService).validate(any());
-    when(blockchainService.isConnected()).thenReturn(true);
-    when(userRepository.findByUsername(any())).thenReturn(Optional.of(new User()));
+    when(userRepository.isUsernameTaken(any())).thenReturn(true);
 
     // execute
     CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
-    DisplayableException thrown = catchThrowableOfType(() -> userService.create(command), DisplayableException.class);
+    DisplayableException thrown = catchThrowableOfType(() -> userService.createAccountTemporary(command), DisplayableException.class);
 
     // verify
     assertThat(thrown).hasMessage("error.usernameTaken");
   }
 
   @Test
-  public void create_communityIsOptional() {
+  public void createAccountTemporary_emailAddressAlreadyTaken() {
     // prepare
     doNothing().when(userService).validate(any());
-    when(blockchainService.isConnected()).thenReturn(true);
-    when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
-    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
-    
+    when(userRepository.isUsernameTaken(any())).thenReturn(false);
+    when(userRepository.isEmailAddressTaken(any())).thenReturn(true);
+
     // execute
-    userService.create(new CreateAccountTemporaryCommand());
+    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
+    DisplayableException thrown = catchThrowableOfType(() -> userService.createAccountTemporary(command), DisplayableException.class);
 
     // verify
-    verify(jobService, never()).submit(any(), any());
-    verify(jobService, never()).execute(any());
+    assertThat(thrown).hasMessage("error.emailAddressTaken");
   }
 
   @Test

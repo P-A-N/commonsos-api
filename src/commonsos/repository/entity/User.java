@@ -29,6 +29,7 @@ public class User {
   private String description;
   private String location;
   private String avatarUrl;
+  private String status;
   private String wallet;
   private String walletAddress;
   private String pushNotificationToken;

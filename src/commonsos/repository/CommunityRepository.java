@@ -28,7 +28,7 @@ public class CommunityRepository extends Repository {
   }
 
   public List<Community> list() {
-    return em().createQuery("FROM Community WHERE tokenContractAddress IS NOT NULL", Community.class)
+    return em().createQuery("FROM Community WHERE tokenContractAddress IS NOT NULL ORDER BY id", Community.class)
         .setLockMode(lockMode())
         .getResultList();
   }

@@ -17,6 +17,7 @@ import lombok.experimental.Accessors;
 public class Community {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
   String name;
+  String description;
   String tokenContractAddress;
   @OneToOne
   @JoinColumn(name = "admin_user_id")

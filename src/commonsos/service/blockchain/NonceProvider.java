@@ -1,12 +1,7 @@
 package commonsos.service.blockchain;
 
-import lombok.extern.slf4j.Slf4j;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import static java.lang.String.format;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +9,14 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-import static java.lang.String.format;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
@@ -22,7 +24,7 @@ public class NonceProvider {
 
   @Inject private Web3j web3j;
 
-  private ConcurrentMap<String, AtomicLong> userNonce = new ConcurrentHashMap();
+  private ConcurrentMap<String, AtomicLong> userNonce = new ConcurrentHashMap<>();
 
   BigInteger nonceFor(String address) {
     userNonce.computeIfAbsent(address, networkNonceProvider());

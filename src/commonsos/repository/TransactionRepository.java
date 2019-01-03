@@ -32,7 +32,8 @@ public class TransactionRepository extends Repository {
   public List<Transaction> transactions(User user, Long communityId) {
     return em()
       .createQuery("FROM Transaction WHERE communityId = :communityId " +
-          "AND (beneficiaryId = :userId OR remitterId = :userId)", Transaction.class)
+          "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
+          "ORDER BY id", Transaction.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())

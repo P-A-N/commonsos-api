@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.web3j.crypto.Credentials;
 
@@ -37,6 +38,9 @@ import commonsos.service.command.CreateAccountTemporaryCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
+import commonsos.service.command.UserNameUpdateCommand;
+import commonsos.service.command.UserPasswordUpdateCommand;
+import commonsos.service.command.UserStatusUpdateCommand;
 import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
@@ -44,6 +48,7 @@ import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
+import commonsos.util.StringUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.BalanceView;
 import commonsos.view.CommunityView;
@@ -145,7 +150,8 @@ public class UserService {
         .setLastName(tempUser.getLastName())
         .setDescription(tempUser.getDescription())
         .setLocation(tempUser.getLocation())
-        .setEmailAddress(tempUser.getEmailAddress());
+        .setEmailAddress(tempUser.getEmailAddress())
+        .setStatus("");
 
     String wallet = blockchainService.createWallet(WALLET_PASSWORD);
     Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
@@ -165,46 +171,7 @@ public class UserService {
     userRepository.updateTemporary(tempUser.setInvalid(true));
     return userRepository.create(user);
   }
-
-  public User create(CreateAccountTemporaryCommand command) {
-    validate(command);
-    if (!blockchainService.isConnected()) throw new RuntimeException("Cannot create user, technical error with blockchain");
-    if (userRepository.findByUsername(command.getUsername()).isPresent()) throw new DisplayableException("error.usernameTaken");
-    List<Community> communityList = new ArrayList<>();
-    if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
-      communityList = communityList(command.getCommunityList());
-    }
-    User user = new User()
-      .setCommunityList(communityList)
-      .setUsername(command.getUsername())
-      .setPasswordHash(cryptoService.encryptoPassword(command.getPassword()))
-      .setFirstName(command.getFirstName())
-      .setLastName(command.getLastName())
-      .setDescription(command.getDescription())
-      .setLocation(command.getLocation())
-      .setEmailAddress(command.getEmailAddress());
-
-    String wallet = blockchainService.createWallet(WALLET_PASSWORD);
-    Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
-
-    user.setWallet(wallet);
-    user.setWalletAddress(credentials.getAddress());
-
-    communityList.forEach(c -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, c);
-      if (command.isWaitUntilCompleted())
-        jobService.execute(task);
-      else
-        jobService.submit(user, task);
-    });
-
-    userRepository.create(user);
-    
-    emailService.sendCreateAccountTemporary(user.getEmailAddress(), user.getUsername(), "11111111111111");
-    
-    return user;
-  }
-
+  
   public void updateEmailTemporary(UpdateEmailTemporaryCommand command) {
     validateEmailAddress(command.getNewEmailAddress());
     User user = userRepository.findStrictById(command.getUserId());
@@ -301,10 +268,15 @@ public class UserService {
   
   void validatePassword(String password) {
     if (password == null || password.length() < 8) throw new BadRequestException("invalid password");
+    if (!StringUtils.isAsciiPrintable(password) || password.contains(" ")) throw new DisplayableException("error.invalid_character_in_password");
   }
   
   void validateUsername(String username) {
-    if (username == null || username.length() < 4) throw new BadRequestException("invalid username");
+    if (username == null || StringUtil.unicodeLength(username) < 4) throw new BadRequestException("invalid username");
+  }
+
+  void validateStatus(String status) {
+    if (status != null && StringUtil.unicodeLength(status) > 50) throw new BadRequestException("invalid status");
   }
   
   public UserView view(Long id) {
@@ -338,6 +310,28 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
+    return userRepository.update(user);
+  }
+
+  public User updateUserName(User user, UserNameUpdateCommand command) {
+    validateUsername(command.getUsername());
+    if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
+    
+    user.setUsername(command.getUsername());
+    return userRepository.update(user);
+  }
+
+  public User updateStatus(User user, UserStatusUpdateCommand command) {
+    validateStatus(command.getStatus());
+    
+    user.setStatus(command.getStatus());
+    return userRepository.update(user);
+  }
+
+  public User updatePassword(User user, UserPasswordUpdateCommand command) {
+    validatePassword(command.getPassword());
+
+    user.setPasswordHash(cryptoService.encryptoPassword(command.getPassword()));
     return userRepository.update(user);
   }
 

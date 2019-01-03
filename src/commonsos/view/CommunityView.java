@@ -9,4 +9,5 @@ public class CommunityView {
   private Long id;
   private String name;
   private Long adminUserId;
+  private String description;
 }

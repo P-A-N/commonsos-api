@@ -19,6 +19,7 @@ public class UserUtil {
         .setId(user.getId())
         .setFullName(fullName(user))
         .setUsername(user.getUsername())
+        .setStatus(user.getStatus())
         .setLocation(user.getLocation())
         .setDescription(user.getDescription())
         .setAvatarUrl(user.getAvatarUrl());
@@ -32,6 +33,7 @@ public class UserUtil {
       .setFirstName(user.getFirstName())
       .setLastName(user.getLastName())
       .setUsername(user.getUsername())
+      .setStatus(user.getStatus())
       .setCommunityList(communityList)
       .setLocation(user.getLocation())
       .setDescription(user.getDescription())

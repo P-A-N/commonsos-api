@@ -192,21 +192,21 @@ public class MessageServiceTest {
 
   @Test
   public void messageThreadView() {
-    User user = new User().setId(id("myself"));
+    User user = new User().setId(id("myself_mtv"));
     MessageThread messageThread = new MessageThread()
-      .setCreatedBy(id("creator"))
+      .setCreatedBy(id("creator_mtv"))
       .setParties(asList(
           party(user),
-          party(new User().setId(id("creator"))),
-          party(new User().setId(id("other")))));
+          party(new User().setId(id("creator_mtv"))),
+          party(new User().setId(id("other_mtv")))));
 
     MessageThreadView view = service.view(user, messageThread);
 
     assertThat(view.getParties().size()).isEqualTo(2);
-    assertThat(view.getParties().get(0).getId()).isEqualTo(id("myself"));
-    assertThat(view.getParties().get(1).getId()).isEqualTo(id("other"));
-    assertThat(view.getCreator().getId()).isEqualTo(id("creator"));
-    assertThat(view.getCounterParty().getId()).isEqualTo(id("other"));
+    assertThat(view.getParties().get(0).getId()).isEqualTo(id("myself_mtv"));
+    assertThat(view.getParties().get(1).getId()).isEqualTo(id("other_mtv"));
+    assertThat(view.getCreator().getId()).isEqualTo(id("creator_mtv"));
+    assertThat(view.getCounterParty().getId()).isEqualTo(id("creator_mtv"));
   }
 
   @Test
@@ -354,11 +354,11 @@ public class MessageServiceTest {
   @Test
   public void view_group() {
     // prepare
-    User user = new User().setId(id("user2"));
-    MessageThread thread = new MessageThread().setGroup(true).setCreatedBy(id("user1")).setParties(asList(
-        new MessageThreadParty().setUser(new User().setId(id("user1"))),
-        new MessageThreadParty().setUser(new User().setId(id("user2"))),
-        new MessageThreadParty().setUser(new User().setId(id("user3")))
+    User user = new User().setId(id("user2_v_g"));
+    MessageThread thread = new MessageThread().setGroup(true).setCreatedBy(id("user1_v_g")).setParties(asList(
+        new MessageThreadParty().setUser(new User().setId(id("user1_v_g"))),
+        new MessageThreadParty().setUser(new User().setId(id("user2_v_g"))),
+        new MessageThreadParty().setUser(new User().setId(id("user3_v_g")))
         ));
 
     when(messageRepository.lastMessage(any())).thenReturn(Optional.empty());
@@ -370,12 +370,12 @@ public class MessageServiceTest {
     assertThat(result.getAd()).isNull();
     
     assertThat(result.getParties().size()).isEqualTo(2);
-    assertThat(result.getParties().get(0).getId()).isEqualTo(id("user2"));
-    assertThat(result.getParties().get(1).getId()).isEqualTo(id("user3"));
+    assertThat(result.getParties().get(0).getId()).isEqualTo(id("user2_v_g"));
+    assertThat(result.getParties().get(1).getId()).isEqualTo(id("user3_v_g"));
 
-    assertThat(result.getCreator().getId()).isEqualTo(id("user1"));
+    assertThat(result.getCreator().getId()).isEqualTo(id("user1_v_g"));
     
-    assertThat(result.getCounterParty().getId()).isEqualTo(id("user3"));
+    assertThat(result.getCounterParty().getId()).isEqualTo(id("user1_v_g"));
   }
 
   @Test
@@ -400,10 +400,10 @@ public class MessageServiceTest {
   @Test
   public void view_between_user() {
     // prepare
-    User user = new User().setId(id("user2"));
-    MessageThread thread = new MessageThread().setGroup(false).setCreatedBy(id("user1")).setParties(asList(
-        new MessageThreadParty().setUser(new User().setId(id("user1"))),
-        new MessageThreadParty().setUser(new User().setId(id("user2")))
+    User user = new User().setId(id("user2_v_b_u"));
+    MessageThread thread = new MessageThread().setGroup(false).setCreatedBy(id("user1_v_b_u")).setParties(asList(
+        new MessageThreadParty().setUser(new User().setId(id("user1_v_b_u"))),
+        new MessageThreadParty().setUser(new User().setId(id("user2_v_b_u")))
         ));
 
     when(messageRepository.lastMessage(any())).thenReturn(Optional.empty());
@@ -415,11 +415,11 @@ public class MessageServiceTest {
     assertThat(result.getAd()).isNull();
     
     assertThat(result.getParties().size()).isEqualTo(1);
-    assertThat(result.getParties().get(0).getId()).isEqualTo(id("user2"));
+    assertThat(result.getParties().get(0).getId()).isEqualTo(id("user2_v_b_u"));
 
-    assertThat(result.getCreator().getId()).isEqualTo(id("user1"));
+    assertThat(result.getCreator().getId()).isEqualTo(id("user1_v_b_u"));
     
-    assertThat(result.getCounterParty().getId()).isEqualTo(id("user1"));
+    assertThat(result.getCounterParty().getId()).isEqualTo(id("user1_v_b_u"));
   }
 
   @Test(expected = ForbiddenException.class)
@@ -448,28 +448,28 @@ public class MessageServiceTest {
   public void updateGroup() {
     // prepare
     MessageThread messageThread = new MessageThread().setGroup(true).setParties(new ArrayList<>(asList(
-        new MessageThreadParty().setUser(new User().setId(id("user1"))),
-        new MessageThreadParty().setUser(new User().setId(id("user2")))
+        new MessageThreadParty().setUser(new User().setId(id("user1_ug"))),
+        new MessageThreadParty().setUser(new User().setId(id("user2_ug")))
         )));
     when(messageThreadRepository.thread(any())).thenReturn(Optional.of(messageThread));
     
     List<User> givenUsers = asList(
-        new User().setId(id("user2")),
-        new User().setId(id("user3"))
+        new User().setId(id("user2_ug")),
+        new User().setId(id("user3_ug"))
         );
     doReturn(givenUsers).when(service).validatePartiesCommunity(any());
     doReturn(null).when(service).view(any(), any());
     
     // execute
-    service.updateGroup(new User().setId(id("user1")), new GroupMessageThreadUpdateCommand());
+    service.updateGroup(new User().setId(id("user1_ug")), new GroupMessageThreadUpdateCommand());
     
     // verify
     verify(messageThreadRepository).update(messageThreadArgumentCaptor.capture());
     MessageThread updated = messageThreadArgumentCaptor.getValue();
     assertThat(updated.getParties().size()).isEqualTo(3);
-    assertThat(updated.getParties().get(0).getUser().getId()).isEqualTo(id("user1"));
-    assertThat(updated.getParties().get(1).getUser().getId()).isEqualTo(id("user2"));
-    assertThat(updated.getParties().get(2).getUser().getId()).isEqualTo(id("user3"));
+    assertThat(updated.getParties().get(0).getUser().getId()).isEqualTo(id("user1_ug"));
+    assertThat(updated.getParties().get(1).getUser().getId()).isEqualTo(id("user2_ug"));
+    assertThat(updated.getParties().get(2).getUser().getId()).isEqualTo(id("user3_ug"));
   }
 
   @Test(expected = UserNotFoundException.class)

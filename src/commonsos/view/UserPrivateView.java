@@ -13,6 +13,7 @@ public class UserPrivateView {
   private String firstName;
   private String lastName;
   private String username;
+  private String status;
   private List<CommunityView> communityList;
   private String description;
   private List<BalanceView> balanceList;

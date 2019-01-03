@@ -4,6 +4,7 @@ import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
 public class PhysicalNamingStrategyImpl extends org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl {
+  private static final long serialVersionUID = 1L;
 
   public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment context) {
     return context.getIdentifierHelper().toIdentifier(

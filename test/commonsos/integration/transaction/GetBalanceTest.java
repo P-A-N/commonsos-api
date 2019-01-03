@@ -15,13 +15,13 @@ import commonsos.repository.entity.User;
 public class GetBalanceTest extends IntegrationTest {
 
   private Community community;
-  private User user;
+//  private User user;
   private String sessionId;
   
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    /* user = */ create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
 
     sessionId = login("user", "pass");
   }

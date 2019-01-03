@@ -26,7 +26,7 @@ public class AdRepository extends Repository {
 
   public List<Ad> ads(Long communityId) {
     return em()
-      .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE", Ad.class)
+      .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE ORDER BY id", Ad.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId).getResultList();
   }
@@ -39,7 +39,8 @@ public class AdRepository extends Repository {
         " AND (" +
           " LOWER(a.description) LIKE LOWER(:filter) OR LOWER(a.title) LIKE LOWER(:filter) " +
           " OR LOWER(u.username) LIKE LOWER(:filter) " +
-        " )", Ad.class)
+        " )" +
+        " ORDER BY a.id", Ad.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("filter", "%"+filter+"%")
@@ -48,7 +49,7 @@ public class AdRepository extends Repository {
 
   public List<Ad> myAds(List<Long> communityIdList, Long userId) {
     return em()
-      .createQuery("FROM Ad WHERE communityId in :communityIdList AND createdBy = :userId AND deleted = FALSE", Ad.class)
+      .createQuery("FROM Ad WHERE communityId in :communityIdList AND createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
       .setLockMode(lockMode())
       .setParameter("communityIdList", communityIdList)
       .setParameter("userId", userId)

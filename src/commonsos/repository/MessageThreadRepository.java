@@ -62,7 +62,7 @@ public class MessageThreadRepository extends Repository {
 
   public List<MessageThread> listByUser(User user) {
     return em()
-      .createQuery("SELECT mt FROM MessageThread mt JOIN mt.parties p WHERE p.user = :user", MessageThread.class)
+      .createQuery("SELECT mt FROM MessageThread mt JOIN mt.parties p WHERE p.user = :user ORDER BY mt.id", MessageThread.class)
       .setLockMode(lockMode())
       .setParameter("user", user)
       .getResultList();
@@ -93,7 +93,8 @@ public class MessageThreadRepository extends Repository {
         "FROM MessageThread mt JOIN MessageThreadParty mtp ON mt.id = mtp.messageThreadId " +
         "WHERE mtp.user = :user " +
         "AND mt.id IN(SELECT threadId FROM Message WHERE threadId = mt.id) "+
-        "AND (mtp.visitedAt IS NULL OR mtp.visitedAt < (SELECT MAX(m.createdAt) FROM Message m WHERE m.threadId = mt.id))", Long.class)
+        "AND (mtp.visitedAt IS NULL OR mtp.visitedAt < (SELECT MAX(m.createdAt) FROM Message m WHERE m.threadId = mt.id)) " +
+        "ORDER BY mt.id", Long.class)
       .setParameter("user", user).getResultList();
   }
 }

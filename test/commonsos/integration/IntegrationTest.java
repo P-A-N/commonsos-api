@@ -86,6 +86,17 @@ public class IntegrationTest {
     return sessionId;
   }
   
+  public static void failLogin(String username, String password) {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("username", username);
+    requestParam.put("password", password);
+    
+    given()
+      .body(gson.toJson(requestParam))
+      .when().post("/login")
+      .then().statusCode(401);
+  }
+  
   public static <T> T create(T entity) {
     emService.runInTransaction(() -> emService.get().persist(entity));
     emService.close();

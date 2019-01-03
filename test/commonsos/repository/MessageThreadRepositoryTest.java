@@ -14,9 +14,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import commonsos.repository.MessageRepository;
-import commonsos.repository.MessageThreadRepository;
-import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -46,14 +43,18 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
 
   @Test
   public void create() {
+    // prepare
     User myself = inTransaction(() -> userRepository.create(new User().setUsername("myself")));
     User counterparty = inTransaction(() -> userRepository.create(new User().setUsername("counterparty")));
 
+    // execute
     List<MessageThreadParty> parties = asList(party(myself), party(counterparty));
     MessageThread messageThread = new MessageThread().setParties(parties);
     Long id = inTransaction(() -> repository.create(messageThread).getId());
 
+    // verify
     MessageThread result = em().find(MessageThread.class, id);
+    result.getParties().sort((p1,p2) -> p1.getId().compareTo(p2.getId()));
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNotNull();
 
@@ -163,6 +164,7 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
 
 
     MessageThread result = repository.thread(threadId).orElseThrow(RuntimeException::new);
+    result.getParties().sort((p1,p2) -> p1.getId().compareTo(p2.getId()));
     assertThat(result.getParties()).hasSize(2);
     assertThat(result.getParties().get(0).getUser().getUsername()).isEqualTo("first");
     assertThat(result.getParties().get(1).getUser().getUsername()).isEqualTo("second");

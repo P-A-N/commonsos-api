@@ -22,10 +22,6 @@ public class CommunityService {
     return repository.list().stream().map(CommunityUtil::view).collect(toList());
   }
 
-  public CommunityView view(Long id) {
-    return CommunityUtil.view(community(id));
-  }
-
   public Community community(Long id) {
     return repository.findById(id).orElseThrow(() -> new BadRequestException("community not found"));
   }

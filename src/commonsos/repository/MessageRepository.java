@@ -23,7 +23,7 @@ public class MessageRepository extends Repository {
 
   public List<Message> listByThread(Long threadId) {
     return em()
-      .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt", Message.class)
+      .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt, id", Message.class)
       .setLockMode(lockMode())
       .setParameter("threadId", threadId)
       .getResultList();

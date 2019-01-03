@@ -9,6 +9,10 @@ public class CommunityUtil {
 
   public static CommunityView view(Community community) {
     Long adminUserId = community.getAdminUser() == null ? null : community.getAdminUser().getId();
-    return new CommunityView().setId(community.getId()).setName(community.getName()).setAdminUserId(adminUserId);
+    return new CommunityView()
+        .setId(community.getId())
+        .setName(community.getName())
+        .setAdminUserId(adminUserId)
+        .setDescription(community.getDescription());
   }
 }

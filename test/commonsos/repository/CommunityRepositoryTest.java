@@ -7,8 +7,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import commonsos.repository.CommunityRepository;
-import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 
@@ -19,14 +17,22 @@ public class CommunityRepositoryTest extends RepositoryTest {
 
   @Test
   public void findById() {
+    // prepare
     User admin = inTransaction(() -> userRepository.create(new User().setUsername("admin")));
-    Long id = inTransaction(() -> repository.create(new Community().setName("Kaga").setTokenContractAddress("66").setAdminUser(admin))).getId();
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setDescription("description")
+        .setTokenContractAddress("66")
+        .setAdminUser(admin))).getId();
 
+    // execute
     Optional<Community> community = repository.findById(id);
 
+    // verify
     assertThat(community).isNotEmpty();
     assertThat(community.get().getId()).isEqualTo(id);
     assertThat(community.get().getName()).isEqualTo("Kaga");
+    assertThat(community.get().getDescription()).isEqualTo("description");
     assertThat(community.get().getTokenContractAddress()).isEqualTo("66");
     assertThat(community.get().getAdminUser().getId()).isEqualTo(admin.getId());
     assertThat(community.get().getAdminUser().getUsername()).isEqualTo("admin");
@@ -34,13 +40,17 @@ public class CommunityRepositoryTest extends RepositoryTest {
 
   @Test
   public void findById_noAdmin() {
-    Long id = inTransaction(() -> repository.create(new Community().setName("Kaga").setTokenContractAddress("66"))).getId();
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setDescription("description")
+        .setTokenContractAddress("66"))).getId();
 
     Optional<Community> community = repository.findById(id);
 
     assertThat(community).isNotEmpty();
     assertThat(community.get().getId()).isEqualTo(id);
     assertThat(community.get().getName()).isEqualTo("Kaga");
+    assertThat(community.get().getDescription()).isEqualTo("description");
     assertThat(community.get().getTokenContractAddress()).isEqualTo("66");
     assertThat(community.get().getAdminUser()).isNull();
   }
@@ -54,9 +64,9 @@ public class CommunityRepositoryTest extends RepositoryTest {
   public void list() {
     Long adminId = inTransaction(() -> userRepository.create(new User().setUsername("admin"))).getId();
     inTransaction(() -> {
-      em().persist(new Community().setName("community1").setTokenContractAddress("66").setAdminUser(new User().setId(adminId)));
-      em().persist(new Community().setName("community2").setTokenContractAddress("66"));
-      em().persist(new Community().setName("community3").setTokenContractAddress(null));
+      em().persist(new Community().setName("community1").setDescription("des1").setTokenContractAddress("66").setAdminUser(new User().setId(adminId)));
+      em().persist(new Community().setName("community2").setDescription("des2").setTokenContractAddress("66"));
+      em().persist(new Community().setName("community3").setDescription("des3").setTokenContractAddress(null));
     });
 
     List<Community> result = repository.list();
@@ -64,19 +74,26 @@ public class CommunityRepositoryTest extends RepositoryTest {
 
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getName()).isEqualTo("community1");
+    assertThat(result.get(0).getDescription()).isEqualTo("des1");
     assertThat(result.get(0).getAdminUser().getUsername()).isEqualTo("admin");
     assertThat(result.get(1).getName()).isEqualTo("community2");
+    assertThat(result.get(1).getDescription()).isEqualTo("des2");
     assertThat(result.get(1).getAdminUser()).isNull();
   }
 
   @Test
   public void create() {
     Long adminId = inTransaction(() -> userRepository.create(new User().setUsername("admin"))).getId();
-    Long id = inTransaction(() -> repository.create(new Community().setName("community").setTokenContractAddress("0x1234567").setAdminUser(new User().setId(adminId))).getId());
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("community")
+        .setDescription("description")
+        .setTokenContractAddress("0x1234567")
+        .setAdminUser(new User().setId(adminId))).getId());
 
     Community community = em().find(Community.class, id);
 
     assertThat(community.getName()).isEqualTo("community");
+    assertThat(community.getDescription()).isEqualTo("description");
     assertThat(community.getTokenContractAddress()).isEqualTo("0x1234567");
     assertThat(community.getAdminUser().getUsername()).isEqualTo("admin");
   }

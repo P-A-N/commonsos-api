@@ -19,8 +19,6 @@ public class GetUserTest extends IntegrationTest {
   private Community community2;
   private User admin;
   private User user1;
-  private User user2;
-  private User user3;
   private String sessionId;
   
   @Before
@@ -32,8 +30,8 @@ public class GetUserTest extends IntegrationTest {
     update(community2.setAdminUser(admin));
     
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityList(asList(community1)));
-    user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community2)));
-    user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community1,community2)));
+    create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community2)));
+    create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community1,community2)));
 
     sessionId = login("user1", "pass");
   }

@@ -15,20 +15,16 @@ public class GetUserSearchTest extends IntegrationTest {
 
   private Community community;
   private Community otherCommunity;
-  private User user;
-  private User otherUser;
-  private User otherUser2;
-  private User otherCommunityUser;
   private String sessionId;
   
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user = create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherUser = create(new User().setUsername("otherUser").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherUser2 = create(new User().setUsername("otherUser2").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherCommunityUser = create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
+    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    create(new User().setUsername("otherUser").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    create(new User().setUsername("otherUser2").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
 
     sessionId = login("user", "pass");
   }

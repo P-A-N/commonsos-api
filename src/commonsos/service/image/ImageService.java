@@ -1,5 +1,11 @@
 package commonsos.service.image;
 
+import java.io.InputStream;
+import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -9,16 +15,10 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import commonsos.Configuration;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.io.InputStream;
-import java.util.UUID;
+import commonsos.Configuration;
 
 @Singleton
-@Slf4j
 public class ImageService {
 
   private AWSCredentials credentials;

@@ -650,6 +650,7 @@ public class UserRepositoryTest extends RepositoryTest {
         .setLastName("last name")
         .setDescription("description")
         .setLocation("location")
+        .setStatus("status")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
@@ -671,6 +672,7 @@ public class UserRepositoryTest extends RepositoryTest {
         .setLastName("last name")
         .setDescription("description")
         .setLocation("location")
+        .setStatus("status")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
@@ -694,6 +696,7 @@ public class UserRepositoryTest extends RepositoryTest {
         .setLastName("last name")
         .setDescription("description")
         .setLocation("location")
+        .setStatus("status")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
@@ -792,6 +795,7 @@ public class UserRepositoryTest extends RepositoryTest {
     assertThat(actual.getLastName()).isEqualTo(expect.getLastName());
     assertThat(actual.getDescription()).isEqualTo(expect.getDescription());
     assertThat(actual.getLocation()).isEqualTo(expect.getLocation());
+    assertThat(actual.getStatus()).isEqualTo(expect.getStatus());
     assertThat(actual.getAvatarUrl()).isEqualTo(expect.getAvatarUrl());
     assertThat(actual.getWallet()).isEqualTo(expect.getWallet());
     assertThat(actual.getWalletAddress()).isEqualTo(expect.getWalletAddress());
@@ -805,6 +809,7 @@ public class UserRepositoryTest extends RepositoryTest {
     for (int i = 0; i < actual.getCommunityList().size(); i++) {
       assertThat(actual.getCommunityList().get(i).getId()).isEqualTo(expect.getCommunityList().get(i).getId());
       assertThat(actual.getCommunityList().get(i).getName()).isEqualTo(expect.getCommunityList().get(i).getName());
+      assertThat(actual.getCommunityList().get(i).getDescription()).isEqualTo(expect.getCommunityList().get(i).getDescription());
       assertThat(actual.getCommunityList().get(i).getTokenContractAddress()).isEqualTo(expect.getCommunityList().get(i).getTokenContractAddress());
     }
   }
@@ -828,6 +833,7 @@ public class UserRepositoryTest extends RepositoryTest {
     for (int i = 0; i < actual.getCommunityList().size(); i++) {
       assertThat(actual.getCommunityList().get(i).getId()).isEqualTo(expect.getCommunityList().get(i).getId());
       assertThat(actual.getCommunityList().get(i).getName()).isEqualTo(expect.getCommunityList().get(i).getName());
+      assertThat(actual.getCommunityList().get(i).getDescription()).isEqualTo(expect.getCommunityList().get(i).getDescription());
       assertThat(actual.getCommunityList().get(i).getTokenContractAddress()).isEqualTo(expect.getCommunityList().get(i).getTokenContractAddress());
     }
   }
