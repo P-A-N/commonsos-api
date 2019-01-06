@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
@@ -48,8 +46,8 @@ import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
-import commonsos.util.StringUtil;
 import commonsos.util.UserUtil;
+import commonsos.util.ValidateUtil;
 import commonsos.view.BalanceView;
 import commonsos.view.CommunityView;
 import commonsos.view.UserPrivateView;
@@ -173,7 +171,7 @@ public class UserService {
   }
   
   public void updateEmailTemporary(UpdateEmailTemporaryCommand command) {
-    validateEmailAddress(command.getNewEmailAddress());
+    ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
     User user = userRepository.findStrictById(command.getUserId());
     if (user.getEmailAddress() != null && user.getEmailAddress().equals(command.getNewEmailAddress())) throw new BadRequestException("new address is same as now");
     if (userRepository.isEmailAddressTaken(command.getNewEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
@@ -236,7 +234,7 @@ public class UserService {
 
   public void passwordReset(String accessId, String newPassword) {
     // validate
-    validatePassword(newPassword);
+    ValidateUtil.validatePassword(newPassword);
     PasswordResetRequest passReset = userRepository.findStrictPasswordResetRequest(cryptoService.hash(accessId));
     User user = userRepository.findStrictById(passReset.getUserId());
     
@@ -255,28 +253,11 @@ public class UserService {
   }
 
   void validate(CreateAccountTemporaryCommand command) {
-    validateUsername(command.getUsername());
-    validatePassword(command.getPassword());
+    ValidateUtil.validateUsername(command.getUsername());
+    ValidateUtil.validatePassword(command.getPassword());
 //    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");
 //    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
-    validateEmailAddress(command.getEmailAddress());
-  }
-  
-  void validateEmailAddress(String emailAddress) {
-    if (emailAddress == null || !EmailValidator.getInstance().isValid(emailAddress)) throw new BadRequestException("invalid email address");
-  }
-  
-  void validatePassword(String password) {
-    if (password == null || password.length() < 8) throw new BadRequestException("invalid password");
-    if (!StringUtils.isAsciiPrintable(password) || password.contains(" ")) throw new DisplayableException("error.invalid_character_in_password");
-  }
-  
-  void validateUsername(String username) {
-    if (username == null || StringUtil.unicodeLength(username) < 4) throw new BadRequestException("invalid username");
-  }
-
-  void validateStatus(String status) {
-    if (status != null && StringUtil.unicodeLength(status) > 50) throw new BadRequestException("invalid status");
+    ValidateUtil.validateEmailAddress(command.getEmailAddress());
   }
   
   public UserView view(Long id) {
@@ -314,7 +295,7 @@ public class UserService {
   }
 
   public User updateUserName(User user, UserNameUpdateCommand command) {
-    validateUsername(command.getUsername());
+    ValidateUtil.validateUsername(command.getUsername());
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
     
     user.setUsername(command.getUsername());
@@ -322,14 +303,14 @@ public class UserService {
   }
 
   public User updateStatus(User user, UserStatusUpdateCommand command) {
-    validateStatus(command.getStatus());
+    ValidateUtil.validateStatus(command.getStatus());
     
     user.setStatus(command.getStatus());
     return userRepository.update(user);
   }
 
   public User updatePassword(User user, UserPasswordUpdateCommand command) {
-    validatePassword(command.getPassword());
+    ValidateUtil.validatePassword(command.getPassword());
 
     user.setPasswordHash(cryptoService.encryptoPassword(command.getPassword()));
     return userRepository.update(user);

@@ -28,7 +28,6 @@ import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
 import commonsos.exception.AuthenticationException;
-import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
@@ -140,132 +139,6 @@ public class UserServiceTest {
     // verify
     verify(jobService, times(2)).submit(any(), any());
     verify(jobService, never()).execute(any());
-  }
-
-  @Test
-  public void validate() {
-    userService.validate(validCommand());
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_username_null() {
-    userService.validate(validCommand().setUsername(null));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_username_less_length1() {
-    userService.validate(validCommand().setUsername("123"));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_username_less_length2() {
-    userService.validate(validCommand().setUsername("１２３"));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_username_less_length3() {
-    userService.validate(validCommand().setUsername("🍺🍺🍺"));
-  }
-
-  @Test
-  public void validate_password_valid() {
-    userService.validatePassword("abcdefghijklmnopqrstuvwxyz!\"#$%&'()-=~^\\|@`[{;+:*]},<.>/?_");
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_password_null() {
-    userService.validate(validCommand().setPassword(null));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_password_less_length() {
-    userService.validate(validCommand().setPassword("1234567"));
-  }
-
-  @Test(expected = DisplayableException.class)
-  public void validate_password_unicode() {
-    userService.validate(validCommand().setPassword("１２３４５６７８"));
-  }
-
-  @Test(expected = DisplayableException.class)
-  public void validate_password_space() {
-    userService.validate(validCommand().setPassword("1 2 3 4 5 6 7 8"));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_null() {
-    userService.validate(validCommand().setEmailAddress(null));
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid1() {
-    userService.validate(validCommand().setEmailAddress(""));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid2() {
-    userService.validate(validCommand().setEmailAddress("aaa"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid3() {
-    userService.validate(validCommand().setEmailAddress("a.@test.com"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid4() {
-    userService.validate(validCommand().setEmailAddress("a<b@test.com"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid5() {
-    userService.validate(validCommand().setEmailAddress("a>b@test.com"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid6() {
-    userService.validate(validCommand().setEmailAddress("a@test<com"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid7() {
-    userService.validate(validCommand().setEmailAddress("a@test>com"));
-  }
-  
-  @Test(expected = BadRequestException.class)
-  public void validate_emailAddress_invalid8() {
-    userService.validate(validCommand().setEmailAddress("a@a@a.com"));
-  }
-
-  @Test
-  public void validate_emailAddress_valid() {
-    userService.validate(validCommand().setEmailAddress("test@test.com"));
-    userService.validate(validCommand().setEmailAddress("a.b.c@test.com"));
-    userService.validate(validCommand().setEmailAddress("a@a.b.c.com"));
-  }
-
-  @Test
-  public void validate_status_valid() {
-    userService.validateStatus(null);
-    userService.validateStatus("");
-    userService.validateStatus("12345678901234567890123456789012345678901234567890"); // length = 50, ascii
-    userService.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０"); // length = 50, utf-8
-    userService.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 50, 4 byte unicode
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_status_invalid1() {
-    userService.validateStatus("123456789012345678901234567890123456789012345678901"); // length = 51, ascii
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_status_invalid2() {
-    userService.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１"); // length = 51, utf-8
-  }
-
-  @Test(expected = BadRequestException.class)
-  public void validate_status_invalid3() {
-    userService.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 51, 4 byte unicode
   }
 
   @Test
@@ -392,14 +265,5 @@ public class UserServiceTest {
     userService.updateMobileDevice(new User(), command);
 
     verify(userRepository).update(new User().setPushNotificationToken("12345"));
-  }
-
-  private CreateAccountTemporaryCommand validCommand() {
-    return new CreateAccountTemporaryCommand()
-        .setUsername("1234")
-        .setPassword("12345678")
-        .setFirstName("1")
-        .setLastName("1")
-        .setEmailAddress("test@test.com");
   }
 }
