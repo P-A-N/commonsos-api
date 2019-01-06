@@ -27,7 +27,10 @@ public class DelegateWalletTask implements Runnable {
     this.community = community;
   }
 
-  @Override public void run() {
+  @Override
+  public void run() {
+    if (blockchainService.isAllowed(walletOwner, community)) return;
+    
     log.info(String.format("Delegating user %s %s wallet to %s", walletOwner.getUsername(), walletOwner.getWalletAddress(), community.getAdminUser().getWalletAddress()));
     blockchainService.transferEther(community.getAdminUser(), walletOwner.getWalletAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE));
     blockchainService.delegateTokenTransferRight(walletOwner, community);

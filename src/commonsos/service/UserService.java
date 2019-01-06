@@ -40,6 +40,7 @@ import commonsos.service.command.UserNameUpdateCommand;
 import commonsos.service.command.UserPasswordUpdateCommand;
 import commonsos.service.command.UserStatusUpdateCommand;
 import commonsos.service.command.UserUpdateCommand;
+import commonsos.service.command.UserUpdateCommunitiesCommand;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
@@ -70,7 +71,6 @@ public class UserService {
   @Inject TransactionService transactionService;
   @Inject ImageService imageService;
   @Inject JobService jobService;
-
 
   public User checkPassword(String username, String password) {
     User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
@@ -109,12 +109,12 @@ public class UserService {
     if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
       communityList = communityList(command.getCommunityList());
     }
-    
+
     String accessId = accessIdService.generateAccessId(id -> {
       String accessIdHash = cryptoService.hash(id);
       return !userRepository.findTemporaryUser(accessIdHash).isPresent();
     });
-    
+
     TemporaryUser tmpUser = new TemporaryUser()
       .setAccessIdHash(cryptoService.hash(accessId))
       .setExpirationTime(Instant.now().plus(1, ChronoUnit.DAYS))
@@ -130,7 +130,7 @@ public class UserService {
       .setWaitUntilCompleted(command.isWaitUntilCompleted());
 
     userRepository.createTemporary(tmpUser);
-    
+
     emailService.sendCreateAccountTemporary(tmpUser.getEmailAddress(), tmpUser.getUsername(), accessId);
   }
 
@@ -291,6 +291,22 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
+    return userRepository.update(user);
+  }
+
+  public User updateUserCommunities(User user, UserUpdateCommunitiesCommand command) {
+    List<Community> communityList = new ArrayList<>();
+    if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
+      communityList = communityList(command.getCommunityList());
+    }
+
+    user.setCommunityList(communityList);
+
+    user.getCommunityList().forEach(c -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, c);
+      jobService.submit(user, task);
+    });
+
     return userRepository.update(user);
   }
 

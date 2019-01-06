@@ -75,6 +75,17 @@ public class BlockchainService {
     }
   }
 
+  public boolean isAllowed(User user, Community community) {
+    try {
+      TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
+      BigInteger allowance = token.allowance(user.getWalletAddress(), community.getAdminUser().getWalletAddress()).send();
+      log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%d", community.getId(), user.getUsername(), community.getAdminUser().getUsername(), allowance));
+      return !allowance.equals(BigInteger.ZERO);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   public String createWallet(String password) {
     File filePath = null;
     try {

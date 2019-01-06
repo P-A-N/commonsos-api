@@ -59,6 +59,7 @@ import commonsos.controller.user.UserMobileDeviceUpdateController;
 import commonsos.controller.user.UserNameUpdateController;
 import commonsos.controller.user.UserPasswordUpdateController;
 import commonsos.controller.user.UserStatusUpdateController;
+import commonsos.controller.user.UserUpdateCommunitiesController;
 import commonsos.controller.user.UserUpdateController;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
@@ -130,6 +131,7 @@ public class Server {
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
     get("/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);
+    post("/users/:id/communities", injector.getInstance(UserUpdateCommunitiesController.class), toJson);
     post("/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
     post("/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
     post("/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);
