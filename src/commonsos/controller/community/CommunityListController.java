@@ -16,7 +16,9 @@ public class CommunityListController implements Route {
 
   @Inject CommunityService service;
 
-  @Override public List<CommunityView> handle(Request request, Response response) {
-    return service.list();
+  @Override
+  public List<CommunityView> handle(Request request, Response response) {
+    String filter = request.queryParams("filter");
+    return service.list(filter);
   }
 }

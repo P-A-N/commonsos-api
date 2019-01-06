@@ -70,7 +70,6 @@ public class CommunityRepositoryTest extends RepositoryTest {
     });
 
     List<Community> result = repository.list();
-    result.sort((a,b) -> a.getId().compareTo(b.getId()));
 
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getName()).isEqualTo("community1");
@@ -79,6 +78,51 @@ public class CommunityRepositoryTest extends RepositoryTest {
     assertThat(result.get(1).getName()).isEqualTo("community2");
     assertThat(result.get(1).getDescription()).isEqualTo("des2");
     assertThat(result.get(1).getAdminUser()).isNull();
+  }
+
+  @Test
+  public void list_filter() {
+    // prepare
+    inTransaction(() -> {
+      em().persist(new Community().setName("comm_foo").setTokenContractAddress("66"));
+      em().persist(new Community().setName("comm_Foo_bar").setTokenContractAddress("66"));
+      em().persist(new Community().setName("comm_bar").setTokenContractAddress("66"));
+      em().persist(new Community().setName("comm_bar_foo").setTokenContractAddress(null));
+    });
+
+    // execute
+    List<Community> result = repository.list("foo");
+
+    // verify
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getName()).isEqualTo("comm_foo");
+    assertThat(result.get(1).getName()).isEqualTo("comm_Foo_bar");
+  }
+
+  @Test
+  public void list_filter_unicode() {
+    // prepare
+    inTransaction(() -> {
+      em().persist(new Community().setName("コミュニティ　フー").setTokenContractAddress("66"));
+      em().persist(new Community().setName("コミュニティ　フー　バー").setTokenContractAddress("66"));
+      em().persist(new Community().setName("コミュニティ　バー").setTokenContractAddress("66"));
+      em().persist(new Community().setName("コミュニティ　🍺").setTokenContractAddress("66"));
+    });
+
+    // execute
+    List<Community> result = repository.list("フー");
+
+    // verify
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getName()).isEqualTo("コミュニティ　フー");
+    assertThat(result.get(1).getName()).isEqualTo("コミュニティ　フー　バー");
+    
+    // execute
+    result = repository.list("🍺"); // 4 byte code
+
+    // verify
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getName()).isEqualTo("コミュニティ　🍺");
   }
 
   @Test

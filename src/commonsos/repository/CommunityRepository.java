@@ -27,8 +27,22 @@ public class CommunityRepository extends Repository {
     return findById(id).orElseThrow(CommunityNotFoundException::new);
   }
 
+  public List<Community> list(String filter) {
+    return em().createQuery(
+        "FROM Community" +
+        " WHERE tokenContractAddress IS NOT NULL" +
+        " AND LOWER(name) LIKE LOWER(:filter)" +
+        " ORDER BY id", Community.class)
+        .setLockMode(lockMode())
+        .setParameter("filter", "%"+filter+"%")
+        .getResultList();
+  }
+
   public List<Community> list() {
-    return em().createQuery("FROM Community WHERE tokenContractAddress IS NOT NULL ORDER BY id", Community.class)
+    return em().createQuery(
+        "FROM Community" +
+        " WHERE tokenContractAddress IS NOT NULL" +
+        " ORDER BY id", Community.class)
         .setLockMode(lockMode())
         .getResultList();
   }

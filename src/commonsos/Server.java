@@ -49,6 +49,7 @@ import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
+import commonsos.controller.user.SearchUsersCommunityController;
 import commonsos.controller.user.UpdateEmailCompleteController;
 import commonsos.controller.user.UpdateEmailTemporaryController;
 import commonsos.controller.user.UserAvatarUpdateController;
@@ -128,6 +129,7 @@ public class Server {
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
+    get("/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);
     post("/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
     post("/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
     post("/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);

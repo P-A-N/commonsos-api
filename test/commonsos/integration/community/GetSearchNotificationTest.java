@@ -42,7 +42,7 @@ public class GetSearchNotificationTest extends IntegrationTest {
     // search community1
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/communities/{:id}/notification", community1.getId())
+      .when().get("/communities/{id}/notification", community1.getId())
       .then().statusCode(200)
       .body("id", iterableWithSize(2))
       .body("id", contains(notification2.getId().intValue(), notification1.getId().intValue()))
@@ -51,7 +51,7 @@ public class GetSearchNotificationTest extends IntegrationTest {
     // search community2
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/communities/{:id}/notification", community2.getId())
+      .when().get("/communities/{id}/notification", community2.getId())
       .then().statusCode(200)
       .body("id", iterableWithSize(1))
       .body("id", contains(notification3.getId().intValue()))
