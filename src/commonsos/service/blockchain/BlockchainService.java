@@ -79,7 +79,7 @@ public class BlockchainService {
     try {
       TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger allowance = token.allowance(user.getWalletAddress(), community.getAdminUser().getWalletAddress()).send();
-      log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%f", community.getId(), user.getId(), community.getAdminUser().getId(), allowance));
+      log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%d", community.getId(), user.getId(), community.getAdminUser().getId(), allowance));
       return !allowance.equals(BigInteger.ZERO);
     } catch (Exception e) {
       throw new RuntimeException(e);
