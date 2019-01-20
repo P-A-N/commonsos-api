@@ -33,10 +33,6 @@ import commonsos.controller.auth.PasswordResetController;
 import commonsos.controller.auth.PasswordResetRequestCheckController;
 import commonsos.controller.auth.PasswordResetRequestController;
 import commonsos.controller.community.CommunityListController;
-import commonsos.controller.community.CreateNotificationController;
-import commonsos.controller.community.DeleteNotificationController;
-import commonsos.controller.community.SearchNotificationController;
-import commonsos.controller.community.UpdateNotificationController;
 import commonsos.controller.message.GroupMessageThreadController;
 import commonsos.controller.message.GroupMessageThreadUpdateController;
 import commonsos.controller.message.MessageListController;
@@ -163,10 +159,6 @@ public class Server {
     get("/message-threads/:id/messages", injector.getInstance(MessageListController.class), toJson);
 
     get("/communities", injector.getInstance(CommunityListController.class), toJson);
-    post("/communities/:id/notification", injector.getInstance(CreateNotificationController.class), toJson);
-    get("/communities/:id/notification", injector.getInstance(SearchNotificationController.class), toJson);
-    post("/communities/:id/notification/:notificationId", injector.getInstance(UpdateNotificationController.class), toJson);
-    post("/communities/:id/notification/:notificationId/delete", injector.getInstance(DeleteNotificationController.class), toJson);
 
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);

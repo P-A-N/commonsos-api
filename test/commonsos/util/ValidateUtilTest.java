@@ -10,6 +10,10 @@ public class ValidateUtilTest {
   @Test
   public void validate_username_valid() {
     ValidateUtil.validateUsername("1234");
+    ValidateUtil.validateUsername("abcdefghijklmno");
+    ValidateUtil.validateUsername("pqrstuvwxyz_");
+    ValidateUtil.validateUsername("ABCDEFGHIJKLMNO");
+    ValidateUtil.validateUsername("PQRSTUVWXYZ_");
   }
 
   @Test(expected = BadRequestException.class)
@@ -17,25 +21,31 @@ public class ValidateUtilTest {
     ValidateUtil.validateUsername(null);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test(expected = DisplayableException.class)
   public void validate_username_less_length1() {
     ValidateUtil.validateUsername("123");
   }
 
-  @Test(expected = BadRequestException.class)
-  public void validate_username_less_length2() {
+  @Test(expected = DisplayableException.class)
+  public void validate_username_more_length1() {
+    ValidateUtil.validateUsername("1234567890123456");
+  }
+
+  @Test(expected = DisplayableException.class)
+  public void validate_username_invalid_char1() {
     ValidateUtil.validateUsername("１２３");
   }
 
-  @Test(expected = BadRequestException.class)
-  public void validate_username_less_length3() {
+  @Test(expected = DisplayableException.class)
+  public void validate_username_invalid_char2() {
     ValidateUtil.validateUsername("🍺🍺🍺");
   }
 
   @Test
   public void validate_password_valid() {
     ValidateUtil.validatePassword("12345678");
-    ValidateUtil.validatePassword("abcdefghijklmnopqrstuvwxyz!\"#$%&'()-=~^\\|@`[{;+:*]},<.>/?_");
+    ValidateUtil.validatePassword("123456789abcdefghijklmnopqrstuvwxyz_");
+    ValidateUtil.validatePassword("123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_");
   }
 
   @Test(expected = BadRequestException.class)
@@ -43,7 +53,7 @@ public class ValidateUtilTest {
     ValidateUtil.validatePassword(null);
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test(expected = DisplayableException.class)
   public void validate_password_less_length() {
     ValidateUtil.validatePassword("1234567");
   }
