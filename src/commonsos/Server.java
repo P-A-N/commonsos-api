@@ -53,7 +53,7 @@ import commonsos.controller.user.UserController;
 import commonsos.controller.user.UserDeleteController;
 import commonsos.controller.user.UserMobileDeviceUpdateController;
 import commonsos.controller.user.UserNameUpdateController;
-import commonsos.controller.user.UserPasswordUpdateController;
+import commonsos.controller.user.UserPasswordResetRequestController;
 import commonsos.controller.user.UserStatusUpdateController;
 import commonsos.controller.user.UserUpdateCommunitiesController;
 import commonsos.controller.user.UserUpdateController;
@@ -121,7 +121,7 @@ public class Server {
     post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);
     post("/users/:id/username", injector.getInstance(UserNameUpdateController.class), toJson);
     post("/users/:id/status", injector.getInstance(UserStatusUpdateController.class), toJson);
-    post("/users/:id/password", injector.getInstance(UserPasswordUpdateController.class), toJson);
+    post("/users/:id/passwordreset", injector.getInstance(UserPasswordResetRequestController.class), toJson);
     post("/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);

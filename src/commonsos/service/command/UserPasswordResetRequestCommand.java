@@ -7,6 +7,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @EqualsAndHashCode @Accessors(chain=true) @ToString
-public class UserPasswordUpdateCommand {
-  private String password;
+public class UserPasswordResetRequestCommand {
+  private String currentPassword;
 }

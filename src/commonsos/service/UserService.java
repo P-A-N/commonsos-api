@@ -37,7 +37,7 @@ import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
 import commonsos.service.command.UserNameUpdateCommand;
-import commonsos.service.command.UserPasswordUpdateCommand;
+import commonsos.service.command.UserPasswordResetRequestCommand;
 import commonsos.service.command.UserStatusUpdateCommand;
 import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.command.UserUpdateCommunitiesCommand;
@@ -325,11 +325,23 @@ public class UserService {
     return userRepository.update(user);
   }
 
-  public User updatePassword(User user, UserPasswordUpdateCommand command) {
-    ValidateUtil.validatePassword(command.getPassword());
+  public void userPasswordResetRequest(User user, UserPasswordResetRequestCommand command) {
+    if (!cryptoService.checkPassword(command.getCurrentPassword(), user.getPasswordHash())) throw new AuthenticationException();
+    
+    String accessId = accessIdService.generateAccessId(id -> {
+      String accessIdHash = cryptoService.hash(id);
+      return !userRepository.findPasswordResetRequest(accessIdHash).isPresent();
+    });
 
-    user.setPasswordHash(cryptoService.encryptoPassword(command.getPassword()));
-    return userRepository.update(user);
+    PasswordResetRequest passReset = new PasswordResetRequest()
+      .setAccessIdHash(cryptoService.hash(accessId))
+      .setExpirationTime(Instant.now().plus(10, ChronoUnit.MINUTES))
+      .setInvalid(false)
+      .setUserId(user.getId());
+    
+    userRepository.createPasswordResetRequest(passReset);
+    
+    emailService.sendPasswordReset(user.getEmailAddress(), user.getUsername(), accessId);
   }
 
   public User deleteUserLogically(User user) {
