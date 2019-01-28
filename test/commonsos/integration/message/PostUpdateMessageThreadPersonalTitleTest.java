@@ -2,11 +2,7 @@ package commonsos.integration.message;
 
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +12,9 @@ import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 
-public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
+public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
 
   private Community community;
   private Community otherCommunity;
@@ -56,59 +51,35 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
   }
   
   @Test
-  public void groupMessageThreadUpdate() {
-    // prepare
+  public void updateMessageThreadPersonalTitle() {
+    // update personal title
     Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("title", "title2");
-    requestParam.put("memberIds", asList(user3.getId()));
-    
-    // call api
-    int id = given()
-      .cookie("JSESSIONID", sessionId)
-      .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/group", messageThreadId)
-      .then().statusCode(200)
-      .body("id", equalTo(messageThreadId.intValue()))
-      .body("ad.id", nullValue())
-      .body("communityId", equalTo(community.getId().intValue()))
-      .body("title", equalTo("title2"))
-      .body("personalTitle", nullValue())
-      .body("parties.id", contains(user2.getId().intValue(), user3.getId().intValue()))
-      .body("creator.id", equalTo(user1.getId().intValue()))
-      .body("counterParty.id", equalTo(user2.getId().intValue()))
-      .body("lastMessage", nullValue())
-      .body("unread", equalTo(false))
-      .body("group", equalTo(true))
-      .body("photoUrl", nullValue())
-      .body("createdAt", notNullValue())
-      .extract().path("id");
-    
-    // verify db
-    MessageThread messageThread = emService.get().find(MessageThread.class, (long) id);
-    assertThat(messageThread.getTitle()).isEqualTo("title2");
-    assertThat(messageThread.getAdId()).isNull();
-    assertThat(messageThread.getCreatedBy()).isEqualTo(user1.getId());
-    assertThat(messageThread.isGroup()).isEqualTo(true);
-    
-    messageThread.getParties().sort((a,b) -> a.getUser().getId().compareTo(b.getUser().getId()));
-    assertThat(messageThread.getParties().size()).isEqualTo(3);
-    assertThat(messageThread.getParties().get(0).getUser().getId()).isEqualTo(user1.getId());
-    assertThat(messageThread.getParties().get(1).getUser().getId()).isEqualTo(user2.getId());
-    assertThat(messageThread.getParties().get(2).getUser().getId()).isEqualTo(user3.getId());
-  }
-
-  @Test
-  public void groupMessageThreadUpdate_otherCommunityUser() {
-    // prepare
-    Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("title", "title2");
-    requestParam.put("memberIds", asList(otherCommunityUser.getId()));
+    requestParam.put("personalTitle", "pTitle");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/group", messageThreadId)
+      .when().post("/message-threads/{id}/title", messageThreadId)
+      .then().statusCode(200)
+      .body("id", equalTo(messageThreadId.intValue()))
+      .body("title", equalTo("title"))
+      .body("personalTitle", equalTo("pTitle"));
+  }
+  
+  @Test
+  public void updateMessageThreadPersonalTitle_not_member() {
+    // login with non member of thread
+    sessionId = login("user3", "pass");
+    
+    // update personal title
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("personalTitle", "pTitle");
+    
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/message-threads/{id}/title", messageThreadId)
       .then().statusCode(400);
   }
 }

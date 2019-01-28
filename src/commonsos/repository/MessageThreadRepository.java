@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 
+import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
@@ -68,8 +69,12 @@ public class MessageThreadRepository extends Repository {
       .getResultList();
   }
 
-  public Optional<MessageThread> thread(Long id) {
+  public Optional<MessageThread> findById(Long id) {
     return ofNullable(em().find(MessageThread.class, id, lockMode()));
+  }
+
+  public MessageThread findStrictById(Long id) {
+    return findById(id).orElseThrow(MessageThreadNotFoundException::new);
   }
 
   public void update(MessageThreadParty party) {

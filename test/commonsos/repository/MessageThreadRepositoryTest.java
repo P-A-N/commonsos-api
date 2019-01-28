@@ -121,7 +121,7 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     Long id = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
 
-    Optional<MessageThread> result = repository.thread(id);
+    Optional<MessageThread> result = repository.findById(id);
 
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(id);
@@ -129,7 +129,7 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
 
   @Test
   public void threadById_notFound() {
-    assertThat(repository.thread(1L)).isEmpty();
+    assertThat(repository.findById(1L)).isEmpty();
   }
 
   @Test
@@ -153,7 +153,7 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
     Long threadId = inTransaction(() -> repository.create(originalThread).getId());
 
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("second")));
-    MessageThread storedThread = repository.thread(threadId).orElseThrow(RuntimeException::new);
+    MessageThread storedThread = repository.findById(threadId).orElseThrow(RuntimeException::new);
 
     List<MessageThreadParty> parties = new ArrayList<>(originalThread.getParties());
     parties.add(new MessageThreadParty().setUser(user2));
@@ -163,7 +163,7 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
     inTransaction(() -> repository.update(storedThread));
 
 
-    MessageThread result = repository.thread(threadId).orElseThrow(RuntimeException::new);
+    MessageThread result = repository.findById(threadId).orElseThrow(RuntimeException::new);
     result.getParties().sort((p1,p2) -> p1.getId().compareTo(p2.getId()));
     assertThat(result.getParties()).hasSize(2);
     assertThat(result.getParties().get(0).getUser().getUsername()).isEqualTo("first");

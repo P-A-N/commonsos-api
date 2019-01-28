@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
@@ -274,7 +275,7 @@ public class UserService {
 
   public String updateAvatar(User user, InputStream image) {
     String url = imageService.create(image);
-    if (user.getAvatarUrl() != null) {
+    if (StringUtils.isNotBlank(user.getAvatarUrl())) {
       imageService.delete(user.getAvatarUrl());
     }
     user.setAvatarUrl(url);

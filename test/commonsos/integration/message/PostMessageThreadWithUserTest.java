@@ -45,13 +45,16 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
+      .body("communityId", nullValue())
       .body("title", nullValue())
+      .body("personalTitle", nullValue())
       .body("parties.id", contains(user2.getId().intValue()))
       .body("creator.id", equalTo(user1.getId().intValue()))
       .body("counterParty.id", equalTo(user2.getId().intValue()))
       .body("lastMessage", nullValue())
       .body("unread", equalTo(false))
       .body("group", equalTo(false))
+      .body("photoUrl", nullValue())
       .body("createdAt", notNullValue())
       .extract().path("id");
     

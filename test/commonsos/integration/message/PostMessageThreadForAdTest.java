@@ -48,13 +48,16 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
       .body("id", notNullValue())
       .body("ad.id", equalTo(ad.getId().intValue()))
       .body("ad.createdBy.id", equalTo(adCreator.getId().intValue()))
+      .body("communityId", equalTo(ad.getCommunityId().intValue()))
       .body("title", equalTo("title"))
+      .body("personalTitle", nullValue())
       .body("parties.id", contains(adCreator.getId().intValue()))
       .body("creator.id", equalTo(user.getId().intValue()))
       .body("counterParty.id", equalTo(adCreator.getId().intValue()))
       .body("lastMessage", nullValue())
       .body("unread", equalTo(false))
       .body("group", equalTo(false))
+      .body("photoUrl", nullValue())
       .body("createdAt", notNullValue())
       .extract().path("id");
     

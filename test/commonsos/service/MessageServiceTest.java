@@ -35,6 +35,7 @@ import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -144,7 +145,7 @@ public class MessageServiceTest {
   public void thread() {
     User user = new User().setId(id("user id"));
     MessageThread messageThread = new MessageThread().setParties(asList(party(user)));
-    when(messageThreadRepository.thread(id("thread-id"))).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById(id("thread-id"))).thenReturn(Optional.of(messageThread));
     MessageThreadView messageThreadView = new MessageThreadView();
     doReturn(messageThreadView).when(service).view(user, messageThread);
 
@@ -158,14 +159,14 @@ public class MessageServiceTest {
   @Test(expected = ForbiddenException.class)
   public void thread_canOnlyAccessThreadParticipatingIn() {
     MessageThread messageThread = new MessageThread().setParties(asList(party(new User().setId(id("other user")))));
-    when(messageThreadRepository.thread(id("thread-id"))).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById(id("thread-id"))).thenReturn(Optional.of(messageThread));
 
     service.thread(new User().setId(id("user id")), id("thread-id"));
   }
 
   @Test(expected = BadRequestException.class)
   public void thread_notFound() {
-    when(messageThreadRepository.thread(id("thread-id"))).thenReturn(empty());
+    when(messageThreadRepository.findById(id("thread-id"))).thenReturn(empty());
 
     service.thread(new User().setId(id("user id")), id("thread-id"));
   }
@@ -292,7 +293,7 @@ public class MessageServiceTest {
   @Test
   public void postMessage() {
     User user = new User().setId(id("user id"));
-    when(messageThreadRepository.thread(id("thread id"))).thenReturn(Optional.of(new MessageThread().setParties(asList(party(user)))));
+    when(messageThreadRepository.findById(id("thread id"))).thenReturn(Optional.of(new MessageThread().setParties(asList(party(user)))));
     Message createdMessage = new Message();
     when(messageRepository.create(any())).thenReturn(createdMessage);
     MessageView messageView = new MessageView();
@@ -317,7 +318,7 @@ public class MessageServiceTest {
     MessageView view = new MessageView();
     doReturn(view).when(service).view(message);
     MessageThreadParty party = party(new User().setId(id("user id")));
-    when(messageThreadRepository.thread((id("thread id")))).thenReturn(Optional.of(new MessageThread().setParties(asList(party))));
+    when(messageThreadRepository.findById((id("thread id")))).thenReturn(Optional.of(new MessageThread().setParties(asList(party))));
 
     List<MessageView> result = service.messages(new User().setId(id("user id")), id("thread id"));
 
@@ -328,7 +329,7 @@ public class MessageServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void message_threadMustExist() {
-    when(messageThreadRepository.thread((id("thread id")))).thenReturn(empty());
+    when(messageThreadRepository.findById((id("thread id")))).thenReturn(empty());
 
     service.messages(new User().setId(id("me")), id("thread id"));
   }
@@ -336,7 +337,7 @@ public class MessageServiceTest {
   @Test(expected = ForbiddenException.class)
   public void message_canBeAccessedByParticipatingParty() {
     MessageThread messageThread = new MessageThread().setParties(asList(party(new User().setId(id("other user")))));
-    when(messageThreadRepository.thread((id("thread id")))).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById((id("thread id")))).thenReturn(Optional.of(messageThread));
 
     service.messages(new User().setId(id("me")), id("thread id"));
   }
@@ -424,14 +425,14 @@ public class MessageServiceTest {
 
   @Test(expected = ForbiddenException.class)
   public void updateGroup_messagethread_not_found() {
-    when(messageThreadRepository.thread(any())).thenReturn(Optional.empty());
+    when(messageThreadRepository.findById(any())).thenReturn(Optional.empty());
     service.updateGroup(new User(), new GroupMessageThreadUpdateCommand());
   }
 
   @Test(expected = BadRequestException.class)
   public void updateGroup_is_not_group() {
     MessageThread messageThread = new MessageThread().setGroup(false);
-    when(messageThreadRepository.thread(any())).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
     service.updateGroup(new User(), new GroupMessageThreadUpdateCommand());
   }
 
@@ -440,7 +441,7 @@ public class MessageServiceTest {
     MessageThread messageThread = new MessageThread().setGroup(true).setParties(asList(
         new MessageThreadParty().setUser(new User().setId(id("user1")))
         ));
-    when(messageThreadRepository.thread(any())).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
     service.updateGroup(new User().setId(id("notMember")), new GroupMessageThreadUpdateCommand());
   }
 
@@ -451,13 +452,13 @@ public class MessageServiceTest {
         new MessageThreadParty().setUser(new User().setId(id("user1_ug"))),
         new MessageThreadParty().setUser(new User().setId(id("user2_ug")))
         )));
-    when(messageThreadRepository.thread(any())).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
     
     List<User> givenUsers = asList(
         new User().setId(id("user2_ug")),
         new User().setId(id("user3_ug"))
         );
-    doReturn(givenUsers).when(service).validatePartiesCommunity(any());
+    doReturn(givenUsers).when(service).validatePartiesCommunity(any(), any());
     doReturn(null).when(service).view(any(), any());
     
     // execute
@@ -475,11 +476,23 @@ public class MessageServiceTest {
   @Test(expected = UserNotFoundException.class)
   public void validatePartiesCommunity_user_not_found() {
     when(userRepository.findById(any())).thenReturn(Optional.empty());
-    service.validatePartiesCommunity(asList(1L, 2L));
+    service.validatePartiesCommunity(asList(1L, 2L), id("community"));
   }
 
   @Test(expected = BadRequestException.class)
   public void validatePartiesCommunity_requiresUser() {
-    service.validatePartiesCommunity(asList());
+    service.validatePartiesCommunity(asList(), id("community"));
+  }
+
+  @Test(expected = BadRequestException.class)
+  public void validatePartiesCommunity_not_a_member() {
+    when(userRepository.findById(any())).thenReturn(Optional.of(new User().setCommunityList(asList(new Community().setId(id("community_1"))))));
+    service.validatePartiesCommunity(asList(1L, 2L), id("community_2"));
+  }
+
+  @Test
+  public void validatePartiesCommunity_valid() {
+    when(userRepository.findById(any())).thenReturn(Optional.of(new User().setCommunityList(asList(new Community().setId(id("community"))))));
+    service.validatePartiesCommunity(asList(1L, 2L), id("community"));
   }
 }

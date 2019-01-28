@@ -45,6 +45,7 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   public void groupMessageThread() {
     // prepare
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("title", "title");
     requestParam.put("memberIds", asList(user2.getId(), user3.getId()));
     
@@ -56,13 +57,16 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
+      .body("communityId", equalTo(community.getId().intValue()))
       .body("title", equalTo("title"))
+      .body("personalTitle", nullValue())
       .body("parties.id", contains(user2.getId().intValue(), user3.getId().intValue()))
       .body("creator.id", equalTo(user1.getId().intValue()))
       .body("counterParty.id", equalTo(user2.getId().intValue()))
       .body("lastMessage", nullValue())
       .body("unread", equalTo(false))
       .body("group", equalTo(true))
+      .body("photoUrl", nullValue())
       .body("createdAt", notNullValue())
       .extract().path("id");
     
@@ -84,6 +88,7 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   public void groupMessageThread_otherCommunityUser() {
     // prepare
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("title", "title");
     requestParam.put("memberIds", asList(otherCommunityUser.getId()));
     
@@ -92,6 +97,6 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/message-threads/group")
-      .then().statusCode(200);
+      .then().statusCode(400);
   }
 }

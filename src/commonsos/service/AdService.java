@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -99,7 +101,7 @@ public class AdService {
     Ad ad = adRepository.find(command.getAdId()).orElseThrow(BadRequestException::new);
     if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
     String url = imageService.create(command.getPhoto());
-    if (ad.getPhotoUrl() != null) {
+    if (StringUtils.isNotBlank(ad.getPhotoUrl())) {
       imageService.delete(ad.getPhotoUrl());
     }
     ad.setPhotoUrl(url);
