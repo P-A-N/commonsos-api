@@ -42,6 +42,7 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
+import commonsos.service.command.MessageThreadListCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.view.AdView;
 import commonsos.view.MessageThreadView;
@@ -230,7 +231,7 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void threads() {
+  public void searchThreads() {
     User user = new User();
     MessageThread thread = new MessageThread().setId(id("unread"));
     when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
@@ -238,32 +239,32 @@ public class MessageServiceTest {
     doReturn(view).when(service).view(user, thread);
     when(messageThreadRepository.unreadMessageThreadIds(user)).thenReturn(asList(id("unread")));
 
-    List<MessageThreadView> result = service.threads(user);
+    List<MessageThreadView> result = service.searchThreads(user, new MessageThreadListCommand());
 
     assertThat(result).containsExactly(view);
     assertThat(view.isUnread()).isTrue();
   }
 
   @Test
-  public void threads_excludePrivateThreadsWithoutMessages() {
+  public void searchThreads_excludePrivateThreadsWithoutMessages() {
     User user = new User();
     MessageThread thread = new MessageThread();
     when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
     MessageThreadView threadView = new MessageThreadView();
     doReturn(threadView).when(service).view(user, thread);
 
-    assertThat(service.threads(user)).isEmpty();
+    assertThat(service.searchThreads(user, new MessageThreadListCommand())).isEmpty();
   }
 
   @Test
-  public void threads_includesGroupThreadsWithoutMessages() {
+  public void searchThreads_includesGroupThreadsWithoutMessages() {
     User user = new User();
     MessageThread thread = new MessageThread().setGroup(true);
     when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
     MessageThreadView threadView = new MessageThreadView().setGroup(true);
     doReturn(threadView).when(service).view(user, thread);
 
-    assertThat(service.threads(user)).isNotEmpty();
+    assertThat(service.searchThreads(user, new MessageThreadListCommand())).isNotEmpty();
   }
 
   @Test

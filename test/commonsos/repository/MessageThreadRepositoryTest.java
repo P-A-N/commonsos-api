@@ -91,6 +91,77 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
   }
 
   @Test
+  public void listByUserAndMemberAndMessage() {
+    // prepare
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));
+    User otherUser2 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser2")));
+
+    MessageThread thread1 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser1), party(otherUser2)))));
+    MessageThread thread2 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser1)))));
+    MessageThread thread3 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser2)))));
+    MessageThread thread4 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(otherUser1), party(otherUser2)))));
+
+    // [execute and verify] search by member
+    List<MessageThread> result = repository.listByUserAndMemberAndMessage(user, "user1", null);
+    assertThat(result).extracting("id").containsExactly(thread1.getId(), thread2.getId());
+
+    result = repository.listByUserAndMemberAndMessage(user, "user2", null);
+    assertThat(result).extracting("id").containsExactly(thread1.getId(), thread3.getId());
+
+    result = repository.listByUserAndMemberAndMessage(user, "her", null);
+    assertThat(result).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
+
+    result = repository.listByUserAndMemberAndMessage(user, "not_exists", null);
+    assertThat(result).extracting("id").containsExactly();
+
+    // prepare
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread1.getId()).setText("foobar")));
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread2.getId()).setText("foobar")));
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread3.getId()).setText("foobar")));
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread4.getId()).setText("foobar")));
+    
+    // [execute and verify] search by message
+    result = repository.listByUserAndMemberAndMessage(user, null, "oob");
+    assertThat(result).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
+
+    // prepare
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread1.getId()).setText("HOGE")));
+
+    // [execute and verify] search by message
+    result = repository.listByUserAndMemberAndMessage(user, null, "OG");
+    assertThat(result).extracting("id").containsExactly(thread1.getId());
+    
+    result = repository.listByUserAndMemberAndMessage(user, null, "og");
+    assertThat(result).extracting("id").containsExactly();
+
+    // prepare multiple byte code
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread1.getId()).setText("こんにちわ。今日はいい天気ですね。")));
+    inTransaction(() -> messageRepository.create(new Message().setThreadId(thread2.getId()).setText("こんにちわ。昨日はいい天気でしたね。")));
+    
+    // [execute and verify] search by message
+    result = repository.listByUserAndMemberAndMessage(user, null, "今日");
+    assertThat(result).extracting("id").containsExactly(thread1.getId());
+
+    result = repository.listByUserAndMemberAndMessage(user, null, "こんにちわ");
+    assertThat(result).extracting("id").containsExactly(thread1.getId(), thread2.getId());
+
+    // [execute and verify] search by member and message
+    result = repository.listByUserAndMemberAndMessage(user, "user2", "こんにちわ");
+    assertThat(result).extracting("id").containsExactly(thread1.getId());
+
+    // [execute and verify] not specified member or message
+    result = repository.listByUserAndMemberAndMessage(user, "", "");
+    assertThat(result).extracting("id").containsExactly();
+
+    // [execute and verify] sql injection
+    result = repository.listByUserAndMemberAndMessage(user, "' OR TRUE", null);
+    assertThat(result).extracting("id").containsExactly();
+    result = repository.listByUserAndMemberAndMessage(user, "; select * from message_threads", null);
+    assertThat(result).extracting("id").containsExactly();
+  }
+
+  @Test
   public void byUserId() {
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));

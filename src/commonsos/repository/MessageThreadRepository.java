@@ -3,12 +3,16 @@ package commonsos.repository;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
+import javax.persistence.Query;
+
+import org.apache.commons.lang3.StringUtils;
 
 import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
@@ -67,6 +71,60 @@ public class MessageThreadRepository extends Repository {
       .setLockMode(lockMode())
       .setParameter("user", user)
       .getResultList();
+  }
+
+  public List<MessageThread> listByUserAndMemberAndMessage(User user, String memberFilter, String messageFilter) {
+    if (StringUtils.isBlank(memberFilter) && StringUtils.isBlank(messageFilter)) {
+      return new ArrayList<>();
+    }
+    
+    StringBuilder sql = new StringBuilder();
+    sql.append(
+        "SELECT " +
+        "    mt.* " +
+        "FROM message_threads mt " +
+        "INNER JOIN message_thread_parties p " +
+        "        ON p.message_thread_id = mt.id " +
+        "       AND p.user_id = :userId " +
+        "WHERE TRUE ");
+    if (StringUtils.isNotBlank(memberFilter)) {
+      sql.append(
+          "AND EXISTS ( " +
+          "    SELECT * FROM message_thread_parties mtp " +
+          "    INNER JOIN users u " +
+          "            ON u.id = mtp.user_id " +
+          "    WHERE mtp.message_thread_id = mt.id " +
+          "    AND LOWER(u.username) LIKE LOWER(:memberFilter) " +
+          ") ");
+    }
+    if (StringUtils.isNotBlank(messageFilter)) {
+      sql.append(
+          "AND EXISTS ( " +
+          "    SELECT * FROM messages m " +
+          "    WHERE m.thread_id = mt.id " +
+          "    AND m.text LIKE :messageFilter" +
+          ") ");
+    }
+    sql.append("ORDER BY mt.id");
+
+    Query query = em().createNativeQuery(sql.toString(), MessageThread.class);
+    query.setParameter("userId", user.getId());
+    if (StringUtils.isNotBlank(memberFilter)) {
+      query.setParameter("memberFilter", "%" + memberFilter + "%");
+    }
+    if (StringUtils.isNotBlank(messageFilter)) {
+      query.setParameter("messageFilter", "%" + messageFilter + "%");
+    }
+    
+    try {
+      @SuppressWarnings("unchecked")
+      List<MessageThread> resultList = query.getResultList();
+      resultList.forEach(r -> em().lock(r, lockMode()));
+      
+      return resultList;
+    } catch (NoResultException e) {
+      return new ArrayList<>();
+    }
   }
 
   public Optional<MessageThread> findById(Long id) {

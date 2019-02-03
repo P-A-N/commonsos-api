@@ -33,6 +33,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.command.CreateGroupCommand;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
+import commonsos.service.command.MessageThreadListCommand;
 import commonsos.service.command.MessageThreadPhotoUpdateCommand;
 import commonsos.service.command.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.service.image.ImageService;
@@ -196,10 +197,17 @@ public class MessageService {
       .setText(message.getText());
   }
 
-  public List<MessageThreadView> threads(User user) {
+  public List<MessageThreadView> searchThreads(User user, MessageThreadListCommand command) {
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user);
-    List<MessageThreadView> threadViews = messageThreadRepository.listByUser(user)
-      .stream()
+    
+    List<MessageThread> threads = null;
+    if (StringUtils.isBlank(command.getMemberFilter()) && StringUtils.isBlank(command.getMessageFilter())) {
+      threads = messageThreadRepository.listByUser(user);
+    } else {
+      threads = messageThreadRepository.listByUserAndMemberAndMessage(user, command.getMemberFilter(), command.getMessageFilter());
+    }
+    
+    List<MessageThreadView> threadViews = threads.stream()
       .map(thread -> view(user, thread))
       .filter(t -> t.getLastMessage() != null || t.isGroup())
       .map(p -> p.setUnread(unreadMessageThreadIds.contains(p.getId())))
