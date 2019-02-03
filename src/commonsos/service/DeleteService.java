@@ -36,7 +36,7 @@ public class DeleteService {
   @Inject private ImageService imageService;
 
   public void deleteUser(User user) {
-    log.info("deleting user. userId=%d", user.getId());
+    log.info(String.format("deleting user. userId=%d", user.getId()));
     
     // delete user's ads
     List<Ad> myAds = adRepository.myAds(user.getId());
@@ -53,11 +53,11 @@ public class DeleteService {
     user.setDeleted(true);
     userRepository.update(user);
 
-    log.info("deleted user. userId=%d", user.getId());
+    log.info(String.format("deleted user. userId=%d", user.getId()));
   }
   
   public void deleteAd(User user, Ad ad) {
-    log.info("deleting ad. adId=%d, userId=%d", ad.getId(), user.getId());
+    log.info(String.format("deleting ad. adId=%d, userId=%d", ad.getId(), user.getId()));
     
     // only creator is allowed to delete ad
     if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
@@ -69,11 +69,11 @@ public class DeleteService {
     ad.setDeleted(true);
     adRepository.update(ad);
     
-    log.info("deleted ad. adId=%d, userId=%d", ad.getId(), user.getId());
+    log.info(String.format("deleted ad. adId=%d, userId=%d", ad.getId(), user.getId()));
   }
 
   public void deleteMessageThreadParty(User user, Long threadId) {
-    log.info("deleting message-thread-party. threadId=%d, userId=%d", threadId, user.getId());
+    log.info(String.format("deleting message-thread-party. threadId=%d, userId=%d", threadId, user.getId()));
     
     // verify user is a member of thread
     MessageThread thread = messageThreadRepository.findStrictById(threadId);
@@ -94,14 +94,14 @@ public class DeleteService {
         .setText(MessageUtil.getSystemMessageUnsubscribe(user.getUsername()));
     messageRepository.create(systemMessage);
 
-    log.info("deleted message-thread-party. threadId=%d, userId=%d", threadId, user.getId());
+    log.info(String.format("deleted message-thread-party. threadId=%d, userId=%d", threadId, user.getId()));
   }
   
   public void deletePhoto(String photoUrl) {
     if (StringUtils.isNotBlank(photoUrl)) {
-      log.info("deleting photo. url=%s", photoUrl);
+      log.info(String.format("deleting photo. url=%s", photoUrl));
       imageService.delete(photoUrl);
-      log.info("deleted photo. url=%s", photoUrl);
+      log.info(String.format("deleted photo. url=%s", photoUrl));
     }
   }
 }
