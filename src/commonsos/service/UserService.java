@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,11 +20,8 @@ import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
-import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
-import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
-import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.PasswordResetRequest;
 import commonsos.repository.entity.TemporaryEmailAddress;
@@ -61,17 +57,15 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
   public static final String WALLET_PASSWORD = "test";
 
-  @Inject UserRepository userRepository;
-  @Inject CommunityRepository communityRepository;
-  @Inject MessageThreadRepository messageThreadRepository;
-  @Inject AdRepository adRepository;
-  @Inject BlockchainService blockchainService;
-  @Inject CryptoService cryptoService;
-  @Inject AccessIdService accessIdService;
-  @Inject EmailService emailService;
-  @Inject TransactionService transactionService;
-  @Inject ImageService imageService;
-  @Inject JobService jobService;
+  @Inject private UserRepository userRepository;
+  @Inject private CommunityRepository communityRepository;
+  @Inject private BlockchainService blockchainService;
+  @Inject private CryptoService cryptoService;
+  @Inject private AccessIdService accessIdService;
+  @Inject private EmailService emailService;
+  @Inject private TransactionService transactionService;
+  @Inject private ImageService imageService;
+  @Inject private JobService jobService;
 
   public User checkPassword(String username, String password) {
     User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
@@ -343,23 +337,6 @@ public class UserService {
     userRepository.createPasswordResetRequest(passReset);
     
     emailService.sendPasswordReset(user.getEmailAddress(), user.getUsername(), accessId);
-  }
-
-  public User deleteUserLogically(User user) {
-    // delete my ads logically
-    List<Ad> myAds = adRepository.myAds(
-        user.getCommunityList().stream().map(Community::getId).collect(Collectors.toList()), user.getId());
-    myAds.forEach(ad -> {
-      ad.setDeleted(true);
-      adRepository.update(ad);
-    });
-
-    // delete message thread party
-    messageThreadRepository.deleteMessageThreadParty(user);
-    
-    // delete user logically
-    user.setDeleted(true);
-    return userRepository.update(user);
   }
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {

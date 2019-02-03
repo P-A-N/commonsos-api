@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import commonsos.repository.entity.Message;
+import commonsos.util.MessageUtil;
 
 @Singleton
 public class MessageRepository extends Repository {
@@ -30,9 +31,14 @@ public class MessageRepository extends Repository {
   }
 
   public Optional<Message> lastMessage(Long threadId) {
-    List<Message> messages = em().createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt DESC", Message.class)
+    List<Message> messages = em().createQuery(
+        "FROM Message " +
+        "WHERE threadId = :threadId " +
+        "AND createdBy <> :systemMessageCreatorId " +
+        "ORDER BY createdAt DESC", Message.class)
       .setLockMode(lockMode())
       .setParameter("threadId", threadId)
+      .setParameter("systemMessageCreatorId", MessageUtil.getSystemMessageCreatorId())
       .setMaxResults(1)
       .getResultList();
 

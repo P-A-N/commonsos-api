@@ -15,7 +15,7 @@ public class AdDeleteController extends AfterLoginController {
   @Inject AdService adService;
 
   @Override public Object handleAfterLogin(User user, Request request, Response response) {
-    adService.deleteAdLogically(parseLong(request.params("id")), user);
+    adService.deleteAdLogically(user, parseLong(request.params("id")));
     return "";
   }
 }

@@ -1,18 +1,18 @@
 package commonsos.repository;
 
-import commonsos.repository.MessageRepository;
-import commonsos.repository.entity.Message;
-
-import org.junit.Test;
+import static commonsos.TestId.id;
+import static java.time.Instant.now;
+import static java.time.temporal.ChronoUnit.HOURS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static commonsos.TestId.id;
-import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.HOURS;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import commonsos.repository.entity.Message;
+import commonsos.util.MessageUtil;
 
 public class MessageRepositoryTest extends RepositoryTest {
 
@@ -53,15 +53,16 @@ public class MessageRepositoryTest extends RepositoryTest {
 
   @Test
   public void lastThreadMessage() {
-    Message oldestMessage = new Message().setThreadId(11L).setCreatedAt(now().minus(2, HOURS));
-    Message newestMessage = new Message().setThreadId(11L).setCreatedAt(now());
-    Message olderMessage = new Message().setThreadId(11L).setCreatedAt(now().minus(1, HOURS));
+    // oldestMessage
+    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user1")).setCreatedAt(now().minus(3, HOURS))));
+    // olderMessage
+    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user2")).setCreatedAt(now().minus(2, HOURS))));
+    // newestMessage
+    Message newestMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user3")).setCreatedAt(now().minus(1, HOURS))));
+    // systemMessage
+    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(MessageUtil.getSystemMessageCreatorId())).setCreatedAt(now()));
 
-    inTransaction(() -> repository.create(oldestMessage));
-    inTransaction(() -> repository.create(newestMessage));
-    inTransaction(() -> repository.create(olderMessage));
-
-    Optional<Message> result = repository.lastMessage(11L);
+    Optional<Message> result = repository.lastMessage(id("thread"));
 
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(newestMessage.getId());

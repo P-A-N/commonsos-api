@@ -47,11 +47,10 @@ public class AdRepository extends Repository {
       .getResultList();
   }
 
-  public List<Ad> myAds(List<Long> communityIdList, Long userId) {
+  public List<Ad> myAds(Long userId) {
     return em()
-      .createQuery("FROM Ad WHERE communityId in :communityIdList AND createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
+      .createQuery("FROM Ad WHERE createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
       .setLockMode(lockMode())
-      .setParameter("communityIdList", communityIdList)
       .setParameter("userId", userId)
       .getResultList();
   }

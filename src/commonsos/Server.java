@@ -42,6 +42,7 @@ import commonsos.controller.message.MessageThreadForAdController;
 import commonsos.controller.message.MessageThreadListController;
 import commonsos.controller.message.MessageThreadPhotoUpdateController;
 import commonsos.controller.message.MessageThreadUnreadCountController;
+import commonsos.controller.message.MessageThreadUnsubscribeController;
 import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.message.UpdateMessageThreadPersonalTitleController;
 import commonsos.controller.transaction.BalanceController;
@@ -155,6 +156,7 @@ public class Server {
     post("/message-threads/:id/group", injector.getInstance(GroupMessageThreadUpdateController.class), toJson);
     post("/message-threads/:id/title", injector.getInstance(UpdateMessageThreadPersonalTitleController.class), toJson);
     post("/message-threads/:id/photo", injector.getInstance(MessageThreadPhotoUpdateController.class), toJson);
+    post("/message-threads/:id/unsubscribe", injector.getInstance(MessageThreadUnsubscribeController.class), toJson);
 
     get("/message-threads/unread-count", injector.getInstance(MessageThreadUnreadCountController.class), toJson);
     get("/message-threads/:id", injector.getInstance(MessageThreadController.class), toJson);

@@ -33,7 +33,6 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
-import commonsos.service.AdService;
 import commonsos.service.command.AdCreateCommand;
 import commonsos.service.command.AdPhotoUpdateCommand;
 import commonsos.service.command.AdUpdateCommand;
@@ -153,30 +152,5 @@ public class AdServiceTest {
     when(adRepository.find(id("ad id"))).thenReturn(empty());
 
     service.updatePhoto(new User(), new AdPhotoUpdateCommand().setAdId(id("ad id")));
-  }
-
-  @Test
-  public void deleteAdLogically() {
-    // prepare
-    User operator = new User().setId(id("operator"));
-    Ad targetAd = new Ad().setCreatedBy(id("operator"));
-    when(adRepository.update(targetAd)).thenReturn(targetAd);
-    
-    // execute
-    Ad result = service.deleteAdLogically(targetAd, operator);
-    
-    // verify
-    assertThat(result).isEqualTo(targetAd);
-    assertThat(result.isDeleted()).isEqualTo(true);
-  }
-
-  @Test(expected = ForbiddenException.class)
-  public void deleteAdLogically_forbidden() {
-    // prepare
-    User operator = new User().setId(id("operator"));
-    Ad targetAd = new Ad().setCreatedBy(id("otherUser"));
-    
-    // execute
-    service.deleteAdLogically(targetAd, operator);
   }
 }

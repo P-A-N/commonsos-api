@@ -2,10 +2,11 @@ package commonsos.integration.message;
 
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -14,9 +15,13 @@ import org.junit.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.Message;
+import commonsos.repository.entity.MessageThread;
+import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
+import commonsos.util.MessageUtil;
 
-public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
+public class PostMessageThreadUnsubscribeTest extends IntegrationTest {
 
   private Community community;
   private Community otherCommunity;
@@ -64,20 +69,22 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
   }
   
   @Test
-  public void updateMessageThreadPersonalTitle() {
-    // update personal title
-    Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("personalTitle", "pTitle");
-    
+  public void messageThreadUnsubscribe() {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", groupThreadId)
-      .then().statusCode(200)
-      .body("id", equalTo(groupThreadId.intValue()))
-      .body("title", equalTo("title"))
-      .body("personalTitle", equalTo("pTitle"));
+      .when().post("/message-threads/{id}/unsubscribe", groupThreadId)
+      .then().statusCode(200);
+
+    MessageThread mt = emService.get().createQuery("FROM MessageThread WHERE id = :id", MessageThread.class)
+        .setParameter("id", groupThreadId)
+        .getSingleResult();
+    assertThat(mt.getParties()).extracting(MessageThreadParty::getUser).extracting(User::getId).doesNotContain(user1.getId());
+    
+    List<Message> mList = emService.get().createQuery("FROM Message WHERE thread_id = :id ORDER BY id DESC", Message.class)
+        .setParameter("id", groupThreadId)
+        .getResultList();
+    assertThat(mList.get(0).getCreatedBy()).isEqualTo(MessageUtil.getSystemMessageCreatorId());
   }
   
   @Test
@@ -85,28 +92,18 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     // login with non member of thread
     sessionId = login("user3", "pass");
     
-    // update personal title
-    Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("personalTitle", "pTitle");
-    
     given()
       .cookie("JSESSIONID", sessionId)
-      .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", groupThreadId)
+      .when().post("/message-threads/{id}/unsubscribe", groupThreadId)
       .then().statusCode(400);
   }
   
   @Test
   public void updateMessageThreadPersonalTitle_notGroup() {
-    // update personal title
-    Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("personalTitle", "pTitle");
-    
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", adThreadId)
+      .when().post("/message-threads/{id}/unsubscribe", adThreadId)
       .then().statusCode(400);
   }
 }

@@ -300,6 +300,56 @@ public class MessageThreadRepositoryTest extends RepositoryTest {
     // verify
     assertThat(result).isEqualTo(0);
   }
+
+  @Test
+  public void deleteMessageThreadParty_threadId() {
+    // prepare
+    User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
+    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
+    
+    MessageThread adMessageThread1 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setGroup(false)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(adMessageThread1.getId()).setUser(user1)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(adMessageThread1.getId()).setUser(user2)));
+
+    MessageThread groupMessageThread1 = inTransaction(() -> repository.create(new MessageThread().setAdId(null).setGroup(true)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(groupMessageThread1.getId()).setUser(user1)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(groupMessageThread1.getId()).setUser(user2)));
+
+    MessageThread betweenUserMessageThread1 = inTransaction(() -> repository.create(new MessageThread().setAdId(null).setGroup(false)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(betweenUserMessageThread1.getId()).setUser(user1)));
+    inTransaction(() -> em().persist(new MessageThreadParty().setMessageThreadId(betweenUserMessageThread1.getId()).setUser(user2)));
+    
+    // verify before execute
+    assertThat(em().find(MessageThread.class, adMessageThread1.getId()).getParties().size()).isEqualTo(2);
+    assertThat(em().find(MessageThread.class, groupMessageThread1.getId()).getParties().size()).isEqualTo(2);
+    assertThat(em().find(MessageThread.class, betweenUserMessageThread1.getId()).getParties().size()).isEqualTo(2);
+    
+    // execute
+    int result = inTransaction(() -> repository.deleteMessageThreadParty(user1, adMessageThread1.getId()));
+    
+    // verify
+    assertThat(result).isEqualTo(1);
+    assertThat(em().find(MessageThread.class, adMessageThread1.getId()).getParties().size()).isEqualTo(1);
+    assertThat(em().find(MessageThread.class, groupMessageThread1.getId()).getParties().size()).isEqualTo(2);
+    assertThat(em().find(MessageThread.class, betweenUserMessageThread1.getId()).getParties().size()).isEqualTo(2);
+
+    // execute & verify
+    result = inTransaction(() -> repository.deleteMessageThreadParty(user1, groupMessageThread1.getId()));
+    assertThat(em().find(MessageThread.class, groupMessageThread1.getId()).getParties().size()).isEqualTo(1);
+
+    // execute & verify
+    result = inTransaction(() -> repository.deleteMessageThreadParty(user1, betweenUserMessageThread1.getId()));
+    assertThat(em().find(MessageThread.class, betweenUserMessageThread1.getId()).getParties().size()).isEqualTo(1);
+    
+    // execute & verify
+    result = inTransaction(() -> repository.deleteMessageThreadParty(user1, adMessageThread1.getId()));
+    assertThat(result).isEqualTo(0);
+
+    // execute & verify
+    result = inTransaction(() -> repository.deleteMessageThreadParty(user2, adMessageThread1.getId()));
+    assertThat(result).isEqualTo(1);
+    assertThat(em().find(MessageThread.class, adMessageThread1.getId()).getParties().size()).isEqualTo(0);
+  }
   
   @Test
   public void unreadMessageThreadCount() {

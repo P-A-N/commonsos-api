@@ -49,7 +49,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user2)
             )));
-    create(new Message().setThreadId(adThread.getId()).setText("adMessage").setCreatedAt(Instant.now().plusSeconds(60)));
+    create(new Message().setCreatedBy(user1.getId()).setThreadId(adThread.getId()).setText("adMessage").setCreatedAt(Instant.now().plusSeconds(60)));
 
     groupThread = create(new MessageThread()
         .setTitle("groupThread")
@@ -61,7 +61,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
             new MessageThreadParty().setUser(user2),
             new MessageThreadParty().setUser(user3)
             )));
-    groupMessage = create(new Message().setThreadId(groupThread.getId()).setText("groupMessage").setCreatedAt(Instant.now().plusSeconds(30)));
+    groupMessage = create(new Message().setCreatedBy(user1.getId()).setThreadId(groupThread.getId()).setText("groupMessage").setCreatedAt(Instant.now().plusSeconds(30)));
 
     directThread = create(new MessageThread()
         .setTitle("directThread")
@@ -72,7 +72,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user3)
             )));
-    create(new Message().setThreadId(directThread.getId()).setText("directMessage").setCreatedAt(Instant.now().plusSeconds(0)));
+    create(new Message().setCreatedBy(user1.getId()).setThreadId(directThread.getId()).setText("directMessage").setCreatedAt(Instant.now().plusSeconds(0)));
   }
   
   @Test

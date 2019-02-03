@@ -150,6 +150,15 @@ public class MessageThreadRepository extends Repository {
       .setParameter("user", user).executeUpdate();
   }
 
+  public int deleteMessageThreadParty(User user, Long threadId) {
+    return em().createQuery(
+      "DELETE FROM MessageThreadParty mtp WHERE mtp.user = :user " +
+      "AND mtp.messageThreadId = :threadId")
+      .setParameter("user", user)
+      .setParameter("threadId", threadId)
+      .executeUpdate();
+  }
+
   public List<Long> unreadMessageThreadIds(User user) {
     return em().createQuery(
       "SELECT mt.id " +

@@ -52,6 +52,7 @@ public class MessageService {
   @Inject private UserRepository userRepository;
   @Inject private CommunityRepository communityRepository;
   @Inject private AdService adService;
+  @Inject private DeleteService deleteService;
   @Inject private PushNotificationService pushNotificationService;
   @Inject private ImageService imageService;
 
@@ -258,20 +259,28 @@ public class MessageService {
   }
 
   public MessageThreadView updatePersonalTitle(User user, UpdateMessageThreadPersonalTitleCommand command) {
+    // verify
     MessageThread messageThread = messageThreadRepository.findStrictById(command.getThreadId());
     Optional<MessageThreadParty> userMtp = messageThread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst();
     if (!userMtp.isPresent()) throw new BadRequestException("User is not a member of thread");
+
+    if (!messageThread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
     
+    // updatePersonalTitle
     userMtp.get().setPersonalTitle(command.getPersonalTitle());
     messageThreadRepository.update(messageThread);
     return view(user, messageThread);
   }
 
   public String updatePhoto(User user, MessageThreadPhotoUpdateCommand command) {
+    // verify
     MessageThread thread = messageThreadRepository.findStrictById(command.getThreadId());
     Optional<MessageThreadParty> userMtp = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst();
     if (!userMtp.isPresent()) throw new BadRequestException("User is not a member of thread");
-    
+
+    if (!thread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
+
+    // updatePhoto
     String url = imageService.create(command.getPhoto());
     if (StringUtils.isNotBlank(userMtp.get().getPhotoUrl())) {
       imageService.delete(userMtp.get().getPhotoUrl());
@@ -279,6 +288,14 @@ public class MessageService {
     userMtp.get().setPhotoUrl(url);
     messageThreadRepository.update(thread);
     return url;
+  }
+
+  public void unsubscribe(User user, Long threadId) {
+    // verify
+    MessageThread thread = messageThreadRepository.findStrictById(threadId);
+    if (!thread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
+
+    deleteService.deleteMessageThreadParty(user, threadId);
   }
 
   private void markVisited(User user, MessageThread thread) {

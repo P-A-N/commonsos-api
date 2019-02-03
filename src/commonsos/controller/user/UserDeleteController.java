@@ -4,16 +4,16 @@ import javax.inject.Inject;
 
 import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
-import commonsos.service.UserService;
+import commonsos.service.DeleteService;
 import spark.Request;
 import spark.Response;
 
 public class UserDeleteController extends AfterLoginController {
 
-  @Inject UserService userService;
+  @Inject DeleteService deleteService;
 
   @Override public Object handleAfterLogin(User user, Request request, Response response) {
-    userService.deleteUserLogically(user);
+    deleteService.deleteUser(user);
     return "";
   }
 }

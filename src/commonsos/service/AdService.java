@@ -4,7 +4,6 @@ import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,11 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
-import commonsos.repository.CommunityRepository;
 import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
-import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.service.command.AdCreateCommand;
 import commonsos.service.command.AdPhotoUpdateCommand;
@@ -30,11 +27,11 @@ import commonsos.view.AdView;
 
 @Singleton
 public class AdService {
-  @Inject AdRepository adRepository;
-  @Inject UserRepository userRepository;
-  @Inject CommunityRepository communityRepository;
-  @Inject TransactionRepository transactionRepository;
-  @Inject ImageService imageService;
+  @Inject private AdRepository adRepository;
+  @Inject private UserRepository userRepository;
+  @Inject private TransactionRepository transactionRepository;
+  @Inject private DeleteService deleteService;
+  @Inject private ImageService imageService;
 
   public AdView create(User user, AdCreateCommand command) {
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
@@ -65,9 +62,7 @@ public class AdService {
   }
 
   public List<Ad> myAds(User user) {
-    return adRepository.myAds(
-        user.getCommunityList().stream().map(Community::getId).collect(Collectors.toList()),
-        user.getId());
+    return adRepository.myAds(user.getId());
   }
 
   public AdView view(Ad ad, User user) {
@@ -109,15 +104,7 @@ public class AdService {
     return url;
   }
 
-  public Ad deleteAdLogically(Long adId, User operator) {
-    return deleteAdLogically(ad(adId), operator);
-  }
-
-  public Ad deleteAdLogically(Ad ad, User operator) {
-    // operator have to be the creator
-    if (!ad.getCreatedBy().equals(operator.getId())) throw new ForbiddenException();
-
-    ad.setDeleted(true);
-    return adRepository.update(ad);
+  public void deleteAdLogically(User user, Long adId) {
+    deleteService.deleteAd(user, ad(adId));
   }
 }
