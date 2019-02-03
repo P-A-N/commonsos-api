@@ -15,6 +15,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainService;
 import commonsos.util.CommunityUtil;
 import commonsos.view.CommunityView;
 
@@ -22,6 +23,7 @@ import commonsos.view.CommunityView;
 public class CommunityService {
 
   @Inject CommunityRepository repository;
+  @Inject BlockchainService blockchainService;
 
   public List<CommunityView> usersCommunitylist(User user, String filter) {
     List<CommunityView> communityList = StringUtils.isEmpty(filter) ? list() : list(filter);
@@ -34,12 +36,12 @@ public class CommunityService {
     if (StringUtils.isEmpty(filter)) {
       return list();
     } else {
-      return repository.list(filter).stream().map(CommunityUtil::view).collect(toList());
+      return repository.list(filter).stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
     }
   }
   
   public List<CommunityView> list() {
-    return repository.list().stream().map(CommunityUtil::view).collect(toList());
+    return repository.list().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
   }
 
   public Community community(Long id) {

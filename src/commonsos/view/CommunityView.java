@@ -10,4 +10,5 @@ public class CommunityView {
   private String name;
   private Long adminUserId;
   private String description;
+  private String tokenSymbol;
 }

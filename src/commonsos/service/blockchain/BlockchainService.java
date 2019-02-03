@@ -39,6 +39,7 @@ import org.web3j.utils.Files;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import commonsos.Cache;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
@@ -62,6 +63,7 @@ public class BlockchainService {
   @Inject CommunityRepository communityRepository;
   @Inject ObjectMapper objectMapper;
   @Inject Web3j web3j;
+  @Inject Cache cache;
   @Inject NonceProvider nonceProvider;
 
   public boolean isConnected() {
@@ -296,6 +298,35 @@ public class BlockchainService {
     }
   }
 
+  public String tokenSymbol(Long communityId) {
+    String tokenSymbol = cache.getTokenSymbol(communityId);
+    
+    if (tokenSymbol == null) {
+      tokenSymbol = getTokenSymbolFromBlockchain(communityId);
+    }
+    
+    return tokenSymbol;
+  }
+  
+  private synchronized String getTokenSymbolFromBlockchain(Long communityId) {
+    String tokenSymbol = cache.getTokenSymbol(communityId);
+    if (tokenSymbol != null) return tokenSymbol;
+
+    try {
+      log.info(String.format("Token symbol request for: communityId=%d", communityId));
+      Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
+      TokenERC20 token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      tokenSymbol = token.symbol().send();
+      log.info(String.format("Token symbol request complete: symbol=%s, communityId=%d", tokenSymbol, communityId));
+      
+      cache.setTokenSymbol(communityId, tokenSymbol == null ? "" : tokenSymbol);
+      return tokenSymbol;
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   public void delegateTokenTransferRight(User walletOwner, Community community) {
     try {
       TokenERC20 token = userCommunityToken(walletOwner, community);

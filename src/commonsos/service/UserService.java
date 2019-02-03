@@ -85,7 +85,7 @@ public class UserService {
     if (user.getCommunityList() != null) {
       user.getCommunityList().forEach(c -> {
         balanceList.add(transactionService.balance(user, c.getId()));
-        communityList.add(CommunityUtil.view(c));
+        communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
       });
     }
     
