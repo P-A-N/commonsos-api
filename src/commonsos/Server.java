@@ -32,7 +32,9 @@ import commonsos.controller.auth.LogoutController;
 import commonsos.controller.auth.PasswordResetController;
 import commonsos.controller.auth.PasswordResetRequestCheckController;
 import commonsos.controller.auth.PasswordResetRequestController;
+import commonsos.controller.community.CommunityCoverPhotoUpdateController;
 import commonsos.controller.community.CommunityListController;
+import commonsos.controller.community.CommunityPhotoUpdateController;
 import commonsos.controller.message.GroupMessageThreadController;
 import commonsos.controller.message.GroupMessageThreadUpdateController;
 import commonsos.controller.message.MessageListController;
@@ -165,6 +167,8 @@ public class Server {
     get("/message-threads/:id/messages", injector.getInstance(MessageListController.class), toJson);
 
     get("/communities", injector.getInstance(CommunityListController.class), toJson);
+    post("/communities/:id/photo", injector.getInstance(CommunityPhotoUpdateController.class), toJson);
+    post("/communities/:id/coverPhoto", injector.getInstance(CommunityCoverPhotoUpdateController.class), toJson);
 
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);

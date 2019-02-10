@@ -58,4 +58,9 @@ public class CommunityRepository extends Repository {
         && community.get().getAdminUser() != null
         && community.get().getAdminUser().getId().equals(userId);
   }
+
+  public Community update(Community community) {
+    em().merge(community);
+    return community;
+  }
 }

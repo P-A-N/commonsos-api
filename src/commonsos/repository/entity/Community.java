@@ -22,4 +22,6 @@ public class Community {
   @OneToOne
   @JoinColumn(name = "admin_user_id")
   private User adminUser;
+  private String photoUrl;
+  private String coverPhotoUrl;
 }

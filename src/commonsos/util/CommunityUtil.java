@@ -14,6 +14,8 @@ public class CommunityUtil {
         .setName(community.getName())
         .setAdminUserId(adminUserId)
         .setDescription(community.getDescription())
-        .setTokenSymbol(tokenSymbol);
+        .setTokenSymbol(tokenSymbol)
+        .setPhotoUrl(community.getPhotoUrl())
+        .setCoverPhotoUrl(community.getCoverPhotoUrl());
   }
 }

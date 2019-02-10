@@ -11,4 +11,6 @@ public class CommunityView {
   private Long adminUserId;
   private String description;
   private String tokenSymbol;
+  private String photoUrl;
+  private String coverPhotoUrl;
 }
