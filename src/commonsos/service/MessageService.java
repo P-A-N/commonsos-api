@@ -34,9 +34,9 @@ import commonsos.service.command.CreateGroupCommand;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
 import commonsos.service.command.MessageThreadListCommand;
-import commonsos.service.command.MessageThreadPhotoUpdateCommand;
 import commonsos.service.command.UpdateMessageThreadPersonalTitleCommand;
-import commonsos.service.image.ImageService;
+import commonsos.service.command.UploadPhotoCommand;
+import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.UserUtil;
 import commonsos.view.AdView;
@@ -54,7 +54,7 @@ public class MessageService {
   @Inject private AdService adService;
   @Inject private DeleteService deleteService;
   @Inject private PushNotificationService pushNotificationService;
-  @Inject private ImageService imageService;
+  @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
     MessageThread thread = messageThreadRepository.byAdId(user, adId).orElseGet(() -> createMessageThreadForAd(user, adId));
@@ -272,19 +272,18 @@ public class MessageService {
     return view(user, messageThread);
   }
 
-  public String updatePhoto(User user, MessageThreadPhotoUpdateCommand command) {
+  public String updatePhoto(User user, UploadPhotoCommand command, Long threadId) {
     // verify
-    MessageThread thread = messageThreadRepository.findStrictById(command.getThreadId());
+    MessageThread thread = messageThreadRepository.findStrictById(threadId);
     Optional<MessageThreadParty> userMtp = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst();
     if (!userMtp.isPresent()) throw new BadRequestException("User is not a member of thread");
 
     if (!thread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
 
     // updatePhoto
-    String url = imageService.create(command.getPhoto());
-    if (StringUtils.isNotBlank(userMtp.get().getPhotoUrl())) {
-      imageService.delete(userMtp.get().getPhotoUrl());
-    }
+    String url = imageService.create(command);
+    imageService.delete(userMtp.get().getPhotoUrl());
+    
     userMtp.get().setPhotoUrl(url);
     messageThreadRepository.update(thread);
     return url;

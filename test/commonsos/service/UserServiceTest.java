@@ -12,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,7 +42,7 @@ import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
-import commonsos.service.image.ImageService;
+import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
 import commonsos.view.UserView;
 
@@ -57,7 +56,7 @@ public class UserServiceTest {
   @Mock BlockchainService blockchainService;
   @Mock CryptoService cryptoService;
   @Mock TransactionService transactionService;
-  @Mock ImageService imageService;
+  @Mock ImageUploadService imageService;
   @Mock EmailService EmailService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
@@ -192,34 +191,6 @@ public class UserServiceTest {
 
     assertThat(results.size()).isEqualTo(1);
     assertThat(results.get(0).getId()).isEqualTo(id("other"));
-  }
-
-  @Test
-  public void updateAvatar() {
-    User user = new User().setAvatarUrl("/old");
-    ByteArrayInputStream image = new ByteArrayInputStream(new byte[] {1, 2, 3});
-    when(imageService.create(image)).thenReturn("/url");
-
-    String result = userService.updateAvatar(user, image);
-
-    assertThat(result).isEqualTo("/url");
-    assertThat(user.getAvatarUrl()).isEqualTo("/url");
-    verify(userRepository).update(user);
-    verify(imageService).delete("/old");
-  }
-
-  @Test
-  public void updateAvatar_userHasNoAvatarYet() {
-    User user = new User().setAvatarUrl(null);
-    ByteArrayInputStream image = new ByteArrayInputStream(new byte[] {1, 2, 3});
-    when(imageService.create(image)).thenReturn("/url");
-
-    String result = userService.updateAvatar(user, image);
-
-    assertThat(result).isEqualTo("/url");
-    assertThat(user.getAvatarUrl()).isEqualTo("/url");
-    verify(userRepository).update(user);
-    verify(imageService, never()).delete(any());
   }
 
   @Test

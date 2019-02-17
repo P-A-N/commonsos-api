@@ -8,8 +8,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -21,7 +19,7 @@ import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
-import commonsos.service.image.ImageService;
+import commonsos.service.image.ImageUploadService;
 import commonsos.util.MessageUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +31,7 @@ public class DeleteService {
   @Inject private AdRepository adRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
-  @Inject private ImageService imageService;
+  @Inject private ImageUploadService imageService;
 
   public void deleteUser(User user) {
     log.info(String.format("deleting user. userId=%d", user.getId()));
@@ -98,10 +96,8 @@ public class DeleteService {
   }
   
   public void deletePhoto(String photoUrl) {
-    if (StringUtils.isNotBlank(photoUrl)) {
-      log.info(String.format("deleting photo. url=%s", photoUrl));
-      imageService.delete(photoUrl);
-      log.info(String.format("deleted photo. url=%s", photoUrl));
-    }
+    log.info(String.format("deleting photo. url=%s", photoUrl));
+    imageService.delete(photoUrl);
+    log.info(String.format("deleted photo. url=%s", photoUrl));
   }
 }

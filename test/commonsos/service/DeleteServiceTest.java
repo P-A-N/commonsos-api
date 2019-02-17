@@ -22,7 +22,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
-import commonsos.service.image.ImageService;
+import commonsos.service.image.ImageUploadService;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DeleteServiceTest {
@@ -31,7 +31,7 @@ public class DeleteServiceTest {
   @Mock AdRepository adRepository;
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock MessageRepository messageRepository;
-  @Mock ImageService imageService;
+  @Mock ImageUploadService imageService;
   @InjectMocks @Spy DeleteService service;
 
   @Test

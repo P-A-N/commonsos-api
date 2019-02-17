@@ -1,6 +1,6 @@
 package commonsos.exception;
 
-public class ServerErrorException extends RuntimeException {
+public class ServerErrorException extends CommonsOSException {
   private static final long serialVersionUID = 1L;
   
   public ServerErrorException() {

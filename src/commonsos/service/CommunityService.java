@@ -3,7 +3,6 @@ package commonsos.service;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +17,8 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.image.ImageService;
+import commonsos.service.command.UploadPhotoCommand;
+import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.view.CommunityView;
 
@@ -26,7 +26,7 @@ import commonsos.view.CommunityView;
 public class CommunityService {
 
   @Inject CommunityRepository repository;
-  @Inject private ImageService imageService;
+  @Inject private ImageUploadService imageService;
   @Inject BlockchainService blockchainService;
 
   public List<CommunityView> usersCommunitylist(User user, String filter) {
@@ -56,27 +56,25 @@ public class CommunityService {
     return repository.isAdmin(userId, communityId);
   }
 
-  public String updatePhoto(User user, Long communityId, InputStream image) {
+  public String updatePhoto(User user, UploadPhotoCommand command, Long communityId) {
     Community community = repository.findStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
-    String url = imageService.create(image);
-    if (StringUtils.isNotBlank(community.getPhotoUrl())) {
-      imageService.delete(community.getPhotoUrl());
-    }
+    String url = imageService.create(command);
+    imageService.delete(community.getPhotoUrl());
+    
     community.setPhotoUrl(url);
     repository.update(community);
     return url;
   }
 
-  public String updateCoverPhoto(User user, Long communityId, InputStream image) {
+  public String updateCoverPhoto(User user, UploadPhotoCommand command, Long communityId) {
     Community community = repository.findStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
-    String url = imageService.create(image);
-    if (StringUtils.isNotBlank(community.getCoverPhotoUrl())) {
-      imageService.delete(community.getCoverPhotoUrl());
-    }
+    String url = imageService.create(command);
+    imageService.delete(community.getCoverPhotoUrl());
+    
     community.setCoverPhotoUrl(url);
     repository.update(community);
     return url;

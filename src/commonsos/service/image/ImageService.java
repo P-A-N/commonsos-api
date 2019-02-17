@@ -1,59 +1,105 @@
 package commonsos.service.image;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import org.im4java.core.IMOperation;
+import org.im4java.core.ImageCommand;
+import org.im4java.process.OutputConsumer;
 
-import commonsos.Configuration;
+import commonsos.exception.ServerErrorException;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
+@Slf4j
 public class ImageService {
 
-  private AWSCredentials credentials;
-  private AmazonS3 s3client;
-  private String bucketName;
-
-  @Inject Configuration config;
-
-  @Inject void init() {
-    bucketName = config.awsS3BucketName();
-    credentials = new BasicAWSCredentials(config.awsAccessKey(), config.awsSecurityKey());
-    s3client = AmazonS3ClientBuilder
-      .standard()
-      .withCredentials(new AWSStaticCredentialsProvider(credentials))
-      .withRegion(Regions.AP_NORTHEAST_1)
-      .withForceGlobalBucketAccessEnabled(true)
-      .build();
+  public ImageType getImageType(File image) {
+    // prepare
+    ImageCommand cmd = new ImageCommand("magick");
+    cmd.setCommand("identify");
+    cmd.setAsyncMode(false);
+    
+    IdentifyOutputConsumer consumer = new IdentifyOutputConsumer();
+    cmd.setOutputConsumer(consumer);
+//    cmd.setErrorConsumer(e -> {});
+    
+    IMOperation op = new IMOperation();
+    op.format("%m");
+    op.addImage(image.getAbsolutePath());
+    
+    // execute command
+    try {
+      cmd.run(op);
+    } catch (Exception e) {
+      log.info(String.format("fail to execute command. [%s]", getCommandLine(cmd, op)), e);
+    }
+    
+    // get result
+    String cmdResult = consumer.getResult();
+    ImageType imageType = ImageType.valueOf(cmdResult, false);
+    
+    return imageType;
   }
-
-  public String create(InputStream inputStream) {
-    String filename = UUID.randomUUID().toString();
-    s3client.putObject(new PutObjectRequest(bucketName, filename, inputStream, null)
-      .withMetadata(metadata())
-      .withCannedAcl(CannedAccessControlList.PublicRead));
-    return "https://" + bucketName + ".s3.amazonaws.com/" + filename;
+  
+  public File crop(File image, int width, int height, int x, int y) throws IOException {
+    // prepare
+    File cropedPhotoFile = Files.createTempFile(String.format("%s_%s_", "commonsos" ,Thread.currentThread().getName()), null).toFile();
+    
+    ImageCommand cmd = new ImageCommand("magick");
+    cmd.setAsyncMode(false);
+    cmd.setOutputConsumer(o -> {});
+    cmd.setErrorConsumer(e -> {});
+    
+    IMOperation op = new IMOperation();
+    op.addImage(image.getAbsolutePath());
+    op.crop(width, height, x, y);
+    op.addImage(cropedPhotoFile.getAbsolutePath());
+    
+    // execute command
+    try {
+      cmd.run(op);
+    } catch (Exception e) {
+      cropedPhotoFile.delete();
+      log.info(String.format("deleted temporary file(cropedPhotoFile). [%s]", cropedPhotoFile.getAbsolutePath()));
+      throw new ServerErrorException(String.format("fail to execute command. [%s]", getCommandLine(cmd, op)), e);
+    }
+    
+    return cropedPhotoFile;
   }
-
-  private ObjectMetadata metadata() {
-    ObjectMetadata objectMetadata = new ObjectMetadata();
-    objectMetadata.setContentType("image");
-    objectMetadata.setCacheControl("public, max-age=3600000");
-    return objectMetadata;
+  
+  private class IdentifyOutputConsumer implements OutputConsumer {
+    
+    private String result;
+    
+    @Override
+    public void consumeOutput(InputStream in) throws IOException {
+      try(InputStreamReader isr = new InputStreamReader(in);
+        BufferedReader br = new BufferedReader(isr);) {
+        result = br.readLine();
+      }
+    }
+    
+    public String getResult() {
+      return result;
+    }
   }
-
-  public void delete(String url) {
-    s3client.deleteObject(bucketName, url.substring(url.lastIndexOf('/') + 1));
+  
+  private String getCommandLine(ImageCommand cmd, IMOperation op) {
+    StringBuilder sb = new StringBuilder();
+    
+    for (String command : cmd.getCommand()) {
+      sb.append(command).append(' ');
+    }
+    
+    sb.append(op.toString());
+    
+    return sb.toString();
   }
 }

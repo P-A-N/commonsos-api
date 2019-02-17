@@ -2,10 +2,6 @@ package commonsos.controller;
 
 import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Base64;
-
 import javax.inject.Inject;
 
 import commonsos.exception.AuthenticationException;
@@ -29,9 +25,4 @@ public abstract class AfterLoginController implements Route {
   }
 
   abstract protected Object handleAfterLogin(User user, Request request, Response response);
-
-  public InputStream image(Request request) {
-    String base64 = request.body().replaceFirst("data:image/.*;base64,", "");
-    return new ByteArrayInputStream(Base64.getDecoder().decode(base64));
-  }
 }

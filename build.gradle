@@ -43,8 +43,10 @@ dependencies {
   compile 'org.flywaydb:flyway-core:5.0.7'
   compile 'org.web3j:core:3.4.0'
   compile 'org.ehcache:ehcache:3.6.1'
+  compile 'org.im4java:im4java:1.4.0'
   
   compile 'commons-validator:commons-validator:1.6'
+  compile 'commons-fileupload:commons-fileupload:1.4'
   
   compile 'ch.qos.logback:logback-classic:1.2.3'
 

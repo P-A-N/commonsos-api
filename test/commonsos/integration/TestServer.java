@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 
 import org.web3j.crypto.Credentials;
@@ -23,7 +24,7 @@ import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.email.EmailService;
-import commonsos.service.image.ImageService;
+import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
 import spark.Spark;
 
@@ -41,8 +42,8 @@ public class TestServer extends Server {
   protected Injector initDependencies() {
     Web3j web3j = mock(Web3j.class);
     PushNotificationService pushNotificationService = mock(PushNotificationService.class);
-    ImageService imageService = mock(ImageService.class);
-    when(imageService.create(any())).thenReturn("http://test.com/ad/photo");
+    ImageUploadService imageService = mock(ImageUploadService.class);
+    when(imageService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     
     BlockchainService blockchainService = mock(BlockchainService.class);
@@ -61,7 +62,7 @@ public class TestServer extends Server {
 
         bind(Web3j.class).toInstance(web3j);
         bind(PushNotificationService.class).toInstance(pushNotificationService);
-        bind(ImageService.class).toInstance(imageService);
+        bind(ImageUploadService.class).toInstance(imageService);
         bind(BlockchainEventService.class).toInstance(blockchainEventService);
         bind(BlockchainService.class).toInstance(blockchainService);
         bind(EntityManagerService.class).to(TestEntityManagerService.class);

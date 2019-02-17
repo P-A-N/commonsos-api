@@ -2,7 +2,6 @@ package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
 
-import java.io.InputStream;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
@@ -33,6 +31,7 @@ import commonsos.service.command.CreateAccountTemporaryCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
+import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.command.UserNameUpdateCommand;
 import commonsos.service.command.UserPasswordResetRequestCommand;
 import commonsos.service.command.UserStatusUpdateCommand;
@@ -41,7 +40,7 @@ import commonsos.service.command.UserUpdateCommunitiesCommand;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
-import commonsos.service.image.ImageService;
+import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
 import commonsos.util.UserUtil;
@@ -64,7 +63,7 @@ public class UserService {
   @Inject private AccessIdService accessIdService;
   @Inject private EmailService emailService;
   @Inject private TransactionService transactionService;
-  @Inject private ImageService imageService;
+  @Inject private ImageUploadService imageService;
   @Inject private JobService jobService;
 
   public User checkPassword(String username, String password) {
@@ -267,11 +266,9 @@ public class UserService {
     return userRepository.search(communityId, query).stream().filter(u -> !u.getId().equals(user.getId())).map(UserUtil::view).collect(toList());
   }
 
-  public String updateAvatar(User user, InputStream image) {
-    String url = imageService.create(image);
-    if (StringUtils.isNotBlank(user.getAvatarUrl())) {
-      imageService.delete(user.getAvatarUrl());
-    }
+  public String updateAvatar(User user, UploadPhotoCommand command) {
+    String url = imageService.create(command);
+    imageService.delete(user.getAvatarUrl());
     user.setAvatarUrl(url);
     userRepository.update(user);
     return url;

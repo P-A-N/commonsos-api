@@ -1,6 +1,6 @@
 package commonsos.exception;
 
-public class ForbiddenException extends RuntimeException {
+public class ForbiddenException extends CommonsOSException {
   private static final long serialVersionUID = 1L;
   
   public ForbiddenException() {
