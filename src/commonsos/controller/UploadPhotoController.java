@@ -114,8 +114,11 @@ public abstract class UploadPhotoController extends AfterLoginController {
   }
   
   private File getPhotoFile(Map<String, List<FileItem>> fileItemMap) throws Exception {
+    String tmpDirPath = System.getProperty("java.io.tmpdir");
+    if (!tmpDirPath.endsWith(File.separator)) tmpDirPath = tmpDirPath + File.separator;
+    
     String filePath = String.format("%s%s_%s_%d.tmp",
-        System.getProperty("java.io.tmpdir"),
+        tmpDirPath,
         "commonsos",
         Thread.currentThread().getName(),
         random.nextInt(Integer.MAX_VALUE));
