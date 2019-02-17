@@ -9,7 +9,9 @@ import java.nio.file.Files;
 
 import javax.inject.Singleton;
 
+import org.im4java.core.ConvertCmd;
 import org.im4java.core.IMOperation;
+import org.im4java.core.IdentifyCmd;
 import org.im4java.core.ImageCommand;
 import org.im4java.process.OutputConsumer;
 
@@ -22,13 +24,12 @@ public class ImageService {
 
   public ImageType getImageType(File image) {
     // prepare
-    ImageCommand cmd = new ImageCommand("magick");
-    cmd.setCommand("identify");
+    IdentifyCmd cmd = new IdentifyCmd();
     cmd.setAsyncMode(false);
     
     IdentifyOutputConsumer consumer = new IdentifyOutputConsumer();
     cmd.setOutputConsumer(consumer);
-//    cmd.setErrorConsumer(e -> {});
+    cmd.setErrorConsumer(e -> {});
     
     IMOperation op = new IMOperation();
     op.format("%m");
@@ -52,7 +53,7 @@ public class ImageService {
     // prepare
     File cropedPhotoFile = Files.createTempFile(String.format("%s_%s_", "commonsos" ,Thread.currentThread().getName()), null).toFile();
     
-    ImageCommand cmd = new ImageCommand("magick");
+    ConvertCmd cmd = new ConvertCmd();
     cmd.setAsyncMode(false);
     cmd.setOutputConsumer(o -> {});
     cmd.setErrorConsumer(e -> {});

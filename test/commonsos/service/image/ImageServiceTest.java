@@ -25,7 +25,7 @@ public class ImageServiceTest {
   @InjectMocks @Spy private ImageService imageService;
 
   @Test
-  public void getImageCommand_JPEG() throws URISyntaxException {
+  public void getImageType_JPEG() throws URISyntaxException {
     // prepare
     URL url = this.getClass().getResource("/images/testImage.jpg");
     URI uri = url.toURI();
@@ -39,7 +39,7 @@ public class ImageServiceTest {
   }
   
   @Test
-  public void getImageCommand_PNG() throws URISyntaxException {
+  public void getImageType_PNG() throws URISyntaxException {
     // prepare
     URL url = this.getClass().getResource("/images/testImage.png");
     URI uri = url.toURI();
@@ -53,7 +53,7 @@ public class ImageServiceTest {
   }
   
   @Test
-  public void getImageCommand_SVG() throws URISyntaxException {
+  public void getImageType_SVG() throws URISyntaxException {
     // prepare
     URL url = this.getClass().getResource("/images/testImage.svg");
     URI uri = url.toURI();
@@ -67,7 +67,7 @@ public class ImageServiceTest {
   }
   
   @Test
-  public void getImageCommand_TXT() throws URISyntaxException {
+  public void getImageType_TXT() throws URISyntaxException {
     // prepare
     URL url = this.getClass().getResource("/images/testImage.txt");
     URI uri = url.toURI();
