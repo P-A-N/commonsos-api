@@ -15,6 +15,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.UploadPhotoCommand;
@@ -31,7 +32,7 @@ public class CommunityService {
 
   public List<CommunityView> usersCommunitylist(User user, String filter) {
     List<CommunityView> communityList = StringUtils.isEmpty(filter) ? list() : list(filter);
-    Set<Long> idSet = user.getCommunityList().stream().map(Community::getId).collect(toSet());
+    Set<Long> idSet = user.getCommunityUserList().stream().map(CommunityUser::getCommunity).map(Community::getId).collect(toSet());
     
     return communityList.stream().filter(c -> idSet.contains(c.getId())).collect(toList());
   }

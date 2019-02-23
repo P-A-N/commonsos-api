@@ -16,6 +16,7 @@ import org.junit.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 
@@ -30,10 +31,10 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(adCreator.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
     sessionId = login("user", "pass");
   }

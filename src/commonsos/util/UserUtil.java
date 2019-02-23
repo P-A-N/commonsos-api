@@ -46,13 +46,13 @@ public class UserUtil {
   }
 
   public static boolean isAdminOfUser(User admin, User user) {
-    if (CollectionUtils.isEmpty(admin.getCommunityList())
-        || CollectionUtils.isEmpty(user.getCommunityList())) {
+    if (CollectionUtils.isEmpty(admin.getCommunityUserList())
+        || CollectionUtils.isEmpty(user.getCommunityUserList())) {
       return false;
     }
     
-    return user.getCommunityList().stream().anyMatch(community -> 
-      community.getAdminUser() != null && community.getAdminUser().getId().equals(admin.getId())
+    return user.getCommunityUserList().stream().anyMatch(cu -> 
+      cu.getCommunity().getAdminUser() != null && cu.getCommunity().getAdminUser().getId().equals(admin.getId())
     );
   }
 
@@ -61,6 +61,6 @@ public class UserUtil {
   }
 
   public static boolean isMember(User user, Long communityId) {
-    return user.getCommunityList().stream().anyMatch(c -> c.getId().equals(communityId));
+    return user.getCommunityUserList().stream().anyMatch(cu -> cu.getCommunity().getId().equals(communityId));
   }
 }

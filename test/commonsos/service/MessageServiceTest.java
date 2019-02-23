@@ -36,6 +36,7 @@ import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -487,13 +488,15 @@ public class MessageServiceTest {
 
   @Test(expected = BadRequestException.class)
   public void validatePartiesCommunity_not_a_member() {
-    when(userRepository.findById(any())).thenReturn(Optional.of(new User().setCommunityList(asList(new Community().setId(id("community_1"))))));
+    when(userRepository.findById(any())).thenReturn(Optional.of(
+        new User().setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community_1")))))));
     service.validatePartiesCommunity(asList(1L, 2L), id("community_2"));
   }
 
   @Test
   public void validatePartiesCommunity_valid() {
-    when(userRepository.findById(any())).thenReturn(Optional.of(new User().setCommunityList(asList(new Community().setId(id("community"))))));
+    when(userRepository.findById(any())).thenReturn(Optional.of(
+        new User().setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))))));
     service.validatePartiesCommunity(asList(1L, 2L), id("community"));
   }
 }

@@ -17,6 +17,7 @@ import org.junit.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 
 public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
@@ -36,10 +37,10 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
+    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
     ad =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
     sessionId = login("user1", "pass");

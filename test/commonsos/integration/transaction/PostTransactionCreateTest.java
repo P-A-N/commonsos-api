@@ -15,6 +15,7 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 
@@ -33,9 +34,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
     giveAd =  create(new Ad().setCreatedBy(adCreator.getId()).setType(AdType.GIVE).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
     wantAd =  create(new Ad().setCreatedBy(adCreator.getId()).setType(AdType.WANT).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 

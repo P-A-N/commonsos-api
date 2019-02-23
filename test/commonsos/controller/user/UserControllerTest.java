@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import spark.Request;
@@ -37,10 +38,10 @@ public class UserControllerTest {
   @Test
   public void handle_adminUser() {
     // prepare
-    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
     when(userService.user(any())).thenReturn(
-        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(user))));
+        new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(user)))));
 
     // execute
     controller.handleAfterLogin(user, request, response);
@@ -53,10 +54,10 @@ public class UserControllerTest {
   @Test
   public void handle_generalUser() {
     // prepare
-    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
     when(userService.user(any())).thenReturn(
-        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2"))))));
+        new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2")))))));
 
     // execute
     controller.handleAfterLogin(user, request, response);

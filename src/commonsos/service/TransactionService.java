@@ -20,6 +20,7 @@ import commonsos.repository.AdRepository;
 import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
@@ -90,7 +91,7 @@ public class TransactionService {
 //      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException();
 //      if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
       if (AdUtil.isPayableByUser(user, ad)) {
-        if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
+        if (!beneficiary.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
       } else {
         command.setAdId(null);
       }

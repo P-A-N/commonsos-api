@@ -185,8 +185,8 @@ public class UserRepository extends Repository {
   public List<User> search(Long communityId, String query) {
     if (isBlank(query)) return emptyList();
     return em().createQuery(
-      "SELECT u FROM User u JOIN u.communityList c " +
-      "WHERE c.id = :communityId " +
+      "SELECT u FROM User u JOIN u.communityUserList cu " +
+      "WHERE cu.community.id = :communityId " +
       "AND u.deleted = FALSE " +
       "AND LOWER(u.username) LIKE LOWER(:query) " +
       "ORDER BY u.id", User.class)

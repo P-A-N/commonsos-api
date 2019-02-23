@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 
@@ -32,9 +33,9 @@ public class GetTransactionListTest extends IntegrationTest {
   public void setup() {
     community1 =  create(new Community().setName("community1"));
     community2 =  create(new Community().setName("community2"));
-    user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityList(asList(community1)));
-    user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community1)));
-    user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community2)));
+    user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
+    user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
+    user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
     Instant instant = Instant.now();
     /* tran1 = */create(new Transaction().setCommunityId(community1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)).setCreatedAt(instant.plusSeconds(10)));
     /* tran2 = */create(new Transaction().setCommunityId(community2.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)).setCreatedAt(instant.plusSeconds(20)));

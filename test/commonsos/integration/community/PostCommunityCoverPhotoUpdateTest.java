@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 
 public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
@@ -25,8 +26,8 @@ public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    admin =  create(new User().setUsername("admin").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    admin =  create(new User().setUsername("admin").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(community.setAdminUser(admin));
   }
   

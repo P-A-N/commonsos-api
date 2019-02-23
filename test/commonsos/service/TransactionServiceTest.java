@@ -39,6 +39,7 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
@@ -66,11 +67,13 @@ public class TransactionServiceTest {
   @Test
   public void createTransaction() {
     TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("remitter")).setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
     doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad().setPoints(TEN).setCreatedBy(id("remitter")).setType(AdType.WANT);
     when(adRepository.findStrict(id("ad id"))).thenReturn(ad);
-    User beneficiary = new User().setCommunityList(asList(new Community().setId(id("community"))));
+    User beneficiary = new User().setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(userRepository.findById(id("beneficiary"))).thenReturn(Optional.of(beneficiary));
     when(blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), new BigDecimal("10"))).thenReturn("blockchain hash");
 
@@ -113,8 +116,10 @@ public class TransactionServiceTest {
   @Test
   public void createTransaction_withoutAd() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "").setAdId(null);
-    User remitter = new User().setId(id("remitter")).setCommunityList(asList(new Community().setId(id("community"))));
-    User beneficiary = new User().setId(id("beneficiary")).setCommunityList(asList(new Community().setId(id("community"))));
+    User remitter = new User().setId(id("remitter")).setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
+    User beneficiary = new User().setId(id("beneficiary")).setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(userRepository.findById(any())).thenReturn(Optional.of(beneficiary));
     doReturn(new BalanceView().setBalance(new BigDecimal("10.20"))).when(service).balance(remitter, id("community"));
 
@@ -135,11 +140,13 @@ public class TransactionServiceTest {
   @Test
   public void createTransaction_insufficientBalance() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("remitter")).setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
     doReturn(new BalanceView().setBalance(TEN)).when(service).balance(user, id("community"));
     Ad ad = new Ad().setCreatedBy(id("beneficiary")).setPoints(TEN).setType(AdType.GIVE).setCommunityId(id("community"));
     when(userRepository.findById(id("beneficiary"))).thenReturn(
-        Optional.of(new User().setId(id("beneficiary")).setCommunityList(asList(new Community().setId(id("community"))))));
+        Optional.of(new User().setId(id("beneficiary")).setCommunityUserList(asList(
+            new CommunityUser().setCommunity(new Community().setId(id("community")))))));
     when(adRepository.findStrict(id("ad id"))).thenReturn(ad);
     DisplayableException thrown = catchThrowableOfType(() -> service.create(user, command), DisplayableException.class);
 
@@ -173,9 +180,11 @@ public class TransactionServiceTest {
   @Test(expected = BadRequestException.class)
   public void createTransaction_communitiesDiffer() {
     TransactionCreateCommand command = command("community", "beneficiary", "0.1", "description", "ad id");
-    User user = new User().setId(id("remitter")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("remitter")).setCommunityUserList(asList(
+        new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(userRepository.findById(id("beneficiary"))).thenReturn(
-        Optional.of(new User().setCommunityList(asList(new Community().setId(id("other community"))))));
+        Optional.of(new User().setCommunityUserList(asList(
+            new CommunityUser().setCommunity(new Community().setId(id("other community")))))));
     Ad ad = new Ad().setPoints(TEN).setCreatedBy(id("remitter")).setType(AdType.WANT);
     when(adRepository.findStrict(id("ad id"))).thenReturn(ad);
 

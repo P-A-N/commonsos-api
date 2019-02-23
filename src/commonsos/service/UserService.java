@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,6 +22,7 @@ import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.PasswordResetRequest;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
@@ -75,19 +77,17 @@ public class UserService {
   public UserPrivateView privateView(User user) {
     List<BalanceView> balanceList = new ArrayList<>();
     List<CommunityView> communityList = new ArrayList<>();
-    if (user.getCommunityList() != null) {
-      user.getCommunityList().forEach(c -> {
-        balanceList.add(transactionService.balance(user, c.getId()));
-        communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
-      });
-    }
+    user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
+      balanceList.add(transactionService.balance(user, c.getId()));
+      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
+    });
     
     return UserUtil.privateView(user, balanceList, communityList);
   }
 
   public UserPrivateView privateView(User currentUser, Long userId) {
     User user = userRepository.findStrictById(userId);
-    boolean isAdmin = user.getCommunityList().stream().anyMatch(c -> {
+    boolean isAdmin = user.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> {
       return c.getAdminUser() != null && c.getAdminUser().getId().equals(currentUser.getId());
     });
     if (!currentUser.getId().equals(user.getId()) && !isAdmin) throw new ForbiddenException();
@@ -134,8 +134,10 @@ public class UserService {
     TemporaryUser tempUser = userRepository.findStrictTemporaryUser(cryptoService.hash(accessId));
     
     // prepare
+    List<CommunityUser> communityUserList = new ArrayList<>();
+    tempUser.getCommunityList().forEach(c -> communityUserList.add(new CommunityUser().setCommunity(c)));
     User user = new User()
-        .setCommunityList(new ArrayList<>(tempUser.getCommunityList()))
+        .setCommunityUserList(communityUserList)
         .setUsername(tempUser.getUsername())
         .setPasswordHash(tempUser.getPasswordHash())
         .setFirstName(tempUser.getFirstName())
@@ -151,8 +153,8 @@ public class UserService {
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());
     
-    user.getCommunityList().forEach(c -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, c);
+    user.getCommunityUserList().forEach(cu -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
       if (tempUser.isWaitUntilCompleted())
         jobService.execute(task);
       else
@@ -287,15 +289,29 @@ public class UserService {
   }
 
   public User updateUserCommunities(User user, UserUpdateCommunitiesCommand command) {
-    List<Community> communityList = new ArrayList<>();
-    if (command.getCommunityList() != null && !command.getCommunityList().isEmpty()) {
-      communityList = communityList(command.getCommunityList());
-    }
+    // create new communityUserList
+    List<CommunityUser> oldCommunityUserList = user.getCommunityUserList();
+    List<Long> oldCommunityIdList = oldCommunityUserList.stream().map(CommunityUser::getCommunity).map(Community::getId).collect(Collectors.toList());
+    List<CommunityUser> newCommunityUserList = new ArrayList<>();
+    List<Long> newCommunityIdList = command.getCommunityList();
+    oldCommunityUserList.forEach(cu -> {
+      if (newCommunityIdList.contains(cu.getCommunity().getId())) {
+        newCommunityUserList.add(cu);
+      }
+    });
+    newCommunityIdList.forEach(id -> {
+      if (!oldCommunityIdList.contains(id)) {
+        newCommunityUserList.add(new CommunityUser().setCommunity(communityRepository.findStrictById(id)));
+      }
+    });
+    newCommunityUserList.sort((c1, c2) -> c1.getCommunity().getId().compareTo(c2.getCommunity().getId()));
 
-    user.setCommunityList(communityList);
+    // set new communityUserList
+    user.setCommunityUserList(newCommunityUserList);
 
-    user.getCommunityList().forEach(c -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, c);
+    // update
+    user.getCommunityUserList().forEach(cu -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
       jobService.submit(user, task);
     });
 
