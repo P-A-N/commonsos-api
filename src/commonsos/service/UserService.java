@@ -33,6 +33,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.DelegateWalletTask;
 import commonsos.service.command.CreateAccountTemporaryCommand;
+import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
@@ -369,6 +370,45 @@ public class UserService {
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
     user.setPushNotificationToken(command.getPushNotificationToken());
+    userRepository.update(user);
+  }
+
+  public void updateWalletLastViewTime(User user, LastViewTimeUpdateCommand command) {
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
+    
+    user.getCommunityUserList().forEach(cu -> {
+      if (cu.getCommunity().getId().equals(community.getId())) {
+        cu.setWalletLastViewTime(Instant.now());
+      }
+    });
+    
+    userRepository.update(user);
+  }
+
+  public void updateAdLastViewTime(User user, LastViewTimeUpdateCommand command) {
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
+    
+    user.getCommunityUserList().forEach(cu -> {
+      if (cu.getCommunity().getId().equals(community.getId())) {
+        cu.setAdLastViewTime(Instant.now());
+      }
+    });
+    
+    userRepository.update(user);
+  }
+
+  public void updateNotificationLastViewTime(User user, LastViewTimeUpdateCommand command) {
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
+
+    user.getCommunityUserList().forEach(cu -> {
+      if (cu.getCommunity().getId().equals(community.getId())) {
+        cu.setNotificationLastViewTime(Instant.now());
+      }
+    });
+    
     userRepository.update(user);
   }
 }
