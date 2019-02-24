@@ -1,6 +1,7 @@
 package commonsos.integration.community;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.iterableWithSize;
 
@@ -33,10 +34,13 @@ public class GetSearchCommutityTest extends IntegrationTest {
       .body("id", contains(community1.getId().intValue(), community2.getId().intValue(), community3.getId().intValue()));
 
     // filter
-    given()
+    String body = given()
       .when().get("/communities?filter={filter}", "foo")
       .then().statusCode(200)
       .body("id", iterableWithSize(2))
-      .body("id", contains(community1.getId().intValue(), community2.getId().intValue()));
+      .body("id", contains(community1.getId().intValue(), community2.getId().intValue()))
+      .extract().asString();
+
+    assertThat(body).doesNotContain("walletLastViewTime", "adLastViewTime", "notificationLastViewTime");
   }
 }

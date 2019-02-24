@@ -1,10 +1,8 @@
 package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -15,7 +13,6 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.UploadPhotoCommand;
@@ -30,23 +27,10 @@ public class CommunityService {
   @Inject private ImageUploadService imageService;
   @Inject BlockchainService blockchainService;
 
-  public List<CommunityView> usersCommunitylist(User user, String filter) {
-    List<CommunityView> communityList = StringUtils.isEmpty(filter) ? list() : list(filter);
-    Set<Long> idSet = user.getCommunityUserList().stream().map(CommunityUser::getCommunity).map(Community::getId).collect(toSet());
-    
-    return communityList.stream().filter(c -> idSet.contains(c.getId())).collect(toList());
-  }
-  
   public List<CommunityView> list(String filter) {
-    if (StringUtils.isEmpty(filter)) {
-      return list();
-    } else {
-      return repository.list(filter).stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
-    }
-  }
-  
-  public List<CommunityView> list() {
-    return repository.list().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
+    List<Community> list = StringUtils.isEmpty(filter) ? repository.list() : repository.list(filter);
+    
+    return list.stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
   }
 
   public Community community(Long id) {

@@ -3,9 +3,10 @@ package commonsos.util;
 import java.util.List;
 
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.view.BalanceView;
-import commonsos.view.CommunityView;
+import commonsos.view.CommunityUserView;
 import commonsos.view.UserPrivateView;
 import commonsos.view.UserView;
 import spark.utils.CollectionUtils;
@@ -25,7 +26,7 @@ public class UserUtil {
         .setAvatarUrl(user.getAvatarUrl());
   }
 
-  public static UserPrivateView privateView(User user, List<BalanceView> balanceList, List<CommunityView> communityList) {
+  public static UserPrivateView privateView(User user, List<BalanceView> balanceList, List<CommunityUserView> communityUserList) {
     return new UserPrivateView()
       .setId(user.getId())
       .setBalanceList(balanceList)
@@ -34,11 +35,26 @@ public class UserUtil {
       .setLastName(user.getLastName())
       .setUsername(user.getUsername())
       .setStatus(user.getStatus())
-      .setCommunityList(communityList)
+      .setCommunityList(communityUserList)
       .setLocation(user.getLocation())
       .setDescription(user.getDescription())
       .setAvatarUrl(user.getAvatarUrl())
       .setEmailAddress(user.getEmailAddress());
+  }
+  
+  public static CommunityUserView communityUserView(CommunityUser communityUser, String tokenSymbol) {
+    Long adminUserId = communityUser.getCommunity().getAdminUser() == null ? null : communityUser.getCommunity().getAdminUser().getId();
+    return new CommunityUserView()
+        .setId(communityUser.getCommunity().getId())
+        .setName(communityUser.getCommunity().getName())
+        .setAdminUserId(adminUserId)
+        .setDescription(communityUser.getCommunity().getDescription())
+        .setTokenSymbol(tokenSymbol)
+        .setPhotoUrl(communityUser.getCommunity().getPhotoUrl())
+        .setCoverPhotoUrl(communityUser.getCommunity().getCoverPhotoUrl())
+        .setWalletLastViewTime(communityUser.getWalletLastViewTime())
+        .setAdLastViewTime(communityUser.getAdLastViewTime())
+        .setNotificationLastViewTime(communityUser.getNotificationLastViewTime());
   }
   
   public static String fullName(User user) {

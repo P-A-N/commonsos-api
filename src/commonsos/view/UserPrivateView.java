@@ -14,7 +14,7 @@ public class UserPrivateView {
   private String lastName;
   private String username;
   private String status;
-  private List<CommunityView> communityList;
+  private List<CommunityUserView> communityList;
   private String description;
   private List<BalanceView> balanceList;
   private String location;

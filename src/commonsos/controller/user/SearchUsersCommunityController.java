@@ -7,19 +7,19 @@ import javax.inject.Inject;
 import commonsos.annotation.ReadOnly;
 import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
-import commonsos.service.CommunityService;
-import commonsos.view.CommunityView;
+import commonsos.service.UserService;
+import commonsos.view.CommunityUserView;
 import spark.Request;
 import spark.Response;
 
 @ReadOnly
 public class SearchUsersCommunityController extends AfterLoginController {
 
-  @Inject CommunityService service;
+  @Inject UserService service;
 
   @Override
-  protected List<CommunityView> handleAfterLogin(User user, Request request, Response response) {
+  protected List<CommunityUserView> handleAfterLogin(User user, Request request, Response response) {
     String filter = request.queryParams("filter");
-    return service.usersCommunitylist(user, filter);
+    return service.searchUsersCommunity(user, filter);
   }
 }

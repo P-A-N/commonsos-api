@@ -26,7 +26,7 @@ public class CommunityUser {
   private Community community;
   @Column(name = "user_id")
   private Long userId;
-  private Instant walletLastViewTime;
-  private Instant adLastViewTime;
-  private Instant notificationLastViewTime;
+  private Instant walletLastViewTime = Instant.EPOCH;
+  private Instant adLastViewTime = Instant.EPOCH;
+  private Instant notificationLastViewTime = Instant.EPOCH;
 }

@@ -1,17 +1,20 @@
 package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
@@ -44,11 +47,10 @@ import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
-import commonsos.util.CommunityUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
 import commonsos.view.BalanceView;
-import commonsos.view.CommunityView;
+import commonsos.view.CommunityUserView;
 import commonsos.view.UserPrivateView;
 import commonsos.view.UserView;
 import lombok.extern.slf4j.Slf4j;
@@ -76,13 +78,13 @@ public class UserService {
 
   public UserPrivateView privateView(User user) {
     List<BalanceView> balanceList = new ArrayList<>();
-    List<CommunityView> communityList = new ArrayList<>();
-    user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
-      balanceList.add(transactionService.balance(user, c.getId()));
-      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
+    List<CommunityUserView> communityUserList = new ArrayList<>();
+    user.getCommunityUserList().forEach(cu -> {
+      balanceList.add(transactionService.balance(user, cu.getCommunity().getId()));
+      communityUserList.add(UserUtil.communityUserView(cu, blockchainService.tokenSymbol(cu.getCommunity().getId())));
     });
     
-    return UserUtil.privateView(user, balanceList, communityList);
+    return UserUtil.privateView(user, balanceList, communityUserList);
   }
 
   public UserPrivateView privateView(User currentUser, Long userId) {
@@ -95,6 +97,19 @@ public class UserService {
     return privateView(user);
   }
 
+  public List<CommunityUserView> searchUsersCommunity(User user, String filter) {
+    List<Community> communityList = StringUtils.isEmpty(filter) ? communityRepository.list() : communityRepository.list(filter);
+    Set<Long> communityIdSet = communityList.stream().map(Community::getId).collect(toSet());
+    
+    List<CommunityUserView> communityUserViewList = user.getCommunityUserList().stream().filter(cu -> {
+      return communityIdSet.contains(cu.getCommunity().getId());
+    }).map(cu -> {
+      return UserUtil.communityUserView(cu, blockchainService.tokenSymbol(cu.getCommunity().getId()));
+    }).collect(toList());
+    
+    return communityUserViewList;
+  }
+  
   public void createAccountTemporary(CreateAccountTemporaryCommand command) {
     validate(command);
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
