@@ -3,6 +3,7 @@ package commonsos.service;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -11,21 +12,26 @@ import org.apache.commons.lang3.StringUtils;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
+import commonsos.repository.CommunityNotificationRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityNotification;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.command.CommunityNotificationCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
+import commonsos.view.CommunityNotificationView;
 import commonsos.view.CommunityView;
 
 @Singleton
 public class CommunityService {
 
-  @Inject CommunityRepository repository;
+  @Inject private CommunityRepository repository;
+  @Inject private CommunityNotificationRepository notificationRepository;
   @Inject private ImageUploadService imageService;
-  @Inject BlockchainService blockchainService;
+  @Inject private BlockchainService blockchainService;
 
   public List<CommunityView> list(String filter) {
     List<Community> list = StringUtils.isEmpty(filter) ? repository.list() : repository.list(filter);
@@ -63,5 +69,36 @@ public class CommunityService {
     community.setCoverPhotoUrl(url);
     repository.update(community);
     return url;
+  }
+  
+  public void updateNotificationUpdateAt(User user, CommunityNotificationCommand command) {
+    Community community = repository.findStrictById(command.getCommunityId());
+    if (!isAdmin(user.getId(), community.getId())) throw new BadRequestException("user is not admin of community");
+
+    Optional<CommunityNotification> optionalNotification = notificationRepository.findByWordPressId(command.getWordpressId());
+    if (optionalNotification.isPresent()) {
+      CommunityNotification notification = optionalNotification.get();
+      
+      if (!notification.getCommunityId().equals(command.getCommunityId())) throw new BadRequestException(
+          String.format("it is not a notification of community. wordpressId=%s communityId=%d", command.getWordpressId(), command.getCommunityId()));
+      
+      notification.setUpdatedAt(command.getUpdatedAtInstant());
+      notificationRepository.update(notification);
+    } else {
+      CommunityNotification notification = new CommunityNotification()
+          .setCommunityId(command.getCommunityId())
+          .setWordpressId(command.getWordpressId())
+          .setUpdatedAt(command.getUpdatedAtInstant());
+
+      notificationRepository.create(notification);
+    }
+  }
+  
+  public List<CommunityNotificationView> notificationList(Long communityId) {
+    repository.findStrictById(communityId);
+    
+    List<CommunityNotification> notificationList = notificationRepository.findByCommunityId(communityId);
+    
+    return CommunityUtil.notificationView(notificationList);
   }
 }

@@ -34,6 +34,8 @@ import commonsos.controller.auth.PasswordResetRequestCheckController;
 import commonsos.controller.auth.PasswordResetRequestController;
 import commonsos.controller.community.CommunityCoverPhotoUpdateController;
 import commonsos.controller.community.CommunityListController;
+import commonsos.controller.community.CommunityNotificationController;
+import commonsos.controller.community.CommunityNotificationListController;
 import commonsos.controller.community.CommunityPhotoUpdateController;
 import commonsos.controller.message.GroupMessageThreadController;
 import commonsos.controller.message.GroupMessageThreadUpdateController;
@@ -175,6 +177,8 @@ public class Server {
     get("/communities", injector.getInstance(CommunityListController.class), toJson);
     post("/communities/:id/photo", injector.getInstance(CommunityPhotoUpdateController.class), toJson);
     post("/communities/:id/coverPhoto", injector.getInstance(CommunityCoverPhotoUpdateController.class), toJson);
+    post("/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
+    get("/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);
