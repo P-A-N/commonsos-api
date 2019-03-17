@@ -1,2 +1,0 @@
-killall geth
-killall bootnode
