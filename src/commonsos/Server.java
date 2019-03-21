@@ -186,7 +186,7 @@ public class Server {
       response.body("");
     });
     exception(AuthenticationException.class, (exception, request, response) -> {
-      log.error("Not authenticated");
+      log.error("Not authenticated", exception);
       response.status(401);
       response.body("");
     });

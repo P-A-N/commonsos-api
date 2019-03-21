@@ -1,5 +1,6 @@
 package commonsos.controller.community;
 
+import static commonsos.annotation.IP.WORDPRESS_SERVER;
 import static commonsos.annotation.SyncObject.REGIST_COMMUNITY_NOTIFICATION;
 import static java.lang.Long.parseLong;
 
@@ -13,18 +14,19 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import com.google.gson.Gson;
 
+import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
-import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
-import commonsos.repository.entity.User;
 import commonsos.service.CommunityService;
 import commonsos.service.command.CommunityNotificationCommand;
 import spark.Request;
 import spark.Response;
+import spark.Route;
 import spark.utils.StringUtils;
 
 @Synchronized(REGIST_COMMUNITY_NOTIFICATION)
-public class CommunityNotificationController extends AfterLoginController {
+@RestrictAccess(allow = WORDPRESS_SERVER)
+public class CommunityNotificationController implements Route {
   
   private static String[] DATE_FORMAT = {
       "yyyy-MM-dd HH:mm:ss",
@@ -36,7 +38,8 @@ public class CommunityNotificationController extends AfterLoginController {
   @Inject Gson gson;
   @Inject CommunityService service;
 
-  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public Object handle(Request request, Response response) {
     CommunityNotificationCommand command = gson.fromJson(request.body(), CommunityNotificationCommand.class);
     
     String communityId = request.params("id");
@@ -56,7 +59,7 @@ public class CommunityNotificationController extends AfterLoginController {
       throw new BadRequestException(String.format("invalid date format. updatedAt=", command.getUpdatedAt()), e);
     }
     
-    service.updateNotificationUpdateAt(user, command);
+    service.updateNotificationUpdateAt(command);
     return "";
   }
 }

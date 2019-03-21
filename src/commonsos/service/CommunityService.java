@@ -71,10 +71,7 @@ public class CommunityService {
     return url;
   }
   
-  public void updateNotificationUpdateAt(User user, CommunityNotificationCommand command) {
-    Community community = repository.findStrictById(command.getCommunityId());
-    if (!isAdmin(user.getId(), community.getId())) throw new BadRequestException("user is not admin of community");
-
+  public void updateNotificationUpdateAt(CommunityNotificationCommand command) {
     Optional<CommunityNotification> optionalNotification = notificationRepository.findByWordPressId(command.getWordpressId());
     if (optionalNotification.isPresent()) {
       CommunityNotification notification = optionalNotification.get();
