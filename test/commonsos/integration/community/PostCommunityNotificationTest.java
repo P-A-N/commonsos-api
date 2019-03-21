@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 import commonsos.annotation.IP;
 import commonsos.integration.IntegrationTest;
@@ -15,18 +17,19 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
 
 public class PostCommunityNotificationTest extends IntegrationTest {
-
+  @Rule
+  public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+  
   private Community community;
   
   @Before
   public void setup() {
     community =  create(new Community().setName("community"));
-    
   }
   
   @Test
   public void communityNotification_valid_dateformat() {
-    System.setProperty(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.1");
+    environmentVariables.set(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.1");
     
     // prepare yyyy-MM-dd HH:mm:ss
     Map<String, Object> requestParam = new HashMap<>();
@@ -86,7 +89,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
   
   @Test
   public void communityNotification_notAllowed() {
-    System.setProperty(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.2");
+    environmentVariables.set(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.2");
     
     // prepare yyyy-MM-dd HH:mm:ss
     Map<String, Object> requestParam = new HashMap<>();
@@ -102,7 +105,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
   
   @Test
   public void communityNotification_invalid_dateformat() {
-    System.setProperty(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.1");
+    environmentVariables.set(IP.WORDPRESS_SERVER.getConfigurationKey(), "127.0.0.1");
     
     // prepare
     Map<String, Object> requestParam = new HashMap<>();

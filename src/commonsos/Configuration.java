@@ -66,7 +66,7 @@ public class Configuration {
   }
 
   public String environmentVariable(String key, String defaultValue) {
-    String value = System.getProperty(key);
+    String value = System.getenv(key);
     if (value == null && defaultValue != null) return defaultValue;
     if (value == null && defaultValue == null) throw new RuntimeException(String.format("Environment variable %s not defined", key));
     return value;
