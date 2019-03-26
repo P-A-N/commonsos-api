@@ -19,6 +19,7 @@ import com.google.inject.Module;
 
 import commonsos.Server;
 import commonsos.di.GsonProvider;
+import commonsos.di.Web3jProvider;
 import commonsos.interceptor.TransactionInterceptor;
 import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
@@ -30,7 +31,10 @@ import spark.Spark;
 
 public class TestServer extends Server {
 
-  public static int TEST_SERVER_PORT = 4568;
+  public static final int TEST_SERVER_PORT = 4568;
+  
+  private boolean blockchainEnable = false;
+  private boolean imageuploadEnable = false;
   
   @Override
   protected void setupServer() {
@@ -40,12 +44,9 @@ public class TestServer extends Server {
   
   @Override
   protected Injector initDependencies() {
+    // ethereum
     Web3j web3j = mock(Web3j.class);
-    PushNotificationService pushNotificationService = mock(PushNotificationService.class);
-    ImageUploadService imageService = mock(ImageUploadService.class);
-    when(imageService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
-    
     BlockchainService blockchainService = mock(BlockchainService.class);
     when(blockchainService.tokenBalance(any(), any())).thenReturn(BigDecimal.TEN);
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
@@ -55,16 +56,31 @@ public class TestServer extends Server {
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
     
+    // s3
+    ImageUploadService imageService = mock(ImageUploadService.class);
+    when(imageService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
+    
+    // firebase
+    PushNotificationService pushNotificationService = mock(PushNotificationService.class);
+    
     Module module = new AbstractModule() {
       @Override protected void configure() {
         bind(Gson.class).toProvider(GsonProvider.class);
         bind(ObjectMapper.class).toInstance(new ObjectMapper());
+        
+        if (blockchainEnable) {
+          bind(Web3j.class).toProvider(Web3jProvider.class);
+        } else {
+          bind(Web3j.class).toInstance(web3j);
+          bind(BlockchainEventService.class).toInstance(blockchainEventService);
+          bind(BlockchainService.class).toInstance(blockchainService);
+        }
 
-        bind(Web3j.class).toInstance(web3j);
+        if (!imageuploadEnable) {
+          bind(ImageUploadService.class).toInstance(imageService);
+        }
+        
         bind(PushNotificationService.class).toInstance(pushNotificationService);
-        bind(ImageUploadService.class).toInstance(imageService);
-        bind(BlockchainEventService.class).toInstance(blockchainEventService);
-        bind(BlockchainService.class).toInstance(blockchainService);
         bind(EntityManagerService.class).to(TestEntityManagerService.class);
         bind(EmailService.class).to(TestEmailService.class);
       }
@@ -74,7 +90,15 @@ public class TestServer extends Server {
     injector.injectMembers(this);
     return injector;
   }
-  
+
+  public void setBlockchainEnable(boolean blockchainEnable) {
+    this.blockchainEnable = blockchainEnable;
+  }
+
+  public void setImageuploadEnable(boolean imageuploadEnable) {
+    this.imageuploadEnable = imageuploadEnable;
+  }
+
   public static void main(String[] args) {
     new TestServer().start(args);
   }

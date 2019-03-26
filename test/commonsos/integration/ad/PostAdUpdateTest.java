@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
@@ -26,7 +26,7 @@ public class PostAdUpdateTest extends IntegrationTest {
   private Ad ad;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setupData() {
     community =  create(new Community().setName("community"));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));

@@ -1,20 +1,21 @@
 package commonsos.controller.ad;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.gson.Gson;
 
@@ -26,7 +27,7 @@ import commonsos.service.command.AdUpdateCommand;
 import commonsos.view.AdView;
 import spark.Request;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AdUpdateControllerTest {
 
   @Mock Request request;
@@ -34,7 +35,7 @@ public class AdUpdateControllerTest {
   @Captor ArgumentCaptor<AdUpdateCommand> commandCaptor;
   @InjectMocks AdUpdateController controller;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     controller.gson = new Gson();
   }
@@ -73,12 +74,12 @@ public class AdUpdateControllerTest {
     assertThat(actualCommand.getType()).isEqualTo(AdType.GIVE);
   }
 
-  @Test(expected = NumberFormatException.class)
+  @Test
   public void handle_parseError() throws Exception {
     // prepare
     when(request.params("id")).thenReturn("string");
     
     // execute
-    controller.handleAfterLogin(null, request, null);
+    assertThrows(NumberFormatException.class, () -> controller.handleAfterLogin(null, request, null));
   }
 }

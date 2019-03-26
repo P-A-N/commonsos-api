@@ -5,10 +5,10 @@ import static commonsos.integration.TestEntityManagerService.DELETE_ALL;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
@@ -23,19 +23,19 @@ public class RepositoryTest {
     return emService.get();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setupRepositoryTest() {
     emService.init();
     emService.clearDbAndMigrate();
   }
   
-  @Before
+  @BeforeEach
   public void prepare() {
     ThreadValue.setReadOnly(false);
     beginTran();
   }
 
-  @After
+  @AfterEach
   public void cleanup() throws Exception {
     commitTran();
     
@@ -43,7 +43,7 @@ public class RepositoryTest {
     dbSetup.launch();
   }
   
-  @AfterClass
+  @AfterAll
   public static void stopIntegrationTest() {
     emService.closeFactory();
   }

@@ -1,7 +1,7 @@
 package commonsos.filter;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import commonsos.filter.LogFilter;
@@ -23,7 +23,7 @@ public class LogFilterTest {
   Session session = mock(Session.class);
   Response response = mock(Response.class);
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     when(request.session()).thenReturn(session);
     when(session.id()).thenReturn("12345678901234567890");

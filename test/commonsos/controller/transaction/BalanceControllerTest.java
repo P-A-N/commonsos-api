@@ -2,13 +2,14 @@ package commonsos.controller.transaction;
 
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
@@ -16,7 +17,7 @@ import commonsos.service.TransactionService;
 import commonsos.view.BalanceView;
 import spark.Request;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BalanceControllerTest {
 
   @Mock Request request;
@@ -33,8 +34,8 @@ public class BalanceControllerTest {
     assertThat(controller.handleAfterLogin(user, request, null).getCommunityId()).isEqualTo(123L);
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void handle_noCommunityId() {
-    controller.handleAfterLogin(new User(), request, null);
+    assertThrows(BadRequestException.class, () -> controller.handleAfterLogin(new User(), request, null));
   }
 }

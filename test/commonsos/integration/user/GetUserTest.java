@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -22,7 +22,7 @@ public class GetUserTest extends IntegrationTest {
   private User user1;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community1 =  create(new Community().setName("community1"));
     community2 =  create(new Community().setName("community2"));

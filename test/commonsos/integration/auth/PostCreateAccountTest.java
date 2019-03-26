@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
 
 import commonsos.integration.IntegrationTest;
@@ -25,7 +25,7 @@ public class PostCreateAccountTest extends IntegrationTest {
   private Community community2;
   private User admin;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     admin = create(new User().setUsername("admin"));
     community1 =  create(new Community().setName("community1").setAdminUser(admin));

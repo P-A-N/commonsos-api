@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
 
 import commonsos.integration.IntegrationTest;
@@ -22,7 +22,7 @@ public class PostUpdateEmailTest extends IntegrationTest {
   private String sessionId;
   private String sessionId2;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("password")).setEmailAddress("user2@test.com"));

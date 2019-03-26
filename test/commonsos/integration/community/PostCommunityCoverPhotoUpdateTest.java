@@ -8,8 +8,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -23,7 +23,7 @@ public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
   private User admin;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));

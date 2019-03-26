@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
@@ -489,7 +489,7 @@ public class UserRepositoryTest extends RepositoryTest {
     assertThat(updatedUser.getFirstName()).isEqualTo("new first name");
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void transactionTest() throws Exception {
     // prepare

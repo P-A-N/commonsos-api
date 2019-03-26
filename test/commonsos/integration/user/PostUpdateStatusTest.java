@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.equalTo;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.User;
@@ -17,7 +17,7 @@ public class PostUpdateStatusTest extends IntegrationTest {
   private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     

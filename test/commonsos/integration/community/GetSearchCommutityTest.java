@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.iterableWithSize;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -17,7 +17,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
   private Community community2;
   private Community community3;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     community1 = create(new Community().setName("comm_foo").setTokenContractAddress("0x0"));
     community2 = create(new Community().setName("comm_foo_bar").setTokenContractAddress("0x0"));

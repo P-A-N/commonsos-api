@@ -5,12 +5,11 @@ import static commonsos.repository.entity.AdType.GIVE;
 import static java.math.BigDecimal.TEN;
 import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
@@ -154,14 +153,14 @@ public class AdRepositoryTest extends RepositoryTest {
 
     Optional<Ad> result = repository.find(id);
 
-    assertFalse(result.isPresent());
+    assertThat(result.isPresent()).isFalse();
   }
 
   @Test
   public void findById_notFound() {
     Optional<Ad> result = inTransaction(() -> repository.find(id("unknown")));
 
-    assertFalse(result.isPresent());
+    assertThat(result.isPresent()).isFalse();
   }
 
   @Test

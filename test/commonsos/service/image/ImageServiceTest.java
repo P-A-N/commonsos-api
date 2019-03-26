@@ -1,6 +1,7 @@
 package commonsos.service.image;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,15 +12,15 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.exception.ServerErrorException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ImageServiceTest {
   
   @InjectMocks @Spy private ImageService imageService;
@@ -132,7 +133,7 @@ public class ImageServiceTest {
     cropedFile.delete();
   }
 
-  @Test(expected = ServerErrorException.class)
+  @Test
   public void crop_TXT() throws URISyntaxException, IOException {
     // prepare
     URL url = this.getClass().getResource("/images/testImage.txt");
@@ -140,6 +141,6 @@ public class ImageServiceTest {
     File file = new File(uri);
 
     // execute
-    imageService.crop(file, 70, 400, 80, 160);
+    assertThrows(ServerErrorException.class, () -> imageService.crop(file, 70, 400, 80, 160));
   }
 }

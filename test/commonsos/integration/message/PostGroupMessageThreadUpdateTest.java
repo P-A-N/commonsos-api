@@ -11,8 +11,8 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -31,7 +31,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
   private Long messageThreadId;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));

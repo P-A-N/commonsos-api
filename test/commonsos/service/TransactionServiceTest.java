@@ -11,6 +11,7 @@ import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -21,15 +22,17 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -44,22 +47,21 @@ import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.TransactionCreateCommand;
-import commonsos.service.notification.PushNotificationService;
 import commonsos.view.BalanceView;
 import commonsos.view.TransactionView;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class TransactionServiceTest {
 
   @Mock TransactionRepository repository;
   @Mock UserRepository userRepository;
   @Mock AdRepository adRepository;
   @Mock BlockchainService blockchainService;
-  @Mock PushNotificationService pushNotificationService;
   @Captor ArgumentCaptor<Transaction> captor;
   @InjectMocks @Spy TransactionService service;
 
-  @Before
+  @BeforeEach
   public void setup() {
     when(userRepository.findStrictById(any())).thenCallRealMethod();
   }
@@ -93,24 +95,24 @@ public class TransactionServiceTest {
     assertThat(transaction.getBlockchainTransactionHash()).isEqualTo("blockchain hash");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_negativeAmount() {
-    service.create(new User(), command("community", "beneficiary", "-0.01", "description", "ad id"));
+    assertThrows(BadRequestException.class, () -> service.create(new User(), command("community", "beneficiary", "-0.01", "description", "ad id")));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_zeroAmount() {
-    service.create(new User(), command("community", "beneficiary", "0.0", "description", "ad id"));
+    assertThrows(BadRequestException.class, () -> service.create(new User(), command("community", "beneficiary", "0.0", "description", "ad id")));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_descriptionIsMandatory() {
-    service.create(new User(), command("community", "beneficiary", "10.2", " ", null));
+    assertThrows(BadRequestException.class, () -> service.create(new User(), command("community", "beneficiary", "10.2", " ", null)));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_communityIdIsRequired() {
-    service.create(new User(), command("community", "beneficiary", "10", "description", "ad id").setCommunityId(null));
+    assertThrows(BadRequestException.class, () -> service.create(new User(), command("community", "beneficiary", "10", "description", "ad id").setCommunityId(null)));
   }
 
   @Test
@@ -153,31 +155,31 @@ public class TransactionServiceTest {
     assertThat(thrown).hasMessage("error.notEnoughFunds");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_unknownBeneficiary() {
     when(userRepository.findById(id("unknown"))).thenThrow(new BadRequestException());
     TransactionCreateCommand command = command("community", "unknown", "10.2", "description", "33");
 
-    service.create(new User().setId(id("remitter")), command);
+    assertThrows(BadRequestException.class, () -> service.create(new User().setId(id("remitter")), command));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_unknownAd() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", "unknown ad");
     User user = new User().setId(id("remitter"));
 
-    service.create(user, command);
+    assertThrows(BadRequestException.class, () -> service.create(user, command));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_canNotPayYourself() {
     TransactionCreateCommand command = command("community", "beneficiary", "10.2", "description", null);
     User user = new User().setId(id("beneficiary"));
 
-    service.create(user, command);
+    assertThrows(BadRequestException.class, () -> service.create(user, command));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void createTransaction_communitiesDiffer() {
     TransactionCreateCommand command = command("community", "beneficiary", "0.1", "description", "ad id");
     User user = new User().setId(id("remitter")).setCommunityUserList(asList(
@@ -188,7 +190,7 @@ public class TransactionServiceTest {
     Ad ad = new Ad().setPoints(TEN).setCreatedBy(id("remitter")).setType(AdType.WANT);
     when(adRepository.findStrict(id("ad id"))).thenReturn(ad);
 
-    service.create(user, command);
+    assertThrows(BadRequestException.class, () -> service.create(user, command));
   }
 
   @Test

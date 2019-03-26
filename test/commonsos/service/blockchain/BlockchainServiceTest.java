@@ -5,6 +5,7 @@ import static commonsos.service.UserService.WALLET_PASSWORD;
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -16,15 +17,13 @@ import java.math.BigInteger;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.web3j.crypto.CipherException;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.RawTransaction;
@@ -40,22 +39,18 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BlockchainServiceTest {
 
-  @Rule public TemporaryFolder tempDirectory = new TemporaryFolder();
   @Mock CommunityRepository communityRepository;
   @Mock(answer = RETURNS_DEEP_STUBS) Web3j web3j;
   @InjectMocks @Spy BlockchainService service;
 
   @Test
   public void createWallet() throws IOException, CipherException {
-    doReturn(tempDirectory.getRoot()).when(service).tempDir();
-
     String wallet = service.createWallet("secret");
 
     assertThat(credentials(wallet)).isNotNull();
-    assertThat(tempDirectory.getRoot().listFiles()).isEmpty();
   }
 
   private Credentials credentials(String wallet) throws CipherException, IOException {
@@ -183,17 +178,17 @@ public class BlockchainServiceTest {
     assertThat(result).isEqualTo("result");
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void handleBlockchainException_error() {
     Callable<Void> action = () -> {throw new RuntimeException("insufficient funds for gas");};
 
-    service.handleBlockchainException(action);
+    assertThrows(DisplayableException.class, () -> service.handleBlockchainException(action));
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void handleBlockchainException_passesThroughRandomError() {
     Callable<Void> action = () -> {throw new RuntimeException();};
 
-    service.handleBlockchainException(action);
+    assertThrows(RuntimeException.class, () -> service.handleBlockchainException(action));
   }
 }

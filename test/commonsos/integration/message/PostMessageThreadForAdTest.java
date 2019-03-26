@@ -10,8 +10,8 @@ import static org.hamcrest.Matchers.nullValue;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
@@ -28,7 +28,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   private Ad ad;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
     adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));

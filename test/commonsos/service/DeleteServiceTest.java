@@ -2,15 +2,16 @@ package commonsos.service;
 
 import static commonsos.TestId.id;
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -24,7 +25,7 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class DeleteServiceTest {
 
   @Mock UserRepository userRepository;
@@ -44,14 +45,14 @@ public class DeleteServiceTest {
     service.deleteAd(user, ad);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void deleteAd_forbidden() {
     // prepare
     User user = new User().setId(id("user"));
     Ad ad = new Ad().setCreatedBy(id("othreUser"));
 
     // execute
-    service.deleteAd(user, ad);
+    assertThrows(ForbiddenException.class, () -> service.deleteAd(user, ad));
   }
 
   @Test
@@ -65,7 +66,7 @@ public class DeleteServiceTest {
     service.deleteMessageThreadParty(user, mt.getId());
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void deleteMessageThreadParty_not_member() {
     // prepare
     User user = new User().setId(id("user"));
@@ -74,6 +75,6 @@ public class DeleteServiceTest {
     when(messageThreadRepository.findStrictById(any())).thenReturn(mt);
     
     // execute
-    service.deleteMessageThreadParty(user, mt.getId());
+    assertThrows(BadRequestException.class, () -> service.deleteMessageThreadParty(user, mt.getId()));
   }
 }

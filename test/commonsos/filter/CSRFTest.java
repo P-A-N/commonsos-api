@@ -1,6 +1,6 @@
 package commonsos.filter;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import commonsos.filter.CSRF;
 import spark.Request;

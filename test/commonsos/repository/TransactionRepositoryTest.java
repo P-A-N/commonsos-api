@@ -7,15 +7,12 @@ import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import commonsos.repository.TransactionRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
@@ -121,13 +118,13 @@ public class TransactionRepositoryTest extends RepositoryTest {
     boolean result = repository.hasPaid(new Ad().setId(id("ad1")));
     
     // verify
-    assertTrue(result);
+    assertThat(result).isTrue();
 
     // execute
     result = repository.hasPaid(new Ad().setId(id("ad2")));
     
     // verify
-    assertFalse(result);
+    assertThat(result).isFalse();
   }
 
   @Test

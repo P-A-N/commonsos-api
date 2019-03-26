@@ -10,8 +10,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -26,7 +26,7 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
   private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     community1 = create(new Community().setName("community1").setTokenContractAddress("0x0"));
     community2 = create(new Community().setName("community2").setTokenContractAddress("0x0"));

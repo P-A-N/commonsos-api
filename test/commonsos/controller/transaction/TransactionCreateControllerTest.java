@@ -1,29 +1,31 @@
 package commonsos.controller.transaction;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.TransactionService;
 import commonsos.service.command.TransactionCreateCommand;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 
-import java.math.BigDecimal;
-
-import static org.mockito.Mockito.*;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TransactionCreateControllerTest {
 
   @InjectMocks  TransactionCreateController controller;
   @Mock TransactionService service;
 
-  @Before
+  @BeforeEach
   public void setUp() {
     controller.gson = new GsonProvider().get();
   }

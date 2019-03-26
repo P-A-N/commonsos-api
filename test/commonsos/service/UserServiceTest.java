@@ -4,6 +4,7 @@ import static commonsos.TestId.id;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -15,14 +16,14 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
@@ -46,7 +47,7 @@ import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
 import commonsos.view.UserView;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
   @Mock UserRepository userRepository;
@@ -80,16 +81,16 @@ public class UserServiceTest {
     assertThat(result).isEqualTo(user);
   }
 
-  @Test(expected = AuthenticationException.class)
+  @Test
   public void checkPassword_withInvalidUsername() {
     // prepare
     when(userRepository.findByUsername("invalid")).thenReturn(Optional.empty());
 
     // execute
-    userService.checkPassword("invalid", "secret");
+    assertThrows(AuthenticationException.class, () -> userService.checkPassword("invalid", "secret"));
   }
 
-  @Test(expected = AuthenticationException.class)
+  @Test
   public void checkPassword_withInvalidPassword() {
     // prepare
     User user = new User().setPasswordHash("hash");
@@ -97,7 +98,7 @@ public class UserServiceTest {
     when(cryptoService.checkPassword("wrong password", "hash")).thenReturn(false);
 
     // execute
-    userService.checkPassword("user", "wrong password");
+    assertThrows(AuthenticationException.class, () -> userService.checkPassword("user", "wrong password"));
   }
 
   @Test

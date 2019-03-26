@@ -8,6 +8,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -18,15 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -44,25 +47,23 @@ import commonsos.repository.entity.User;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
 import commonsos.service.command.MessageThreadListCommand;
-import commonsos.service.notification.PushNotificationService;
 import commonsos.view.AdView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
 
-@RunWith(MockitoJUnitRunner.class)
-
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MessageServiceTest {
 
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock MessageRepository messageRepository;
   @Mock private UserRepository userRepository;
   @Mock AdService adService;
-  @Mock PushNotificationService pushNotificationService;
   @InjectMocks @Spy MessageService service;
   @Captor ArgumentCaptor<MessageThread> messageThreadArgumentCaptor;
   @Captor ArgumentCaptor<MessageThread> messageThreadArgumentCaptor2;
 
-  @Before
+  @BeforeEach
   public void setup() {
     when(userRepository.findStrictById(any())).thenCallRealMethod();
   }
@@ -158,19 +159,21 @@ public class MessageServiceTest {
     return new MessageThreadParty().setUser(user);
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void thread_canOnlyAccessThreadParticipatingIn() {
     MessageThread messageThread = new MessageThread().setParties(asList(party(new User().setId(id("other user")))));
     when(messageThreadRepository.findById(id("thread-id"))).thenReturn(Optional.of(messageThread));
 
-    service.thread(new User().setId(id("user id")), id("thread-id"));
+    assertThrows(ForbiddenException.class, () -> service.thread(new User().setId(id("user id")), id("thread-id")));
+    ;
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void thread_notFound() {
     when(messageThreadRepository.findById(id("thread-id"))).thenReturn(empty());
 
-    service.thread(new User().setId(id("user id")), id("thread-id"));
+    assertThrows(BadRequestException.class, () -> service.thread(new User().setId(id("user id")), id("thread-id")));
+    ;
   }
 
   @Test
@@ -329,19 +332,19 @@ public class MessageServiceTest {
     assertThat(party.getVisitedAt()).isCloseTo(now(), within(1, SECONDS));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void message_threadMustExist() {
     when(messageThreadRepository.findById((id("thread id")))).thenReturn(empty());
 
-    service.messages(new User().setId(id("me")), id("thread id"));
+    assertThrows(BadRequestException.class, () -> service.messages(new User().setId(id("me")), id("thread id")));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void message_canBeAccessedByParticipatingParty() {
     MessageThread messageThread = new MessageThread().setParties(asList(party(new User().setId(id("other user")))));
     when(messageThreadRepository.findById((id("thread id")))).thenReturn(Optional.of(messageThread));
 
-    service.messages(new User().setId(id("me")), id("thread id"));
+    assertThrows(ForbiddenException.class, () -> service.messages(new User().setId(id("me")), id("thread id")));
   }
 
   @Test
@@ -425,26 +428,28 @@ public class MessageServiceTest {
     assertThat(result.getCounterParty().getId()).isEqualTo(id("user1_v_b_u"));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void updateGroup_messagethread_not_found() {
     when(messageThreadRepository.findById(any())).thenReturn(Optional.empty());
-    service.updateGroup(new User(), new GroupMessageThreadUpdateCommand());
+
+    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User(), new GroupMessageThreadUpdateCommand()));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void updateGroup_is_not_group() {
     MessageThread messageThread = new MessageThread().setGroup(false);
     when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
-    service.updateGroup(new User(), new GroupMessageThreadUpdateCommand());
+
+    assertThrows(BadRequestException.class, () -> service.updateGroup(new User(), new GroupMessageThreadUpdateCommand()));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void updateGroup_not_member() {
     MessageThread messageThread = new MessageThread().setGroup(true).setParties(asList(
         new MessageThreadParty().setUser(new User().setId(id("user1")))
         ));
     when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
-    service.updateGroup(new User().setId(id("notMember")), new GroupMessageThreadUpdateCommand());
+    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User().setId(id("notMember")), new GroupMessageThreadUpdateCommand()));
   }
 
   @Test
@@ -475,22 +480,22 @@ public class MessageServiceTest {
     assertThat(updated.getParties().get(2).getUser().getId()).isEqualTo(id("user3_ug"));
   }
 
-  @Test(expected = UserNotFoundException.class)
+  @Test
   public void validatePartiesCommunity_user_not_found() {
     when(userRepository.findById(any())).thenReturn(Optional.empty());
-    service.validatePartiesCommunity(asList(1L, 2L), id("community"));
+    assertThrows(UserNotFoundException.class, () -> service.validatePartiesCommunity(asList(1L, 2L), id("community")));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validatePartiesCommunity_requiresUser() {
-    service.validatePartiesCommunity(asList(), id("community"));
+    assertThrows(BadRequestException.class, () -> service.validatePartiesCommunity(asList(), id("community")));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validatePartiesCommunity_not_a_member() {
     when(userRepository.findById(any())).thenReturn(Optional.of(
         new User().setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community_1")))))));
-    service.validatePartiesCommunity(asList(1L, 2L), id("community_2"));
+    assertThrows(BadRequestException.class, () -> service.validatePartiesCommunity(asList(1L, 2L), id("community_2")));
   }
 
   @Test

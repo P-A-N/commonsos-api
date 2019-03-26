@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.contains;
 
 import java.time.Instant;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -17,7 +17,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   private Community community1;
   private Community community2;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community1 =  create(new Community().setName("community1"));
     community2 =  create(new Community().setName("community2"));

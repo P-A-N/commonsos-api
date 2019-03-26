@@ -1,6 +1,8 @@
 package commonsos.util;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -16,29 +18,29 @@ public class ValidateUtilTest {
     ValidateUtil.validateUsername("PQRSTUVWXYZ_");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_username_null() {
-    ValidateUtil.validateUsername(null);
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUsername(null));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_username_less_length1() {
-    ValidateUtil.validateUsername("123");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUsername("123"));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_username_more_length1() {
-    ValidateUtil.validateUsername("1234567890123456");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUsername("1234567890123456"));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_username_invalid_char1() {
-    ValidateUtil.validateUsername("１２３");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUsername("１２３"));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_username_invalid_char2() {
-    ValidateUtil.validateUsername("🍺🍺🍺");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUsername("🍺🍺🍺"));
   }
 
   @Test
@@ -48,24 +50,24 @@ public class ValidateUtilTest {
     ValidateUtil.validatePassword("123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_password_null() {
-    ValidateUtil.validatePassword(null);
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validatePassword(null));
   }
   
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_password_less_length() {
-    ValidateUtil.validatePassword("1234567");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validatePassword("1234567"));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_password_unicode() {
-    ValidateUtil.validatePassword("１２３４５６７８");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validatePassword("１２３４５６７８"));
   }
 
-  @Test(expected = DisplayableException.class)
+  @Test
   public void validate_password_space() {
-    ValidateUtil.validatePassword("1 2 3 4 5 6 7 8");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validatePassword("1 2 3 4 5 6 7 8"));
   }
 
   @Test
@@ -75,49 +77,49 @@ public class ValidateUtilTest {
     ValidateUtil.validateEmailAddress("a@a.b.c.com");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_null() {
-    ValidateUtil.validateEmailAddress(null);
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress(null));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid1() {
-    ValidateUtil.validateEmailAddress("");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress(""));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid2() {
-    ValidateUtil.validateEmailAddress("aaa");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("aaa"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid3() {
-    ValidateUtil.validateEmailAddress("a.@test.com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a.@test.com"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid4() {
-    ValidateUtil.validateEmailAddress("a<b@test.com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a<b@test.com"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid5() {
-    ValidateUtil.validateEmailAddress("a>b@test.com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a>b@test.com"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid6() {
-    ValidateUtil.validateEmailAddress("a@test<com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@test<com"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid7() {
-    ValidateUtil.validateEmailAddress("a@test>com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@test>com"));
   }
   
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_emailAddress_invalid8() {
-    ValidateUtil.validateEmailAddress("a@a@a.com");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@a@a.com"));
   }
 
   @Test
@@ -135,34 +137,34 @@ public class ValidateUtilTest {
     ValidateUtil.validateUrl("https://test.com/path/index.html");
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_null() {
-    ValidateUtil.validateUrl(null);
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl(null));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_empty() {
-    ValidateUtil.validateUrl("");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl(""));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_url1() {
-    ValidateUtil.validateUrl("aaaaaaaa");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("aaaaaaaa"));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_url2() {
-    ValidateUtil.validateUrl("test.com/path/index.html");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("test.com/path/index.html"));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_url3() {
-    ValidateUtil.validateUrl("http://test.com//path/index.html");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("http://test.com//path/index.html"));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validateUrl_invalid_url4() {
-    ValidateUtil.validateUrl("http://test.com:80:80/path/index.html");
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("http://test.com:80:80/path/index.html"));
   }
 
   @Test
@@ -174,18 +176,18 @@ public class ValidateUtilTest {
     ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 50, 4 byte unicode
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_status_invalid1() {
-    ValidateUtil.validateStatus("123456789012345678901234567890123456789012345678901"); // length = 51, ascii
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("123456789012345678901234567890123456789012345678901")); // length = 51, ascii
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_status_invalid2() {
-    ValidateUtil.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１"); // length = 51, utf-8
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１")); // length = 51, utf-8
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void validate_status_invalid3() {
-    ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺"); // length = 51, 4 byte unicode
+    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺")); // length = 51, 4 byte unicode
   }
 }

@@ -5,8 +5,8 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -19,7 +19,7 @@ public class GetBalanceTest extends IntegrationTest {
 //  private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
     /* user = */ create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));

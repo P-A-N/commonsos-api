@@ -7,8 +7,8 @@ import static org.hamcrest.Matchers.iterableWithSize;
 
 import java.time.Instant;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
@@ -24,7 +24,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
   private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     community1 = create(new Community().setName("comm_foo").setTokenContractAddress("0x0"));
     community2 = create(new Community().setName("comm_foo_bar").setTokenContractAddress("0x0"));

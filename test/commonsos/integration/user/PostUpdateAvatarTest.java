@@ -7,8 +7,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.User;
@@ -18,7 +18,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
   private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     

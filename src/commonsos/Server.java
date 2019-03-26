@@ -120,7 +120,6 @@ public class Server {
     before((request, response) -> response.type("application/json"));
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
-//    before(new CSRFFilter(asList("/login", "/logout", "/create-account")));
 
     post("/login", injector.getInstance(LoginController.class), toJson);
     post("/logout", injector.getInstance(LogoutController.class), toJson);

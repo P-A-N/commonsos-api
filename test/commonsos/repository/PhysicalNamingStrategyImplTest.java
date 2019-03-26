@@ -4,8 +4,8 @@ import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentImpl;
 import org.hibernate.engine.jdbc.env.spi.IdentifierHelper;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.repository.PhysicalNamingStrategyImpl;
 
@@ -20,7 +20,7 @@ public class PhysicalNamingStrategyImplTest {
   JdbcEnvironment context = mock(JdbcEnvironmentImpl.class);
   IdentifierHelper identifierHelper = mock(IdentifierHelper.class);
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     when(context.getIdentifierHelper()).thenReturn(identifierHelper);
   }

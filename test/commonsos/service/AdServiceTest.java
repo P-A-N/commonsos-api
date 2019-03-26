@@ -1,18 +1,19 @@
 package commonsos.service;
 
 import static commonsos.TestId.id;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -25,7 +26,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.command.AdUpdateCommand;
 import commonsos.service.image.ImageUploadService;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class AdServiceTest {
 
   @Mock AdRepository adRepository;
@@ -44,27 +45,29 @@ public class AdServiceTest {
     service.updateAd(user, new AdUpdateCommand());
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void updateAd_otherUser() {
     User user = new User().setId(id("user"));
     doReturn(new Ad().setCreatedBy(id("creator"))).when(service).ad(any());
-    service.updateAd(user, new AdUpdateCommand());
+    
+    assertThrows(ForbiddenException.class, () -> service.updateAd(user, new AdUpdateCommand()));
   }
 
-  @Test(expected = BadRequestException.class)
+  @Test
   public void updateAd_hasPaid() {
     User user = new User().setId(id("creator"));
     doReturn(new Ad().setCreatedBy(id("creator"))).when(service).ad(any());
     when(transactionRepository.hasPaid(any())).thenReturn(true);
-    service.updateAd(user, new AdUpdateCommand());
+
+    assertThrows(BadRequestException.class, () -> service.updateAd(user, new AdUpdateCommand()));
   }
 
-  @Test(expected = ForbiddenException.class)
+  @Test
   public void updatePhoto_requiresCreatorUser() {
     User user = new User().setId(id("other user id"));
     Ad ad = new Ad().setCreatedBy(id("creator user id"));
     when(adRepository.findStrict(any())).thenReturn(ad);
 
-    service.updatePhoto(user, null, id("ad id"));
+    assertThrows(ForbiddenException.class, () -> service.updatePhoto(user, null, id("ad id")));
   }
 }
