@@ -33,6 +33,8 @@ public class TestServer extends Server {
 
   public static final int TEST_SERVER_PORT = 4568;
   
+  private BlockchainService blockchainService;
+  
   private boolean blockchainEnable = false;
   private boolean imageuploadEnable = false;
   
@@ -88,15 +90,27 @@ public class TestServer extends Server {
 
     Injector injector = Guice.createInjector(module, new TransactionInterceptor());
     injector.injectMembers(this);
+    
+    this.blockchainService = injector.getInstance(BlockchainService.class);
+    checkBlockchainIsConnected();
+    
     return injector;
   }
 
+  public BlockchainService getBlockchainService() {
+    return blockchainService;
+  }
+  
   public void setBlockchainEnable(boolean blockchainEnable) {
     this.blockchainEnable = blockchainEnable;
   }
 
   public void setImageuploadEnable(boolean imageuploadEnable) {
     this.imageuploadEnable = imageuploadEnable;
+  }
+  
+  private void checkBlockchainIsConnected() {
+    if (blockchainEnable && !blockchainService.isConnected()) throw new RuntimeException("blockchain is not connected.");
   }
 
   public static void main(String[] args) {

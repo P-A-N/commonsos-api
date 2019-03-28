@@ -45,6 +45,7 @@ public class TransactionService {
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
     BalanceView view = new BalanceView()
         .setCommunityId(communityId)
+        .setTokenSymbol(blockchainService.tokenSymbol(communityId))
         .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
     return view;
   }

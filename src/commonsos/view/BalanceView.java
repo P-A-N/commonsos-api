@@ -9,5 +9,6 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true)
 public class BalanceView {
   private Long communityId;
+  private String tokenSymbol;
   private BigDecimal balance;
 }

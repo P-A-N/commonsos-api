@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 
+import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.crypto.CryptoService;
 import io.restassured.RestAssured;
 
@@ -32,6 +33,7 @@ public class IntegrationTest {
   protected TestEntityManagerService emService = new TestEntityManagerService();
   protected Wiser wiser = new Wiser();
   protected CryptoService cryptoService = new CryptoService();
+  protected BlockchainService blockchainService;
 
   protected boolean isBlockchainEnable() { return false; }
   protected boolean imageuploadEnable() { return false; }
@@ -47,6 +49,7 @@ public class IntegrationTest {
     testServer.setBlockchainEnable(isBlockchainEnable());
     testServer.setImageuploadEnable(imageuploadEnable());
     testServer.start(new String[]{});
+    blockchainService = testServer.getBlockchainService();
     awaitInitialization();
 
     // RestAssured
@@ -121,7 +124,7 @@ public class IntegrationTest {
     return cryptoService.encryptoPassword(text);
   }
   
-  public static String extractAccessId(WiserMessage wiseMessage) throws Exception {
+  public String extractAccessId(WiserMessage wiseMessage) throws Exception {
     String content = wiseMessage.getMimeMessage().getContent().toString();
     Pattern p = Pattern.compile("^https://.*$", Pattern.MULTILINE);
     Matcher m = p.matcher(content);
