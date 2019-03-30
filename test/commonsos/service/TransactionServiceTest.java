@@ -45,6 +45,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.view.BalanceView;
@@ -58,6 +59,7 @@ public class TransactionServiceTest {
   @Mock UserRepository userRepository;
   @Mock AdRepository adRepository;
   @Mock BlockchainService blockchainService;
+  @Mock BlockchainEventService blockchainEventService;
   @Captor ArgumentCaptor<Transaction> captor;
   @InjectMocks @Spy TransactionService service;
 
