@@ -41,7 +41,7 @@ dependencies {
   compile 'org.hibernate:hibernate-core:5.2.16.Final'
   compile 'org.hibernate:hibernate-c3p0:5.2.16.Final'
   compile 'org.flywaydb:flyway-core:5.0.7'
-  compile 'org.web3j:core:3.4.0'
+  compile 'org.web3j:core:4.2.0'
   compile 'org.ehcache:ehcache:3.6.1'
   compile 'org.im4java:im4java:1.4.0'
   

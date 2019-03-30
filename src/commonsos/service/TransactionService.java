@@ -23,6 +23,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
@@ -39,6 +40,7 @@ public class TransactionService {
   @Inject UserRepository userRepository;
   @Inject AdRepository adRepository;
   @Inject BlockchainService blockchainService;
+  @Inject BlockchainEventService blockchainEventService;
   @Inject PushNotificationService pushNotificationService;
 
   public BalanceView balance(User user, Long communityId) {
@@ -111,10 +113,11 @@ public class TransactionService {
 
     repository.create(transaction);
 
-    String blockchainTransactionId = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
-    transaction.setBlockchainTransactionHash(blockchainTransactionId);
+    String blockchainTransactionHash = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
+    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
 
     repository.update(transaction);
+    blockchainEventService.checkTransaction(blockchainTransactionHash);
 
     return transaction;
   }
@@ -122,7 +125,6 @@ public class TransactionService {
   public void markTransactionCompleted(String blockChainTransactionHash) {
     Optional<Transaction> result = repository.findByBlockchainTransactionHash(blockChainTransactionHash);
     if (!result.isPresent()) {
-      log.warn(format("Cannot mark transaction completed, hash %s not found", blockChainTransactionHash));
       return;
     }
 
