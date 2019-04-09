@@ -43,7 +43,7 @@ public class GetMyAdsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/my-ads")
       .then().statusCode(200)
-      .body("id", contains(
+      .body("adList.id", contains(
           ad1_1.getId().intValue(),
           ad1_2.getId().intValue()));
 
@@ -54,7 +54,7 @@ public class GetMyAdsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/my-ads")
       .then().statusCode(200)
-      .body("id", contains(
+      .body("adList.id", contains(
           ad2.getId().intValue()));
   }
 }

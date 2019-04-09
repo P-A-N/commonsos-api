@@ -53,7 +53,7 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community1.getId())
       .then().statusCode(200)
-      .body("remitter.username",    contains("user2", "user1"))
-      .body("beneficiary.username", contains("user1", "user2"));
+      .body("transactionList.remitter.username",    contains("user2", "user1"))
+      .body("transactionList.beneficiary.username", contains("user1", "user2"));
   }
 }

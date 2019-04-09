@@ -37,7 +37,7 @@ public class GetUserSearchTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}", community.getId(), "user")
       .then().statusCode(200)
-      .body("username", contains("otherUser", "otherUser2"));
+      .body("userList.username", contains("otherUser", "otherUser2"));
   }
 
   @Test
@@ -47,6 +47,6 @@ public class GetUserSearchTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}", otherCommunity.getId(), "user")
       .then().statusCode(200)
-      .body("username", contains("otherCommunityUser"));
+      .body("userList.username", contains("otherCommunityUser"));
   }
 }

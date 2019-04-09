@@ -45,17 +45,17 @@ public class GetSearchCommutityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/users/{id}/communities", user.getId())
       .then().statusCode(200)
-      .body("id", iterableWithSize(3))
-      .body("id", contains(community2.getId().intValue(), community3.getId().intValue(), community4.getId().intValue()))
-      .body("walletLastViewTime", contains(Instant.EPOCH.toString(), Instant.EPOCH.toString(), Instant.EPOCH.toString()));
+      .body("communityList.id", iterableWithSize(3))
+      .body("communityList.id", contains(community2.getId().intValue(), community3.getId().intValue(), community4.getId().intValue()))
+      .body("communityList.walletLastViewTime", contains(Instant.EPOCH.toString(), Instant.EPOCH.toString(), Instant.EPOCH.toString()));
 
     // filter
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/users/{id}/communities?filter={filter}", user.getId(), "foo")
       .then().statusCode(200)
-      .body("id", iterableWithSize(2))
-      .body("id", contains(community2.getId().intValue(), community4.getId().intValue()))
-      .body("walletLastViewTime", contains(Instant.EPOCH.toString(), Instant.EPOCH.toString()));
+      .body("communityList.id", iterableWithSize(2))
+      .body("communityList.id", contains(community2.getId().intValue(), community4.getId().intValue()))
+      .body("communityList.walletLastViewTime", contains(Instant.EPOCH.toString(), Instant.EPOCH.toString()));
   }
 }

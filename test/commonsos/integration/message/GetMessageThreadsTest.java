@@ -85,21 +85,21 @@ public class GetMessageThreadsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/message-threads")
       .then().statusCode(200)
-      .body("id", contains(adThread.getId().intValue(), groupThread.getId().intValue(), directThread.getId().intValue()))
-      .body("title", contains("adThread", "groupThread", "directThread"))
-      .body("ad.id", contains(ad.getId().intValue()))
-      .body("group", contains(false, true, false))
-      .body("parties.id", contains(
+      .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue(), directThread.getId().intValue()))
+      .body("messageThreadList.title", contains("adThread", "groupThread", "directThread"))
+      .body("messageThreadList.ad.id", contains(ad.getId().intValue()))
+      .body("messageThreadList.group", contains(false, true, false))
+      .body("messageThreadList.parties.id", contains(
           asList(user2.getId().intValue()), // adThread
           asList(user2.getId().intValue(), user3.getId().intValue()), // groupThread
           asList(user3.getId().intValue()) // directThread
           ))
-      .body("creator.id", contains(
+      .body("messageThreadList.creator.id", contains(
           user1.getId().intValue(), // adThread
           user1.getId().intValue(), // groupThread
           user1.getId().intValue() // directThread
           ))
-      .body("counterParty.id", contains(
+      .body("messageThreadList.counterParty.id", contains(
           user2.getId().intValue(), // adThread
           user2.getId().intValue(), // groupThread
           user3.getId().intValue() // directThread
@@ -112,19 +112,19 @@ public class GetMessageThreadsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/message-threads")
       .then().statusCode(200)
-      .body("id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
-      .body("title", contains("adThread", "groupThread"))
-      .body("ad.id", contains(ad.getId().intValue()))
-      .body("group", contains(false, true))
-      .body("parties.id", contains(
+      .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
+      .body("messageThreadList.title", contains("adThread", "groupThread"))
+      .body("messageThreadList.ad.id", contains(ad.getId().intValue()))
+      .body("messageThreadList.group", contains(false, true))
+      .body("messageThreadList.parties.id", contains(
           asList(user2.getId().intValue()), // adThread
           asList(user2.getId().intValue(), user3.getId().intValue()) // groupThread
           ))
-      .body("creator.id", contains(
+      .body("messageThreadList.creator.id", contains(
           user1.getId().intValue(), // adThread
           user1.getId().intValue() // groupThread
           ))
-      .body("counterParty.id", contains(
+      .body("messageThreadList.counterParty.id", contains(
           user1.getId().intValue(), // adThread
           user1.getId().intValue() // groupThread
           ));
@@ -136,19 +136,19 @@ public class GetMessageThreadsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/message-threads")
       .then().statusCode(200)
-      .body("id", contains(groupThread.getId().intValue(), directThread.getId().intValue()))
-      .body("title", contains("groupThread", "directThread"))
-      .body("ad.id", emptyIterable())
-      .body("group", contains(true, false))
-      .body("parties.id", contains(
+      .body("messageThreadList.id", contains(groupThread.getId().intValue(), directThread.getId().intValue()))
+      .body("messageThreadList.title", contains("groupThread", "directThread"))
+      .body("messageThreadList.ad.id", emptyIterable())
+      .body("messageThreadList.group", contains(true, false))
+      .body("messageThreadList.parties.id", contains(
           asList(user2.getId().intValue(), user3.getId().intValue()), // groupThread
           asList(user3.getId().intValue()) // directThread
           ))
-      .body("creator.id", contains(
+      .body("messageThreadList.creator.id", contains(
           user1.getId().intValue(), // groupThread
           user1.getId().intValue() // directThread
           ))
-      .body("counterParty.id", contains(
+      .body("messageThreadList.counterParty.id", contains(
           user1.getId().intValue(), // groupThread
           user1.getId().intValue() // directThread
           ));
@@ -163,19 +163,19 @@ public class GetMessageThreadsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/message-threads?memberFilter={memberFilter}", user2.getUsername())
       .then().statusCode(200)
-      .body("id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
-      .body("title", contains("adThread", "groupThread"))
-      .body("ad.id", contains(ad.getId().intValue()))
-      .body("group", contains(false, true))
-      .body("parties.id", contains(
+      .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
+      .body("messageThreadList.title", contains("adThread", "groupThread"))
+      .body("messageThreadList.ad.id", contains(ad.getId().intValue()))
+      .body("messageThreadList.group", contains(false, true))
+      .body("messageThreadList.parties.id", contains(
           asList(user2.getId().intValue()), // adThread
           asList(user2.getId().intValue(), user3.getId().intValue()) // groupThread
           ))
-      .body("creator.id", contains(
+      .body("messageThreadList.creator.id", contains(
           user1.getId().intValue(), // adThread
           user1.getId().intValue() // groupThread
           ))
-      .body("counterParty.id", contains(
+      .body("messageThreadList.counterParty.id", contains(
           user2.getId().intValue(), // adThread
           user2.getId().intValue() // groupThread
           ));
@@ -190,17 +190,17 @@ public class GetMessageThreadsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/message-threads?messageFilter={messageFilter}", groupMessage.getText())
       .then().statusCode(200)
-      .body("id", contains(groupThread.getId().intValue()))
-      .body("title", contains("groupThread"))
-      .body("ad.id", emptyIterable())
-      .body("group", contains(true))
-      .body("parties.id", contains(
+      .body("messageThreadList.id", contains(groupThread.getId().intValue()))
+      .body("messageThreadList.title", contains("groupThread"))
+      .body("messageThreadList.ad.id", emptyIterable())
+      .body("messageThreadList.group", contains(true))
+      .body("messageThreadList.parties.id", contains(
           asList(user2.getId().intValue(), user3.getId().intValue()) // groupThread
           ))
-      .body("creator.id", contains(
+      .body("messageThreadList.creator.id", contains(
           user1.getId().intValue() // groupThread
           ))
-      .body("counterParty.id", contains(
+      .body("messageThreadList.counterParty.id", contains(
           user2.getId().intValue() // groupThread
           ));
   }

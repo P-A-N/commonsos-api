@@ -30,15 +30,15 @@ public class GetSearchCommutityTest extends IntegrationTest {
     given()
       .when().get("/communities")
       .then().statusCode(200)
-      .body("id", iterableWithSize(3))
-      .body("id", contains(community1.getId().intValue(), community2.getId().intValue(), community3.getId().intValue()));
+      .body("communityList.id", iterableWithSize(3))
+      .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue(), community3.getId().intValue()));
 
     // filter
     String body = given()
       .when().get("/communities?filter={filter}", "foo")
       .then().statusCode(200)
-      .body("id", iterableWithSize(2))
-      .body("id", contains(community1.getId().intValue(), community2.getId().intValue()))
+      .body("communityList.id", iterableWithSize(2))
+      .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue()))
       .extract().asString();
 
     assertThat(body).doesNotContain("walletLastViewTime", "adLastViewTime", "notificationLastViewTime");

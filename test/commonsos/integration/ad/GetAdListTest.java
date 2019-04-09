@@ -51,11 +51,11 @@ public class GetAdListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/ads?communityId={communityId}&filter={filter}", community.getId(), "foo")
       .then().statusCode(200)
-      .body("id", contains(
+      .body("adList.id", contains(
           ad.getId().intValue(),
           fooAd.getId().intValue(),
           fooAd2.getId().intValue()))
-      .body("communityId", contains(
+      .body("adList.communityId", contains(
           ad.getCommunityId().intValue(),
           fooAd.getCommunityId().intValue(),
           fooAd2.getCommunityId().intValue()));

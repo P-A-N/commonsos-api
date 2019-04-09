@@ -34,14 +34,14 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
     given()
       .when().get("/communities/{id}/notification", community1.getId())
       .then().statusCode(200)
-      .body("wordpressId", contains("notification1_1", "notification1_2", "notification1_3"))
-      .body("updatedAt", contains("2019-01-01T12:10:10Z", "2019-01-02T12:10:10Z", "2019-01-03T12:10:10Z"));
+      .body("notificationList.wordpressId", contains("notification1_1", "notification1_2", "notification1_3"))
+      .body("notificationList.updatedAt", contains("2019-01-01T12:10:10Z", "2019-01-02T12:10:10Z", "2019-01-03T12:10:10Z"));
 
     // call api
     given()
       .when().get("/communities/{id}/notification", community2.getId())
       .then().statusCode(200)
-      .body("wordpressId", contains("notification2_1", "notification2_2"))
-      .body("updatedAt", contains("2019-02-01T12:10:10Z", "2019-02-02T12:10:10Z"));
+      .body("notificationList.wordpressId", contains("notification2_1", "notification2_2"))
+      .body("notificationList.updatedAt", contains("2019-02-01T12:10:10Z", "2019-02-02T12:10:10Z"));
   }
 }
