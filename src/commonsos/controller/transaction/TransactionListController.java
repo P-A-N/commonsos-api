@@ -12,9 +12,9 @@ import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.TransactionService;
-import commonsos.service.command.PagenationCommand;
-import commonsos.util.PagenationUtil;
-import commonsos.view.PagenationView;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
+import commonsos.view.PaginationView;
 import commonsos.view.TransactionListView;
 import commonsos.view.TransactionView;
 import spark.Request;
@@ -29,13 +29,13 @@ public class TransactionListController extends AfterLoginController {
     String communityId = request.queryParams("communityId");
     if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
 
-    PagenationCommand pagenationCommand = PagenationUtil.getCommand(request);
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
     List<TransactionView> transactionList = service.transactions(user, parseLong(communityId));
-    PagenationView pagenationView = PagenationUtil.toView(pagenationCommand);
+    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
     TransactionListView view = new TransactionListView()
         .setTransactionList(transactionList)
-        .setPagenation(pagenationView);
+        .setPagination(paginationView);
     
     return view;
   }

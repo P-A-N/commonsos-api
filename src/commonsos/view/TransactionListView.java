@@ -9,5 +9,5 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true)
 public class TransactionListView {
   private List<TransactionView> transactionList;
-  private PagenationView pagenation;
+  private PaginationView pagination;
 }

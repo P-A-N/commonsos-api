@@ -11,5 +11,5 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @EqualsAndHashCode @ToString
 public class MessageListView {
   private List<MessageView> messageList;
-  private PagenationView pagenation;
+  private PaginationView pagination;
 }

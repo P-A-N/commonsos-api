@@ -11,11 +11,11 @@ import com.google.gson.Gson;
 import commonsos.annotation.ReadOnly;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;
-import commonsos.service.command.PagenationCommand;
-import commonsos.util.PagenationUtil;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
 import commonsos.view.CommunityNotificationListView;
 import commonsos.view.CommunityNotificationView;
-import commonsos.view.PagenationView;
+import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -33,13 +33,13 @@ public class CommunityNotificationListController implements Route {
     if (StringUtils.isEmpty(communityId)) throw new BadRequestException("communityId is required");
     if (!NumberUtils.isParsable(communityId)) throw new BadRequestException("invalid communityId");
 
-    PagenationCommand pagenationCommand = PagenationUtil.getCommand(request);
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
     List<CommunityNotificationView> notificationList = service.notificationList(Long.parseLong(communityId));
-    PagenationView pagenationView = PagenationUtil.toView(pagenationCommand);
+    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
     CommunityNotificationListView view = new CommunityNotificationListView()
         .setNotificationList(notificationList)
-        .setPagenation(pagenationView);
+        .setPagination(paginationView);
     
     return view;
   }

@@ -11,5 +11,5 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @EqualsAndHashCode @ToString
 public class MessageThreadListView {
   private List<MessageThreadView> messageThreadList;
-  private PagenationView pagenation;
+  private PaginationView pagination;
 }

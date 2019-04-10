@@ -9,5 +9,5 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true)
 public class CommunityNotificationListView {
   private List<CommunityNotificationView> notificationList;
-  private PagenationView pagenation;
+  private PaginationView pagination;
 }

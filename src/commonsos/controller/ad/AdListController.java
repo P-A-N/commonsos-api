@@ -12,11 +12,11 @@ import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
-import commonsos.service.command.PagenationCommand;
-import commonsos.util.PagenationUtil;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
 import commonsos.view.AdListView;
 import commonsos.view.AdView;
-import commonsos.view.PagenationView;
+import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 
@@ -28,13 +28,13 @@ public class AdListController extends AfterLoginController {
     String communityId = request.queryParams("communityId");
     if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
 
-    PagenationCommand pagenationCommand = PagenationUtil.getCommand(request);
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
     List<AdView> adList = service.listFor(user, parseLong(communityId), request.queryParams("filter"));
-    PagenationView pagenationView = PagenationUtil.toView(pagenationCommand);
+    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
     AdListView view = new AdListView()
         .setAdList(adList)
-        .setPagenation(pagenationView);
+        .setPagination(paginationView);
     
     return view;
   }

@@ -12,9 +12,9 @@ import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.PagenationCommand;
-import commonsos.util.PagenationUtil;
-import commonsos.view.PagenationView;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
+import commonsos.view.PaginationView;
 import commonsos.view.UserListView;
 import commonsos.view.UserView;
 import spark.Request;
@@ -30,13 +30,13 @@ public class UserSearchController extends AfterLoginController {
     if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
     String q = request.queryParams("q");
     
-    PagenationCommand pagenationCommand = PagenationUtil.getCommand(request);
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
     List<UserView> userList = service.searchUsers(user, parseLong(communityId), q);
-    PagenationView pagenationView = PagenationUtil.toView(pagenationCommand);
+    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
     UserListView view = new UserListView()
         .setUserList(userList)
-        .setPagenation(pagenationView);
+        .setPagination(paginationView);
     return view;
   }
 }

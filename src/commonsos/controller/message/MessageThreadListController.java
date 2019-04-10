@@ -9,11 +9,11 @@ import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.service.command.MessageThreadListCommand;
-import commonsos.service.command.PagenationCommand;
-import commonsos.util.PagenationUtil;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
 import commonsos.view.MessageThreadListView;
 import commonsos.view.MessageThreadView;
-import commonsos.view.PagenationView;
+import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 
@@ -27,13 +27,13 @@ public class MessageThreadListController extends AfterLoginController {
         .setMemberFilter(request.queryParams("memberFilter"))
         .setMessageFilter(request.queryParams("messageFilter"));
 
-    PagenationCommand pagenationCommand = PagenationUtil.getCommand(request);
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
     List<MessageThreadView> messageThreadList = service.searchThreads(user, command);
-    PagenationView pagenationView = PagenationUtil.toView(pagenationCommand);
+    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
     MessageThreadListView view = new MessageThreadListView()
         .setMessageThreadList(messageThreadList)
-        .setPagenation(pagenationView);
+        .setPagination(paginationView);
     
     return view;
   }

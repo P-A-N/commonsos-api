@@ -5,18 +5,18 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.SortType;
-import commonsos.service.command.PagenationCommand;
-import commonsos.view.PagenationView;
+import commonsos.service.command.PaginationCommand;
+import commonsos.view.PaginationView;
 import spark.Request;
 
-public class PagenationUtil {
+public class PaginationUtil {
 
-  private PagenationUtil() {}
+  private PaginationUtil() {}
   
-  public static PagenationCommand getCommand(Request request) {
-    String pageStr = request.queryParams("pagenation.page");
-    String sizeStr = request.queryParams("pagenation.size");
-    String sortStr = request.queryParams("pagenation.sort");
+  public static PaginationCommand getCommand(Request request) {
+    String pageStr = request.queryParams("pagination[page]");
+    String sizeStr = request.queryParams("pagination[size]");
+    String sortStr = request.queryParams("pagination[sort]");
     
     if (StringUtils.isNotEmpty(pageStr)) {
       if(!NumberUtils.isParsable(pageStr)) throw new BadRequestException("invalid page number");
@@ -25,18 +25,19 @@ public class PagenationUtil {
       Long page = Long.parseLong(pageStr);
       Long size = Long.parseLong(sizeStr);
       SortType sort = SortType.of(sortStr, SortType.ASC);
-      return new PagenationCommand()
+      return new PaginationCommand()
           .setPage(page)
           .setSize(size)
           .setSort(sort);
     }
-    return new PagenationCommand();
+    return new PaginationCommand();
   }
   
-  public static PagenationView toView(PagenationCommand command) {
-    return new PagenationView()
+  public static PaginationView toView(PaginationCommand command) {
+    return new PaginationView()
         .setPage(command.getPage())
         .setSize(command.getSize())
-        .setSort(command.getSort());
+        .setSort(command.getSort())
+        .setLastPage(20L);
   }
 }
