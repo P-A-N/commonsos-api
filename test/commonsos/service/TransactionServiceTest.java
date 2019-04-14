@@ -3,7 +3,6 @@ package commonsos.service;
 import static commonsos.TestId.id;
 import static java.math.BigDecimal.TEN;
 import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
@@ -19,7 +18,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +47,6 @@ import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.view.BalanceView;
-import commonsos.view.TransactionView;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -193,22 +190,6 @@ public class TransactionServiceTest {
     when(adRepository.findStrict(id("ad id"))).thenReturn(ad);
 
     assertThrows(BadRequestException.class, () -> service.create(user, command));
-  }
-
-  @Test
-  public void transactions() {
-    User user = new User();
-    Transaction transaction1 = new Transaction().setCreatedAt(now().minus(1, HOURS));
-    Transaction transaction2 = new Transaction().setCreatedAt(now());
-    when(repository.transactions(user, id("community"))).thenReturn(asList(transaction1, transaction2));
-    TransactionView transactionView1 = new TransactionView();
-    TransactionView transactionView2 = new TransactionView();
-    doReturn(transactionView1).when(service).view(user, transaction1);
-    doReturn(transactionView2).when(service).view(user, transaction2);
-
-    List<TransactionView> result = service.transactions(user, id("community"));
-
-    assertThat(result).isEqualTo(asList(transactionView2, transactionView1));
   }
 
   @Test

@@ -10,14 +10,16 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
 import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
 @Singleton
 public class MessageThreadRepository extends Repository {
@@ -65,17 +67,20 @@ public class MessageThreadRepository extends Repository {
     return messageThread;
   }
 
-  public List<MessageThread> listByUser(User user) {
-    return em()
+  public ResultList<MessageThread> listByUser(User user, PaginationCommand pagination) {
+    TypedQuery<MessageThread> query = em()
       .createQuery("SELECT mt FROM MessageThread mt JOIN mt.parties p WHERE p.user = :user ORDER BY mt.id", MessageThread.class)
       .setLockMode(lockMode())
-      .setParameter("user", user)
-      .getResultList();
+      .setParameter("user", user);
+    
+    ResultList<MessageThread> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
 
-  public List<MessageThread> listByUserAndMemberAndMessage(User user, String memberFilter, String messageFilter) {
+  public ResultList<MessageThread> listByUserAndMemberAndMessage(User user, String memberFilter, String messageFilter, PaginationCommand pagination) {
     if (StringUtils.isBlank(memberFilter) && StringUtils.isBlank(messageFilter)) {
-      return new ArrayList<>();
+      return new ResultList<MessageThread>().setList(new ArrayList<>());
     }
     
     StringBuilder sql = new StringBuilder();
@@ -107,7 +112,8 @@ public class MessageThreadRepository extends Repository {
     }
     sql.append("ORDER BY mt.id");
 
-    Query query = em().createNativeQuery(sql.toString(), MessageThread.class);
+    @SuppressWarnings("unchecked")
+    TypedQuery<MessageThread> query = (TypedQuery<MessageThread>) em().createNativeQuery(sql.toString(), MessageThread.class);
     query.setParameter("userId", user.getId());
     if (StringUtils.isNotBlank(memberFilter)) {
       query.setParameter("memberFilter", "%" + memberFilter + "%");
@@ -116,15 +122,10 @@ public class MessageThreadRepository extends Repository {
       query.setParameter("messageFilter", "%" + messageFilter + "%");
     }
     
-    try {
-      @SuppressWarnings("unchecked")
-      List<MessageThread> resultList = query.getResultList();
-      resultList.forEach(r -> em().lock(r, lockMode()));
-      
-      return resultList;
-    } catch (NoResultException e) {
-      return new ArrayList<>();
-    }
+    ResultList<MessageThread> resultList = getResultList(query, pagination);
+    resultList.getList().forEach(r -> em().lock(r, lockMode()));
+    
+    return resultList;
   }
 
   public Optional<MessageThread> findById(Long id) {

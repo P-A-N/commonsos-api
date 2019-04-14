@@ -7,8 +7,8 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
 public class PaginationView {
-  private Long page;
-  private Long size;
+  private Integer page;
+  private Integer size;
   private SortType sort;
-  private Long lastPage;
+  private Integer lastPage;
 }

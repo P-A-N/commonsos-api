@@ -1,7 +1,5 @@
 package commonsos.controller.community;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -14,8 +12,6 @@ import commonsos.service.CommunityService;
 import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.CommunityNotificationListView;
-import commonsos.view.CommunityNotificationView;
-import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -35,12 +31,7 @@ public class CommunityNotificationListController implements Route {
 
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    List<CommunityNotificationView> notificationList = service.notificationList(Long.parseLong(communityId));
-    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
-    CommunityNotificationListView view = new CommunityNotificationListView()
-        .setNotificationList(notificationList)
-        .setPagination(paginationView);
-    
+    CommunityNotificationListView view = service.notificationList(Long.parseLong(communityId), paginationCommand);
     return view;
   }
 }

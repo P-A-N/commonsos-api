@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.exception.BadRequestException;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
 import commonsos.service.command.PaginationCommand;
 import commonsos.view.PaginationView;
@@ -22,22 +23,37 @@ public class PaginationUtil {
       if(!NumberUtils.isParsable(pageStr)) throw new BadRequestException("invalid page number");
       if(StringUtils.isEmpty(sizeStr)) throw new BadRequestException("page size is required");
       if(!NumberUtils.isParsable(sizeStr)) throw new BadRequestException("invalid page size");
-      Long page = Long.parseLong(pageStr);
-      Long size = Long.parseLong(sizeStr);
+      int page = Integer.parseInt(pageStr);
+      int size = Integer.parseInt(sizeStr);
       SortType sort = SortType.of(sortStr, SortType.ASC);
-      return new PaginationCommand()
+      
+      PaginationCommand command = new PaginationCommand()
           .setPage(page)
           .setSize(size)
           .setSort(sort);
+      validateCommand(command);
+      
+      return command;
+    } else {
+      return null;
     }
-    return new PaginationCommand();
   }
   
-  public static PaginationView toView(PaginationCommand command) {
+  public static <V> PaginationView toView(ResultList<V> result) {
+    if (result.getPage() == null) {
+      return new PaginationView(); 
+    }
+    
     return new PaginationView()
-        .setPage(command.getPage())
-        .setSize(command.getSize())
-        .setSort(command.getSort())
-        .setLastPage(20L);
+        .setPage(result.getPage())
+        .setSize(result.getSize())
+        .setSort(result.getSort())
+        .setLastPage(result.getLastPage());
+  }
+  
+  public static void validateCommand(PaginationCommand command) {
+    if (command.getPage() < 0) throw new BadRequestException(String.format("page can't be less than 0. [page=%d]", command.getPage()));
+    if (command.getSize() <= 0) throw new BadRequestException(String.format("size can't be less than 1. [size=%d]", command.getSize()));
+    if (command.getSort() == null) throw new BadRequestException("sort can't be null");
   }
 }

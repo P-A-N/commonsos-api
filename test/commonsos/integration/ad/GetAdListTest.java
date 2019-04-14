@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,5 +60,76 @@ public class GetAdListTest extends IntegrationTest {
           ad.getCommunityId().intValue(),
           fooAd.getCommunityId().intValue(),
           fooAd2.getCommunityId().intValue()));
+  }
+  
+  @Test
+  public void adList_pagination() {
+    // prepare
+    Community pageCommunity =  create(new Community().setName("page_community"));
+    User pageUser = create(new User().setUsername("page_user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
+    create(new Ad().setTitle("page_ad1").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad2").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad3").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad4").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad5").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad6").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad7").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad8").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad9").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad10").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad11").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad12").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
+
+    sessionId = login("user", "pass");
+    
+    // page 0 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
+      .then().statusCode(200)
+      .body("adList.title", contains(
+          "page_ad1", "page_ad2", "page_ad3", "page_ad4", "page_ad5",
+          "page_ad6", "page_ad7", "page_ad8", "page_ad9", "page_ad10"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+    
+    // page 1 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
+      .then().statusCode(200)
+      .body("adList.title", contains(
+          "page_ad11", "page_ad12"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+    
+    // page 0 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
+      .then().statusCode(200)
+      .body("adList.title", contains(
+          "page_ad12", "page_ad11", "page_ad10", "page_ad9", "page_ad8",
+          "page_ad7", "page_ad6", "page_ad5", "page_ad4", "page_ad3"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
+    
+    // page 1 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
+      .then().statusCode(200)
+      .body("adList.title", contains(
+          "page_ad2", "page_ad1"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
   }
 }

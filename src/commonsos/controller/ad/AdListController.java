@@ -3,8 +3,6 @@ package commonsos.controller.ad;
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
@@ -15,8 +13,6 @@ import commonsos.service.AdService;
 import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.AdListView;
-import commonsos.view.AdView;
-import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 
@@ -30,12 +26,7 @@ public class AdListController extends AfterLoginController {
 
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    List<AdView> adList = service.listFor(user, parseLong(communityId), request.queryParams("filter"));
-    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
-    AdListView view = new AdListView()
-        .setAdList(adList)
-        .setPagination(paginationView);
-    
+    AdListView view = service.listFor(user, parseLong(communityId), request.queryParams("filter"), paginationCommand);
     return view;
   }
 }

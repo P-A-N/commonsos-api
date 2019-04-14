@@ -37,11 +37,11 @@ public class DeleteService {
     log.info(String.format("deleting user. userId=%d", user.getId()));
     
     // delete user's ads
-    List<Ad> myAds = adRepository.myAds(user.getId());
+    List<Ad> myAds = adRepository.myAds(user.getId(), null).getList();
     myAds.forEach(ad -> deleteAd(user, ad));
     
     // delete user's message threads party
-    List<MessageThread> myThreads = messageThreadRepository.listByUser(user);
+    List<MessageThread> myThreads = messageThreadRepository.listByUser(user, null).getList();
     myThreads.forEach(thread -> deleteMessageThreadParty(user, thread.getId()));
     
     // delete user's photo

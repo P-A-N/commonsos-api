@@ -10,12 +10,15 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 
 import commonsos.exception.UserNotFoundException;
 import commonsos.repository.entity.PasswordResetRequest;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -182,19 +185,24 @@ public class UserRepository extends Repository {
     return findPasswordResetRequest(accessIdHash).orElseThrow(UserNotFoundException::new);
   }
 
-  public List<User> search(Long communityId, String query) {
-    if (isBlank(query)) return emptyList();
-    return em().createQuery(
+  public ResultList<User> search(Long communityId, String q, PaginationCommand pagination) {
+    if (isBlank(q)) {
+      return new ResultList<User>().setList(emptyList());
+    }
+    
+    TypedQuery<User> query = em().createQuery(
       "SELECT u FROM User u JOIN u.communityUserList cu " +
       "WHERE cu.community.id = :communityId " +
       "AND u.deleted = FALSE " +
-      "AND LOWER(u.username) LIKE LOWER(:query) " +
+      "AND LOWER(u.username) LIKE LOWER(:q) " +
       "ORDER BY u.id", User.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
-      .setParameter("query", "%"+query+"%")
-      .setMaxResults(10)
-      .getResultList();
+      .setParameter("q", "%"+q+"%");
+    
+    ResultList<User> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
 
   public User update(User user) {

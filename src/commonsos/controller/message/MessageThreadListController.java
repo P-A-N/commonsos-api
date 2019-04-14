@@ -1,7 +1,5 @@
 package commonsos.controller.message;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
@@ -12,8 +10,6 @@ import commonsos.service.command.MessageThreadListCommand;
 import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.MessageThreadListView;
-import commonsos.view.MessageThreadView;
-import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 
@@ -29,12 +25,7 @@ public class MessageThreadListController extends AfterLoginController {
 
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    List<MessageThreadView> messageThreadList = service.searchThreads(user, command);
-    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
-    MessageThreadListView view = new MessageThreadListView()
-        .setMessageThreadList(messageThreadList)
-        .setPagination(paginationView);
-    
+    MessageThreadListView view = service.searchThreads(user, command, paginationCommand);
     return view;
   }
 }

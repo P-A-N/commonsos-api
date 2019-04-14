@@ -7,8 +7,11 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.TypedQuery;
 
 import commonsos.repository.entity.CommunityNotification;
+import commonsos.repository.entity.ResultList;
+import commonsos.service.command.PaginationCommand;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -33,14 +36,17 @@ public class CommunityNotificationRepository extends Repository {
     return Optional.of(result.get(0));
   }
 
-  public List<CommunityNotification> findByCommunityId(Long communityId) {
-    return em().createQuery(
+  public ResultList<CommunityNotification> findByCommunityId(Long communityId, PaginationCommand pagination) {
+    TypedQuery<CommunityNotification> query = em().createQuery(
         "FROM CommunityNotification" +
         " WHERE communityId = :communityId" +
         " ORDER BY id", CommunityNotification.class)
         .setLockMode(lockMode())
-        .setParameter("communityId", communityId)
-        .getResultList();
+        .setParameter("communityId", communityId);
+    
+    ResultList<CommunityNotification> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
   
   public CommunityNotification create(CommunityNotification notification) {

@@ -14,10 +14,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
-public class TransactionRepositoryTest extends RepositoryTest {
+public class TransactionRepositoryTest extends AbstractRepositoryTest {
 
   TransactionRepository repository = new TransactionRepository(emService);
 
@@ -73,7 +76,33 @@ public class TransactionRepositoryTest extends RepositoryTest {
     Long id3 = inTransaction(() -> repository.create(transaction(id("community2"), id("user1"), id("user2"))).getId());
     Long id4 = inTransaction(() -> repository.create(transaction(id("community2"), id("user2"), id("user1"))).getId());
 
-    assertThat(repository.transactions(user, id("community1"))).extracting("id").containsExactly(id1, id2);
+    assertThat(repository.transactions(user, id("community1"), null).getList()).extracting("id").containsExactly(id1, id2);
+  }
+
+  @Test
+  public void transactions_paginarion() {
+    // prepare
+    User user = new User().setId(id("user1"));
+
+    inTransaction(() -> repository.create(transaction(id("community1"), id("user1"), id("user2"))));
+    inTransaction(() -> repository.create(transaction(id("community1"), id("user2"), id("user1"))));
+    inTransaction(() -> repository.create(transaction(id("community1"), id("user1"), id("user2"))));
+    inTransaction(() -> repository.create(transaction(id("community1"), id("user2"), id("user1"))));
+    inTransaction(() -> repository.create(transaction(id("community1"), id("user2"), id("user1"))));
+
+    // execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Transaction> result = repository.transactions(user, id("community1"), pagination);
+    
+    // verify
+    assertThat(result.getList().size()).isEqualTo(3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.transactions(user, id("community1"), pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   @Test

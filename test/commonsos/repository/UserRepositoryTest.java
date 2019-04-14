@@ -5,7 +5,6 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,11 +17,14 @@ import org.junit.jupiter.api.Test;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.PasswordResetRequest;
+import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
-public class UserRepositoryTest extends RepositoryTest {
+public class UserRepositoryTest extends AbstractRepositoryTest {
 
   private UserRepository repository = new UserRepository(emService);
   private CommunityRepository communityRepository = new CommunityRepository(emService);
@@ -540,39 +542,39 @@ public class UserRepositoryTest extends RepositoryTest {
         new CommunityUser().setCommunity(community2)))));
     
     // execute
-    List<User> results = repository.search(community1.getId(), "foo");
+    ResultList<User> result = repository.search(community1.getId(), "foo", null);
     
     // verify
-    assertThat(results.size()).isEqualTo(1);
-    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("fooUser");
 
     // execute
-    results = repository.search(community2.getId(), "foo");
+    result = repository.search(community2.getId(), "foo", null);
     
     // verify
-    results.sort((a,b) -> a.getId().compareTo(b.getId()));
-    results.get(0).getCommunityUserList().sort((a,b) -> a.getId().compareTo(b.getId()));
-    assertThat(results.size()).isEqualTo(2);
-    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
-    assertThat(results.get(0).getCommunityUserList().get(0).getCommunity().getName()).isEqualTo("community1");
-    assertThat(results.get(0).getCommunityUserList().get(0).getCommunity().getAdminUser().getUsername()).isEqualTo("fooUser");
-    assertThat(results.get(0).getCommunityUserList().get(0).getCommunity().getAdminUser().getCommunityUserList().get(0).getCommunity().getName()).isEqualTo("community1");
-    assertThat(results.get(0).getCommunityUserList().get(1).getCommunity().getName()).isEqualTo("community2");
-    assertThat(results.get(0).getCommunityUserList().get(1).getCommunity().getAdminUser()).isNull();
-    assertThat(results.get(1).getUsername()).isEqualTo("foobarUser");
+    result.getList().sort((a,b) -> a.getId().compareTo(b.getId()));
+    result.getList().get(0).getCommunityUserList().sort((a,b) -> a.getId().compareTo(b.getId()));
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().get(0).getCommunityUserList().get(0).getCommunity().getName()).isEqualTo("community1");
+    assertThat(result.getList().get(0).getCommunityUserList().get(0).getCommunity().getAdminUser().getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().get(0).getCommunityUserList().get(0).getCommunity().getAdminUser().getCommunityUserList().get(0).getCommunity().getName()).isEqualTo("community1");
+    assertThat(result.getList().get(0).getCommunityUserList().get(1).getCommunity().getName()).isEqualTo("community2");
+    assertThat(result.getList().get(0).getCommunityUserList().get(1).getCommunity().getAdminUser()).isNull();
+    assertThat(result.getList().get(1).getUsername()).isEqualTo("foobarUser");
 
     // execute
-    results = repository.search(community3.getId(), "foo");
+    result = repository.search(community3.getId(), "foo", null);
     
     // verify
-    assertThat(results.size()).isEqualTo(1);
-    assertThat(results.get(0).getUsername()).isEqualTo("foobarUser");
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("foobarUser");
 
     // execute
-    results = repository.search(community4.getId(), "foo");
+    result = repository.search(community4.getId(), "foo", null);
     
     // verify
-    assertThat(results.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
   }
 
   @Test
@@ -585,11 +587,11 @@ public class UserRepositoryTest extends RepositoryTest {
         new CommunityUser().setCommunity(new Community().setId(community1Id))))));
     
     // execute
-    List<User> results = repository.search(community1Id, "user");
+    ResultList<User> result = repository.search(community1Id, "user", null);
 
     // verify
-    assertThat(results.size()).isEqualTo(1);
-    assertThat(results.get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("fooUser");
   }
 
   @Test
@@ -602,16 +604,16 @@ public class UserRepositoryTest extends RepositoryTest {
         new CommunityUser().setCommunity(community1)))));
     
     // execute
-    List<User> results = repository.search(community1.getId(), null);
+    ResultList<User> result = repository.search(community1.getId(), null, null);
     
     // verify
-    assertThat(results.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
     
     // execute
-    results = repository.search(id("community1"), "");
+    result = repository.search(id("community1"), "", null);
 
     // verify
-    assertThat(results.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
   }
 
   @Test
@@ -624,14 +626,14 @@ public class UserRepositoryTest extends RepositoryTest {
         new CommunityUser().setCommunity(community1)))));
     
     // execute
-    List<User> results = repository.search(community1.getId(), "hogehoge");
+    ResultList<User> result = repository.search(community1.getId(), "hogehoge", null);
     
     // verify
-    assertThat(results.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
   }
 
   @Test
-  public void search_maxResults() {
+  public void search_pagination() {
     // prepare
     Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
     inTransaction(() -> repository.create(new User().setUsername("user1").setCommunityUserList(asList(new CommunityUser().setCommunity(community1)))));
@@ -648,10 +650,18 @@ public class UserRepositoryTest extends RepositoryTest {
     inTransaction(() -> repository.create(new User().setUsername("user12").setCommunityUserList(asList(new CommunityUser().setCommunity(community1)))));
     
     // execute
-    List<User> results = repository.search(community1.getId(), "user");
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
+    ResultList<User> result = repository.search(community1.getId(), "user", pagination);
     
     // verify
-    assertThat(results.size()).isEqualTo(10);
+    assertThat(result.getList().size()).isEqualTo(10);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.search(community1.getId(), "user", pagination);
+    
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   private User createTestUser_BelongAtZeroCommunity() {

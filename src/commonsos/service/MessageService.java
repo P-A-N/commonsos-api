@@ -29,17 +29,22 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.command.CreateGroupCommand;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
 import commonsos.service.command.MessageThreadListCommand;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
+import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.AdView;
+import commonsos.view.MessageListView;
+import commonsos.view.MessageThreadListView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
 import commonsos.view.UserView;
@@ -198,22 +203,28 @@ public class MessageService {
       .setText(message.getText());
   }
 
-  public List<MessageThreadView> searchThreads(User user, MessageThreadListCommand command) {
+  public MessageThreadListView searchThreads(User user, MessageThreadListCommand command, PaginationCommand pagination) {
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user);
     
-    List<MessageThread> threads = null;
+    ResultList<MessageThread> result = null;
     if (StringUtils.isBlank(command.getMemberFilter()) && StringUtils.isBlank(command.getMessageFilter())) {
-      threads = messageThreadRepository.listByUser(user);
+      result = messageThreadRepository.listByUser(user, pagination);
     } else {
-      threads = messageThreadRepository.listByUserAndMemberAndMessage(user, command.getMemberFilter(), command.getMessageFilter());
+      result = messageThreadRepository.listByUserAndMemberAndMessage(user, command.getMemberFilter(), command.getMessageFilter(), pagination);
     }
     
-    List<MessageThreadView> threadViews = threads.stream()
+    List<MessageThreadView> threadViews = result.getList().stream()
       .map(thread -> view(user, thread))
       .filter(t -> t.getLastMessage() != null || t.isGroup())
       .map(p -> p.setUnread(unreadMessageThreadIds.contains(p.getId())))
       .collect(toList());
-    return sortAsNewestFirst(threadViews);
+    threadViews = sortAsNewestFirst(threadViews);
+
+    MessageThreadListView listView = new MessageThreadListView();
+    listView.setMessageThreadList(threadViews);
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   List<MessageThreadView> sortAsNewestFirst(List<MessageThreadView> threadViews) {
@@ -249,13 +260,19 @@ public class MessageService {
       });
   }
 
-  public List<MessageView> messages(User user, Long threadId) {
-    MessageThread thread = messageThreadRepository.findById(threadId).orElseThrow(BadRequestException::new);
+  public MessageListView messages(User user, Long threadId, PaginationCommand pagination) {
+    MessageThread thread = messageThreadRepository.findStrictById(threadId);
     if (!isUserAllowedToAccessMessageThread(user, thread)) throw new ForbiddenException();
 
     markVisited(user, thread);
 
-    return messageRepository.listByThread(threadId).stream().map(this::view).collect(toList());
+    ResultList<Message> result = messageRepository.listByThread(threadId, pagination);
+
+    MessageListView listView = new MessageListView();
+    listView.setMessageList(result.getList().stream().map(this::view).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public MessageThreadView updatePersonalTitle(User user, UpdateMessageThreadPersonalTitleCommand command) {

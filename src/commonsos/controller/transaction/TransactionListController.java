@@ -3,8 +3,6 @@ package commonsos.controller.transaction;
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
@@ -14,9 +12,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.TransactionService;
 import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
-import commonsos.view.PaginationView;
 import commonsos.view.TransactionListView;
-import commonsos.view.TransactionView;
 import spark.Request;
 import spark.Response;
 
@@ -31,12 +27,7 @@ public class TransactionListController extends AfterLoginController {
 
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    List<TransactionView> transactionList = service.transactions(user, parseLong(communityId));
-    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
-    TransactionListView view = new TransactionListView()
-        .setTransactionList(transactionList)
-        .setPagination(paginationView);
-    
+    TransactionListView view = service.transactions(user, parseLong(communityId), paginationCommand);
     return view;
   }
 }

@@ -8,7 +8,6 @@ import static spark.utils.StringUtils.isBlank;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -21,15 +20,19 @@ import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.AdUtil;
+import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.BalanceView;
+import commonsos.view.TransactionListView;
 import commonsos.view.TransactionView;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,11 +59,17 @@ public class TransactionService {
     return transaction.getRemitterId().equals(user.getId());
   }
 
-  public List<TransactionView> transactions(User user, Long communityId) {
-    return repository.transactions(user, communityId).stream()
-      .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
-      .map(transaction -> view(user, transaction))
-      .collect(toList());
+  public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
+    ResultList<Transaction> result = repository.transactions(user, communityId, pagination);
+
+    TransactionListView listView = new TransactionListView();
+    listView.setTransactionList(result.getList().stream()
+        .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
+        .map(transaction -> view(user, transaction))
+        .collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public TransactionView view(User user, Transaction transaction) {

@@ -6,15 +6,17 @@ import static java.time.temporal.ChronoUnit.HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Message;
+import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.SortType;
+import commonsos.service.command.PaginationCommand;
 import commonsos.util.MessageUtil;
 
-public class MessageRepositoryTest extends RepositoryTest {
+public class MessageRepositoryTest extends AbstractRepositoryTest {
 
   private MessageRepository repository = new MessageRepository(emService);
 
@@ -46,9 +48,53 @@ public class MessageRepositoryTest extends RepositoryTest {
     Long id3 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(2, HOURS))).getId());
     inTransaction(() -> repository.create(new Message().setThreadId(id("other thread"))));
 
-    List<Message> result = repository.listByThread(id("thread id"));
+    ResultList<Message> result = repository.listByThread(id("thread id"), null);
 
-    assertThat(result).extracting("id").containsExactly(id3, id1, id2);
+    assertThat(result.getList()).extracting("id").containsExactly(id3, id1, id2);
+  }
+
+  @Test
+  public void listByThread_pagination_asc() {
+    // prepare
+    Long id1 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(1, HOURS))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(2, HOURS))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(3, HOURS))).getId());
+    Long id4 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(4, HOURS))).getId());
+    Long id5 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(5, HOURS))).getId());
+
+    // execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Message> result = repository.listByThread(id("thread id"), pagination);
+
+    assertThat(result.getList()).extracting("id").containsExactly(id5, id4, id3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.listByThread(id("thread id"), pagination);
+
+    assertThat(result.getList()).extracting("id").containsExactly(id2, id1);
+  }
+
+  @Test
+  public void listByThread_pagination_desc() {
+    // prepare
+    Long id1 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(1, HOURS))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(2, HOURS))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(3, HOURS))).getId());
+    Long id4 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(4, HOURS))).getId());
+    Long id5 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id")).setCreatedAt(now().minus(5, HOURS))).getId());
+
+    // execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.DESC);
+    ResultList<Message> result = repository.listByThread(id("thread id"), pagination);
+
+    assertThat(result.getList()).extracting("id").containsExactly(id1, id2, id3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.listByThread(id("thread id"), pagination);
+
+    assertThat(result.getList()).extracting("id").containsExactly(id4, id5);
   }
 
   @Test

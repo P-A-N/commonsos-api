@@ -2,7 +2,6 @@ package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -16,14 +15,17 @@ import commonsos.repository.CommunityNotificationRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.CommunityNotificationCommand;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
-import commonsos.view.CommunityNotificationView;
-import commonsos.view.CommunityView;
+import commonsos.util.PaginationUtil;
+import commonsos.view.CommunityListView;
+import commonsos.view.CommunityNotificationListView;
 
 @Singleton
 public class CommunityService {
@@ -33,10 +35,14 @@ public class CommunityService {
   @Inject private ImageUploadService imageService;
   @Inject private BlockchainService blockchainService;
 
-  public List<CommunityView> list(String filter) {
-    List<Community> list = StringUtils.isEmpty(filter) ? repository.list() : repository.list(filter);
+  public CommunityListView list(String filter, PaginationCommand pagination) {
+    ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.list(pagination) : repository.list(filter, pagination);
+
+    CommunityListView listView = new CommunityListView();
+    listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
     
-    return list.stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList());
+    return listView;
   }
 
   public Community community(Long id) {
@@ -91,11 +97,15 @@ public class CommunityService {
     }
   }
   
-  public List<CommunityNotificationView> notificationList(Long communityId) {
+  public CommunityNotificationListView notificationList(Long communityId, PaginationCommand pagination) {
     repository.findStrictById(communityId);
     
-    List<CommunityNotification> notificationList = notificationRepository.findByCommunityId(communityId);
+    ResultList<CommunityNotification> result = notificationRepository.findByCommunityId(communityId, pagination);
+
+    CommunityNotificationListView listView = new CommunityNotificationListView();
+    listView.setNotificationList(CommunityUtil.notificationView(result.getList()));
+    listView.setPagination(PaginationUtil.toView(result));
     
-    return CommunityUtil.notificationView(notificationList);
+    return listView;
   }
 }

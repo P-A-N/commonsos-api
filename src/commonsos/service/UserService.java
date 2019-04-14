@@ -1,14 +1,12 @@
 package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,6 +25,7 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.PasswordResetRequest;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
@@ -35,6 +34,7 @@ import commonsos.service.blockchain.DelegateWalletTask;
 import commonsos.service.command.CreateAccountTemporaryCommand;
 import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
 import commonsos.service.command.UploadPhotoCommand;
@@ -48,10 +48,13 @@ import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
+import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
 import commonsos.view.BalanceView;
+import commonsos.view.CommunityUserListView;
 import commonsos.view.CommunityUserView;
+import commonsos.view.UserListView;
 import commonsos.view.UserPrivateView;
 import commonsos.view.UserView;
 import lombok.extern.slf4j.Slf4j;
@@ -98,17 +101,18 @@ public class UserService {
     return privateView(user);
   }
 
-  public List<CommunityUserView> searchUsersCommunity(User user, String filter) {
-    List<Community> communityList = StringUtils.isEmpty(filter) ? communityRepository.list() : communityRepository.list(filter);
-    Set<Long> communityIdSet = communityList.stream().map(Community::getId).collect(toSet());
+  public CommunityUserListView searchUsersCommunity(User user, String filter, PaginationCommand pagination) {
+    ResultList<CommunityUser> result = StringUtils.isEmpty(filter) ?
+        communityRepository.list(user.getCommunityUserList(), pagination) :
+        communityRepository.list(filter, user.getCommunityUserList(), pagination);
     
-    List<CommunityUserView> communityUserViewList = user.getCommunityUserList().stream().filter(cu -> {
-      return communityIdSet.contains(cu.getCommunity().getId());
-    }).map(cu -> {
+    CommunityUserListView listView = new CommunityUserListView();
+    listView.setCommunityList(result.getList().stream().map(cu -> {
       return UserUtil.communityUserView(cu, blockchainService.tokenSymbol(cu.getCommunity().getId()));
-    }).collect(toList());
+    }).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
     
-    return communityUserViewList;
+    return listView;
   }
   
   public void createAccountTemporary(CreateAccountTemporaryCommand command) {
@@ -280,8 +284,14 @@ public class UserService {
     return userRepository.findStrictById(id);
   }
 
-  public List<UserView> searchUsers(User user, Long communityId, String query) {
-    return userRepository.search(communityId, query).stream().filter(u -> !u.getId().equals(user.getId())).map(UserUtil::view).collect(toList());
+  public UserListView searchUsers(User user, Long communityId, String query, PaginationCommand pagination) {
+    ResultList<User> result = userRepository.search(communityId, query, pagination);
+    
+    UserListView listView = new UserListView();
+    listView.setUserList(result.getList().stream().filter(u -> !u.getId().equals(user.getId())).map(UserUtil::view).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public String updateAvatar(User user, UploadPhotoCommand command) {

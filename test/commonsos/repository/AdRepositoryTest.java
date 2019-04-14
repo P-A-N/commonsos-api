@@ -6,15 +6,17 @@ import static java.math.BigDecimal.TEN;
 import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
-public class AdRepositoryTest extends RepositoryTest {
+public class AdRepositoryTest extends AbstractRepositoryTest {
 
   private AdRepository repository = new AdRepository(emService);
   private UserRepository userRepository = new UserRepository(emService);
@@ -33,16 +35,16 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setDeleted(true)).getId());
     Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2"))).getId());
 
-    List<Ad> list = repository.ads(id("community1"));
+    ResultList<Ad> result = repository.ads(id("community1"), null);
 
-    assertThat(list).extracting("id").containsExactly(id1, id2);
+    assertThat(result.getList()).extracting("id").containsExactly(id1, id2);
   }
 
   @Test
   public void ads_notFound() {
-    List<Ad> list = repository.ads(id("community1"));
+    ResultList<Ad> result = repository.ads(id("community1"), null);
 
-    assertThat(list.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
   }
 
   @Test
@@ -54,9 +56,9 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setDescription("text").setCommunityId(id("community2"))).getId());
     Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setDescription("text").setCommunityId(id("community3"))).getId());
 
-    List<Ad> list = repository.ads(id("community1"), "text");
+    ResultList<Ad> result = repository.ads(id("community1"), "text", null);
 
-    assertThat(list).extracting("id").containsExactly(id1);
+    assertThat(result.getList()).extracting("id").containsExactly(id1);
   }
 
   @Test
@@ -68,9 +70,9 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setTitle("_title_").setCommunityId(id("community2"))).getId());
     Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setTitle("_title_").setCommunityId(id("community3"))).getId());
 
-    List<Ad> list = repository.ads(id("community1"), "title");
+    ResultList<Ad> result = repository.ads(id("community1"), "title", null);
 
-    assertThat(list).extracting("id").containsExactly(id1);
+    assertThat(result.getList()).extracting("id").containsExactly(id1);
   }
 
   @Test
@@ -82,9 +84,9 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community2"))).getId());
     Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community3"))).getId());
 
-    List<Ad> list = repository.ads(id("community1"), "user");
+    ResultList<Ad> result = repository.ads(id("community1"), "user", null);
 
-    assertThat(list).extracting("id").containsExactly(id1);
+    assertThat(result.getList()).extracting("id").containsExactly(id1);
   }
 
   @Test
@@ -96,16 +98,40 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community1"))).getId());
     Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community1")).setDeleted(true)).getId());
 
-    List<Ad> list = repository.ads(id("community1"), "user");
+    ResultList<Ad> result = repository.ads(id("community1"), "user", null);
 
-    assertThat(list).extracting("id").containsExactly(id1);
+    assertThat(result.getList()).extracting("id").containsExactly(id1);
   }
 
   @Test
   public void ads_filter_notFound() {
-    List<Ad> list = repository.ads(id("community1"), "user");
+    ResultList<Ad> result = repository.ads(id("community1"), "user", null);
 
-    assertThat(list.size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(0);
+  }
+
+  @Test
+  public void ads_pagination() {
+    // prepare
+    inTransaction(() -> repository.create(new Ad().setTitle("ad1").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad2").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad3").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad4").setCommunityId(id("community1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad5").setCommunityId(id("community1"))));
+
+    // execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Ad> result = repository.ads(id("community1"), pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.ads(id("community1"), pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   @Test
@@ -117,10 +143,34 @@ public class AdRepositoryTest extends RepositoryTest {
     Long id5 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2")).setCreatedBy(id("user1"))).getId());
 
     // execute
-    List<Ad> list = repository.myAds(id("user1"));
+    ResultList<Ad> result = repository.myAds(id("user1"), null);
 
     // verify
-    assertThat(list).extracting("id").containsExactly(id1, id2, id5);
+    assertThat(result.getList()).extracting("id").containsExactly(id1, id2, id5);
+  }
+
+  @Test
+  public void myAds_pagination() {
+    // prepare
+    inTransaction(() -> repository.create(new Ad().setTitle("ad1").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad2").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad3").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad4").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad5").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+
+    // execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Ad> result = repository.myAds(id("user1"), pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.myAds(id("user1"), pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   @Test

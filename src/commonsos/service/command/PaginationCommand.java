@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
 public class PaginationCommand {
-  private Long page;
-  private Long size;
+  private int page;
+  private int size;
   private SortType sort;
 }

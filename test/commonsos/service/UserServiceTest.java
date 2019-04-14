@@ -13,7 +13,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,6 @@ import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
-import commonsos.view.UserView;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -180,18 +178,6 @@ public class UserServiceTest {
 
     // verify
     assertThat(thrown).hasMessage("error.emailAddressTaken");
-  }
-
-  @Test
-  public void searchUsers() {
-    User myself = new User().setId(id("myself"));
-    User other = new User().setId(id("other"));
-    when(userRepository.search(id("community"), "foobar")).thenReturn(asList(myself, other));
-
-    List<UserView> results = userService.searchUsers(myself, id("community"), "foobar");
-
-    assertThat(results.size()).isEqualTo(1);
-    assertThat(results.get(0).getId()).isEqualTo(id("other"));
   }
 
   @Test

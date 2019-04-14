@@ -3,8 +3,6 @@ package commonsos.controller.admin;
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
@@ -14,9 +12,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
-import commonsos.view.PaginationView;
 import commonsos.view.UserListView;
-import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
@@ -32,11 +28,7 @@ public class UserSearchController extends AfterLoginController {
     
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    List<UserView> userList = service.searchUsers(user, parseLong(communityId), q);
-    PaginationView paginationView = PaginationUtil.toView(paginationCommand);
-    UserListView view = new UserListView()
-        .setUserList(userList)
-        .setPagination(paginationView);
+    UserListView view = service.searchUsers(user, parseLong(communityId), q, paginationCommand);
     return view;
   }
 }

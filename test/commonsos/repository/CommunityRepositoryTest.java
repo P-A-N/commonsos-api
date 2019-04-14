@@ -2,15 +2,17 @@ package commonsos.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
-public class CommunityRepositoryTest extends RepositoryTest {
+public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
   UserRepository userRepository = new UserRepository(emService);
   CommunityRepository repository = new CommunityRepository(emService);
@@ -69,15 +71,39 @@ public class CommunityRepositoryTest extends RepositoryTest {
       em().persist(new Community().setName("community3").setDescription("des3").setTokenContractAddress(null));
     });
 
-    List<Community> result = repository.list();
+    ResultList<Community> result = repository.list(null);
 
-    assertThat(result.size()).isEqualTo(2);
-    assertThat(result.get(0).getName()).isEqualTo("community1");
-    assertThat(result.get(0).getDescription()).isEqualTo("des1");
-    assertThat(result.get(0).getAdminUser().getUsername()).isEqualTo("admin");
-    assertThat(result.get(1).getName()).isEqualTo("community2");
-    assertThat(result.get(1).getDescription()).isEqualTo("des2");
-    assertThat(result.get(1).getAdminUser()).isNull();
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getName()).isEqualTo("community1");
+    assertThat(result.getList().get(0).getDescription()).isEqualTo("des1");
+    assertThat(result.getList().get(0).getAdminUser().getUsername()).isEqualTo("admin");
+    assertThat(result.getList().get(1).getName()).isEqualTo("community2");
+    assertThat(result.getList().get(1).getDescription()).isEqualTo("des2");
+    assertThat(result.getList().get(1).getAdminUser()).isNull();
+  }
+
+  @Test
+  public void list_pagination() {
+    // prepare
+    inTransaction(() -> em().persist(new Community().setName("community1").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community2").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community3").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community4").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community5").setTokenContractAddress("0x0")));
+
+    //execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Community> result = repository.list(pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.list(pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   @Test
@@ -91,12 +117,12 @@ public class CommunityRepositoryTest extends RepositoryTest {
     });
 
     // execute
-    List<Community> result = repository.list("foo");
+    ResultList<Community> result = repository.list("foo", null);
 
     // verify
-    assertThat(result.size()).isEqualTo(2);
-    assertThat(result.get(0).getName()).isEqualTo("comm_foo");
-    assertThat(result.get(1).getName()).isEqualTo("comm_Foo_bar");
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getName()).isEqualTo("comm_foo");
+    assertThat(result.getList().get(1).getName()).isEqualTo("comm_Foo_bar");
   }
 
   @Test
@@ -110,19 +136,43 @@ public class CommunityRepositoryTest extends RepositoryTest {
     });
 
     // execute
-    List<Community> result = repository.list("フー");
+    ResultList<Community> result = repository.list("フー", null);
 
     // verify
-    assertThat(result.size()).isEqualTo(2);
-    assertThat(result.get(0).getName()).isEqualTo("コミュニティ　フー");
-    assertThat(result.get(1).getName()).isEqualTo("コミュニティ　フー　バー");
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getName()).isEqualTo("コミュニティ　フー");
+    assertThat(result.getList().get(1).getName()).isEqualTo("コミュニティ　フー　バー");
     
     // execute
-    result = repository.list("🍺"); // 4 byte code
+    result = repository.list("🍺", null); // 4 byte code
 
     // verify
-    assertThat(result.size()).isEqualTo(1);
-    assertThat(result.get(0).getName()).isEqualTo("コミュニティ　🍺");
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getList().get(0).getName()).isEqualTo("コミュニティ　🍺");
+  }
+
+  @Test
+  public void list_filter_pagination() {
+    // prepare
+    inTransaction(() -> em().persist(new Community().setName("community1").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community2").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community3").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community4").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setName("community5").setTokenContractAddress("0x0")));
+
+    //execute
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
+    ResultList<Community> result = repository.list("community", pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(3);
+
+    // execute
+    pagination.setPage(1);
+    result = repository.list("community", pagination);
+
+    // verify
+    assertThat(result.getList().size()).isEqualTo(2);
   }
 
   @Test

@@ -46,7 +46,6 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
-import commonsos.service.command.MessageThreadListCommand;
 import commonsos.view.AdView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
@@ -235,43 +234,6 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void searchThreads() {
-    User user = new User();
-    MessageThread thread = new MessageThread().setId(id("unread"));
-    when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
-    MessageThreadView view = new MessageThreadView().setId(id("unread")).setLastMessage(new MessageView());
-    doReturn(view).when(service).view(user, thread);
-    when(messageThreadRepository.unreadMessageThreadIds(user)).thenReturn(asList(id("unread")));
-
-    List<MessageThreadView> result = service.searchThreads(user, new MessageThreadListCommand());
-
-    assertThat(result).containsExactly(view);
-    assertThat(view.isUnread()).isTrue();
-  }
-
-  @Test
-  public void searchThreads_excludePrivateThreadsWithoutMessages() {
-    User user = new User();
-    MessageThread thread = new MessageThread();
-    when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
-    MessageThreadView threadView = new MessageThreadView();
-    doReturn(threadView).when(service).view(user, thread);
-
-    assertThat(service.searchThreads(user, new MessageThreadListCommand())).isEmpty();
-  }
-
-  @Test
-  public void searchThreads_includesGroupThreadsWithoutMessages() {
-    User user = new User();
-    MessageThread thread = new MessageThread().setGroup(true);
-    when(messageThreadRepository.listByUser(user)).thenReturn(asList(thread));
-    MessageThreadView threadView = new MessageThreadView().setGroup(true);
-    doReturn(threadView).when(service).view(user, thread);
-
-    assertThat(service.searchThreads(user, new MessageThreadListCommand())).isNotEmpty();
-  }
-
-  @Test
   public void ordersNewestThreadsFirst() {
     MessageThreadView view1 = new MessageThreadView().setLastMessage(new MessageView().setCreatedAt(now().minus(2, HOURS)));
     MessageThreadView view2 = new MessageThreadView().setLastMessage(new MessageView().setCreatedAt(now().minus(1, HOURS)));
@@ -314,37 +276,6 @@ public class MessageServiceTest {
     assertThat(message.getCreatedBy()).isEqualTo(id("user id"));
     assertThat(message.getText()).isEqualTo("message text");
     assertThat(message.getCreatedAt()).isCloseTo(now(), within(1, SECONDS));
-  }
-
-  @Test
-  public void messages() {
-    Message message = new Message();
-    when(messageRepository.listByThread(id("thread id"))).thenReturn(asList(message));
-    MessageView view = new MessageView();
-    doReturn(view).when(service).view(message);
-    MessageThreadParty party = party(new User().setId(id("user id")));
-    when(messageThreadRepository.findById((id("thread id")))).thenReturn(Optional.of(new MessageThread().setParties(asList(party))));
-
-    List<MessageView> result = service.messages(new User().setId(id("user id")), id("thread id"));
-
-    assertThat(result).containsExactly(view);
-    verify(messageThreadRepository).update(party);
-    assertThat(party.getVisitedAt()).isCloseTo(now(), within(1, SECONDS));
-  }
-
-  @Test
-  public void message_threadMustExist() {
-    when(messageThreadRepository.findById((id("thread id")))).thenReturn(empty());
-
-    assertThrows(BadRequestException.class, () -> service.messages(new User().setId(id("me")), id("thread id")));
-  }
-
-  @Test
-  public void message_canBeAccessedByParticipatingParty() {
-    MessageThread messageThread = new MessageThread().setParties(asList(party(new User().setId(id("other user")))));
-    when(messageThreadRepository.findById((id("thread id")))).thenReturn(Optional.of(messageThread));
-
-    assertThrows(ForbiddenException.class, () -> service.messages(new User().setId(id("me")), id("thread id")));
   }
 
   @Test

@@ -3,8 +3,6 @@ package commonsos.service;
 import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -14,13 +12,17 @@ import commonsos.repository.AdRepository;
 import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.command.AdCreateCommand;
 import commonsos.service.command.AdUpdateCommand;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.AdUtil;
+import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.AdListView;
 import commonsos.view.AdView;
 
 @Singleton
@@ -47,20 +49,26 @@ public class AdService {
     return view(adRepository.create(ad), user);
   }
 
-  public List<AdView> listFor(User user, Long communityId, String filter) {
-    List<Ad> ads = filter != null ?
-      adRepository.ads(communityId, filter) :
-      adRepository.ads(communityId);
-
-    return ads.stream().map(ad -> view(ad, user)).collect(toList());
+  public AdListView listFor(User user, Long communityId, String filter, PaginationCommand pagination) {
+    ResultList<Ad> result = filter != null ?
+      adRepository.ads(communityId, filter, pagination) :
+      adRepository.ads(communityId, pagination);
+    
+    AdListView listView = new AdListView();
+    listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
-  public List<AdView> myAdsView(User user) {
-    return myAds(user).stream().map(ad -> view(ad, user)).collect(toList());
-  }
+  public AdListView myAdsView(User user, PaginationCommand pagination) {
+    ResultList<Ad> result = adRepository.myAds(user.getId(), pagination);
 
-  public List<Ad> myAds(User user) {
-    return adRepository.myAds(user.getId());
+    AdListView listView = new AdListView();
+    listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public AdView view(Ad ad, User user) {
