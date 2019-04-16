@@ -29,6 +29,7 @@ import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
+import commonsos.service.command.CreateDirectMessageThreadCommand;
 import commonsos.service.command.CreateGroupCommand;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
@@ -64,15 +65,18 @@ public class MessageService {
     return view(user, thread);
   }
 
-  public MessageThreadView threadWithUser(User user, Long otherUserId) {
-    MessageThread thread = messageThreadRepository.betweenUsers(user.getId(), otherUserId)
-      .orElseGet(() -> createMessageThreadWithUser(user, otherUserId));
+  public MessageThreadView threadWithUser(User user, CreateDirectMessageThreadCommand command) {
+    MessageThread thread = messageThreadRepository.betweenUsers(user.getId(), command.getOtherUserId(), command.getCommunityId())
+      .orElseGet(() -> createMessageThreadWithUser(user, command));
     return view(user, thread);
   }
 
-  MessageThread createMessageThreadWithUser(User user, Long otherUserId) {
-    User otherUser = userRepository.findStrictById(otherUserId);
+  MessageThread createMessageThreadWithUser(User user, CreateDirectMessageThreadCommand command) {
+    User otherUser = userRepository.findStrictById(command.getOtherUserId());
+    if (!UserUtil.isMember(user, command.getCommunityId()) || !UserUtil.isMember(otherUser, command.getCommunityId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", command.getCommunityId()));
+    
     MessageThread messageThread = new MessageThread()
+      .setCommunityId(command.getCommunityId())
       .setCreatedBy(user.getId())
       .setCreatedAt(now())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));

@@ -8,6 +8,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -39,14 +42,18 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
   
   @Test
   public void messageThreadWithUser() {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
+    
     // call api
     int id = given()
       .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
       .when().post("/message-threads/user/{userId}", user2.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
-      .body("communityId", nullValue())
+      .body("communityId", equalTo(community.getId().intValue()))
       .body("title", nullValue())
       .body("personalTitle", nullValue())
       .body("parties.id", contains(user2.getId().intValue()))
@@ -74,10 +81,14 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
 
   @Test
   public void messageThreadWithUser_otherCommunityUser() {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
+    
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
       .when().post("/message-threads/user/{userId}", otherCommunityUser.getId())
-      .then().statusCode(200);
+      .then().statusCode(400);
   }
 }

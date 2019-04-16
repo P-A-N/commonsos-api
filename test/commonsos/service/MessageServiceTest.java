@@ -99,51 +99,6 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void threadWithUser_existingThread() {
-    User user = new User().setId(id("my id"));
-    MessageThread existingThread = new MessageThread();
-    when(messageThreadRepository.betweenUsers(id("my id"), id("other user id"))).thenReturn(Optional.of(existingThread));
-    MessageThreadView messageThreadView = new MessageThreadView();
-    doReturn(messageThreadView).when(service).view(user, existingThread);
-
-    MessageThreadView result = service.threadWithUser(user, id("other user id"));
-
-    assertThat(result).isSameAs(messageThreadView);
-  }
-
-  @Test
-  public void threadWithUser_createNew() {
-    User user = new User().setId(id("my id"));
-    when(messageThreadRepository.betweenUsers(id("my id"), id("other user id"))).thenReturn(empty());
-    MessageThread createdThread = new MessageThread();
-    doReturn(createdThread).when(service).createMessageThreadWithUser(user, id("other user id"));
-    MessageThreadView messageThreadView = new MessageThreadView();
-    doReturn(messageThreadView).when(service).view(user, createdThread);
-
-    MessageThreadView result = service.threadWithUser(user, id("other user id"));
-
-    assertThat(result).isSameAs(messageThreadView);
-  }
-
-  @Test
-  public void createMessageThreadWithUser() {
-    User user = new User().setId(id("user id"));
-    User counterparty = new User().setId(id("counterparty id"));
-    MessageThread newThread = new MessageThread();
-    when(messageThreadRepository.create(messageThreadArgumentCaptor.capture())).thenReturn(newThread);
-    when(userRepository.findById(id("counterparty id"))).thenReturn(Optional.of(counterparty));
-
-    MessageThread result = service.createMessageThreadWithUser(user, id("counterparty id"));
-
-    assertThat(result).isEqualTo(newThread);
-    MessageThread createdThread = messageThreadArgumentCaptor.getValue();
-    assertThat(createdThread.getCreatedBy()).isEqualTo(id("user id"));
-    assertThat(createdThread.getCreatedAt()).isCloseTo(now(), within(1, SECONDS));
-    assertThat(createdThread.isGroup()).isFalse();
-    assertThat(createdThread.getParties()).extracting("user").containsExactly(user, counterparty);
-  }
-
-  @Test
   public void thread() {
     User user = new User().setId(id("user id"));
     MessageThread messageThread = new MessageThread().setParties(asList(party(user)));

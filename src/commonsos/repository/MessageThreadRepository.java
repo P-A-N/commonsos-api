@@ -41,20 +41,22 @@ public class MessageThreadRepository extends Repository {
     }
   }
 
-  public Optional<MessageThread> betweenUsers(Long userId1, Long userId2) {
-    String sql = "SELECT * FROM message_threads mt " +
-      "WHERE mt.ad_id IS NULL AND mt.is_group = FALSE AND " +
-            "mt.id IN (SELECT mtp.message_thread_id FROM message_thread_parties mtp WHERE mtp.user_id = :user1 AND mt.id = mtp.message_thread_id) AND " +
-            "mt.id IN (SELECT mtp.message_thread_id FROM message_thread_parties mtp WHERE mtp.user_id = :user2 AND mt.id = mtp.message_thread_id)";
+  public Optional<MessageThread> betweenUsers(Long userId1, Long userId2, Long communityId) {
+    String sql = "SELECT mt FROM MessageThread mt " +
+      "WHERE mt.communityId = :communityId " +
+      "AND mt.adId IS NULL " +
+      "AND mt.group IS FALSE " +
+      "AND EXISTS (SELECT 1 FROM MessageThreadParty mtp WHERE mtp.messageThreadId = mt.id AND mtp.user.id = :userId1) " +
+      "AND EXISTS (SELECT 1 FROM MessageThreadParty mtp WHERE mtp.messageThreadId = mt.id AND mtp.user.id = :userId2)";
     try {
-      Object singleResult = em().createNativeQuery(sql, MessageThread.class)
-        .setParameter("user1", userId1)
-        .setParameter("user2", userId2)
+      MessageThread singleResult = em().createQuery(sql, MessageThread.class)
+        .setLockMode(lockMode())
+        .setParameter("communityId", communityId)
+        .setParameter("userId1", userId1)
+        .setParameter("userId2", userId2)
         .getSingleResult();
-
-      em().lock(singleResult, lockMode());
       
-      return Optional.of((MessageThread)singleResult);
+      return Optional.of(singleResult);
     }
     catch (NoResultException e) {
       return empty();
