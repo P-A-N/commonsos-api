@@ -3,7 +3,6 @@ package commonsos.repository;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,53 +66,36 @@ public class MessageThreadRepository extends Repository {
     return messageThread;
   }
 
-  public ResultList<MessageThread> listByUser(User user, PaginationCommand pagination) {
-    TypedQuery<MessageThread> query = em()
-      .createQuery("SELECT mt FROM MessageThread mt JOIN mt.parties p WHERE p.user = :user ORDER BY mt.id", MessageThread.class)
-      .setLockMode(lockMode())
-      .setParameter("user", user);
-    
-    ResultList<MessageThread> resultList = getResultList(query, pagination);
-    
-    return resultList;
-  }
-
-  public ResultList<MessageThread> listByUserAndMemberAndMessage(User user, String memberFilter, String messageFilter, PaginationCommand pagination) {
-    if (StringUtils.isBlank(memberFilter) && StringUtils.isBlank(messageFilter)) {
-      return new ResultList<MessageThread>().setList(new ArrayList<>());
-    }
-    
+  public ResultList<MessageThread> listByUser(User user, Long communityId, String memberFilter, String messageFilter, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
     sql.append(
         "SELECT " +
-        "    mt.* " +
-        "FROM message_threads mt " +
-        "INNER JOIN message_thread_parties p " +
-        "        ON p.message_thread_id = mt.id " +
-        "       AND p.user_id = :userId " +
-        "WHERE TRUE ");
+        "    mt " +
+        "FROM MessageThread mt " +
+        "JOIN mt.parties p " +
+        "WHERE mt.communityId = :communityId " +
+        "AND p.user.id = :userId ");
     if (StringUtils.isNotBlank(memberFilter)) {
       sql.append(
           "AND EXISTS ( " +
-          "    SELECT * FROM message_thread_parties mtp " +
-          "    INNER JOIN users u " +
-          "            ON u.id = mtp.user_id " +
-          "    WHERE mtp.message_thread_id = mt.id " +
-          "    AND LOWER(u.username) LIKE LOWER(:memberFilter) " +
+          "    SELECT 1 FROM MessageThreadParty mtp " +
+          "    WHERE mtp.messageThreadId = mt.id " +
+          "    AND LOWER(mtp.user.username) LIKE LOWER(:memberFilter) " +
           ") ");
     }
     if (StringUtils.isNotBlank(messageFilter)) {
       sql.append(
           "AND EXISTS ( " +
-          "    SELECT * FROM messages m " +
-          "    WHERE m.thread_id = mt.id " +
+          "    SELECT 1 FROM Message m " +
+          "    WHERE m.threadId = mt.id " +
           "    AND m.text LIKE :messageFilter" +
           ") ");
     }
     sql.append("ORDER BY mt.id");
 
-    @SuppressWarnings("unchecked")
-    TypedQuery<MessageThread> query = (TypedQuery<MessageThread>) em().createNativeQuery(sql.toString(), MessageThread.class);
+    TypedQuery<MessageThread> query = em().createQuery(sql.toString(), MessageThread.class);
+    query.setLockMode(lockMode());
+    query.setParameter("communityId", communityId);
     query.setParameter("userId", user.getId());
     if (StringUtils.isNotBlank(memberFilter)) {
       query.setParameter("memberFilter", "%" + memberFilter + "%");
@@ -160,14 +142,17 @@ public class MessageThreadRepository extends Repository {
       .executeUpdate();
   }
 
-  public List<Long> unreadMessageThreadIds(User user) {
+  public List<Long> unreadMessageThreadIds(User user, Long communityId) {
     return em().createQuery(
       "SELECT mt.id " +
-        "FROM MessageThread mt JOIN MessageThreadParty mtp ON mt.id = mtp.messageThreadId " +
-        "WHERE mtp.user = :user " +
-        "AND mt.id IN(SELECT threadId FROM Message WHERE threadId = mt.id) "+
-        "AND (mtp.visitedAt IS NULL OR mtp.visitedAt < (SELECT MAX(m.createdAt) FROM Message m WHERE m.threadId = mt.id)) " +
+        "FROM MessageThread mt JOIN mt.parties p " +
+        "WHERE mt.communityId = :communityId " +
+        "AND p.user = :user " +
+        "AND EXISTS (SELECT 1 FROM Message WHERE threadId = mt.id) "+
+        "AND (p.visitedAt IS NULL OR p.visitedAt < (SELECT MAX(createdAt) FROM Message WHERE threadId = mt.id)) " +
         "ORDER BY mt.id", Long.class)
-      .setParameter("user", user).getResultList();
+      .setParameter("communityId", communityId)
+      .setParameter("user", user)
+      .getResultList();
   }
 }

@@ -1,8 +1,6 @@
 package commonsos.repository;
 
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
-import static spark.utils.StringUtils.isBlank;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +9,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
+
+import org.apache.commons.lang3.StringUtils;
 
 import commonsos.exception.UserNotFoundException;
 import commonsos.repository.entity.PasswordResetRequest;
@@ -186,19 +186,21 @@ public class UserRepository extends Repository {
   }
 
   public ResultList<User> search(Long communityId, String q, PaginationCommand pagination) {
-    if (isBlank(q)) {
-      return new ResultList<User>().setList(emptyList());
+    StringBuilder sql = new StringBuilder();
+    sql.append("SELECT u FROM User u JOIN u.communityUserList cu ");
+    sql.append("WHERE cu.community.id = :communityId ");
+    sql.append("AND u.deleted = FALSE ");
+    if (StringUtils.isNotEmpty(q)) {
+      sql.append("AND LOWER(u.username) LIKE LOWER(:q) ");
     }
+    sql.append("ORDER BY u.id");
     
-    TypedQuery<User> query = em().createQuery(
-      "SELECT u FROM User u JOIN u.communityUserList cu " +
-      "WHERE cu.community.id = :communityId " +
-      "AND u.deleted = FALSE " +
-      "AND LOWER(u.username) LIKE LOWER(:q) " +
-      "ORDER BY u.id", User.class)
+    TypedQuery<User> query = em().createQuery(sql.toString(), User.class)
       .setLockMode(lockMode())
-      .setParameter("communityId", communityId)
-      .setParameter("q", "%"+q+"%");
+      .setParameter("communityId", communityId);
+    if (StringUtils.isNotEmpty(q)) {
+      query.setParameter("q", "%"+q+"%");
+    }
     
     ResultList<User> resultList = getResultList(query, pagination);
     

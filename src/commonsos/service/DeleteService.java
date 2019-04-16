@@ -41,8 +41,10 @@ public class DeleteService {
     myAds.forEach(ad -> deleteAd(user, ad));
     
     // delete user's message threads party
-    List<MessageThread> myThreads = messageThreadRepository.listByUser(user, null).getList();
-    myThreads.forEach(thread -> deleteMessageThreadParty(user, thread.getId()));
+    user.getCommunityUserList().forEach(cu -> {
+      List<MessageThread> myThreads = messageThreadRepository.listByUser(user, cu.getCommunity().getId() ,null, null, null).getList();
+      myThreads.forEach(thread -> deleteMessageThreadParty(user, thread.getId()));
+    });
     
     // delete user's photo
     deletePhoto(user.getAvatarUrl());

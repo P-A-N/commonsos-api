@@ -24,7 +24,8 @@ public class CommunityNotificationListController implements Route {
   @Inject CommunityService service;
   
   @Override
-  public CommunityNotificationListView handle(Request request, Response response) throws Exception {
+  public
+  CommunityNotificationListView handle(Request request, Response response) throws Exception {
     String communityId = request.params("id");
     if (StringUtils.isEmpty(communityId)) throw new BadRequestException("communityId is required");
     if (!NumberUtils.isParsable(communityId)) throw new BadRequestException("invalid communityId");

@@ -23,22 +23,29 @@ public class GetUserSearchTest extends IntegrationTest {
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    create(new User().setUsername("otherUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    create(new User().setUsername("otherUser1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new User().setUsername("otherUser2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
+    create(new User().setUsername("otherCommunityUser1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
 
-    sessionId = login("user", "pass");
+    sessionId = login("user1", "pass");
   }
   
   @Test
   public void userSearch() {
-    // call api
+    // call api (filter)
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}", community.getId(), "user")
+      .when().get("/users?communityId={communityId}&q={q}", community.getId(), "user1")
       .then().statusCode(200)
-      .body("userList.username", contains("otherUser", "otherUser2"));
+      .body("userList.username", contains("otherUser1"));
+
+    // call api (non filter)
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/users?communityId={communityId}", community.getId())
+      .then().statusCode(200)
+      .body("userList.username", contains("otherUser1", "otherUser2"));
   }
 
   @Test
@@ -48,7 +55,7 @@ public class GetUserSearchTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}", otherCommunity.getId(), "user")
       .then().statusCode(200)
-      .body("userList.username", contains("otherCommunityUser"));
+      .body("userList.username", contains("otherCommunityUser1"));
   }
 
   @Test
@@ -68,7 +75,7 @@ public class GetUserSearchTest extends IntegrationTest {
     create(new User().setUsername("page_user11").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
     create(new User().setUsername("page_user12").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
 
-    sessionId = login("user", "pass");
+    sessionId = login("user1", "pass");
     
     // page 0 size 10 asc
     given()

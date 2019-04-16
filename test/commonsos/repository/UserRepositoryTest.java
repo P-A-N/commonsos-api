@@ -607,13 +607,17 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     ResultList<User> result = repository.search(community1.getId(), null, null);
     
     // verify
-    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().get(1).getUsername()).isEqualTo("barUser");
     
     // execute
-    result = repository.search(id("community1"), "", null);
+    result = repository.search(community1.getId(), "", null);
 
     // verify
-    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getUsername()).isEqualTo("fooUser");
+    assertThat(result.getList().get(1).getUsername()).isEqualTo("barUser");
   }
 
   @Test

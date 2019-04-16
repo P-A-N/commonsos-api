@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -24,8 +25,9 @@ import commonsos.service.command.PaginationCommand;
 
 public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
-  UserRepository userRepository = new UserRepository(emService);
   MessageThreadRepository repository = new MessageThreadRepository(emService);
+  UserRepository userRepository = new UserRepository(emService);
+  CommunityRepository communityRepository = new CommunityRepository(emService);
   MessageRepository messageRepository = new MessageRepository(emService);
 
   @Test
@@ -76,71 +78,31 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void listByUser() {
-    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    User otherUser = inTransaction(() -> userRepository.create(new User().setUsername("otherUser")));
-
-    MessageThread thread1 = new MessageThread().setParties(asList(party(user), party(otherUser)));
-    MessageThread thread2 = new MessageThread().setParties(asList(party(otherUser)));
-    MessageThread thread3 = new MessageThread().setParties(asList(party(otherUser), party(user)));
-
-    Long id1 = inTransaction(() -> repository.create(thread1).getId());
-    Long id2 = inTransaction(() -> repository.create(thread2).getId());
-    Long id3 = inTransaction(() -> repository.create(thread3).getId());
-
-    ResultList<MessageThread> result = repository.listByUser(user, null);
-
-    assertThat(result.getList()).extracting("id").containsExactly(id1, id3);
-  }
-
-  @Test
-  public void listByUser_pagination() {
-    // prepare
-    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))));
-    inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))));
-    inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))));
-    inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))));
-    inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))));
-
-    //execute
-    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<MessageThread> result = repository.listByUser(user, pagination);
-
-    // verify
-    assertThat(result.getList().size()).isEqualTo(3);
-
-    // execute
-    pagination.setPage(1);
-    result = repository.listByUser(user, pagination);
-
-    // verify
-    assertThat(result.getList().size()).isEqualTo(2);
-  }
-
-  @Test
   public void listByUserAndMemberAndMessage() {
     // prepare
+    Long communityId1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")).getId());
+    Long communityId2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")).getId());
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));
     User otherUser2 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser2")));
 
-    MessageThread thread1 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser1), party(otherUser2)))));
-    MessageThread thread2 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser1)))));
-    MessageThread thread3 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user), party(otherUser2)))));
-    MessageThread thread4 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(otherUser1), party(otherUser2)))));
+    MessageThread thread1 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId1).setParties(asList(party(user), party(otherUser1), party(otherUser2)))));
+    MessageThread thread2 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId1).setParties(asList(party(user), party(otherUser1)))));
+    MessageThread thread3 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId1).setParties(asList(party(user), party(otherUser2)))));
+    MessageThread thread4 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId1).setParties(asList(party(otherUser1), party(otherUser2)))));
+    MessageThread thread5 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId2).setParties(asList(party(user), party(otherUser1), party(otherUser2)))));
 
     // [execute and verify] search by member
-    ResultList<MessageThread> result = repository.listByUserAndMemberAndMessage(user, "user1", null, null);
+    ResultList<MessageThread> result = repository.listByUser(user, communityId1, "user1", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId());
 
-    result = repository.listByUserAndMemberAndMessage(user, "user2", null, null);
+    result = repository.listByUser(user, communityId1, "user2", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread3.getId());
 
-    result = repository.listByUserAndMemberAndMessage(user, "her", null, null);
+    result = repository.listByUser(user, communityId1, "her", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
-    result = repository.listByUserAndMemberAndMessage(user, "not_exists", null, null);
+    result = repository.listByUser(user, communityId1, "not_exists", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
 
     // prepare
@@ -150,17 +112,17 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread4.getId()).setText("foobar")));
     
     // [execute and verify] search by message
-    result = repository.listByUserAndMemberAndMessage(user, null, "oob", null);
+    result = repository.listByUser(user, communityId1, null, "oob", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
     // prepare
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread1.getId()).setText("HOGE")));
 
     // [execute and verify] search by message
-    result = repository.listByUserAndMemberAndMessage(user, null, "OG", null);
+    result = repository.listByUser(user, communityId1, null, "OG", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
     
-    result = repository.listByUserAndMemberAndMessage(user, null, "og", null);
+    result = repository.listByUser(user, communityId1, null, "og", null);
     assertThat(result.getList()).extracting("id").containsExactly();
 
     // prepare multiple byte code
@@ -168,36 +130,39 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread2.getId()).setText("こんにちわ。昨日はいい天気でしたね。")));
     
     // [execute and verify] search by message
-    result = repository.listByUserAndMemberAndMessage(user, null, "今日", null);
+    result = repository.listByUser(user, communityId1, null, "今日", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
 
-    result = repository.listByUserAndMemberAndMessage(user, null, "こんにちわ", null);
+    result = repository.listByUser(user, communityId1, null, "こんにちわ", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId());
 
     // [execute and verify] search by member and message
-    result = repository.listByUserAndMemberAndMessage(user, "user2", "こんにちわ", null);
+    result = repository.listByUser(user, communityId1, "user2", "こんにちわ", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
 
     // [execute and verify] not specified member or message
-    result = repository.listByUserAndMemberAndMessage(user, "", "", null);
-    assertThat(result.getList()).extracting("id").containsExactly();
+    result = repository.listByUser(user, communityId1, "", "", null);
+    assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
+    result = repository.listByUser(user, communityId1, null, null, null);
+    assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
     // [execute and verify] sql injection
-    result = repository.listByUserAndMemberAndMessage(user, "' OR TRUE", null, null);
+    result = repository.listByUser(user, communityId1, "' OR TRUE", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
-    result = repository.listByUserAndMemberAndMessage(user, "; select * from message_threads", null, null);
+    result = repository.listByUser(user, communityId1, "; select * from message_threads", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
   }
 
   @Test
   public void listByUserAndMemberAndMessage_pagination() {
     // prepare
+    Long communityId = inTransaction(() -> communityRepository.create(new Community().setName("community")).getId());
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    Long id1 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
-    Long id2 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
-    Long id3 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
-    Long id4 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
-    Long id5 = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
+    Long id1 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId).setParties(asList(party(user)))).getId());
+    Long id2 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId).setParties(asList(party(user)))).getId());
+    Long id3 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId).setParties(asList(party(user)))).getId());
+    Long id4 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId).setParties(asList(party(user)))).getId());
+    Long id5 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId).setParties(asList(party(user)))).getId());
     inTransaction(() -> messageRepository.create(new Message().setThreadId(id1).setText("message")));
     inTransaction(() -> messageRepository.create(new Message().setThreadId(id2).setText("message")));
     inTransaction(() -> messageRepository.create(new Message().setThreadId(id3).setText("message")));
@@ -206,14 +171,14 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<MessageThread> result = repository.listByUserAndMemberAndMessage(user, "user", "message", pagination);
+    ResultList<MessageThread> result = repository.listByUser(user, communityId, "user", "message", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listByUserAndMemberAndMessage(user, "user", "message", pagination);
+    result = repository.listByUser(user, communityId, "user", "message", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -411,42 +376,42 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   
   @Test
   public void unreadMessageThreadCount() {
+    Long communityId1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")).getId());
+    Long communityId2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")).getId());
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
-    Long threadId1 = threadWithMessages(user, user2, null).getId();
-    Long threadId2 = threadWithMessages(user, user2, now().minus(10, SECONDS)).getId();
-    threadWithMessages(user, user2, now().plus(10, SECONDS));
+    Long threadId1 = threadWithMessages(user, user2, communityId1, null).getId();
+    Long threadId2 = threadWithMessages(user, user2, communityId1, now().minus(10, SECONDS)).getId();
+    threadWithMessages(user, user2, communityId1, now().plus(10, SECONDS));
+    threadWithoutMessages(user, user2, communityId1, null).getId();
+    threadWithMessages(user, user2, communityId2, null).getId();
+    threadWithMessages(user, user2, communityId2, now().minus(10, SECONDS)).getId();
+    threadWithMessages(user, user2, communityId2, now().plus(10, SECONDS));
 
-    List<Long> result = repository.unreadMessageThreadIds(user);
+    List<Long> result = repository.unreadMessageThreadIds(user, communityId1);
 
     assertThat(result).containsExactly(threadId1, threadId2);
   }
 
-  @Test
-  public void unreadMessageThreadCount_excludesThreadsWithoutMessages() {
-    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
-
-    MessageThreadParty myParty = new MessageThreadParty().setUser(user);
-    MessageThreadParty counterParty = new MessageThreadParty().setUser(user2);
-    MessageThread thread = new MessageThread().setParties(asList(myParty, counterParty));
-    inTransaction(() -> repository.create(thread));
-
-    List<Long> result = repository.unreadMessageThreadIds(user);
-
-    assertThat(result).isEmpty();
-  }
-
-  private MessageThread threadWithMessages(User myUser, User otherUser, Instant visitedAt) {
+  private MessageThread threadWithMessages(User myUser, User otherUser, Long communityId, Instant visitedAt) {
     MessageThreadParty myParty = new MessageThreadParty().setUser(myUser).setVisitedAt(visitedAt);
     MessageThreadParty counterParty = new MessageThreadParty().setUser(otherUser);
-    MessageThread thread = new MessageThread().setParties(asList(myParty, counterParty));
+    MessageThread thread = new MessageThread().setCommunityId(communityId).setParties(asList(myParty, counterParty));
     inTransaction(() -> {
       repository.create(thread);
       messageRepository.create(new Message().setThreadId(thread.getId()).setCreatedAt(now())).setCreatedBy(otherUser.getId());
       messageRepository.create(new Message().setThreadId(thread.getId()).setCreatedAt(now())).setCreatedBy(myUser.getId());
     });
+
+    return thread;
+  }
+
+  private MessageThread threadWithoutMessages(User myUser, User otherUser, Long communityId, Instant visitedAt) {
+    MessageThreadParty myParty = new MessageThreadParty().setUser(myUser).setVisitedAt(visitedAt);
+    MessageThreadParty counterParty = new MessageThreadParty().setUser(otherUser);
+    MessageThread thread = new MessageThread().setCommunityId(communityId).setParties(asList(myParty, counterParty));
+    inTransaction(() -> repository.create(thread));
 
     return thread;
   }

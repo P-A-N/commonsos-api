@@ -42,6 +42,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     ad = create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
 
     adThread = create(new MessageThread()
+        .setCommunityId(community.getId())
         .setTitle("adThread")
         .setAdId(ad.getId())
         .setGroup(false)
@@ -53,6 +54,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     create(new Message().setCreatedBy(user1.getId()).setThreadId(adThread.getId()).setText("adMessage").setCreatedAt(Instant.now().plusSeconds(60)));
 
     groupThread = create(new MessageThread()
+        .setCommunityId(community.getId())
         .setTitle("groupThread")
         .setAdId(null)
         .setGroup(true)
@@ -65,6 +67,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     groupMessage = create(new Message().setCreatedBy(user1.getId()).setThreadId(groupThread.getId()).setText("groupMessage").setCreatedAt(Instant.now().plusSeconds(30)));
 
     directThread = create(new MessageThread()
+        .setCommunityId(community.getId())
         .setTitle("directThread")
         .setAdId(null)
         .setGroup(false)
@@ -74,6 +77,20 @@ public class GetMessageThreadsTest extends IntegrationTest {
             new MessageThreadParty().setUser(user3)
             )));
     create(new Message().setCreatedBy(user1.getId()).setThreadId(directThread.getId()).setText("directMessage").setCreatedAt(Instant.now().plusSeconds(0)));
+
+    Community otherCommunity =  create(new Community().setName("otherCommunity"));
+    MessageThread otherCommunityGroupThread = create(new MessageThread()
+        .setCommunityId(otherCommunity.getId())
+        .setTitle("groupThread")
+        .setAdId(null)
+        .setGroup(true)
+        .setCreatedBy(user1.getId())
+        .setParties(asList(
+            new MessageThreadParty().setUser(user1),
+            new MessageThreadParty().setUser(user2),
+            new MessageThreadParty().setUser(user3)
+            )));
+    Message otherCommunityGroupMessage = create(new Message().setCreatedBy(user1.getId()).setThreadId(otherCommunityGroupThread.getId()).setText("otherCommunityGroupMessage").setCreatedAt(Instant.now().plusSeconds(30)));
   }
   
   @Test
@@ -83,7 +100,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads")
+      .when().get("/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue(), directThread.getId().intValue()))
       .body("messageThreadList.title", contains("adThread", "groupThread", "directThread"))
@@ -110,7 +127,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads")
+      .when().get("/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("adThread", "groupThread"))
@@ -134,7 +151,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads")
+      .when().get("/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue(), directThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread", "directThread"))
@@ -161,7 +178,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?memberFilter={memberFilter}", user2.getUsername())
+      .when().get("/message-threads?communityId={communityId}&memberFilter={memberFilter}", community.getId(), user2.getUsername())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(adThread.getId().intValue(), groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("adThread", "groupThread"))
@@ -188,7 +205,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?messageFilter={messageFilter}", groupMessage.getText())
+      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}", community.getId(), groupMessage.getText())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread"))

@@ -15,8 +15,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.collect.ImmutableMap;
 
 import commonsos.exception.BadRequestException;
@@ -204,14 +202,11 @@ public class MessageService {
   }
 
   public MessageThreadListView searchThreads(User user, MessageThreadListCommand command, PaginationCommand pagination) {
-    List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user);
+    communityRepository.findStrictById(command.getCommunityId());
     
-    ResultList<MessageThread> result = null;
-    if (StringUtils.isBlank(command.getMemberFilter()) && StringUtils.isBlank(command.getMessageFilter())) {
-      result = messageThreadRepository.listByUser(user, pagination);
-    } else {
-      result = messageThreadRepository.listByUserAndMemberAndMessage(user, command.getMemberFilter(), command.getMessageFilter(), pagination);
-    }
+    List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user, command.getCommunityId());
+    
+    ResultList<MessageThread> result = messageThreadRepository.listByUser(user, command.getCommunityId(), command.getMemberFilter(), command.getMessageFilter(), pagination);
     
     List<MessageThreadView> threadViews = result.getList().stream()
       .map(thread -> view(user, thread))
@@ -324,7 +319,7 @@ public class MessageService {
     return thread.getParties().stream().anyMatch(p -> p.getUser().equals(user));
   }
 
-  public int unreadMessageThreadCount(User user) {
-    return messageThreadRepository.unreadMessageThreadIds(user).size();
+  public int unreadMessageThreadCount(User user, Long communityId) {
+    return messageThreadRepository.unreadMessageThreadIds(user, communityId).size();
   }
 }
