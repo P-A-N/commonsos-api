@@ -73,6 +73,7 @@ import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
+import commonsos.filter.AddHeaderFilter;
 import commonsos.filter.LogFilter;
 import commonsos.interceptor.TransactionInterceptor;
 import commonsos.repository.DatabaseMigrator;
@@ -117,7 +118,7 @@ public class Server {
 
   private void initRoutes() {
 
-    before((request, response) -> response.type("application/json"));
+    before(new AddHeaderFilter());
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
 
