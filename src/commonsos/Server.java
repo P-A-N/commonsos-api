@@ -3,6 +3,7 @@ package commonsos;
 import static spark.Spark.before;
 import static spark.Spark.exception;
 import static spark.Spark.get;
+import static spark.Spark.options;
 import static spark.Spark.post;
 
 import org.web3j.protocol.Web3j;
@@ -17,6 +18,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import commonsos.controller.JsonTransformer;
+import commonsos.controller.PreflightController;
 import commonsos.controller.ad.AdController;
 import commonsos.controller.ad.AdCreateController;
 import commonsos.controller.ad.AdDeleteController;
@@ -121,6 +123,8 @@ public class Server {
     before(new AddHeaderFilter());
     before(new LogFilter());
     before((request, response) -> log.info(requestInfo(request)));
+
+    options("/*", injector.getInstance(PreflightController.class));
 
     post("/login", injector.getInstance(LoginController.class), toJson);
     post("/logout", injector.getInstance(LogoutController.class), toJson);
