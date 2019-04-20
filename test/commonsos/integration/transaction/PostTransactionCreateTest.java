@@ -3,6 +3,7 @@ package commonsos.integration.transaction;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -74,7 +75,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     sessionId = login("otherCommunityUser", "pass");
     
     Map<String, Object> requestParam = new HashMap<>();
-    requestParam.put("communityId", otherCommunity.getId());
+    requestParam.put("communityId", otherCommunity.getId()); // with other community id
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
@@ -85,7 +86,18 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(400);
+      .then().statusCode(468)
+      .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
+
+    // call api
+    requestParam.put("communityId", community.getId()); // with right community id
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(468)
+      .body("key", equalTo("error.userIsNotCommunityMember"));
+
   }
 
   @Test
@@ -117,6 +129,35 @@ public class PostTransactionCreateTest extends IntegrationTest {
   }
 
   @Test
+  public void transactionForAd_want_wrongCommunityId() {
+    // user belong to same community
+    update(user.setCommunityUserList(asList(new CommunityUser().setCommunity(community), new CommunityUser().setCommunity(otherCommunity))));
+    update(adCreator.setCommunityUserList(asList(new CommunityUser().setCommunity(community), new CommunityUser().setCommunity(otherCommunity))));
+    
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", otherCommunity.getId()); // with wrong community id
+    requestParam.put("beneficiaryId", adCreator.getId());
+    requestParam.put("description", "description");
+    requestParam.put("amount", "10");
+    requestParam.put("adId", giveAd.getId());
+    
+    // call api
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(400);
+
+    // call api
+    requestParam.put("communityId", community.getId()); // with right community id
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(200);
+  }
+
+  @Test
   public void transactionForAd_want_otherCommunityUser() {
     sessionId = login("adCreator", "pass");
     
@@ -132,7 +173,8 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(400);
+      .then().statusCode(468)
+      .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
   }
 
   @Test
@@ -176,16 +218,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
-    
-    // verify db
-    Transaction transaction = emService.get().createQuery("FROM Transaction WHERE beneficiaryId = :userId", Transaction.class)
-        .setParameter("userId", otherCommunityUser.getId())
-        .getSingleResult();
-    assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
-    assertThat(transaction.getBeneficiaryId()).isEqualTo(otherCommunityUser.getId());
-    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
-    assertThat(transaction.getDescription()).isEqualTo("description");
-    assertThat(transaction.getAdId()).isNull();
+      .then().statusCode(468)
+      .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
   }
 }

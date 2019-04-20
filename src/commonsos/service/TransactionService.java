@@ -16,10 +16,11 @@ import javax.inject.Singleton;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
+import commonsos.repository.CommunityRepository;
 import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
-import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
@@ -39,9 +40,11 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class TransactionService {
+  
   @Inject TransactionRepository repository;
   @Inject UserRepository userRepository;
   @Inject AdRepository adRepository;
+  @Inject CommunityRepository communityRepository;
   @Inject BlockchainService blockchainService;
   @Inject BlockchainEventService blockchainEventService;
   @Inject PushNotificationService pushNotificationService;
@@ -91,22 +94,19 @@ public class TransactionService {
 
   public Transaction create(User user, TransactionCreateCommand command) {
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
-    if (isBlank(command.getDescription()))  throw new BadRequestException();
-    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException();
-    if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException();
+    if (isBlank(command.getDescription()))  throw new BadRequestException("description is blank");
+    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
+    if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException("user is beneficiary");
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryId());
+    
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!UserUtil.isMember(user, community)) throw new DisplayableException("error.userIsNotCommunityMember");
+    if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 
     if (command.getAdId() != null) {
       Ad ad = adRepository.findStrict(command.getAdId());
-      
-      // TODO this is temporary solution.
-//      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException();
-//      if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
-      if (AdUtil.isPayableByUser(user, ad)) {
-        if (!beneficiary.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
-      } else {
-        command.setAdId(null);
-      }
+      if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
+      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException("ad is not payable");
     }
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
