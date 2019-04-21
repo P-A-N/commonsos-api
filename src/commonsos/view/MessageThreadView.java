@@ -16,9 +16,9 @@ public class MessageThreadView {
   private Long communityId;
   private String title;
   private String personalTitle;
-  private List<UserView> parties;
-  private UserView creator;
-  private UserView counterParty;
+  private List<PublicUserView> parties;
+  private PublicUserView creator;
+  private PublicUserView counterParty;
   private MessageView lastMessage;
   private boolean unread;
   private boolean group;

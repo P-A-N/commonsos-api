@@ -1,7 +1,6 @@
 package commonsos.service;
 
 import static commonsos.TestId.id;
-import static commonsos.repository.entity.AdType.GIVE;
 import static commonsos.repository.entity.AdType.WANT;
 import static java.math.BigDecimal.TEN;
 import static java.time.Instant.now;
@@ -105,11 +104,6 @@ public class TransactionServiceTest {
     beneficiary.setCommunityUserList(asList());
     assertThrows(DisplayableException.class, () -> service.create(user, command));
     beneficiary.setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
-    
-    // ad is not payable by user
-    ad.setType(GIVE);
-    assertThrows(BadRequestException.class, () -> service.create(user, command));
-    ad.setType(WANT);
     
     // not enough funds
     balance.setBalance(new BigDecimal("9"));

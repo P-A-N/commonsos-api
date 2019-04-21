@@ -48,7 +48,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
   public void transactionForAd_give() {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
-    requestParam.put("beneficiaryId", adCreator.getId());
+    requestParam.put("beneficiaryId", adCreator.getId()); // from user to adCreator
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
     requestParam.put("adId", giveAd.getId());
@@ -68,6 +68,15 @@ public class PostTransactionCreateTest extends IntegrationTest {
     assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
+    
+    // call api
+    sessionId = login("adCreator", "pass");
+    requestParam.put("beneficiaryId", user.getId()); // from adCreator to user
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(200);
   }
 
   @Test
@@ -106,7 +115,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
-    requestParam.put("beneficiaryId", user.getId());
+    requestParam.put("beneficiaryId", user.getId()); // from adCreator to user
     requestParam.put("description", "description");
     requestParam.put("amount", "10");
     requestParam.put("adId", wantAd.getId());
@@ -126,6 +135,15 @@ public class PostTransactionCreateTest extends IntegrationTest {
     assertThat(transaction.getBeneficiaryId()).isEqualTo(user.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
+    
+    // call api
+    sessionId = login("user", "pass");
+    requestParam.put("beneficiaryId", adCreator.getId()); // from user to adCreator
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(200);
   }
 
   @Test

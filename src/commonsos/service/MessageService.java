@@ -46,7 +46,7 @@ import commonsos.view.MessageListView;
 import commonsos.view.MessageThreadListView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
-import commonsos.view.UserView;
+import commonsos.view.PublicUserView;
 
 @Singleton
 public class MessageService {
@@ -162,19 +162,19 @@ public class MessageService {
   public MessageThreadView view(User user, MessageThread thread) {
     MessageThreadParty userMtp = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst().get();
     
-    List<UserView> parties = thread.getParties().stream()
+    List<PublicUserView> parties = thread.getParties().stream()
       .filter(p -> !p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(UserUtil::view)
+      .map(UserUtil::publicView)
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .collect(toList());
 
-    UserView creator = thread.getParties().stream()
+    PublicUserView creator = thread.getParties().stream()
       .filter(p -> p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(UserUtil::view).findFirst().orElse(null);
+      .map(UserUtil::publicView).findFirst().orElse(null);
 
-    UserView counterParty = concat(parties.stream(), of(creator))
+    PublicUserView counterParty = concat(parties.stream(), of(creator))
       .filter(uv -> uv != null && uv.getId() != user.getId())
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .findFirst().orElse(null);

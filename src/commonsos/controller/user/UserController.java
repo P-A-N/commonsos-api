@@ -30,6 +30,6 @@ public class UserController extends AfterLoginController {
     User requestedUser = userService.user(id);
     
     if (UserUtil.isAdminOfUser(user, requestedUser)) return userService.privateView(user, id);
-    else return userService.view(id);
+    else return userService.publicUserAndCommunityView(id);
   }
 }

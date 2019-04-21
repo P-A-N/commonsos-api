@@ -56,7 +56,6 @@ public class PostAdUpdateTest extends IntegrationTest {
       .body("points", equalTo(10))
       .body("location", equalTo("location"))
       .body("own", equalTo(true))
-      .body("payable", equalTo(false))
       .body("type", equalTo("GIVE"))
       .body("createdBy.id", equalTo(user.getId().intValue()))
       .body("createdBy.username", equalTo("user"));

@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,8 @@ public class GetUserTest extends IntegrationTest {
       .when().get("/user")
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
-      .body("communityList.name", contains("community1"));
+      .body("communityList.name", contains("community1"))
+      .body("communityList.walletLastViewTime", contains(notNullValue()));
   }
   
   @Test
@@ -60,7 +62,8 @@ public class GetUserTest extends IntegrationTest {
       .when().get("/users/{id}", user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
-      .body("communityList.name", contains("community1"));
+      .body("communityList.name", contains("community1"))
+      .body("communityList.walletLastViewTime", contains(notNullValue()));
   }
   
   @Test
@@ -73,6 +76,7 @@ public class GetUserTest extends IntegrationTest {
       .when().get("/users/{id}", user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
-      .body("communityList", nullValue());
+      .body("communityList.name", contains("community1"))
+      .body("communityList.walletLastViewTime", contains(nullValue()));
   }
 }

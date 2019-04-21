@@ -7,16 +7,17 @@ import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.view.BalanceView;
 import commonsos.view.CommunityUserView;
-import commonsos.view.UserPrivateView;
-import commonsos.view.UserView;
+import commonsos.view.CommunityView;
+import commonsos.view.PrivateUserView;
+import commonsos.view.PublicUserView;
 import spark.utils.CollectionUtils;
 
 public class UserUtil {
   
   private UserUtil() {}
 
-  public static UserView view(User user) {
-    return new UserView()
+  public static PublicUserView publicView(User user) {
+    return new PublicUserView()
         .setId(user.getId())
         .setFullName(fullName(user))
         .setUsername(user.getUsername())
@@ -25,9 +26,14 @@ public class UserUtil {
         .setDescription(user.getDescription())
         .setAvatarUrl(user.getAvatarUrl());
   }
+  
+  public static PublicUserView publicView(User user, List<CommunityView> communityList) {
+    return publicView(user)
+        .setCommunityList(communityList);
+  }
 
-  public static UserPrivateView privateView(User user, List<BalanceView> balanceList, List<CommunityUserView> communityUserList) {
-    return new UserPrivateView()
+  public static PrivateUserView privateView(User user, List<BalanceView> balanceList, List<CommunityUserView> communityUserList) {
+    return new PrivateUserView()
       .setId(user.getId())
       .setBalanceList(balanceList)
       .setFullName(fullName(user))

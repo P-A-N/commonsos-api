@@ -29,7 +29,6 @@ import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
-import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.BalanceView;
@@ -86,8 +85,8 @@ public class TransactionService {
     Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
     Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
     
-    if (remitter.isPresent()) view.setRemitter(UserUtil.view(remitter.get()));
-    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.view(beneficiary.get()));
+    if (remitter.isPresent()) view.setRemitter(UserUtil.publicView(remitter.get()));
+    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicView(beneficiary.get()));
     
     return view;
   }
@@ -106,7 +105,6 @@ public class TransactionService {
     if (command.getAdId() != null) {
       Ad ad = adRepository.findStrict(command.getAdId());
       if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
-      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException("ad is not payable");
     }
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");

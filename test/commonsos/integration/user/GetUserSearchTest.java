@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,9 @@ public class GetUserSearchTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}", community.getId(), "user1")
       .then().statusCode(200)
-      .body("userList.username", contains("otherUser1"));
+      .body("userList.username", contains("otherUser1"))
+      .body("userList.communityList.name", contains(contains("community")))
+      .body("userList.communityList.walletLastViewTime", contains(contains(nullValue())));
 
     // call api (non filter)
     given()

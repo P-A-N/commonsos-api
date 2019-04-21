@@ -21,7 +21,7 @@ import commonsos.filter.CSRF;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.session.UserSession;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -50,11 +50,11 @@ public class LoginControllerTest {
     when(request.body()).thenReturn("{\"username\": \"john\", \"password\": \"pwd\"}");
     UserSession userSession = new UserSession();
     when(userService.session(user)).thenReturn(userSession);
-    UserPrivateView userView = new UserPrivateView();
+    PrivateUserView userView = new PrivateUserView();
     when(userService.privateView(user)).thenReturn(userView);
 
     // execute
-    UserPrivateView result = controller.handle(request, response);
+    PrivateUserView result = controller.handle(request, response);
 
     // verify
     verify(userService, times(1)).checkPassword("john", "pwd");

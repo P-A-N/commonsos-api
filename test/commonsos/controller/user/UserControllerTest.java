@@ -48,7 +48,7 @@ public class UserControllerTest {
 
     // verify
     verify(userService, times(1)).privateView(any(User.class), any(Long.class));
-    verify(userService, never()).view(any(Long.class));
+    verify(userService, never()).publicUserAndCommunityView(any(Long.class));
   }
 
   @Test
@@ -64,6 +64,6 @@ public class UserControllerTest {
 
     // verify
     verify(userService, never()).privateView(any(User.class), any(Long.class));
-    verify(userService, times(1)).view(any(Long.class));
+    verify(userService, times(1)).publicUserAndCommunityView(any(Long.class));
   }
 }

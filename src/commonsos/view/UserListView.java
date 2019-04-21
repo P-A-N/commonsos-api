@@ -8,6 +8,6 @@ import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
 public class UserListView {
-  private List<UserView> userList;
+  private List<PublicUserView> userList;
   private PaginationView pagination;
 }

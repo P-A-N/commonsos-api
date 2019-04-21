@@ -9,8 +9,8 @@ import java.time.Instant;
 
 @Getter @Setter @Accessors(chain=true)
 public class TransactionView {
-  private UserView remitter;
-  private UserView beneficiary;
+  private PublicUserView remitter;
+  private PublicUserView beneficiary;
   private BigDecimal amount;
   private String description;
   private Instant createdAt;

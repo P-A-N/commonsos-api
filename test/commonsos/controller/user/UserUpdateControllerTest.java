@@ -19,7 +19,7 @@ import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserUpdateCommand;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 
@@ -49,12 +49,12 @@ public class UserUpdateControllerTest {
     when(request.body()).thenReturn(json);
     User updatedUser = new User();
     when(userService.updateUser(any(), any())).thenReturn(updatedUser);
-    UserPrivateView privateView = new UserPrivateView();
+    PrivateUserView privateView = new PrivateUserView();
     when(userService.privateView(updatedUser)).thenReturn(privateView);
 
     // execute
     User user = new User();
-    UserPrivateView result = controller.handleAfterLogin(user, request, response);
+    PrivateUserView result = controller.handleAfterLogin(user, request, response);
 
     // verify
     ArgumentCaptor<UserUpdateCommand> commandCaptor = ArgumentCaptor.forClass(UserUpdateCommand.class);

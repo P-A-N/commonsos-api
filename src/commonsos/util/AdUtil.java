@@ -16,6 +16,7 @@ public class AdUtil {
     return ad.getCreatedBy().equals(user.getId());
   }
 
+  @Deprecated
   public static boolean isPayableByUser(User user, Ad ad) {
     if (ZERO.compareTo(ad.getPoints()) >= 0) return false;
     if (isOwnAd(user, ad) && WANT == ad.getType()) return true;
@@ -27,14 +28,13 @@ public class AdUtil {
     return new AdView()
       .setId(ad.getId())
       .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(UserUtil.view(createdBy))
+      .setCreatedBy(UserUtil.publicView(createdBy))
       .setType(ad.getType())
       .setTitle(ad.getTitle())
       .setDescription(ad.getDescription())
       .setPoints(ad.getPoints())
       .setLocation(ad.getLocation())
       .setOwn(AdUtil.isOwnAd(user, ad))
-      .setPayable(AdUtil.isPayableByUser(user, ad))
       .setCreatedAt(ad.getCreatedAt())
       .setPhotoUrl(ad.getPhotoUrl());
   }

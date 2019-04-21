@@ -48,15 +48,17 @@ import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.session.UserSession;
+import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
 import commonsos.view.BalanceView;
 import commonsos.view.CommunityUserListView;
 import commonsos.view.CommunityUserView;
+import commonsos.view.CommunityView;
+import commonsos.view.PrivateUserView;
+import commonsos.view.PublicUserView;
 import commonsos.view.UserListView;
-import commonsos.view.UserPrivateView;
-import commonsos.view.UserView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -80,7 +82,7 @@ public class UserService {
     return user;
   }
 
-  public UserPrivateView privateView(User user) {
+  public PrivateUserView privateView(User user) {
     List<BalanceView> balanceList = new ArrayList<>();
     List<CommunityUserView> communityUserList = new ArrayList<>();
     user.getCommunityUserList().forEach(cu -> {
@@ -91,7 +93,7 @@ public class UserService {
     return UserUtil.privateView(user, balanceList, communityUserList);
   }
 
-  public UserPrivateView privateView(User currentUser, Long userId) {
+  public PrivateUserView privateView(User currentUser, Long userId) {
     User user = userRepository.findStrictById(userId);
     boolean isAdmin = user.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> {
       return c.getAdminUser() != null && c.getAdminUser().getId().equals(currentUser.getId());
@@ -99,6 +101,20 @@ public class UserService {
     if (!currentUser.getId().equals(user.getId()) && !isAdmin) throw new ForbiddenException();
 
     return privateView(user);
+  }
+  
+  public PublicUserView publicUserAndCommunityView(Long id) {
+    User user = userRepository.findStrictById(id);
+    return publicUserAndCommunityView(user);
+  }
+  
+  public PublicUserView publicUserAndCommunityView(User user) {
+    List<CommunityView> communityList = new ArrayList<>();
+    user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
+      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
+    });
+    
+    return UserUtil.publicView(user, communityList);
   }
 
   public CommunityUserListView searchUsersCommunity(User user, String filter, PaginationCommand pagination) {
@@ -275,10 +291,6 @@ public class UserService {
 //    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
     ValidateUtil.validateEmailAddress(command.getEmailAddress());
   }
-  
-  public UserView view(Long id) {
-    return UserUtil.view(userRepository.findStrictById(id));
-  }
 
   public User user(Long id) {
     return userRepository.findStrictById(id);
@@ -288,7 +300,7 @@ public class UserService {
     ResultList<User> result = userRepository.search(communityId, query, pagination);
     
     UserListView listView = new UserListView();
-    listView.setUserList(result.getList().stream().filter(u -> !u.getId().equals(user.getId())).map(UserUtil::view).collect(toList()));
+    listView.setUserList(result.getList().stream().filter(u -> !u.getId().equals(user.getId())).map(this::publicUserAndCommunityView).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;

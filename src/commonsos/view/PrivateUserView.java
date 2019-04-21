@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class UserPrivateView {
+public class PrivateUserView {
   private Long id;
   private String fullName;
   private String firstName;

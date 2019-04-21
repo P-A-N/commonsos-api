@@ -14,7 +14,7 @@ import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.LoginCommand;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -28,7 +28,7 @@ public class LoginController implements Route {
   @Inject UserService userService;
   @Inject CSRF csrf;
 
-  @Override public UserPrivateView handle(Request request, Response response) {
+  @Override public PrivateUserView handle(Request request, Response response) {
     LoginCommand command = gson.fromJson(request.body(), LoginCommand.class);
     User user = userService.checkPassword(command.getUsername(), command.getPassword());
     

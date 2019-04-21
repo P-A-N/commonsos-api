@@ -11,7 +11,7 @@ import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserNameUpdateCommand;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 
@@ -21,7 +21,7 @@ public class UserNameUpdateController extends AfterLoginController {
   @Inject UserService userService;
   @Inject Gson gson;
 
-  @Override public UserPrivateView handleAfterLogin(User user, Request request, Response response) {
+  @Override public PrivateUserView handleAfterLogin(User user, Request request, Response response) {
     UserNameUpdateCommand command = gson.fromJson(request.body(), UserNameUpdateCommand.class);
     User updatedUser = userService.updateUserName(user, command);
     return userService.privateView(updatedUser);
