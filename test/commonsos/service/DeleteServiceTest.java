@@ -20,6 +20,8 @@ import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
@@ -36,23 +38,29 @@ public class DeleteServiceTest {
   @InjectMocks @Spy DeleteService service;
 
   @Test
-  public void deleteAd_allow() {
+  public void deleteAdByUser() {
     // prepare
     User user = new User().setId(id("user"));
-    Ad ad = new Ad().setCreatedBy(id("user"));
+    Ad ad1 = new Ad().setCreatedBy(id("user"));
+    Ad ad2 = new Ad().setCreatedBy(id("othreUser"));
     
-    // execute
-    service.deleteAd(user, ad);
+    // execute (checking error)
+    service.deleteAdByUser(user, ad1);
+    assertThrows(ForbiddenException.class, () -> service.deleteAdByUser(user, ad2));
   }
-
+  
   @Test
-  public void deleteAd_forbidden() {
+  public void deleteAdByAdmin() {
     // prepare
-    User user = new User().setId(id("user"));
-    Ad ad = new Ad().setCreatedBy(id("othreUser"));
-
-    // execute
-    assertThrows(ForbiddenException.class, () -> service.deleteAd(user, ad));
+    Community community = new Community().setId(id("community"));
+    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
+    User admin = new User().setId(id("admin")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
+    community.setAdminUser(admin);
+    Ad ad = new Ad().setCreatedBy(id("othreUser")).setCommunityId(id("community"));
+    
+    // execute (checking error)
+    service.deleteAdByAdmin(admin, ad);
+    assertThrows(ForbiddenException.class, () -> service.deleteAdByAdmin(user, ad));
   }
 
   @Test

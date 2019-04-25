@@ -110,7 +110,11 @@ public class AdService {
     return url;
   }
 
-  public void deleteAdLogically(User user, Long adId) {
-    deleteService.deleteAd(user, ad(adId));
+  public void deleteAdLogicallyByUser(User user, Long adId) {
+    deleteService.deleteAdByUser(user, ad(adId));
+  }
+
+  public void deleteAdLogicallyByAdmin(User user, Long adId) {
+    deleteService.deleteAdByAdmin(user, ad(adId));
   }
 }

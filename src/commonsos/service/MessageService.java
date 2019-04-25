@@ -210,7 +210,7 @@ public class MessageService {
     
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user, command.getCommunityId());
     
-    ResultList<MessageThread> result = messageThreadRepository.listByUser(user, command.getCommunityId(), command.getMemberFilter(), command.getMessageFilter(), pagination);
+    ResultList<MessageThread> result = messageThreadRepository.listByUser(user, command.getCommunityId(), command.getMemberFilter(), command.getMessageFilter(), null);
     
     List<MessageThreadView> threadViews = result.getList().stream()
       .map(thread -> view(user, thread))
@@ -220,8 +220,9 @@ public class MessageService {
     threadViews = sortAsNewestFirst(threadViews);
 
     MessageThreadListView listView = new MessageThreadListView();
-    listView.setMessageThreadList(threadViews);
-    listView.setPagination(PaginationUtil.toView(result));
+    listView.setPagination(PaginationUtil.toView(threadViews, pagination));
+    List<MessageThreadView> paginationedViews = PaginationUtil.pagination(threadViews, pagination);
+    listView.setMessageThreadList(paginationedViews);
     
     return listView;
   }
@@ -231,6 +232,7 @@ public class MessageService {
       if (t.getLastMessage() == null) return t.getCreatedAt();
       return t.getLastMessage().getCreatedAt();
     }).reversed());
+    
     return threadViews;
   }
 

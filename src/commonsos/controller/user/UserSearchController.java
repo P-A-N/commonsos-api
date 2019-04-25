@@ -1,4 +1,4 @@
-package commonsos.controller.admin;
+package commonsos.controller.user;
 
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;

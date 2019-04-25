@@ -2,6 +2,7 @@ package commonsos.integration.community;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.time.Instant;
 
@@ -43,5 +44,69 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains("notification2_1", "notification2_2"))
       .body("notificationList.updatedAt", contains("2019-02-01T12:10:10Z", "2019-02-02T12:10:10Z"));
+  }
+  
+  @Test
+  public void communityNotificationList_pagenation() {
+    // prepare
+    Community community =  create(new Community().setName("page_community"));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification1").setUpdatedAt(Instant.parse("2019-01-15T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification2").setUpdatedAt(Instant.parse("2019-01-14T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification3").setUpdatedAt(Instant.parse("2019-01-13T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification4").setUpdatedAt(Instant.parse("2019-01-12T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification5").setUpdatedAt(Instant.parse("2019-01-11T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification6").setUpdatedAt(Instant.parse("2019-01-10T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification7").setUpdatedAt(Instant.parse("2019-01-16T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification8").setUpdatedAt(Instant.parse("2019-01-17T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification9").setUpdatedAt(Instant.parse("2019-01-18T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification10").setUpdatedAt(Instant.parse("2019-01-19T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification11").setUpdatedAt(Instant.parse("2019-01-20T12:10:10Z")));
+    create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification12").setUpdatedAt(Instant.parse("2019-01-21T12:10:10Z")));
+
+    // page 0 size 10 asc
+    given()
+      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "ASC")
+      .then().statusCode(200)
+      .body("notificationList.wordpressId", contains(
+          "page_notification1", "page_notification2", "page_notification3", "page_notification4", "page_notification5",
+          "page_notification6", "page_notification7", "page_notification8", "page_notification9", "page_notification10"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 asc
+    given()
+      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "ASC")
+      .then().statusCode(200)
+      .body("notificationList.wordpressId", contains(
+          "page_notification11", "page_notification12"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 0 size 10 desc
+    given()
+      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "DESC")
+      .then().statusCode(200)
+      .body("notificationList.wordpressId", contains(
+          "page_notification12", "page_notification11", "page_notification10", "page_notification9", "page_notification8",
+          "page_notification7", "page_notification6", "page_notification5", "page_notification4", "page_notification3"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 desc
+    given()
+      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "DESC")
+      .then().statusCode(200)
+      .body("notificationList.wordpressId", contains(
+          "page_notification2", "page_notification1"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
   }
 }

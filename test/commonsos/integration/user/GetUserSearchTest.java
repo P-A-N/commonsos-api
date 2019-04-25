@@ -93,7 +93,7 @@ public class GetUserSearchTest extends IntegrationTest {
       .body("pagination.sort", equalTo("ASC"))
       .body("pagination.lastPage", equalTo(1));
 
-    // page 0 size 10 asc
+    // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
@@ -118,7 +118,7 @@ public class GetUserSearchTest extends IntegrationTest {
       .body("pagination.sort", equalTo("DESC"))
       .body("pagination.lastPage", equalTo(1));
 
-    // page 0 size 10 desc
+    // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")

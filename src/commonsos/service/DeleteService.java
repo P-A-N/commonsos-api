@@ -21,14 +21,15 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.MessageUtil;
+import commonsos.util.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
 public class DeleteService {
 
-  @Inject private UserRepository userRepository;
   @Inject private AdRepository adRepository;
+  @Inject private UserRepository userRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
   @Inject private ImageUploadService imageService;
@@ -38,7 +39,7 @@ public class DeleteService {
     
     // delete user's ads
     List<Ad> myAds = adRepository.myAds(user.getId(), null).getList();
-    myAds.forEach(ad -> deleteAd(user, ad));
+    myAds.forEach(ad -> deleteAdByUser(user, ad));
     
     // delete user's message threads party
     user.getCommunityUserList().forEach(cu -> {
@@ -56,20 +57,37 @@ public class DeleteService {
     log.info(String.format("deleted user. userId=%d", user.getId()));
   }
   
-  public void deleteAd(User user, Ad ad) {
-    log.info(String.format("deleting ad. adId=%d, userId=%d", ad.getId(), user.getId()));
+  public void deleteAdByUser(User user, Ad ad) {
+    log.info(String.format("deleting ad by user. adId=%d, userId=%d", ad.getId(), user.getId()));
     
     // only creator is allowed to delete ad
     if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
 
+    // delete ad's photo
+    deleteAd(ad);
+    
+    log.info(String.format("deleted ad by user. adId=%d, userId=%d", ad.getId(), user.getId()));
+  }
+  
+  public void deleteAdByAdmin(User admin, Ad ad) {
+    log.info(String.format("deleting ad by admin. adId=%d, adminId=%d", ad.getId(), admin.getId()));
+    
+    // only admin is allowed to delete ad
+    if (!UserUtil.isAdmin(admin, ad.getCommunityId()))throw new ForbiddenException();
+
+    // delete ad's photo
+    deleteAd(ad);
+    
+    log.info(String.format("deleted ad by admin. adId=%d, adminId=%d", ad.getId(), admin.getId()));
+  }
+  
+  private void deleteAd(Ad ad) {
     // delete ad's photo
     deletePhoto(ad.getPhotoUrl());
     
     // delete ad(logically)
     ad.setDeleted(true);
     adRepository.update(ad);
-    
-    log.info(String.format("deleted ad. adId=%d, userId=%d", ad.getId(), user.getId()));
   }
 
   public void deleteMessageThreadParty(User user, Long threadId) {

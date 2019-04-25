@@ -14,7 +14,7 @@ import commonsos.service.AdService;
 import spark.Request;
 import spark.Response;
 
-public class AdDeleteController extends AfterLoginController {
+public class AdminAdDeleteController extends AfterLoginController {
 
   @Inject AdService adService;
 
@@ -23,7 +23,7 @@ public class AdDeleteController extends AfterLoginController {
     String id = request.params("id");
     if (isEmpty(id)) throw new BadRequestException("id is required");
     if (!NumberUtils.isParsable(id)) throw new BadRequestException("invalid id");
-    adService.deleteAdLogicallyByUser(user, parseLong(id));
+    adService.deleteAdLogicallyByAdmin(user, parseLong(id));
     return "";
   }
 }

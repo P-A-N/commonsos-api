@@ -1,6 +1,7 @@
 package commonsos.util;
 
 import java.util.List;
+import java.util.Optional;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
@@ -65,6 +66,12 @@ public class UserUtil {
   
   public static String fullName(User user) {
     return String.format("%s %s", user.getLastName(), user.getFirstName());
+  }
+
+  public static boolean isAdmin(User admin, Long communityId) {
+    Optional<Community> community = admin.getCommunityUserList().stream().map(CommunityUser::getCommunity).filter(c -> c.getId().equals(communityId)).findFirst();
+    return community.isPresent()
+        && community.get().getAdminUser().getId().equals(admin.getId());
   }
 
   public static boolean isAdminOfUser(User admin, User user) {

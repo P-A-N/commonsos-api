@@ -25,8 +25,8 @@ import commonsos.controller.ad.AdDeleteController;
 import commonsos.controller.ad.AdListController;
 import commonsos.controller.ad.AdPhotoUpdateController;
 import commonsos.controller.ad.AdUpdateController;
+import commonsos.controller.ad.AdminAdDeleteController;
 import commonsos.controller.ad.MyAdsController;
-import commonsos.controller.admin.UserSearchController;
 import commonsos.controller.auth.CreateAccountCompleteController;
 import commonsos.controller.auth.CreateAccountTemporaryController;
 import commonsos.controller.auth.LoginController;
@@ -66,6 +66,7 @@ import commonsos.controller.user.UserDeleteController;
 import commonsos.controller.user.UserMobileDeviceUpdateController;
 import commonsos.controller.user.UserNameUpdateController;
 import commonsos.controller.user.UserPasswordResetRequestController;
+import commonsos.controller.user.UserSearchController;
 import commonsos.controller.user.UserStatusUpdateController;
 import commonsos.controller.user.UserUpdateCommunitiesController;
 import commonsos.controller.user.UserUpdateController;
@@ -184,6 +185,8 @@ public class Server {
     post("/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
     get("/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
+    post("/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
+    
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);
       response.status(400);
