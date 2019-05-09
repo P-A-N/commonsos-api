@@ -4,6 +4,8 @@ import static commonsos.service.UserService.WALLET_PASSWORD;
 import static java.lang.String.format;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
+import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH;
+import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -21,9 +23,14 @@ import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.ChainId;
+import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.ReadonlyTransactionManager;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.Transfer;
 import org.web3j.tx.gas.StaticGasProvider;
+import org.web3j.tx.response.NoOpProcessor;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.utils.Convert.Unit;
 import org.web3j.utils.Files;
 
@@ -138,7 +145,6 @@ public class BlockchainService {
     TransactionReceipt receipt = handleBlockchainException(() -> {
       return token.transferFrom(remitter.getWalletAddress(), beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
-    if (!receipt.isStatusOK()) throw new RuntimeException("Token transfer from transaction " + receipt.getTransactionHash() + " failed");
     
     log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
     return receipt.getTransactionHash();
@@ -159,7 +165,6 @@ public class BlockchainService {
     TransactionReceipt receipt = handleBlockchainException(() -> {
       return token.transfer(beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
-    if (!receipt.isStatusOK()) throw new RuntimeException("Token transfer transaction " + receipt.getTransactionHash() + " failed");
     
     log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
     return receipt.getTransactionHash();
@@ -174,7 +179,8 @@ public class BlockchainService {
   }
 
   TokenERC20 loadToken(Credentials remitterCredentials, String tokenContractAddress, BigInteger gasPrice, BigInteger gasLimit) {
-    return TokenERC20.load(tokenContractAddress, web3j, remitterCredentials, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
+    TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new NoOpProcessor(web3j));
+    return TokenERC20.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
   TokenERC20 loadTokenReadOnly(String walletAddress, String tokenContractAddress) {
@@ -189,10 +195,11 @@ public class BlockchainService {
   public void transferEther(Credentials credentials, String beneficiaryAddress, BigInteger amount) {
     log.info(String.format("transferEther %d to %s", amount, beneficiaryAddress));
     TransactionReceipt receipt = handleBlockchainException(() -> {
-      return Transfer.sendFunds(web3j, credentials, beneficiaryAddress, new BigDecimal(amount), Unit.WEI).sendAsync().get();
+      TransactionManager tm = new RawTransactionManager(web3j, credentials, ChainId.NONE, new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH ));
+      Transfer transfer = new Transfer(web3j, tm);
+      return transfer.sendFunds(beneficiaryAddress, new BigDecimal(amount), Unit.WEI).send();
     });
-    if (!receipt.isStatusOK()) throw new RuntimeException("Ether transaction " + receipt.getTransactionHash() + " failed");
-    log.info(String.format("Ether transaction receipt received for %s, gas used %d", receipt.getTransactionHash(), receipt.getGasUsed()));
+    log.info(String.format("Ether transaction receipt received for %s", receipt.getTransactionHash()));
   }
 
   private <T> T handleBlockchainException(Callable<T> callable) {
@@ -217,7 +224,7 @@ public class BlockchainService {
             new StaticGasProvider(GAS_PRICE, TOKEN_DEPLOYMENT_GAS_LIMIT),
             INITIAL_TOKEN_AMOUNT,
             name,
-            symbol).sendAsync().get();
+            symbol).send();
       });
       if (!token.isValid()) {
         if (token.getTransactionReceipt().isPresent()) {
@@ -288,7 +295,6 @@ public class BlockchainService {
     TransactionReceipt receipt = handleBlockchainException(() -> {
       return token.approve(community.getAdminUser().getWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
     });
-    if (!receipt.isStatusOK()) throw new RuntimeException("Approving token transfer " + receipt.getTransactionHash() + " failed");
 
     log.info(format("Approving token transfer has sent. [hash=%s]", receipt.getTransactionHash()));
   }
