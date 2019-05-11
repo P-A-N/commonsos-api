@@ -1,7 +1,6 @@
 package commonsos.repository;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +27,11 @@ public class MessageThreadRepository extends Repository {
     super(entityManagerService);
   }
 
-  public Optional<MessageThread> byAdId(User user, Long adId) {
+  public Optional<MessageThread> byAdId(Long adId) {
     try {
-      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy", MessageThread.class)
+      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND deleted IS FALSE", MessageThread.class)
         .setLockMode(lockMode())
         .setParameter("adId", adId)
-        .setParameter("createdBy", user.getId())
         .getSingleResult());
     }
     catch (NoResultException e) {
@@ -46,6 +44,7 @@ public class MessageThreadRepository extends Repository {
       "WHERE mt.communityId = :communityId " +
       "AND mt.adId IS NULL " +
       "AND mt.group IS FALSE " +
+      "AND mt.deleted IS FALSE " +
       "AND EXISTS (SELECT 1 FROM MessageThreadParty mtp WHERE mtp.messageThreadId = mt.id AND mtp.user.id = :userId1) " +
       "AND EXISTS (SELECT 1 FROM MessageThreadParty mtp WHERE mtp.messageThreadId = mt.id AND mtp.user.id = :userId2)";
     try {
@@ -76,6 +75,7 @@ public class MessageThreadRepository extends Repository {
         "FROM MessageThread mt " +
         "JOIN mt.parties p " +
         "WHERE mt.communityId = :communityId " +
+        "AND mt.deleted IS FALSE " +
         "AND p.user.id = :userId ");
     if (StringUtils.isNotBlank(memberFilter)) {
       sql.append(
@@ -113,7 +113,16 @@ public class MessageThreadRepository extends Repository {
   }
 
   public Optional<MessageThread> findById(Long id) {
-    return ofNullable(em().find(MessageThread.class, id, lockMode()));
+    try {
+      return Optional.of(em().createQuery("FROM MessageThread WHERE id = :id AND deleted IS FALSE", MessageThread.class)
+        .setLockMode(lockMode())
+        .setParameter("id", id)
+        .getSingleResult()
+      );
+    }
+    catch (NoResultException e) {
+        return empty();
+    }
   }
 
   public MessageThread findStrictById(Long id) {

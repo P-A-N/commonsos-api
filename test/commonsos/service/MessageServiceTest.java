@@ -34,10 +34,10 @@ import org.mockito.quality.Strictness;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.exception.UserNotFoundException;
+import commonsos.repository.AdRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
-import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Message;
@@ -46,7 +46,6 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
 import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.service.command.MessagePostCommand;
-import commonsos.view.AdView;
 import commonsos.view.MessageThreadView;
 import commonsos.view.MessageView;
 
@@ -56,8 +55,8 @@ public class MessageServiceTest {
 
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock MessageRepository messageRepository;
-  @Mock private UserRepository userRepository;
-  @Mock AdService adService;
+  @Mock UserRepository userRepository;
+  @Mock AdRepository adRepository;
   @InjectMocks @Spy MessageService service;
   @Captor ArgumentCaptor<MessageThread> messageThreadArgumentCaptor;
   @Captor ArgumentCaptor<MessageThread> messageThreadArgumentCaptor2;
@@ -65,37 +64,6 @@ public class MessageServiceTest {
   @BeforeEach
   public void setup() {
     when(userRepository.findStrictById(any())).thenCallRealMethod();
-  }
-  
-  @Test
-  public void threadForAd_findExisting() {
-    MessageThread messageThread = new MessageThread();
-    User user = new User();
-    when(messageThreadRepository.byAdId(user, id("ad-id"))).thenReturn(Optional.of(messageThread));
-    MessageThreadView messageThreadView = new MessageThreadView();
-    doReturn(messageThreadView).when(service).view(user, messageThread);
-
-    MessageThreadView result = service.threadForAd(user, id("ad-id"));
-
-    assertThat(result).isSameAs(messageThreadView);
-  }
-
-  @Test
-  public void threadForAd_createNewIfNotPresent() {
-    User user = new User().setId(id("user id"));
-    when(messageThreadRepository.byAdId(user, id("ad-id"))).thenReturn(empty());
-
-    MessageThread newThread = new MessageThread();
-    doReturn(newThread).when(service).createMessageThreadForAd(user, id("ad-id"));
-
-    MessageThreadView messageThreadView = new MessageThreadView();
-    doReturn(messageThreadView).when(service).view(user, newThread);
-
-
-    MessageThreadView result = service.threadForAd(user, id("ad-id"));
-
-
-    assertThat(result).isEqualTo(messageThreadView);
   }
 
   @Test
@@ -128,26 +96,6 @@ public class MessageServiceTest {
 
     assertThrows(BadRequestException.class, () -> service.thread(new User().setId(id("user id")), id("thread-id")));
     ;
-  }
-
-  @Test
-  public void createMessageThreadForAd() {
-    User user = new User().setId(id("user id"));
-    User counterparty = new User().setId(id("counterparty id"));
-    when(adService.ad(id("ad-id"))).thenReturn(new Ad().setTitle("Title").setCreatedBy(id("ad publisher")));
-    MessageThread newThread = new MessageThread();
-    when(messageThreadRepository.create(messageThreadArgumentCaptor.capture())).thenReturn(newThread);
-    when(userRepository.findById(id("ad publisher"))).thenReturn(Optional.of(counterparty));
-
-    MessageThread result = service.createMessageThreadForAd(user, id("ad-id"));
-
-    assertThat(result).isEqualTo(newThread);
-    MessageThread createdThread = messageThreadArgumentCaptor.getValue();
-    assertThat(createdThread.getAdId()).isEqualTo(id("ad-id"));
-    assertThat(createdThread.getCreatedBy()).isEqualTo(id("user id"));
-    assertThat(createdThread.getCreatedAt()).isCloseTo(now(), within(1, SECONDS));
-    assertThat(createdThread.isGroup()).isFalse();
-    assertThat(createdThread.getParties()).extracting("user").containsExactly(counterparty, user);
   }
 
   @Test
@@ -258,25 +206,6 @@ public class MessageServiceTest {
     assertThat(result.getCreator().getId()).isEqualTo(id("user1_v_g"));
     
     assertThat(result.getCounterParty().getId()).isEqualTo(id("user1_v_g"));
-  }
-
-  @Test
-  public void view_ad_thread() {
-    // prepare
-    User user = new User().setId(id("user2"));
-    MessageThread thread = new MessageThread().setId(id("thread")).setAdId(id("ad")).setCreatedBy(id("user1")).setParties(asList(
-        new MessageThreadParty().setUser(new User().setId(id("user1"))),
-        new MessageThreadParty().setUser(new User().setId(id("user2"))),
-        new MessageThreadParty().setUser(new User().setId(id("user3")))
-        ));
-    when(messageRepository.lastMessage(any())).thenReturn(Optional.empty());
-    when(adService.view(any(User.class), any(Long.class))).thenReturn(new AdView().setId(id("ad")));
-    
-    // execute
-    MessageThreadView result = service.view(user, thread);
-    
-    // verify
-    assertThat(result.getAd().getId()).isEqualTo(id("ad"));
   }
 
   @Test

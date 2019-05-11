@@ -32,18 +32,67 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void byAdId() {
-    inTransaction(() -> repository.create(new MessageThread().setAdId(10L).setCreatedBy(id("me"))));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(20L).setCreatedBy(id("other-user"))));
-    Long id = inTransaction(() -> repository.create(new MessageThread().setAdId(20L).setCreatedBy(id("me")))).getId();
+    // prepare
+    inTransaction(() -> repository.create(new MessageThread().setAdId(20L).setTitle("message-thread")));
 
-    Optional<MessageThread> result = repository.byAdId(new User().setId(id("me")), 20L);
+    // execute
+    Optional<MessageThread> result = repository.byAdId(20L);
+    
+    // verify
     assertThat(result).isNotEmpty();
-    assertThat(result.get().getId()).isEqualTo(id);
+    assertThat(result.get().getTitle()).isEqualTo("message-thread");
+    
+    // prepare
+    inTransaction(() -> repository.create(new MessageThread().setAdId(30L).setTitle("message-thread2").setDeleted(true)));
+    
+    // execute
+    result = repository.byAdId(30L);
+    
+    // verify
+    assertThat(result).isEmpty();
+    
+    // execute
+    result = repository.byAdId(40L);
+    
+    // verify
+    assertThat(result).isEmpty();
   }
 
   @Test
-  public void byAdId_notFound() {
-    assertThat(repository.byAdId(new User().setId(id("me")), 20L)).isEmpty();
+  public void betweenUsers() {
+    // prepare
+    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
+    Community community2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")));
+    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
+    User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));
+    User otherUser2 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser2")));
+
+    MessageThread thread0 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setGroup(true);
+    MessageThread thread1 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setGroup(false);
+    MessageThread thread2 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setGroup(false).setDeleted(true);
+    MessageThread thread3 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser2)));
+    MessageThread thread4 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(otherUser1), party(otherUser2)));
+    MessageThread thread5 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setAdId(id("ad id"));
+
+    inTransaction(() -> repository.create(thread0));
+    Long thread1Id = inTransaction(() -> repository.create(thread1)).getId();
+    inTransaction(() -> repository.create(thread2));
+    inTransaction(() -> repository.create(thread3));
+    inTransaction(() -> repository.create(thread4));
+    inTransaction(() -> repository.create(thread5));
+
+    // execute
+    Optional<MessageThread> result = repository.betweenUsers(user.getId(), otherUser1.getId(), community1.getId());
+
+    // verity
+    assertThat(result).isNotEmpty();
+    assertThat(result.get().getId()).isEqualTo(thread1Id);
+
+    // execute
+    result = repository.betweenUsers(user.getId(), otherUser1.getId(), community2.getId());
+
+    // verity
+    assertThat(result).isEmpty();
   }
 
   @Test
@@ -151,6 +200,13 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList()).extracting("id").containsExactly();
     result = repository.listByUser(user, communityId1, "; select * from message_threads", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
+
+    // prepare deleted threads
+    inTransaction(() -> repository.update(thread1.setDeleted(true)));
+    
+    // [execute and verify] not specified member or message
+    result = repository.listByUser(user, communityId1, null, null, null);
+    assertThat(result.getList()).extracting("id").containsExactly(thread2.getId(), thread3.getId());
   }
 
   @Test
@@ -185,49 +241,26 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void byUserId() {
+  public void findById() {
     // prepare
-    Community community1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")));
-    Community community2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")));
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    User otherUser1 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser1")));
-    User otherUser2 = inTransaction(() -> userRepository.create(new User().setUsername("otherUser2")));
-
-    MessageThread thread0 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setGroup(true);
-    MessageThread thread1 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setGroup(false);
-    MessageThread thread2 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser2)));
-    MessageThread thread3 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(otherUser1), party(otherUser2)));
-    MessageThread thread4 = new MessageThread().setCommunityId(community1.getId()).setParties(asList(party(user), party(otherUser1))).setAdId(id("ad id"));
-
-    inTransaction(() -> repository.create(thread0).getId());
-    Long thread1Id = inTransaction(() -> repository.create(thread1).getId());
-    inTransaction(() -> repository.create(thread2).getId());
-    inTransaction(() -> repository.create(thread3).getId());
-    inTransaction(() -> repository.create(thread4).getId());
+    MessageThread messageThread = inTransaction(() -> repository.create(new MessageThread().setTitle("mt").setParties(asList(party(user)))));
 
     // execute
-    Optional<MessageThread> result = repository.betweenUsers(user.getId(), otherUser1.getId(), community1.getId());
+    Optional<MessageThread> result = repository.findById(messageThread.getId());
 
-    // verity
+    // verify
     assertThat(result).isNotEmpty();
-    assertThat(result.get().getId()).isEqualTo(thread1Id);
+    assertThat(result.get().getTitle()).isEqualTo("mt");
+    
+    // prepare
+    inTransaction(() -> repository.update(messageThread.setDeleted(true)));
 
     // execute
-    result = repository.betweenUsers(user.getId(), otherUser1.getId(), community2.getId());
+    result = repository.findById(messageThread.getId());
 
-    // verity
+    // verify
     assertThat(result).isEmpty();
-  }
-
-  @Test
-  public void threadById() {
-    User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));
-    Long id = inTransaction(() -> repository.create(new MessageThread().setParties(asList(party(user)))).getId());
-
-    Optional<MessageThread> result = repository.findById(id);
-
-    assertThat(result).isNotEmpty();
-    assertThat(result.get().getId()).isEqualTo(id);
   }
 
   @Test

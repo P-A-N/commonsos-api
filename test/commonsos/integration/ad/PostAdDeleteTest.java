@@ -11,6 +11,7 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 
 public class PostAdDeleteTest extends IntegrationTest {
@@ -22,6 +23,7 @@ public class PostAdDeleteTest extends IntegrationTest {
   private User user1;
   private User user2;
   private Ad ad_user1;
+  private MessageThread messageThread_ad_user1;
   private String sessionId;
   
   @BeforeEach
@@ -41,6 +43,7 @@ public class PostAdDeleteTest extends IntegrationTest {
         new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     
     ad_user1 =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community1.getId()));
+    messageThread_ad_user1 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
   }
   
   @Test
@@ -70,6 +73,8 @@ public class PostAdDeleteTest extends IntegrationTest {
     // verify
     emService.get().refresh(actual);
     assertThat(actual.isDeleted()).isTrue();
+    MessageThread mt = emService.get().find(MessageThread.class, messageThread_ad_user1.getId());
+    assertThat(mt.isDeleted()).isTrue();
   }
 
   
@@ -113,5 +118,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // verify
     emService.get().refresh(actual);
     assertThat(actual.isDeleted()).isTrue();
+    MessageThread mt = emService.get().find(MessageThread.class, messageThread_ad_user1.getId());
+    assertThat(mt.isDeleted()).isTrue();
   }
 }

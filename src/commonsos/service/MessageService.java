@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
+import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
@@ -39,6 +40,7 @@ import commonsos.service.command.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
+import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.AdView;
@@ -54,14 +56,14 @@ public class MessageService {
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
   @Inject private UserRepository userRepository;
+  @Inject private AdRepository adRepository;
   @Inject private CommunityRepository communityRepository;
-  @Inject private AdService adService;
   @Inject private DeleteService deleteService;
   @Inject private PushNotificationService pushNotificationService;
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.byAdId(user, adId).orElseGet(() -> createMessageThreadForAd(user, adId));
+    MessageThread thread = messageThreadRepository.byAdId(adId).orElseGet(() -> createMessageThreadForAd(user, adId));
     return view(user, thread);
   }
 
@@ -146,7 +148,7 @@ public class MessageService {
   }
 
   MessageThread createMessageThreadForAd(User user, Long adId) {
-    Ad ad = adService.ad(adId);
+    Ad ad = adRepository.findStrict(adId);
     User adCreator = userRepository.findStrictById(ad.getCreatedBy());
 
     MessageThread messageThread = new MessageThread()
@@ -179,12 +181,17 @@ public class MessageService {
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .findFirst().orElse(null);
 
-    AdView ad = thread.getAdId() == null ? null : adService.view(user, thread.getAdId());
+    AdView adView = null;
+    if (thread.getAdId() != null) {
+      Ad ad = adRepository.findStrict(thread.getAdId());
+      User createdBy = userRepository.findStrictById(ad.getCreatedBy());
+      adView = AdUtil.view(ad, createdBy, user);
+    }
     MessageView lastMessage = messageRepository.lastMessage(thread.getId()).map(this::view).orElse(null);
 
     return new MessageThreadView()
       .setId(thread.getId())
-      .setAd(ad)
+      .setAd(adView)
       .setCommunityId(thread.getCommunityId())
       .setTitle(thread.getTitle())
       .setPersonalTitle(userMtp.getPersonalTitle())

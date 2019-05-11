@@ -85,11 +85,25 @@ public class DeleteService {
     // delete ad's photo
     deletePhoto(ad.getPhotoUrl());
     
+    // delete ad's message-thread
+    Optional<MessageThread> messageThread = messageThreadRepository.byAdId(ad.getId());
+    if (messageThread.isPresent()) deleteMessageThread(messageThread.get());
+    
     // delete ad(logically)
     ad.setDeleted(true);
     adRepository.update(ad);
   }
 
+  public void deleteMessageThread(MessageThread messageThread) {
+    log.info(String.format("deleting message-thread. threadId=%d", messageThread.getId()));
+    
+    // delete message-thread
+    messageThread.setDeleted(true);
+    messageThreadRepository.update(messageThread);
+    
+    log.info(String.format("deleted message-thread. threadId=%d", messageThread.getId()));
+  }
+  
   public void deleteMessageThreadParty(User user, Long threadId) {
     log.info(String.format("deleting message-thread-party. threadId=%d, userId=%d", threadId, user.getId()));
     

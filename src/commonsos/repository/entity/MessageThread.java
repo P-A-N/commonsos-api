@@ -30,6 +30,7 @@ public class MessageThread {
   private Long createdBy;
   private Instant createdAt;
   @Column(name = "is_group") private boolean group;
+  private boolean deleted;
 
   @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JoinColumn(name = "message_thread_id", referencedColumnName = "id")
