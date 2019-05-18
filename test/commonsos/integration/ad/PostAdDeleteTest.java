@@ -23,7 +23,8 @@ public class PostAdDeleteTest extends IntegrationTest {
   private User user1;
   private User user2;
   private Ad ad_user1;
-  private MessageThread messageThread_ad_user1;
+  private MessageThread messageThread_ad_user1_1;
+  private MessageThread messageThread_ad_user1_2;
   private String sessionId;
   
   @BeforeEach
@@ -43,7 +44,8 @@ public class PostAdDeleteTest extends IntegrationTest {
         new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     
     ad_user1 =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community1.getId()));
-    messageThread_ad_user1 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
+    messageThread_ad_user1_1 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
+    messageThread_ad_user1_2 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
   }
   
   @Test
@@ -73,8 +75,10 @@ public class PostAdDeleteTest extends IntegrationTest {
     // verify
     emService.get().refresh(actual);
     assertThat(actual.isDeleted()).isTrue();
-    MessageThread mt = emService.get().find(MessageThread.class, messageThread_ad_user1.getId());
-    assertThat(mt.isDeleted()).isTrue();
+    MessageThread mt1 = emService.get().find(MessageThread.class, messageThread_ad_user1_1.getId());
+    assertThat(mt1.isDeleted()).isTrue();
+    MessageThread mt2 = emService.get().find(MessageThread.class, messageThread_ad_user1_2.getId());
+    assertThat(mt2.isDeleted()).isTrue();
   }
 
   
@@ -118,7 +122,9 @@ public class PostAdDeleteTest extends IntegrationTest {
     // verify
     emService.get().refresh(actual);
     assertThat(actual.isDeleted()).isTrue();
-    MessageThread mt = emService.get().find(MessageThread.class, messageThread_ad_user1.getId());
-    assertThat(mt.isDeleted()).isTrue();
+    MessageThread mt1 = emService.get().find(MessageThread.class, messageThread_ad_user1_1.getId());
+    assertThat(mt1.isDeleted()).isTrue();
+    MessageThread mt2 = emService.get().find(MessageThread.class, messageThread_ad_user1_2.getId());
+    assertThat(mt2.isDeleted()).isTrue();
   }
 }

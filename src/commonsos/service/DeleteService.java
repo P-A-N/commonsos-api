@@ -18,6 +18,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.MessageUtil;
@@ -86,8 +87,10 @@ public class DeleteService {
     deletePhoto(ad.getPhotoUrl());
     
     // delete ad's message-thread
-    Optional<MessageThread> messageThread = messageThreadRepository.byAdId(ad.getId());
-    if (messageThread.isPresent()) deleteMessageThread(messageThread.get());
+    ResultList<MessageThread> messageThreadResult = messageThreadRepository.byAdId(ad.getId(), null);
+    for (MessageThread messageThread : messageThreadResult.getList()) {
+      deleteMessageThread(messageThread);
+    }
     
     // delete ad(logically)
     ad.setDeleted(true);

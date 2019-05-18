@@ -6,12 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -24,10 +27,12 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class DeleteServiceTest {
 
   @Mock UserRepository userRepository;
@@ -37,6 +42,13 @@ public class DeleteServiceTest {
   @Mock ImageUploadService imageService;
   @InjectMocks @Spy DeleteService service;
 
+  @BeforeEach
+  public void setup() {
+    ResultList<MessageThread> mtResult = new ResultList<>();
+    mtResult.setList(asList(new MessageThread()));
+    when(messageThreadRepository.byAdId(any(), any())).thenReturn(mtResult);
+  }
+  
   @Test
   public void deleteAdByUser() {
     // prepare

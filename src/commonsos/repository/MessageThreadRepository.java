@@ -27,16 +27,29 @@ public class MessageThreadRepository extends Repository {
     super(entityManagerService);
   }
 
-  public Optional<MessageThread> byAdId(Long adId) {
+  public Optional<MessageThread> byCreaterAndAdId(User user, Long adId) {
     try {
-      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND deleted IS FALSE", MessageThread.class)
+      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy AND deleted IS FALSE", MessageThread.class)
         .setLockMode(lockMode())
         .setParameter("adId", adId)
+        .setParameter("createdBy", user.getId())
         .getSingleResult());
     }
     catch (NoResultException e) {
       return empty();
     }
+  }
+
+  public ResultList<MessageThread> byAdId(Long adId, PaginationCommand pagination) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("FROM MessageThread WHERE adId = :adId AND deleted IS false ORDER BY id");
+
+    TypedQuery<MessageThread> query = em().createQuery(sql.toString(), MessageThread.class)
+      .setLockMode(lockMode())
+      .setParameter("adId", adId);
+
+    ResultList<MessageThread> resultList = getResultList(query, pagination);
+    return resultList;
   }
 
   public Optional<MessageThread> betweenUsers(Long userId1, Long userId2, Long communityId) {

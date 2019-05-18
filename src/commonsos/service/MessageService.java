@@ -63,7 +63,7 @@ public class MessageService {
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.byAdId(adId).orElseGet(() -> createMessageThreadForAd(user, adId));
+    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user, adId).orElseGet(() -> createMessageThreadForAd(user, adId));
     return view(user, thread);
   }
 

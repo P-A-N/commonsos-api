@@ -31,31 +31,96 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   MessageRepository messageRepository = new MessageRepository(emService);
 
   @Test
+  public void byCreaterAndAdId() {
+    // prepare
+    User user1 = new User().setId(id("user1"));
+    User user2 = new User().setId(id("user2"));
+    User user3 = new User().setId(id("user3"));
+    MessageThread mt1 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1")));
+    MessageThread mt2 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt2")));
+
+    // execute & verify
+    Optional<MessageThread> result = repository.byCreaterAndAdId(user1, id("ad1"));
+    assertThat(result.get().getTitle()).isEqualTo("mt1");
+
+    // execute & verify
+    result = repository.byCreaterAndAdId(user2, id("ad1"));
+    assertThat(result.get().getTitle()).isEqualTo("mt2");
+
+    // execute & verify
+    result = repository.byCreaterAndAdId(user3, id("ad1"));
+    assertThat(result).isEmpty();
+    
+    // prepare
+    inTransaction(() -> repository.update(mt1.setDeleted(true)));
+
+    // execute & verify
+    result = repository.byCreaterAndAdId(user1, id("ad1"));
+    assertThat(result).isEmpty();
+    
+    // execute & verify
+    result = repository.byCreaterAndAdId(user2, id("ad2"));
+    assertThat(result).isEmpty();
+  }
+
+  @Test
   public void byAdId() {
     // prepare
-    inTransaction(() -> repository.create(new MessageThread().setAdId(20L).setTitle("message-thread")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1_1")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt1_2")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user3")).setTitle("mt1_3").setDeleted(true)));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad2")).setCreatedBy(id("user1")).setTitle("mt2_1")));
 
-    // execute
-    Optional<MessageThread> result = repository.byAdId(20L);
-    
-    // verify
-    assertThat(result).isNotEmpty();
-    assertThat(result.get().getTitle()).isEqualTo("message-thread");
-    
+    // execute & verify
+    ResultList<MessageThread> result = repository.byAdId(id("ad1"), null);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_1");
+    assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_2");
+  }
+
+  @Test
+  public void byAdId_pagination() {
     // prepare
-    inTransaction(() -> repository.create(new MessageThread().setAdId(30L).setTitle("message-thread2").setDeleted(true)));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1_1")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt1_2")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user3")).setTitle("mt1_3")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user4")).setTitle("mt1_4")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user5")).setTitle("mt1_5")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user6")).setTitle("mt1_6")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user7")).setTitle("mt1_7")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user8")).setTitle("mt1_8")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user9")).setTitle("mt1_9")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user10")).setTitle("mt1_10")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user11")).setTitle("mt1_11")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user12")).setTitle("mt1_12")));
+
+    // execute & verify
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
+    ResultList<MessageThread> result = repository.byAdId(id("ad1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(10);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_1");
+    assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_10");
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.byAdId(id("ad1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_11");
+    assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_12");
     
-    // execute
-    result = repository.byAdId(30L);
-    
-    // verify
-    assertThat(result).isEmpty();
-    
-    // execute
-    result = repository.byAdId(40L);
-    
-    // verify
-    assertThat(result).isEmpty();
+    // execute & verify
+    pagination.setPage(0).setSort(SortType.DESC);
+    result = repository.byAdId(id("ad1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(10);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_12");
+    assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_3");
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.byAdId(id("ad1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_2");
+    assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_1");
   }
 
   @Test

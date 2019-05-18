@@ -17,14 +17,14 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
-import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 
 public class PostMessageThreadForAdTest extends IntegrationTest {
 
   private Community community;
   private User adCreator;
-  private User user;
+  private User user1;
+  private User user2;
   private Ad ad;
   private String sessionId;
   
@@ -34,15 +34,15 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(adCreator.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-
-    sessionId = login("user", "pass");
+    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
   }
   
   @Test
   public void messageThreadForAd() {
-    // call api
-    int id = given()
+    // call api from user1 (1)
+    sessionId = login("user1", "pass");
+    int id1 = given()
       .cookie("JSESSIONID", sessionId)
       .when().post("/message-threads/for-ad/{adId}", ad.getId())
       .then().statusCode(200)
@@ -53,7 +53,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
       .body("title", equalTo("title"))
       .body("personalTitle", nullValue())
       .body("parties.id", contains(adCreator.getId().intValue()))
-      .body("creator.id", equalTo(user.getId().intValue()))
+      .body("creator.id", equalTo(user1.getId().intValue()))
       .body("counterParty.id", equalTo(adCreator.getId().intValue()))
       .body("lastMessage", nullValue())
       .body("unread", equalTo(false))
@@ -62,16 +62,46 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
       .body("createdAt", notNullValue())
       .extract().path("id");
     
-    // verify db
-    MessageThread messageThread = emService.get().find(MessageThread.class, (long) id);
-    assertThat(messageThread.getTitle()).isEqualTo("title");
-    assertThat(messageThread.getAdId()).isEqualTo(ad.getId());
-    assertThat(messageThread.getCreatedBy()).isEqualTo(user.getId());
-    assertThat(messageThread.isGroup()).isEqualTo(false);
+    // call api from user2 (1)
+    sessionId = login("user2", "pass");
+    int id2 = given()
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .then().statusCode(200)
+      .body("id", notNullValue())
+      .body("ad.id", equalTo(ad.getId().intValue()))
+      .body("ad.createdBy.id", equalTo(adCreator.getId().intValue()))
+      .body("communityId", equalTo(ad.getCommunityId().intValue()))
+      .body("title", equalTo("title"))
+      .body("personalTitle", nullValue())
+      .body("parties.id", contains(adCreator.getId().intValue()))
+      .body("creator.id", equalTo(user2.getId().intValue()))
+      .body("counterParty.id", equalTo(adCreator.getId().intValue()))
+      .body("lastMessage", nullValue())
+      .body("unread", equalTo(false))
+      .body("group", equalTo(false))
+      .body("photoUrl", nullValue())
+      .body("createdAt", notNullValue())
+      .extract().path("id");
+
+    assertThat(id1).isNotEqualTo(id2);
+
+    // call api from user1 (2)
+    sessionId = login("user1", "pass");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .then().statusCode(200)
+      .body("id", equalTo(id1))
+      .body("parties.id", contains(adCreator.getId().intValue()));
     
-    messageThread.getParties().sort((a,b) -> a.getUser().getId().compareTo(b.getUser().getId()));
-    assertThat(messageThread.getParties().size()).isEqualTo(2);
-    assertThat(messageThread.getParties().get(0).getUser().getId()).isEqualTo(adCreator.getId());
-    assertThat(messageThread.getParties().get(1).getUser().getId()).isEqualTo(user.getId());
+    // call api from user2 (2)
+    sessionId = login("user2", "pass");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .then().statusCode(200)
+      .body("id", equalTo(id2))
+      .body("parties.id", contains(adCreator.getId().intValue()));
   }
 }
