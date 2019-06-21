@@ -1,10 +1,11 @@
 package commonsos.controller.message;
 
-import commonsos.GsonProvider;
-import commonsos.domain.auth.User;
-import commonsos.domain.message.GroupMessageThreadUpdateCommand;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageThreadView;
+import commonsos.di.GsonProvider;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.service.command.GroupMessageThreadUpdateCommand;
+import commonsos.view.MessageThreadView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +38,7 @@ public class GroupMessageThreadUpdateControllerTest {
     MessageThreadView view = new MessageThreadView();
     when(service.updateGroup(user, new GroupMessageThreadUpdateCommand().setThreadId(99L).setTitle("Hola!").setMemberIds(asList(11, 33)))).thenReturn(view);
 
-    MessageThreadView result = controller.handle(user, request, null);
+    MessageThreadView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isSameAs(view);
   }

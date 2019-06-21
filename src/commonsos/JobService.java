@@ -1,17 +1,19 @@
 package commonsos;
 
 import com.google.inject.Injector;
-import commonsos.domain.auth.User;
+
+import commonsos.repository.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import static commonsos.filter.LogFilter.USERNAME_MDC_KEY;
+
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import static commonsos.LogFilter.USERNAME_MDC_KEY;
 
 @Slf4j
 @Singleton

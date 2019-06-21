@@ -1,8 +1,9 @@
 package commonsos.controller.message;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageThreadView;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.view.MessageThreadView;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,7 +28,7 @@ public class MessageThreadListControllerTest {
     MessageThreadView messageThreadView = new MessageThreadView();
     when(service.threads(user)).thenReturn(asList(messageThreadView));
 
-    List<MessageThreadView> threads = controller.handle(user, null, null);
+    List<MessageThreadView> threads = controller.handleAfterLogin(user, null, null);
 
     assertThat(threads).containsExactly(messageThreadView);
   }

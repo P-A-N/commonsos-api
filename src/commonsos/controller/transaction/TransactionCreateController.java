@@ -1,21 +1,26 @@
 package commonsos.controller.transaction;
 
-import com.google.gson.Gson;
-import commonsos.controller.Controller;
-import commonsos.domain.auth.User;
-import commonsos.domain.transaction.TransactionCreateCommand;
-import commonsos.domain.transaction.TransactionService;
-import spark.Request;
-import spark.Response;
+import static commonsos.annotation.SyncObject.REGIST_TRANSACTION;
 
 import javax.inject.Inject;
 
-public class TransactionCreateController extends Controller {
+import com.google.gson.Gson;
+
+import commonsos.annotation.Synchronized;
+import commonsos.controller.AfterLoginController;
+import commonsos.repository.entity.User;
+import commonsos.service.TransactionService;
+import commonsos.service.command.TransactionCreateCommand;
+import spark.Request;
+import spark.Response;
+
+@Synchronized(REGIST_TRANSACTION)
+public class TransactionCreateController extends AfterLoginController {
 
   @Inject TransactionService service;
   @Inject Gson gson;
 
-  @Override protected Object handle(User user, Request request, Response response) {
+  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
     TransactionCreateCommand command = gson.fromJson(request.body(), TransactionCreateCommand.class);
     service.create(user, command);
     return "";

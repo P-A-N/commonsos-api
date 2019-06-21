@@ -1,7 +1,9 @@
 package commonsos;
 
 import com.google.inject.Injector;
-import commonsos.domain.auth.User;
+
+import commonsos.repository.entity.User;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

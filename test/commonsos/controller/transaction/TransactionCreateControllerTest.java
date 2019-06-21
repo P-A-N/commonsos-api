@@ -1,9 +1,10 @@
 package commonsos.controller.transaction;
 
-import commonsos.GsonProvider;
-import commonsos.domain.auth.User;
-import commonsos.domain.transaction.TransactionCreateCommand;
-import commonsos.domain.transaction.TransactionService;
+import commonsos.di.GsonProvider;
+import commonsos.repository.entity.User;
+import commonsos.service.TransactionService;
+import commonsos.service.command.TransactionCreateCommand;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,7 +34,7 @@ public class TransactionCreateControllerTest {
     Request request = mock(Request.class);
     when(request.body()).thenReturn("{\"amount\": 10.2, \"beneficiaryId\": \"22\", \"description\": \"description\", \"adId\": \"33\" }");
 
-    controller.handle(user, request, null);
+    controller.handleAfterLogin(user, request, null);
 
     verify(service).create(user, new TransactionCreateCommand().setAmount(new BigDecimal("10.2")).setBeneficiaryId(22L).setDescription("description").setAdId(33L));
   }

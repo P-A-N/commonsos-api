@@ -1,17 +1,26 @@
 package commonsos.controller.ad;
 
-import commonsos.controller.Controller;
-import commonsos.domain.ad.AdService;
-import commonsos.domain.auth.User;
-import spark.Request;
-import spark.Response;
+import static java.lang.Long.parseLong;
+import static spark.utils.StringUtils.isEmpty;
 
 import javax.inject.Inject;
 
-public class AdListController extends Controller {
+import commonsos.annotation.ReadOnly;
+import commonsos.controller.AfterLoginController;
+import commonsos.exception.BadRequestException;
+import commonsos.repository.entity.User;
+import commonsos.service.AdService;
+import spark.Request;
+import spark.Response;
+
+@ReadOnly
+public class AdListController extends AfterLoginController {
   @Inject AdService service;
 
-  @Override public Object handle(User user, Request request, Response response) {
-    return service.listFor(user, request.queryParams("filter"));
+  @Override public Object handleAfterLogin(User user, Request request, Response response) {
+    String communityId = request.queryParams("communityId");
+    if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
+    
+    return service.listFor(user, parseLong(communityId), request.queryParams("filter"));
   }
 }

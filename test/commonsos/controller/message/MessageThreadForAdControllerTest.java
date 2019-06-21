@@ -1,8 +1,9 @@
 package commonsos.controller.message;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageThreadView;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.view.MessageThreadView;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -27,7 +28,7 @@ public class MessageThreadForAdControllerTest {
     MessageThreadView view = new MessageThreadView();
     when(service.threadForAd(user, 123L)).thenReturn(view);
 
-    MessageThreadView result = controller.handle(user, request, null);
+    MessageThreadView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(view);
   }

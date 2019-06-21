@@ -1,7 +1,8 @@
 package commonsos.controller.message;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessageService;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,7 +25,7 @@ public class MessageThreadUnreadCountControllerTest {
     User user = new User();
     when(service.unreadMessageThreadCount(user)).thenReturn(3);
 
-    Map<String, Object> result = controller.handle(user, null, null);
+    Map<String, Object> result = controller.handleAfterLogin(user, null, null);
 
     assertThat(result.get("count")).isEqualTo(3);
   }

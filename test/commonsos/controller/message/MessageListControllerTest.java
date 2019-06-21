@@ -1,8 +1,9 @@
 package commonsos.controller.message;
 
-import commonsos.domain.auth.User;
-import commonsos.domain.message.MessageService;
-import commonsos.domain.message.MessageView;
+import commonsos.repository.entity.User;
+import commonsos.service.MessageService;
+import commonsos.view.MessageView;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,7 @@ public class MessageListControllerTest {
     when(request.params("id")).thenReturn("123");
     when(service.messages(user, 123L)).thenReturn(messages);
 
-    List<MessageView> result = controller.handle(user, request, null);
+    List<MessageView> result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isSameAs(messages);
   }

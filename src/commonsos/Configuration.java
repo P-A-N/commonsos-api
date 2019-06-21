@@ -18,19 +18,43 @@ public class Configuration {
   }
 
   public String databaseUrl() {
-    return environmentVariable("DATABASE_URL", "jdbc:postgresql://localhost:5432/commonsos");
+    return environmentVariable("DATABASE_URL", "jdbc:postgresql://localhost:5432/commonsos_test");
   }
 
   public String databaseUsername() {
-    return environmentVariable("DATABASE_USERNAME", "commonsos");
+    return environmentVariable("DATABASE_USERNAME", "commonsos_test");
   }
 
   public String databasePassword() {
-    return environmentVariable("DATABASE_PASSWORD", "commonsos");
+    return environmentVariable("DATABASE_PASSWORD", "test");
   }
 
   public String ethererumUrl() {
     return environmentVariable("ETHEREUM_URL", "http://localhost:8545/");
+  }
+
+  public String smtpHost() {
+    return environmentVariable("SMTP_HOST", "localhost");
+  }
+
+  public String smtpPort() {
+    return environmentVariable("SMTP_PORT", "587");
+  }
+
+  public String smtpUser() {
+    return environmentVariable("SMTP_USER", "testuser");
+  }
+
+  public String smtpPassword() {
+    return environmentVariable("SMTP_PASSWORD", "test");
+  }
+
+  public String smtpFromAddress() {
+    return environmentVariable("SMTP_FROM_ADDRESS", "no-replay@app.test.commons.love");
+  }
+
+  public String commonsosHost() {
+    return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
   }
 
   String environmentVariable(String key) {

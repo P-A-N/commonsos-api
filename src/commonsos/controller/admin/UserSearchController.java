@@ -1,20 +1,31 @@
 package commonsos.controller.admin;
 
-import commonsos.controller.Controller;
-import commonsos.domain.auth.User;
-import commonsos.domain.auth.UserService;
-import commonsos.domain.auth.UserView;
+import static java.lang.Long.parseLong;
+import static spark.utils.StringUtils.isEmpty;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import commonsos.annotation.ReadOnly;
+import commonsos.controller.AfterLoginController;
+import commonsos.exception.BadRequestException;
+import commonsos.repository.entity.User;
+import commonsos.service.UserService;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
-import javax.inject.Inject;
-import java.util.List;
-
-public class UserSearchController extends Controller {
+@ReadOnly
+public class UserSearchController extends AfterLoginController {
 
   @Inject UserService service;
 
-  @Override public List<UserView> handle(User user, Request request, Response response) {
-    return service.searchUsers(user, request.queryParams("q"));
+  @Override public List<UserView> handleAfterLogin(User user, Request request, Response response) {
+    String communityId = request.queryParams("communityId");
+    if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
+    String q = request.queryParams("q");
+    
+    return service.searchUsers(user, parseLong(communityId), q);
   }
 }

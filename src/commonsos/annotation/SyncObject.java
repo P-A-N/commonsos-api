@@ -1,0 +1,8 @@
+package commonsos.annotation;
+
+public enum SyncObject {
+  USERNAME_AND_EMAIL_ADDRESS,
+  MESSAGE_THRED_FOR_AD,
+  MESSAGE_THRED_BETWEEN_USER,
+  REGIST_TRANSACTION
+}
