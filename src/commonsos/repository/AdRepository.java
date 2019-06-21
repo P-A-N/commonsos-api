@@ -2,15 +2,17 @@ package commonsos.repository;
 
 import static java.util.Optional.empty;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 
 import commonsos.exception.AdNotFoundException;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.ResultList;
+import commonsos.service.command.PaginationCommand;
 
 @Singleton
 public class AdRepository extends Repository {
@@ -24,35 +26,45 @@ public class AdRepository extends Repository {
     return ad;
   }
 
-  public List<Ad> ads(Long communityId) {
-    return em()
-      .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE", Ad.class)
+  public ResultList<Ad> ads(Long communityId, PaginationCommand pagination) {
+    TypedQuery<Ad> query = em()
+      .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE ORDER BY id", Ad.class)
       .setLockMode(lockMode())
-      .setParameter("communityId", communityId).getResultList();
+      .setParameter("communityId", communityId);
+    
+    ResultList<Ad> resultList = getResultList(query, pagination);
+
+    return resultList;
   }
 
-  public List<Ad> ads(Long communityId, String filter) {
-    return em()
+  public ResultList<Ad> ads(Long communityId, String filter, PaginationCommand pagination) {
+    TypedQuery<Ad> query = em()
       .createQuery("SELECT a FROM Ad a JOIN User u ON a.createdBy = u.id AND u.deleted = FALSE" +
         " WHERE a.communityId = :communityId " +
         " AND a.deleted = FALSE" +
         " AND (" +
           " LOWER(a.description) LIKE LOWER(:filter) OR LOWER(a.title) LIKE LOWER(:filter) " +
           " OR LOWER(u.username) LIKE LOWER(:filter) " +
-        " )", Ad.class)
+        " )" +
+        " ORDER BY a.id", Ad.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
-      .setParameter("filter", "%"+filter+"%")
-      .getResultList();
+      .setParameter("filter", "%"+filter+"%");
+    
+    ResultList<Ad> resultList = getResultList(query, pagination);
+
+    return resultList;
   }
 
-  public List<Ad> myAds(List<Long> communityIdList, Long userId) {
-    return em()
-      .createQuery("FROM Ad WHERE communityId in :communityIdList AND createdBy = :userId AND deleted = FALSE", Ad.class)
+  public ResultList<Ad> myAds(Long userId, PaginationCommand pagination) {
+    TypedQuery<Ad> query = em()
+      .createQuery("FROM Ad WHERE createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
       .setLockMode(lockMode())
-      .setParameter("communityIdList", communityIdList)
-      .setParameter("userId", userId)
-      .getResultList();
+      .setParameter("userId", userId);
+    
+    ResultList<Ad> resultList = getResultList(query, pagination);
+
+    return resultList;
   }
 
   public Optional<Ad> find(Long id) {

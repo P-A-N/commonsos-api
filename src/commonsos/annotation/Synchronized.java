@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 public @interface Synchronized {
 
   /**
-   * Name of lock object key.
+   * lock object.
    */
   SyncObject value();
 }

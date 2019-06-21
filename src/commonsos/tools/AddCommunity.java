@@ -141,7 +141,7 @@ public class AddCommunity {
     boolean isAdminCreated = false;
     while (!isAdminCreated) {
       scanner.nextLine();
-      Optional<User> result = userRepository.findByUsername(adminUsername);
+      Optional<User> result = emService.runInTransaction(() -> userRepository.findByUsername(adminUsername));
       if (result.isPresent()) {
         admin = result.get();
         isAdminCreated = true;

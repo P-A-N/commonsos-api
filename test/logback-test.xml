@@ -1,3 +1,14 @@
 <configuration>
   <root level="OFF"/>
+  <!-- <property name="defaultPattern"
+            value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100} - [%X{ip}][%X{username}][%X{sessionId}][%X{requestId}] %msg%n"/>
+
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${defaultPattern}</pattern>
+    </encoder>
+  </appender>
+  <root level="info">
+    <appender-ref ref="stdout"/>
+  </root> -->
 </configuration>

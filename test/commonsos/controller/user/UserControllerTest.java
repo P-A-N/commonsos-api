@@ -8,19 +8,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import spark.Request;
 import spark.Response;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
 
   @Mock Request request;
@@ -37,32 +38,32 @@ public class UserControllerTest {
   @Test
   public void handle_adminUser() {
     // prepare
-    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
     when(userService.user(any())).thenReturn(
-        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(user))));
+        new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(user)))));
 
     // execute
     controller.handleAfterLogin(user, request, response);
 
     // verify
     verify(userService, times(1)).privateView(any(User.class), any(Long.class));
-    verify(userService, never()).view(any(Long.class));
+    verify(userService, never()).publicUserAndCommunityView(any(Long.class));
   }
 
   @Test
   public void handle_generalUser() {
     // prepare
-    User user = new User().setId(id("user")).setCommunityList(asList(new Community().setId(id("community"))));
+    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
     when(userService.user(any())).thenReturn(
-        new User().setId(id("other")).setCommunityList(asList(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2"))))));
+        new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2")))))));
 
     // execute
     controller.handleAfterLogin(user, request, response);
 
     // verify
     verify(userService, never()).privateView(any(User.class), any(Long.class));
-    verify(userService, times(1)).view(any(Long.class));
+    verify(userService, times(1)).publicUserAndCommunityView(any(Long.class));
   }
 }

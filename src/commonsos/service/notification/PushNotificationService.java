@@ -1,21 +1,31 @@
 package commonsos.service.notification;
 
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.*;
-import com.google.firebase.messaging.Message;
-import commonsos.Configuration;
-import commonsos.repository.entity.User;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.Collections.emptyMap;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.time.Duration;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
+
+import commonsos.Configuration;
+import commonsos.repository.entity.User;
+import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
@@ -43,7 +53,7 @@ public class PushNotificationService {
   }
 
   public void send(User recipient, String message, Map<String, String> params) {
-    if (recipient.getPushNotificationToken() == null) return;
+    if (StringUtils.isEmpty(recipient.getPushNotificationToken())) return;
     log.info(String.format("Sending push notification to user: %s, token: %s", recipient.getUsername(), recipient.getPushNotificationToken()));
     send(recipient.getPushNotificationToken(), message, params);
   }

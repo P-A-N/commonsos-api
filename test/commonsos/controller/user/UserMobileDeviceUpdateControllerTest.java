@@ -1,23 +1,22 @@
 package commonsos.controller.user;
 
-import commonsos.controller.user.UserMobileDeviceUpdateController;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.MobileDeviceUpdateCommand;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import spark.Request;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserMobileDeviceUpdateControllerTest {
 
   @InjectMocks UserMobileDeviceUpdateController controller;
@@ -25,7 +24,7 @@ public class UserMobileDeviceUpdateControllerTest {
   @Mock UserService userService;
   @Mock User user;
 
-  @Before
+  @BeforeEach
   public void setGson() {
     controller.gson = new GsonProvider().get();
   }

@@ -7,23 +7,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserUpdateCommand;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserUpdateControllerTest {
 
   @Mock Request request;
@@ -31,7 +31,7 @@ public class UserUpdateControllerTest {
   @Mock UserService userService;
   @InjectMocks UserUpdateController controller;
 
-  @Before
+  @BeforeEach
   public void setGson() {
     controller.gson = new GsonProvider().get();
   }
@@ -49,12 +49,12 @@ public class UserUpdateControllerTest {
     when(request.body()).thenReturn(json);
     User updatedUser = new User();
     when(userService.updateUser(any(), any())).thenReturn(updatedUser);
-    UserPrivateView privateView = new UserPrivateView();
+    PrivateUserView privateView = new PrivateUserView();
     when(userService.privateView(updatedUser)).thenReturn(privateView);
 
     // execute
     User user = new User();
-    UserPrivateView result = controller.handleAfterLogin(user, request, response);
+    PrivateUserView result = controller.handleAfterLogin(user, request, response);
 
     // verify
     ArgumentCaptor<UserUpdateCommand> commandCaptor = ArgumentCaptor.forClass(UserUpdateCommand.class);

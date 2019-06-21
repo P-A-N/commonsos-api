@@ -5,11 +5,16 @@ import static spark.utils.StringUtils.isEmpty;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 import commonsos.annotation.ReadOnly;
 import commonsos.controller.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
+import commonsos.view.AdListView;
 import spark.Request;
 import spark.Response;
 
@@ -17,10 +22,15 @@ import spark.Response;
 public class AdListController extends AfterLoginController {
   @Inject AdService service;
 
-  @Override public Object handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public AdListView handleAfterLogin(User user, Request request, Response response) {
     String communityId = request.queryParams("communityId");
     if (isEmpty(communityId)) throw new BadRequestException("communityId is required");
+    if (!NumberUtils.isParsable(communityId)) throw new BadRequestException("invalid communityId");
+
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    return service.listFor(user, parseLong(communityId), request.queryParams("filter"));
+    AdListView view = service.listFor(user, parseLong(communityId), request.queryParams("filter"), paginationCommand);
+    return view;
   }
 }

@@ -15,10 +15,13 @@ import lombok.experimental.Accessors;
 @Entity @Table(name = "communities")
 @Getter @Setter @Accessors(chain=true)
 public class Community {
-  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
-  String name;
-  String tokenContractAddress;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
+  private String name;
+  private String description;
+  private String tokenContractAddress;
   @OneToOne
   @JoinColumn(name = "admin_user_id")
   private User adminUser;
+  private String photoUrl;
+  private String coverPhotoUrl;
 }

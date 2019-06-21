@@ -6,7 +6,7 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.ZERO;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;

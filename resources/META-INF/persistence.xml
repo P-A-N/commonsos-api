@@ -16,6 +16,8 @@
     <class>commonsos.repository.entity.MessageThread</class>
     <class>commonsos.repository.entity.MessageThreadParty</class>
     <class>commonsos.repository.entity.Community</class>
+    <class>commonsos.repository.entity.CommunityUser</class>
+    <class>commonsos.repository.entity.CommunityNotification</class>
     <class>commonsos.repository.entity.TemporaryUser</class>
     <class>commonsos.repository.entity.TemporaryEmailAddress</class>
     <class>commonsos.repository.entity.PasswordResetRequest</class>

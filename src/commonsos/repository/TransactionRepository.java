@@ -11,10 +11,13 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
+import commonsos.service.command.PaginationCommand;
 
 @Singleton
 public class TransactionRepository extends Repository {
@@ -29,14 +32,18 @@ public class TransactionRepository extends Repository {
     return transaction;
   }
 
-  public List<Transaction> transactions(User user, Long communityId) {
-    return em()
+  public ResultList<Transaction> transactions(User user, Long communityId, PaginationCommand pagination) {
+    TypedQuery<Transaction> query = em()
       .createQuery("FROM Transaction WHERE communityId = :communityId " +
-          "AND (beneficiaryId = :userId OR remitterId = :userId)", Transaction.class)
+          "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
+          "ORDER BY id", Transaction.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
-      .setParameter("userId", user.getId())
-      .getResultList();
+      .setParameter("userId", user.getId());
+    
+    ResultList<Transaction> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
 
   public void update(Transaction transaction) {

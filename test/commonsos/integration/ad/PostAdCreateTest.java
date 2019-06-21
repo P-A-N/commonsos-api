@@ -9,13 +9,14 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 
 public class PostAdCreateTest extends IntegrationTest {
@@ -24,10 +25,10 @@ public class PostAdCreateTest extends IntegrationTest {
   private User user;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
-    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
+    user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
     sessionId = login("user", "pass");
   }
@@ -54,7 +55,6 @@ public class PostAdCreateTest extends IntegrationTest {
       .body("points", equalTo(10))
       .body("location", equalTo("location"))
       .body("own", equalTo(true))
-      .body("payable", equalTo(false))
       .body("type", equalTo("GIVE"))
       .body("createdBy.id", equalTo(user.getId().intValue()))
       .body("createdBy.username", equalTo("user"));

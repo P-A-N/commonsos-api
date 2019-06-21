@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
 
 import commonsos.integration.IntegrationTest;
@@ -18,7 +18,7 @@ public class PostPasswordResetTest extends IntegrationTest {
 
   private User user;
   
-  @Before
+  @BeforeEach
   public void createUser() {
     user = create(new User().setUsername("user").setPasswordHash(hash("password1")).setEmailAddress("test@test.com"));
   }

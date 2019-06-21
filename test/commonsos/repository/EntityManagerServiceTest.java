@@ -1,9 +1,7 @@
 package commonsos.repository;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,17 +16,17 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.repository.EntityManagerService.Executable;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EntityManagerServiceTest {
   @Mock EntityManagerFactory entityManagerFactory;
   @InjectMocks @Spy EntityManagerService entityManagerService = new EntityManagerService() {
@@ -40,8 +38,8 @@ public class EntityManagerServiceTest {
     EntityManager entityManager = mock(EntityManager.class);
     when(entityManagerFactory.createEntityManager()).thenReturn(entityManager);
 
-    assertSame(entityManager, entityManagerService.get());
-    assertSame(entityManager, entityManagerService.get());
+    assertThat(entityManagerService.get()).isEqualTo(entityManager);
+    assertThat(entityManagerService.get()).isEqualTo(entityManager);
 
     verify(entityManagerFactory, times(1)).createEntityManager();
   }
@@ -54,7 +52,7 @@ public class EntityManagerServiceTest {
     entityManagerService.close();
 
     verify(entityManager).close();
-    assertNull(entityManagerService.em.get());
+    assertThat(entityManagerService.em.get()).isNull();
   }
 
   @Test
@@ -99,8 +97,8 @@ public class EntityManagerServiceTest {
     thread2.join();
 
     verify(entityManagerFactory, times(2)).createEntityManager();
-    assertSame(entityManager1, thread1.entityManager);
-    assertSame(entityManager2, thread2.entityManager);
+    assertThat(thread1.entityManager).isEqualTo(entityManager1);
+    assertThat(thread2.entityManager).isEqualTo(entityManager2);
   }
 
   @Test
@@ -114,7 +112,7 @@ public class EntityManagerServiceTest {
     Executable<String> code = mock(Executable.class);
     when(code.execute()).thenReturn("test");
 
-    assertEquals("test", entityManagerService.runInTransaction(code));
+    assertThat(entityManagerService.runInTransaction(code)).isEqualTo("test");
 
     InOrder inOrder = inOrder(transaction, code);
     inOrder.verify(transaction).begin();
@@ -132,21 +130,14 @@ public class EntityManagerServiceTest {
     when(transaction.isActive()).thenReturn(false).thenReturn(true);
 
     Executable<String> code = mock(Executable.class);
-    RuntimeException runtimeException = new RuntimeException();
-    when(code.execute()).thenThrow(runtimeException);
+    when(code.execute()).thenThrow(new RuntimeException());
 
-    try {
-      entityManagerService.runInTransaction(code);
-      fail();
-    }
-    catch (RuntimeException e) {
-      assertSame(runtimeException, e);
-      InOrder inOrder = inOrder(transaction, code);
-      inOrder.verify(transaction).begin();
-      inOrder.verify(code).execute();
-      inOrder.verify(transaction).rollback();
-      verify(transaction, never()).commit();
-    }
+    assertThrows(RuntimeException.class, () -> entityManagerService.runInTransaction(code));
+    InOrder inOrder = inOrder(transaction, code);
+    inOrder.verify(transaction).begin();
+    inOrder.verify(code).execute();
+    inOrder.verify(transaction).rollback();
+    verify(transaction, never()).commit();
   }
 
   @Test
@@ -158,21 +149,14 @@ public class EntityManagerServiceTest {
     when(transaction.isActive()).thenReturn(false).thenReturn(true);
 
     Executable<String> code = mock(Executable.class);
-    Exception exception = new Exception();
-    when(code.execute()).thenThrow(exception);
+    when(code.execute()).thenThrow(new Exception());
 
-    try {
-      entityManagerService.runInTransaction(code);
-      fail();
-    }
-    catch (Exception e) {
-      assertSame(exception, e.getCause());
-      InOrder inOrder = inOrder(transaction, code);
-      inOrder.verify(transaction).begin();
-      inOrder.verify(code).execute();
-      inOrder.verify(transaction).rollback();
-      verify(transaction, never()).commit();
-    }
+    assertThrows(Exception.class, () -> entityManagerService.runInTransaction(code));
+    InOrder inOrder = inOrder(transaction, code);
+    inOrder.verify(transaction).begin();
+    inOrder.verify(code).execute();
+    inOrder.verify(transaction).rollback();
+    verify(transaction, never()).commit();
   }
 
   @Test
@@ -205,6 +189,6 @@ public class EntityManagerServiceTest {
   public void defaultSchema() throws Exception {
     when(entityManagerFactory.getProperties()).thenReturn(Collections.singletonMap("hibernate.default_schema", "schema"));
 
-    assertEquals("schema", entityManagerService.defaultSchema());
+    assertThat(entityManagerService.defaultSchema()).isEqualTo("schema");
   }
 }

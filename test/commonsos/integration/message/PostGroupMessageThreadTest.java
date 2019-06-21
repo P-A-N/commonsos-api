@@ -11,11 +11,12 @@ import static org.hamcrest.Matchers.nullValue;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 
@@ -29,14 +30,14 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   private User otherCommunityUser;
   private String sessionId;
   
-  @Before
+  @BeforeEach
   public void setup() {
     community =  create(new Community().setName("community"));
     otherCommunity =  create(new Community().setName("otherCommunity"));
-    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityList(asList(community)));
-    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityList(asList(otherCommunity)));
+    user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
 
     sessionId = login("user1", "pass");
   }
@@ -45,6 +46,7 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   public void groupMessageThread() {
     // prepare
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("title", "title");
     requestParam.put("memberIds", asList(user2.getId(), user3.getId()));
     
@@ -56,13 +58,16 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
+      .body("communityId", equalTo(community.getId().intValue()))
       .body("title", equalTo("title"))
+      .body("personalTitle", nullValue())
       .body("parties.id", contains(user2.getId().intValue(), user3.getId().intValue()))
       .body("creator.id", equalTo(user1.getId().intValue()))
       .body("counterParty.id", equalTo(user2.getId().intValue()))
       .body("lastMessage", nullValue())
       .body("unread", equalTo(false))
       .body("group", equalTo(true))
+      .body("photoUrl", nullValue())
       .body("createdAt", notNullValue())
       .extract().path("id");
     
@@ -84,6 +89,7 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
   public void groupMessageThread_otherCommunityUser() {
     // prepare
     Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
     requestParam.put("title", "title");
     requestParam.put("memberIds", asList(otherCommunityUser.getId()));
     
@@ -92,6 +98,6 @@ public class PostGroupMessageThreadTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/message-threads/group")
-      .then().statusCode(200);
+      .then().statusCode(400);
   }
 }

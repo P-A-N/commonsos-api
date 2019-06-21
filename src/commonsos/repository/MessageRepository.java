@@ -5,8 +5,12 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.TypedQuery;
 
 import commonsos.repository.entity.Message;
+import commonsos.repository.entity.ResultList;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.MessageUtil;
 
 @Singleton
 public class MessageRepository extends Repository {
@@ -21,18 +25,26 @@ public class MessageRepository extends Repository {
     return message;
   }
 
-  public List<Message> listByThread(Long threadId) {
-    return em()
-      .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt", Message.class)
+  public ResultList<Message> listByThread(Long threadId, PaginationCommand pagination) {
+    TypedQuery<Message> query = em()
+      .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt, id", Message.class)
       .setLockMode(lockMode())
-      .setParameter("threadId", threadId)
-      .getResultList();
+      .setParameter("threadId", threadId);
+    
+    ResultList<Message> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
 
   public Optional<Message> lastMessage(Long threadId) {
-    List<Message> messages = em().createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt DESC", Message.class)
+    List<Message> messages = em().createQuery(
+        "FROM Message " +
+        "WHERE threadId = :threadId " +
+        "AND createdBy <> :systemMessageCreatorId " +
+        "ORDER BY createdAt DESC", Message.class)
       .setLockMode(lockMode())
       .setParameter("threadId", threadId)
+      .setParameter("systemMessageCreatorId", MessageUtil.getSystemMessageCreatorId())
       .setMaxResults(1)
       .getResultList();
 

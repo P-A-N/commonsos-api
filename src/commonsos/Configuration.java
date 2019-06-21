@@ -57,7 +57,7 @@ public class Configuration {
     return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
   }
 
-  String environmentVariable(String key) {
+  public String environmentVariable(String key) {
     return environmentVariable(key, null);
   }
 
@@ -65,7 +65,7 @@ public class Configuration {
     return environmentVariable("FIREBASE_CREDENTIALS");
   }
 
-  String environmentVariable(String key, String defaultValue) {
+  public String environmentVariable(String key, String defaultValue) {
     String value = System.getenv(key);
     if (value == null && defaultValue != null) return defaultValue;
     if (value == null && defaultValue == null) throw new RuntimeException(String.format("Environment variable %s not defined", key));

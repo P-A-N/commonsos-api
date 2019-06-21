@@ -1,20 +1,20 @@
 package commonsos.controller.user;
 
-import commonsos.controller.AfterLoginController;
+import javax.inject.Inject;
+
+import commonsos.controller.UploadPhotoController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import lombok.extern.slf4j.Slf4j;
+import commonsos.service.command.UploadPhotoCommand;
 import spark.Request;
 import spark.Response;
 
-import javax.inject.Inject;
-
-@Slf4j
-public class UserAvatarUpdateController extends AfterLoginController {
+public class UserAvatarUpdateController extends UploadPhotoController {
 
   @Inject UserService userService;
 
-  @Override public String handleAfterLogin(User user, Request request, Response response) {
-    return userService.updateAvatar(user, image(request));
+  @Override
+  protected String handleUploadPhoto(User user, UploadPhotoCommand command, Request request, Response response) {
+    return userService.updateAvatar(user, command);
   }
 }

@@ -14,7 +14,7 @@ import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -26,7 +26,7 @@ public class CreateAccountCompleteController implements Route {
   @Inject UserService userService;
   @Inject CSRF csrf;
   
-  @Override public UserPrivateView handle(Request request, Response response) {
+  @Override public PrivateUserView handle(Request request, Response response) {
     String accessId = request.params("accessId");
     if(accessId == null || accessId.isEmpty()) throw new BadRequestException("accessId is required");
 

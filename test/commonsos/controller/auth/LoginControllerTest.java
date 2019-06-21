@@ -8,12 +8,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.MDC;
 
 import commonsos.di.GsonProvider;
@@ -21,12 +21,12 @@ import commonsos.filter.CSRF;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.session.UserSession;
-import commonsos.view.UserPrivateView;
+import commonsos.view.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoginControllerTest {
 
   @Mock Request request;
@@ -36,7 +36,7 @@ public class LoginControllerTest {
   @Mock CSRF csrf;
   @InjectMocks LoginController controller;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception {
     controller.gson = new GsonProvider().get();
     when(request.session()).thenReturn(session);
@@ -50,11 +50,11 @@ public class LoginControllerTest {
     when(request.body()).thenReturn("{\"username\": \"john\", \"password\": \"pwd\"}");
     UserSession userSession = new UserSession();
     when(userService.session(user)).thenReturn(userSession);
-    UserPrivateView userView = new UserPrivateView();
+    PrivateUserView userView = new PrivateUserView();
     when(userService.privateView(user)).thenReturn(userView);
 
     // execute
-    UserPrivateView result = controller.handle(request, response);
+    PrivateUserView result = controller.handle(request, response);
 
     // verify
     verify(userService, times(1)).checkPassword("john", "pwd");

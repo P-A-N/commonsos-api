@@ -1,10 +1,11 @@
 package commonsos;
 
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+
+import org.junit.jupiter.api.Test;
 
 
 public class ConfigurationTest {
@@ -39,9 +40,9 @@ public class ConfigurationTest {
     assertThat(configuration.firebaseCredentialsFile()).isEqualTo("file.name");
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void environmentVariable_notFound() {
-    configuration.environmentVariable("RANDOM_KEY");
+    assertThrows(RuntimeException.class, () -> configuration.environmentVariable("RANDOM_KEY"));
   }
 
   @Test

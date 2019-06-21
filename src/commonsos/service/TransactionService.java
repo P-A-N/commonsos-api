@@ -17,33 +17,43 @@ import javax.inject.Singleton;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
+import commonsos.repository.CommunityRepository;
 import commonsos.repository.TransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Transaction;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
-import commonsos.util.AdUtil;
+import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.BalanceView;
+import commonsos.view.TransactionListView;
 import commonsos.view.TransactionView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
 public class TransactionService {
+  
   @Inject TransactionRepository repository;
   @Inject UserRepository userRepository;
   @Inject AdRepository adRepository;
+  @Inject CommunityRepository communityRepository;
   @Inject BlockchainService blockchainService;
+  @Inject BlockchainEventService blockchainEventService;
   @Inject PushNotificationService pushNotificationService;
 
   public BalanceView balance(User user, Long communityId) {
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
     BalanceView view = new BalanceView()
         .setCommunityId(communityId)
+        .setTokenSymbol(blockchainService.tokenSymbol(communityId))
         .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
     return view;
   }
@@ -52,11 +62,20 @@ public class TransactionService {
     return transaction.getRemitterId().equals(user.getId());
   }
 
-  public List<TransactionView> transactions(User user, Long communityId) {
-    return repository.transactions(user, communityId).stream()
-      .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
-      .map(transaction -> view(user, transaction))
-      .collect(toList());
+  public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
+    ResultList<Transaction> result = repository.transactions(user, communityId, null);
+
+    List<TransactionView> transactionViews = result.getList().stream()
+        .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
+        .map(transaction -> view(user, transaction))
+        .collect(toList());
+    
+    TransactionListView listView = new TransactionListView();
+    listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
+    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    listView.setTransactionList(paginationedViews);
+    
+    return listView;
   }
 
   public TransactionView view(User user, Transaction transaction) {
@@ -70,30 +89,26 @@ public class TransactionService {
     Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
     Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
     
-    if (remitter.isPresent()) view.setRemitter(UserUtil.view(remitter.get()));
-    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.view(beneficiary.get()));
+    if (remitter.isPresent()) view.setRemitter(UserUtil.publicView(remitter.get()));
+    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicView(beneficiary.get()));
     
     return view;
   }
 
   public Transaction create(User user, TransactionCreateCommand command) {
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
-    if (isBlank(command.getDescription()))  throw new BadRequestException();
-    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException();
-    if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException();
+    if (isBlank(command.getDescription()))  throw new BadRequestException("description is blank");
+    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
+    if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException("user is beneficiary");
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryId());
+    
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!UserUtil.isMember(user, community)) throw new DisplayableException("error.userIsNotCommunityMember");
+    if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 
     if (command.getAdId() != null) {
       Ad ad = adRepository.findStrict(command.getAdId());
-      
-      // TODO this is temporary solution.
-//      if (!AdUtil.isPayableByUser(user, ad)) throw new BadRequestException();
-//      if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
-      if (AdUtil.isPayableByUser(user, ad)) {
-        if (!beneficiary.getCommunityList().stream().anyMatch(c -> c.getId().equals(command.getCommunityId()))) throw new BadRequestException();
-      } else {
-        command.setAdId(null);
-      }
+      if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
     }
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
@@ -109,10 +124,11 @@ public class TransactionService {
 
     repository.create(transaction);
 
-    String blockchainTransactionId = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
-    transaction.setBlockchainTransactionHash(blockchainTransactionId);
+    String blockchainTransactionHash = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
+    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
 
     repository.update(transaction);
+    blockchainEventService.checkTransaction(blockchainTransactionHash);
 
     return transaction;
   }
@@ -120,7 +136,6 @@ public class TransactionService {
   public void markTransactionCompleted(String blockChainTransactionHash) {
     Optional<Transaction> result = repository.findByBlockchainTransactionHash(blockChainTransactionHash);
     if (!result.isPresent()) {
-      log.warn(format("Cannot mark transaction completed, hash %s not found", blockChainTransactionHash));
       return;
     }
 
