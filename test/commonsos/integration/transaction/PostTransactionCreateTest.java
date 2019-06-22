@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -58,7 +59,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
     
     // verify db
     Transaction transaction = emService.get().createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
@@ -76,7 +79,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
   }
 
   @Test
@@ -125,7 +130,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
     
     // verify db
     Transaction transaction = emService.get().createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
@@ -143,7 +150,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
   }
 
   @Test
@@ -172,7 +181,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
   }
 
   @Test
@@ -209,7 +220,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
     
     // verify db
     Transaction transaction = emService.get().createQuery("FROM Transaction WHERE beneficiaryId = :userId", Transaction.class)

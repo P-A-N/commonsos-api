@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
@@ -62,7 +64,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalance(user1, community1, 100);
 
     // transfer token from user
-    transferToken(user1, user2, community1, 10);
+    transferToken(user1, user2, community1, 10, 90);
     waitUntilTransactionCompleted();
     checkBalance(user1, community1, 90);
     checkBalance(user2, community1, 10);
@@ -77,7 +79,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalance(user1, community2, 100);
 
     // transfer token from user
-    transferToken(user1, user2, community2, 20);
+    transferToken(user1, user2, community2, 20, 80);
     waitUntilTransactionCompleted();
     checkBalance(user1, community2, 80);
     checkBalance(user2, community2, 20);
@@ -171,6 +173,16 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   }
   
   private void transferToken(User from, User to, Community community, int amount) {
+    Matcher<Object> matcher = notNullValue();
+    transferToken(from, to, community, amount, matcher);
+  }
+
+  private void transferToken(User from, User to, Community community, int amount, float expectAmount) {
+    Matcher<Float> matcher = equalTo(expectAmount);
+    transferToken(from, to, community, amount, matcher);
+  }
+
+  private void transferToken(User from, User to, Community community, int amount, Matcher<?> expectAmount) {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", to.getId());
@@ -184,7 +196,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/transactions")
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("balance", expectAmount);
     log.info(String.format("transfer token completed. [from=%s, to=%s, community=%s]", community.getName(), from.getUsername(), to.getUsername()));
   }
   

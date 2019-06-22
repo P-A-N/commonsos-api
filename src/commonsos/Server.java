@@ -51,6 +51,7 @@ import commonsos.controller.message.MessageThreadUnreadCountController;
 import commonsos.controller.message.MessageThreadUnsubscribeController;
 import commonsos.controller.message.MessageThreadWithUserController;
 import commonsos.controller.message.UpdateMessageThreadPersonalTitleController;
+import commonsos.controller.transaction.AdminTransactionListController;
 import commonsos.controller.transaction.BalanceController;
 import commonsos.controller.transaction.TransactionCreateController;
 import commonsos.controller.transaction.TransactionListController;
@@ -186,6 +187,7 @@ public class Server {
     get("/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
     post("/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
+    get("/admin/transactions", injector.getInstance(AdminTransactionListController.class), toJson);
     
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);

@@ -11,6 +11,7 @@ import commonsos.controller.AfterLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.TransactionService;
 import commonsos.service.command.TransactionCreateCommand;
+import commonsos.view.BalanceView;
 import spark.Request;
 import spark.Response;
 
@@ -20,9 +21,10 @@ public class TransactionCreateController extends AfterLoginController {
   @Inject TransactionService service;
   @Inject Gson gson;
 
-  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
+  @Override protected BalanceView handleAfterLogin(User user, Request request, Response response) {
     TransactionCreateCommand command = gson.fromJson(request.body(), TransactionCreateCommand.class);
     service.create(user, command);
-    return "";
+    
+    return service.balance(user, command.getCommunityId());
   }
 }

@@ -14,16 +14,17 @@ import spark.Request;
 import spark.Response;
 
 @ReadOnly
-public class TransactionListController extends AfterLoginController {
+public class AdminTransactionListController extends AfterLoginController {
 
   @Inject private TransactionService service;
 
   @Override
   public TransactionListView handleAfterLogin(User user, Request request, Response response) {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
+    Long userId = RequestUtil.getQueryParamLong(request, "userId", true);
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
-    
-    TransactionListView view = service.transactions(user, communityId, paginationCommand);
+
+    TransactionListView view = service.transactionsByAdmin(user, communityId, userId, paginationCommand);
     return view;
   }
 }

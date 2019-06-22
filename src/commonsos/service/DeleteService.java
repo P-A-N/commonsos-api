@@ -74,7 +74,7 @@ public class DeleteService {
     log.info(String.format("deleting ad by admin. adId=%d, adminId=%d", ad.getId(), admin.getId()));
     
     // only admin is allowed to delete ad
-    if (!UserUtil.isAdmin(admin, ad.getCommunityId()))throw new ForbiddenException();
+    if (!UserUtil.isAdmin(admin, ad.getCommunityId())) throw new ForbiddenException();
 
     // delete ad's photo
     deleteAd(ad);

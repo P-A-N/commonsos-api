@@ -16,6 +16,7 @@ import javax.inject.Singleton;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
+import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.TransactionRepository;
@@ -62,7 +63,15 @@ public class TransactionService {
     return transaction.getRemitterId().equals(user.getId());
   }
 
+  public TransactionListView transactionsByAdmin(User admin, Long communityId, Long userId, PaginationCommand pagination) {
+    if (!UserUtil.isAdmin(admin, communityId)) throw new ForbiddenException(String.format("user is not a admin.[userId=%d, communityId=%d]", admin.getId(), communityId));
+    
+    User user = userRepository.findStrictById(userId);
+    return transactions(user, communityId, pagination);
+  }
+
   public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
+    communityRepository.findStrictById(communityId);
     ResultList<Transaction> result = repository.transactions(user, communityId, null);
 
     List<TransactionView> transactionViews = result.getList().stream()
