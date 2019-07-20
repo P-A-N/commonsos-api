@@ -122,8 +122,8 @@ public class Server {
 
   private void initRoutes() {
 
-    before(new AddHeaderFilter());
-    before(new LogFilter());
+    before(injector.getInstance(AddHeaderFilter.class));
+    before(injector.getInstance(LogFilter.class));
     before((request, response) -> log.info(requestInfo(request)));
 
     options("/*", injector.getInstance(PreflightController.class));
