@@ -57,8 +57,8 @@ public class Configuration {
     return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
   }
 
-  public String preflightUrl() {
-    return environmentVariable("PREFLIGHT_URL", "http://commonspeople.localhost:8888");
+  public String accessControlAllowOrigin() {
+    return environmentVariable("ACCESS_CONTROL_ALLOW_ORIGIN", "http://commonspeople.localhost:8888");
   }
 
   public String environmentVariable(String key) {
