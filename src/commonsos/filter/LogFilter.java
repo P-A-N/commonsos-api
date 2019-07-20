@@ -7,9 +7,9 @@ import spark.Filter;
 import spark.Request;
 import spark.Response;
 
-import java.util.concurrent.atomic.AtomicLong;
+import static commonsos.controller.app.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 
-import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class LogFilter implements Filter {
   public static final String USERNAME_MDC_KEY = "username";

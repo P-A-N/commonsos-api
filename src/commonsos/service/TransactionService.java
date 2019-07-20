@@ -33,9 +33,9 @@ import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.BalanceView;
-import commonsos.view.TransactionListView;
-import commonsos.view.TransactionView;
+import commonsos.view.app.BalanceView;
+import commonsos.view.app.TransactionListView;
+import commonsos.view.app.TransactionView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton

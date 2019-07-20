@@ -6,7 +6,7 @@ import static java.math.BigDecimal.ZERO;
 
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
-import commonsos.view.AdView;
+import commonsos.view.app.AdView;
 
 public class AdUtil {
   

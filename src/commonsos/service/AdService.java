@@ -22,8 +22,8 @@ import commonsos.service.image.ImageUploadService;
 import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.AdListView;
-import commonsos.view.AdView;
+import commonsos.view.app.AdListView;
+import commonsos.view.app.AdView;
 
 @Singleton
 public class AdService {

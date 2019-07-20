@@ -6,11 +6,11 @@ import java.util.Optional;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
-import commonsos.view.BalanceView;
-import commonsos.view.CommunityUserView;
-import commonsos.view.CommunityView;
-import commonsos.view.PrivateUserView;
-import commonsos.view.PublicUserView;
+import commonsos.view.app.BalanceView;
+import commonsos.view.app.CommunityUserView;
+import commonsos.view.app.CommunityView;
+import commonsos.view.app.PrivateUserView;
+import commonsos.view.app.PublicUserView;
 import spark.utils.CollectionUtils;
 
 public class UserUtil {

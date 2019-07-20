@@ -10,7 +10,7 @@ import spark.Request;
 import spark.Response;
 import spark.Session;
 
-import static commonsos.controller.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+import static commonsos.controller.app.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
 import static commonsos.filter.LogFilter.X_REQUEST_ID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

@@ -43,12 +43,12 @@ import commonsos.service.notification.PushNotificationService;
 import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.AdView;
-import commonsos.view.MessageListView;
-import commonsos.view.MessageThreadListView;
-import commonsos.view.MessageThreadView;
-import commonsos.view.MessageView;
-import commonsos.view.PublicUserView;
+import commonsos.view.app.AdView;
+import commonsos.view.app.MessageListView;
+import commonsos.view.app.MessageThreadListView;
+import commonsos.view.app.MessageThreadView;
+import commonsos.view.app.MessageView;
+import commonsos.view.app.PublicUserView;
 
 @Singleton
 public class MessageService {

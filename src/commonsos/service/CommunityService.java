@@ -24,8 +24,8 @@ import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
-import commonsos.view.CommunityListView;
-import commonsos.view.CommunityNotificationListView;
+import commonsos.view.app.CommunityListView;
+import commonsos.view.app.CommunityNotificationListView;
 
 @Singleton
 public class CommunityService {

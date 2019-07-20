@@ -41,7 +41,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.TransactionCreateCommand;
-import commonsos.view.BalanceView;
+import commonsos.view.app.BalanceView;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

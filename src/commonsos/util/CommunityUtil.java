@@ -5,8 +5,8 @@ import java.util.List;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
-import commonsos.view.CommunityNotificationView;
-import commonsos.view.CommunityView;
+import commonsos.view.app.CommunityNotificationView;
+import commonsos.view.app.CommunityView;
 
 public class CommunityUtil {
   

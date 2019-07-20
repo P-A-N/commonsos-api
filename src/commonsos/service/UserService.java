@@ -52,13 +52,13 @@ import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
-import commonsos.view.BalanceView;
-import commonsos.view.CommunityUserListView;
-import commonsos.view.CommunityUserView;
-import commonsos.view.CommunityView;
-import commonsos.view.PrivateUserView;
-import commonsos.view.PublicUserView;
-import commonsos.view.UserListView;
+import commonsos.view.app.BalanceView;
+import commonsos.view.app.CommunityUserListView;
+import commonsos.view.app.CommunityUserView;
+import commonsos.view.app.CommunityView;
+import commonsos.view.app.PrivateUserView;
+import commonsos.view.app.PublicUserView;
+import commonsos.view.app.UserListView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
