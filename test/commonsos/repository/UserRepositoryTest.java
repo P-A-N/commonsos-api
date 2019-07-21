@@ -747,7 +747,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setPasswordHash("password hash")
         .setUsername("worker")
         .setEmailAddress("test@test.com")
-        .setWaitUntilCompleted(false)
         .setCommunityList(asList());
     
     return inTransaction(() -> repository.createTemporary(testUser));
@@ -768,7 +767,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setPasswordHash("password hash")
         .setUsername("worker")
         .setEmailAddress("test@test.com")
-        .setWaitUntilCompleted(false)
         .setCommunityList(asList(community1));
     
     return inTransaction(() -> repository.createTemporary(testUser));
@@ -791,7 +789,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setPasswordHash("password hash")
         .setUsername("worker")
         .setEmailAddress("test@test.com")
-        .setWaitUntilCompleted(false)
         .setCommunityList(asList(community1, community2));
     
     return inTransaction(() -> repository.createTemporary(testUser));
@@ -858,7 +855,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
     assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
-    assertThat(actual.isWaitUntilCompleted()).isEqualTo(expect.isWaitUntilCompleted());
 
     assertThat(actual.getCommunityList().size()).isEqualTo(expect.getCommunityList().size());
     actual.getCommunityList().sort((a,b) -> a.getId().compareTo(b.getId()));
