@@ -33,6 +33,10 @@ public class Configuration {
     return environmentVariable("ETHEREUM_URL", "http://localhost:8545/");
   }
 
+  public String walletPassword() {
+    return environmentVariable("WALLET_PASSWORD", "test");
+  }
+
   public String smtpHost() {
     return environmentVariable("SMTP_HOST", "localhost");
   }
