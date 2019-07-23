@@ -43,8 +43,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   
   @BeforeAll
   public void setupTest() throws Exception {
-    admin1 = createAdmin("admin1_test", "passpass", "admin1@test.com", null);
-    admin2 = createAdmin("admin2_test", "passpass", "admin2@test.com", null);
+    admin1 = createAdmin("admin1_test", "passpass", "admin1@test.com", true, null);
+    admin2 = createAdmin("admin2_test", "passpass", "admin2@test.com", true, null);
     community1 = createCommunity(admin1, "community1", "c1", "community1");
     community2 = createCommunity(admin2, "community2", "c2", "community2");
   }
@@ -52,8 +52,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   @Test
   public void testBlockchain() throws Exception {
     // create user
-    user1 = createUser("user1_test", "passpass", "user1@test.com", asList(community1.getId()));
-    user2 = createUser("user2_test", "passpass", "user2@test.com", asList(community1.getId(), community2.getId()));
+    user1 = createUser("user1_test", "passpass", "user1@test.com", true, asList(community1.getId()));
+    user2 = createUser("user2_test", "passpass", "user2@test.com", true, asList(community1.getId(), community2.getId()));
     checkBalance(user1, community1, 0);
     checkBalance(user2, community1, 0);
     checkBalance(user2, community2, 0);
@@ -71,6 +71,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // change community
     changeCommunity(user1, asList(community2.getId()));
+    waitUntilAllowed(user1, community2);
     
     // transfer token from admin
     transferToken(admin2, user1, community2, 100);
@@ -94,9 +95,10 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       String username,
       String password,
       String emailAddress,
+      boolean waitUntilCompleated,
       List<Long> communityList
       ) throws Exception {
-    User admin = createUser(username, password, emailAddress, communityList);
+    User admin = createUser(username, password, emailAddress, waitUntilCompleated, communityList);
 
     log.info(String.format("transfer ether to admin started. [username=%s]", username));
     transferEtherToAdmin(admin);
@@ -109,6 +111,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       String username,
       String password,
       String emailAddress,
+      boolean waitUntilCompleated,
       List<Long> communityList
       ) throws Exception {
     log.info(String.format("creating user started. [username=%s]", username));
@@ -117,6 +120,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     requestParam.put("username", username);
     requestParam.put("password", password);
     requestParam.put("emailAddress", emailAddress);
+    requestParam.put("waitUntilCompleted", waitUntilCompleated);
     requestParam.put("communityList", communityList);
     
     // create temporary user
@@ -232,5 +236,17 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       Thread.sleep(1000);
     }
     throw new RuntimeException("transaction didn't finish in 60 seconds.");
+  }
+  
+  private void waitUntilAllowed(User user, Community community) throws Exception {
+    log.info(String.format("waiting for allowing."));
+    for (int i = 0; i < (60*30); i++) {
+      if (blockchainService.isAllowed(user, community, BigInteger.ONE)) {
+        log.info(String.format("allowing completed."));
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("allowence didn't finish in 30 minutes.");
   }
 }

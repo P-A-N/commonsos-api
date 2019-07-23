@@ -18,4 +18,5 @@ public class CreateAccountTemporaryCommand {
   private String location;
   private List<Long> communityList;
   private String emailAddress;
+  private boolean waitUntilCompleted;
 }

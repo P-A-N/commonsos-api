@@ -33,6 +33,7 @@ public class TemporaryUser {
   private String passwordHash;
   private String username;
   private String emailAddress;
+  private boolean waitUntilCompleted;
 
   @ManyToMany
   @JoinTable(

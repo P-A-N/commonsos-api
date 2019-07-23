@@ -1,11 +1,14 @@
 package commonsos.service;
 
 import static commonsos.TestId.id;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,7 +23,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.web3j.crypto.Credentials;
 
+import commonsos.JobService;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
@@ -28,6 +33,8 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.CreateAccountTemporaryCommand;
@@ -50,6 +57,7 @@ public class UserServiceTest {
   @Mock TransactionService transactionService;
   @Mock ImageUploadService imageService;
   @Mock EmailService EmailService;
+  @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
   @Captor ArgumentCaptor<CreateAccountTemporaryCommand> accountCreatecommandCaptor;
   @Captor ArgumentCaptor<User> userCaptor;
@@ -89,6 +97,46 @@ public class UserServiceTest {
 
     // execute
     assertThrows(AuthenticationException.class, () -> userService.checkPassword("user", "wrong password"));
+  }
+
+  @Test
+  public void createAccountComplete_noWait() {
+    // prepare
+    when(blockchainService.isConnected()).thenReturn(true);
+    
+    TemporaryUser tempUser = new TemporaryUser()
+        .setWaitUntilCompleted(true)
+        .setCommunityList(asList(new Community(), new Community()));
+    when(userRepository.findStrictTemporaryUser(any())).thenReturn(tempUser);
+    
+    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
+
+    // execute
+    userService.createAccountComplete("accessId");
+    
+    // verify
+    verify(jobService, never()).submit(any(), any());
+    verify(jobService, times(2)).execute(any());
+  }
+
+  @Test
+  public void createAccountComplete_wait() {
+    // prepare
+    when(blockchainService.isConnected()).thenReturn(true);
+    
+    TemporaryUser tempUser = new TemporaryUser()
+        .setWaitUntilCompleted(false)
+        .setCommunityList(asList(new Community(), new Community()));
+    when(userRepository.findStrictTemporaryUser(any())).thenReturn(tempUser);
+    
+    when(blockchainService.credentials(any(), any())).thenReturn(mock(Credentials.class));
+
+    // execute
+    userService.createAccountComplete("accessId");
+    
+    // verify
+    verify(jobService, times(2)).submit(any(), any());
+    verify(jobService, never()).execute(any());
   }
 
   @Test

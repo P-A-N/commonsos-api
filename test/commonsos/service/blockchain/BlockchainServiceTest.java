@@ -4,8 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +24,13 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletFile;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteCall;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -32,7 +38,7 @@ public class BlockchainServiceTest {
 
   @Mock CommunityRepository communityRepository;
   @Mock(answer = RETURNS_DEEP_STUBS) Web3j web3j;
-  @Mock Token token;
+  @Mock TokenERC20 token;
   @InjectMocks @Spy BlockchainService service;
   
   @BeforeEach
@@ -60,5 +66,20 @@ public class BlockchainServiceTest {
     Credentials credentials = service.credentials(wallet, "test");
 
     assertThat(credentials.getAddress()).isEqualTo("0x116ca1e1cc960a033a613f442e3c1bfc91841521");
+  }
+  
+  @Test
+  public void isAllowed() throws Exception {
+    // prepare
+    RemoteCall<BigInteger> remoteCall = mock(RemoteCall.class);
+    when(remoteCall.send()).thenReturn(BigInteger.TEN);
+    when(token.allowance(any(), any())).thenReturn(remoteCall);
+    
+    // lower
+    assertThat(service.isAllowed(new User(), new Community().setAdminUser(new User()), new BigInteger("9"))).isTrue();
+    // equal
+    assertThat(service.isAllowed(new User(), new Community().setAdminUser(new User()), BigInteger.TEN)).isTrue();
+    // grater
+    assertThat(service.isAllowed(new User(), new Community().setAdminUser(new User()), new BigInteger("11"))).isFalse();
   }
 }

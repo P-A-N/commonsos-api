@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
+import commonsos.JobService;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -29,6 +30,7 @@ import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.DelegateWalletTask;
 import commonsos.service.command.CreateAccountTemporaryCommand;
 import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
@@ -72,6 +74,7 @@ public class UserService {
   @Inject private EmailService emailService;
   @Inject private TransactionService transactionService;
   @Inject private ImageUploadService imageService;
+  @Inject private JobService jobService;
 
   public User checkPassword(String username, String password) {
     User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
@@ -153,7 +156,8 @@ public class UserService {
       .setDescription(command.getDescription())
       .setLocation(command.getLocation())
       .setCommunityList(communityList)
-      .setEmailAddress(command.getEmailAddress());
+      .setEmailAddress(command.getEmailAddress())
+      .setWaitUntilCompleted(command.isWaitUntilCompleted());
 
     userRepository.createTemporary(tmpUser);
 
@@ -184,6 +188,14 @@ public class UserService {
 
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());
+    
+    user.getCommunityUserList().forEach(cu -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
+      if (tempUser.isWaitUntilCompleted())
+        jobService.execute(task);
+      else
+        jobService.submit(user, task);
+    });
 
     // create
     userRepository.updateTemporary(tempUser.setInvalid(true));
@@ -334,6 +346,12 @@ public class UserService {
 
     // set new communityUserList
     user.setCommunityUserList(newCommunityUserList);
+
+    // update
+    user.getCommunityUserList().forEach(cu -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
+      jobService.submit(user, task);
+    });
 
     return userRepository.update(user);
   }
