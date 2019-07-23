@@ -90,6 +90,7 @@ import commonsos.controller.app.message.MessageThreadUnreadCountController;
 import commonsos.controller.app.message.MessageThreadUnsubscribeController;
 import commonsos.controller.app.message.MessageThreadWithUserController;
 import commonsos.controller.app.message.UpdateMessageThreadPersonalTitleController;
+import commonsos.controller.app.transaction.AdminTransactionListController;
 import commonsos.controller.app.transaction.BalanceController;
 import commonsos.controller.app.transaction.TransactionCreateController;
 import commonsos.controller.app.transaction.TransactionListController;
@@ -253,8 +254,10 @@ public class Server {
     post("/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
     get("/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
-    // TODO change to /ads/...
+    // TODO change path
     post("/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
+    // TODO delete
+    get("/admin/transactions", injector.getInstance(AdminTransactionListController.class), toJson);
   }
   
   private void initAdminPageRoutes() {
