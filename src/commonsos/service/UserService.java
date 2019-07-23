@@ -15,7 +15,6 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
-import commonsos.Configuration;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -63,6 +62,7 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class UserService {
+  public static final String WALLET_PASSWORD = "test";
 
   @Inject private UserRepository userRepository;
   @Inject private CommunityRepository communityRepository;
@@ -72,7 +72,6 @@ public class UserService {
   @Inject private EmailService emailService;
   @Inject private TransactionService transactionService;
   @Inject private ImageUploadService imageService;
-  @Inject Configuration config;
 
   public User checkPassword(String username, String password) {
     User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
@@ -180,8 +179,8 @@ public class UserService {
         .setEmailAddress(tempUser.getEmailAddress())
         .setStatus("");
 
-    String wallet = blockchainService.createWallet(config.walletPassword());
-    Credentials credentials = blockchainService.credentials(wallet, config.walletPassword());
+    String wallet = blockchainService.createWallet(WALLET_PASSWORD);
+    Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
 
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());
