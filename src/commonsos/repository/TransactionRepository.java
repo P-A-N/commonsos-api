@@ -67,10 +67,30 @@ public class TransactionRepository extends Repository {
     List<Transaction> resultList = em()
       .createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
       .setLockMode(lockMode())
-      .setParameter("adId", ad.getId()).getResultList();
+      .setParameter("adId", ad.getId())
+      .getResultList();
     
     return !resultList.isEmpty();
   }
+
+  public BigDecimal getBalanceFromTransactions(User user, Long communityId) {
+    BigDecimal remitAmount = em()
+      .createQuery("SELECT SUM(amount) FROM Transaction WHERE communityId = :communityId AND remitterId = :userId ", BigDecimal.class)
+      .setParameter("communityId", communityId)
+      .setParameter("userId", user.getId())
+      .getSingleResult();
+    if (remitAmount == null) remitAmount = BigDecimal.ZERO;
+    
+    BigDecimal benefitAmount = em()
+      .createQuery("SELECT SUM(amount) FROM Transaction WHERE communityId = :communityId AND beneficiaryId = :userId ", BigDecimal.class)
+      .setParameter("communityId", communityId)
+      .setParameter("userId", user.getId())
+      .getSingleResult();
+    if (benefitAmount == null) benefitAmount = BigDecimal.ZERO;
+    
+    return benefitAmount.subtract(remitAmount);
+  }
+
 
   public BigDecimal pendingTransactionsAmount(Long userId, Long communityId) {
     BigDecimal amount = em()
@@ -82,5 +102,13 @@ public class TransactionRepository extends Repository {
       .setParameter("userId", userId)
       .getSingleResult();
     return amount != null ? amount :  ZERO;
+  }
+  
+  public Long pendingTransactionsCount() {
+    Long count = em()
+      .createQuery("SELECT COUNT(*) FROM Transaction " +
+          "WHERE blockchainCompletedAt IS NULL ", Long.class)
+      .getSingleResult();
+    return count != null ? count :  0L;
   }
 }

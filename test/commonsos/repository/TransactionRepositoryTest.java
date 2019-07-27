@@ -9,6 +9,7 @@ import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -157,9 +158,49 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
+  public void getBalanceFromTransactions() {
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u2")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u3")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u3")).setBeneficiaryId(id("u1")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c2")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
+
+    
+//    ThreadValue.setReadOnly(true);
+    BigDecimal balance = repository.getBalanceFromTransactions(new User().setId(id("u1")), id("c1"));
+    assertThat(balance).isEqualByComparingTo(new BigDecimal(9));
+
+    balance = repository.getBalanceFromTransactions(new User().setId(id("u2")), id("c1"));
+    assertThat(balance).isEqualByComparingTo(new BigDecimal(1));
+
+    balance = repository.getBalanceFromTransactions(new User().setId(id("u3")), id("c1"));
+    assertThat(balance).isEqualByComparingTo(new BigDecimal(0));
+
+    balance = repository.getBalanceFromTransactions(new User().setId(id("u1")), id("c2"));
+    assertThat(balance).isEqualByComparingTo(new BigDecimal(10));
+
+    balance = repository.getBalanceFromTransactions(new User().setId(id("u2")), id("c2"));
+    assertThat(balance).isEqualByComparingTo(new BigDecimal(0));
+  }
+
+  @Test
   public void pendingTransactionsAmount_none() {
     BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community"));
 
     assertThat(amount).isEqualByComparingTo(ZERO);
+  }
+
+  @Test
+  public void pendingTransactionsCount() {
+    long count = repository.pendingTransactionsCount();
+    assertThat(count).isEqualTo(0L);
+    
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id 1"))));
+    count = repository.pendingTransactionsCount();
+    assertThat(count).isEqualTo(1L);
+    
+    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id 2")).setBlockchainCompletedAt(Instant.now())));
+    count = repository.pendingTransactionsCount();
+    assertThat(count).isEqualTo(1L);
   }
 }

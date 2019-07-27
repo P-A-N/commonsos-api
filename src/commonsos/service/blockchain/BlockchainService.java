@@ -22,6 +22,7 @@ import org.web3j.crypto.Wallet;
 import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.ChainId;
 import org.web3j.tx.RawTransactionManager;
@@ -246,6 +247,18 @@ public class BlockchainService {
       TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
       log.info("Token balance request complete, balance " + balance.toString());
+      return toTokensWithDecimals(balance);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public BigDecimal getBalance(String address) {
+    try {
+      log.info("balance request for " + address);
+      BigInteger balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
+      log.info("balance request for " + address + " complete, balance=" + balance.toString());
       return toTokensWithDecimals(balance);
     }
     catch (Exception e) {
