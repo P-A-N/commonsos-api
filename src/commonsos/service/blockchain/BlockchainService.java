@@ -78,7 +78,7 @@ public class BlockchainService {
 
   public boolean isAllowed(User user, Community community, BigInteger floor) {
     try {
-      TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
+      Token token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger allowance = token.allowance(user.getWalletAddress(), community.getAdminUser().getWalletAddress()).send();
       log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%d", community.getId(), user.getId(), community.getAdminUser().getId(), allowance));
       return allowance.compareTo(floor) >= 0;
@@ -137,7 +137,7 @@ public class BlockchainService {
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
     
     Credentials credentials = credentials(walletUser.getWallet(), WALLET_PASSWORD);
-    TokenERC20 token = loadToken(
+    Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
         GAS_PRICE,
@@ -157,7 +157,7 @@ public class BlockchainService {
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
 
     Credentials credentials = credentials(remitter.getWallet(), WALLET_PASSWORD);
-    TokenERC20 token = loadToken(
+    Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
         GAS_PRICE,
@@ -179,13 +179,13 @@ public class BlockchainService {
     return new BigDecimal(amount).divide(BigDecimal.TEN.pow(NUMBER_OF_DECIMALS));
   }
 
-  TokenERC20 loadToken(Credentials remitterCredentials, String tokenContractAddress, BigInteger gasPrice, BigInteger gasLimit) {
+  Token loadToken(Credentials remitterCredentials, String tokenContractAddress, BigInteger gasPrice, BigInteger gasLimit) {
     TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new NoOpProcessor(web3j));
-    return TokenERC20.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
+    return Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
-  TokenERC20 loadTokenReadOnly(String walletAddress, String tokenContractAddress) {
-    return TokenERC20.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
+  Token loadTokenReadOnly(String walletAddress, String tokenContractAddress) {
+    return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
   public void transferEther(User remitter, String beneficiaryAddress, BigInteger amount) {
@@ -218,14 +218,14 @@ public class BlockchainService {
     return handleBlockchainException(() -> {
       Credentials credentials = credentials(owner.getWallet(), WALLET_PASSWORD);
       log.info("Deploying token contract: " + name + " (" + symbol + "), owner: " + owner.getWalletAddress());
-      TokenERC20 token = handleBlockchainException(() -> {
-        return TokenERC20.deploy(
+      Token token = handleBlockchainException(() -> {
+        return Token.deploy(
             web3j,
             credentials,
             new StaticGasProvider(GAS_PRICE, TOKEN_DEPLOYMENT_GAS_LIMIT),
-            INITIAL_TOKEN_AMOUNT,
             name,
-            symbol).send();
+            symbol,
+            INITIAL_TOKEN_AMOUNT).send();
       });
       if (!token.isValid()) {
         if (token.getTransactionReceipt().isPresent()) {
@@ -244,7 +244,7 @@ public class BlockchainService {
     try {
       log.info("Token balance request for: " + user.getWalletAddress());
       Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
-      TokenERC20 token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
+      Token token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
       log.info("Token balance request complete, balance " + balance.toString());
       return toTokensWithDecimals(balance);
@@ -283,7 +283,7 @@ public class BlockchainService {
     try {
       log.info(String.format("Token symbol request for: communityId=%d", communityId));
       Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
-      TokenERC20 token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
       tokenSymbol = token.symbol().send();
       log.info(String.format("Token symbol request complete: symbol=%s, communityId=%d", tokenSymbol, communityId));
       
@@ -299,7 +299,7 @@ public class BlockchainService {
     log.info(format("Approving token transfer. [owner=%s, spender=%s, amount=%d]", walletOwner.getUsername(), community.getAdminUser().getUsername(), INITIAL_TOKEN_AMOUNT));
 
     Credentials credentials = credentials(walletOwner.getWallet(), WALLET_PASSWORD);
-    TokenERC20 token = loadToken(
+    Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
         GAS_PRICE,

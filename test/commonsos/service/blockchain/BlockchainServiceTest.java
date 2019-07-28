@@ -38,7 +38,7 @@ public class BlockchainServiceTest {
 
   @Mock CommunityRepository communityRepository;
   @Mock(answer = RETURNS_DEEP_STUBS) Web3j web3j;
-  @Mock TokenERC20 token;
+  @Mock Token token;
   @InjectMocks @Spy BlockchainService service;
   
   @BeforeEach
