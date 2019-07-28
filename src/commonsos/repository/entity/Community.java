@@ -10,11 +10,12 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "communities")
-@Getter @Setter @Accessors(chain=true)
-public class Community {
+@Getter @Setter @Accessors(chain=true) @ToString
+public class Community extends AbstractEntity {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
   private String name;
   private String description;

@@ -128,8 +128,7 @@ public class TransactionService {
       .setAmount(command.getAmount())
       .setBeneficiaryId(command.getBeneficiaryId())
       .setDescription(command.getDescription())
-      .setAdId(command.getAdId())
-      .setCreatedAt(now());
+      .setAdId(command.getAdId());
 
     repository.create(transaction);
 

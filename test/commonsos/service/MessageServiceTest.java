@@ -3,18 +3,15 @@ package commonsos.service;
 import static commonsos.TestId.id;
 import static java.time.Instant.now;
 import static java.time.temporal.ChronoUnit.HOURS;
-import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -119,11 +116,9 @@ public class MessageServiceTest {
 
   @Test
   public void messageView() {
-    Instant messageCreated = now();
     Message message = new Message()
       .setId(33L)
       .setThreadId(id("thread id"))
-      .setCreatedAt(messageCreated)
       .setCreatedBy(id("user id"))
       .setText("hello");
 
@@ -131,7 +126,6 @@ public class MessageServiceTest {
 
     assertThat(result).isEqualTo(new MessageView()
       .setId(33L)
-      .setCreatedAt(messageCreated)
       .setCreatedBy(id("user id"))
       .setText("hello"));
   }
@@ -178,7 +172,6 @@ public class MessageServiceTest {
     assertThat(message.getThreadId()).isEqualTo(id("thread id"));
     assertThat(message.getCreatedBy()).isEqualTo(id("user id"));
     assertThat(message.getText()).isEqualTo("message text");
-    assertThat(message.getCreatedAt()).isCloseTo(now(), within(1, SECONDS));
   }
 
   @Test

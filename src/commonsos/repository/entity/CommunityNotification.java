@@ -10,13 +10,14 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "community_notifications")
-@Getter @Setter @Accessors(chain=true)
-public class CommunityNotification {
+@Getter @Setter @Accessors(chain=true) @ToString
+public class CommunityNotification extends AbstractEntity {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
   private Long communityId;
   private String wordpressId;
-  private Instant updatedAt;
+  private Instant updatedNotificationAt;
 }

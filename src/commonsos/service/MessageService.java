@@ -80,7 +80,6 @@ public class MessageService {
     MessageThread messageThread = new MessageThread()
       .setCommunityId(command.getCommunityId())
       .setCreatedBy(user.getId())
-      .setCreatedAt(now())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));
 
     return messageThreadRepository.create(messageThread);
@@ -98,7 +97,6 @@ public class MessageService {
       .setCommunityId(command.getCommunityId())
       .setTitle(command.getTitle())
       .setCreatedBy(user.getId())
-      .setCreatedAt(now())
       .setParties(parties);
     return view(user, messageThreadRepository.create(messageThread));
   }
@@ -154,7 +152,6 @@ public class MessageService {
     MessageThread messageThread = new MessageThread()
       .setCommunityId(ad.getCommunityId())
       .setCreatedBy(user.getId())
-      .setCreatedAt(now())
       .setTitle(ad.getTitle()).setAdId(adId)
       .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
 
@@ -247,7 +244,6 @@ public class MessageService {
     MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).map(thread -> checkAccess(user, thread)).get();
     Message message = messageRepository.create(new Message()
       .setCreatedBy(user.getId())
-      .setCreatedAt(now())
       .setThreadId(command.getThreadId())
       .setText(command.getText()));
 
@@ -258,7 +254,7 @@ public class MessageService {
 
     private void notifyThreadParties(User senderUser, MessageThread messageThread, Message message) {
     messageThread.getParties().stream()
-      .filter(p -> !p.getUser().equals(senderUser))
+      .filter(p -> !p.getUser().getId().equals(senderUser.getId()))
       .forEach(p -> {
         String messageText = format("%s:\n\n%s", senderUser.getUsername(), message.getText());
         Map<String, String> params = ImmutableMap.of(
@@ -323,13 +319,13 @@ public class MessageService {
   }
 
   private void markVisited(User user, MessageThread thread) {
-    MessageThreadParty me = thread.getParties().stream().filter(p -> p.getUser().equals(user)).findFirst().orElseThrow(RuntimeException::new);
+    MessageThreadParty me = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst().orElseThrow(RuntimeException::new);
     me.setVisitedAt(now());
     messageThreadRepository.update(me);
   }
 
   private boolean isUserAllowedToAccessMessageThread(User user, MessageThread thread) {
-    return thread.getParties().stream().anyMatch(p -> p.getUser().equals(user));
+    return thread.getParties().stream().anyMatch(p -> p.getUser().getId().equals(user.getId()));
   }
 
   public int unreadMessageThreadCount(User user, Long communityId) {

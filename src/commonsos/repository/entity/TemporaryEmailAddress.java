@@ -9,15 +9,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "temporary_email_address")
-@Getter @Setter @Accessors(chain=true) @EqualsAndHashCode @ToString
-public class TemporaryEmailAddress {
+@Getter @Setter @Accessors(chain=true) @ToString
+public class TemporaryEmailAddress extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
   private String accessIdHash;
   private Instant expirationTime;

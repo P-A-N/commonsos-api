@@ -3,6 +3,7 @@ package commonsos.repository;
 import static commonsos.TestId.id;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -474,11 +475,13 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void update() {
     // prepare
-    Long userId = createTestUser_BelongAtOneCommunity().getId();
+    User user = createTestUser_BelongAtOneCommunity();
+    Instant createdAt = user.getCreatedAt();
+    Instant updatedAt = user.getUpdatedAt();
     
     // execute
     inTransaction(() -> {
-      User target = repository.findStrictById(userId);
+      User target = repository.findStrictById(user.getId());
       target.setFirstName("new first name")
         .setLastName("new last name").setDescription("new description")
         .setLocation("new location")
@@ -487,8 +490,11 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     });
 
     // verify
-    User updatedUser = em().find(User.class, userId);
+    User updatedUser = em().find(User.class, user.getId());
     assertThat(updatedUser.getFirstName()).isEqualTo("new first name");
+    assertThat(updatedUser.getCreatedAt()).isEqualTo(createdAt);
+    assertThat(updatedUser.getUpdatedAt()).isNotEqualTo(updatedAt);
+    assertTrue(updatedUser.getUpdatedAt().isAfter(updatedAt));
   }
 
   @Disabled
@@ -831,6 +837,8 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
     assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
+    assertThat(actual.getCreatedAt()).isNotNull();
+    assertThat(actual.getUpdatedAt()).isNotNull();
 
     assertThat(actual.getCommunityUserList().size()).isEqualTo(expect.getCommunityUserList().size());
     actual.getCommunityUserList().sort((a,b) -> a.getId().compareTo(b.getId()));

@@ -34,6 +34,6 @@ public class CommunityUtil {
   public static CommunityNotificationView notificationView(CommunityNotification notification) {
     return new CommunityNotificationView()
         .setWordpressId(notification.getWordpressId())
-        .setUpdatedAt(notification.getUpdatedAt());
+        .setUpdatedAt(notification.getUpdatedNotificationAt());
   }
 }

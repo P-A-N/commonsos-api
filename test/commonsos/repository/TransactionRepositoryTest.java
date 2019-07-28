@@ -5,7 +5,6 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
 import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
-import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -33,7 +32,6 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
       .setBeneficiaryId(id("beneficiary id"))
       .setAdId(id("ad id"))
       .setDescription("description")
-      .setCreatedAt(parse("2017-10-24T11:22:33Z"))
       .setAmount(TEN))
       .setBlockchainTransactionHash("blockchain id")
       .getId());
@@ -47,7 +45,6 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getBeneficiaryId()).isEqualTo(id("beneficiary id"));
     assertThat(result.getAdId()).isEqualTo(id("ad id"));
     assertThat(result.getDescription()).isEqualTo("description");
-    assertThat(result.getCreatedAt()).isEqualTo(parse("2017-10-24T11:22:33Z"));
     assertThat(result.getAmount()).isEqualTo(new BigDecimal("10.00"));
     assertThat(result.getBlockchainTransactionHash()).isEqualTo("blockchain id");
   }

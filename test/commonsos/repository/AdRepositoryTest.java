@@ -3,9 +3,10 @@ package commonsos.repository;
 import static commonsos.TestId.id;
 import static commonsos.repository.entity.AdType.GIVE;
 import static java.math.BigDecimal.TEN;
-import static java.time.Instant.parse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -180,7 +181,6 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
         .setCreatedBy(id("john"))
         .setPoints(TEN).setType(GIVE)
         .setPhotoUrl("url://photo")
-        .setCreatedAt(parse("2016-02-02T20:15:30Z"))
         .setDescription("description")
         .setLocation("home"))
       .getId());
@@ -191,7 +191,7 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getCreatedBy()).isEqualTo(id("john"));
     assertThat(result.getType()).isEqualTo(GIVE);
     assertThat(result.getPhotoUrl()).isEqualTo("url://photo");
-    assertThat(result.getCreatedAt()).isEqualTo(parse("2016-02-02T20:15:30Z"));
+    assertThat(result.getCreatedAt()).isNotNull();
     assertThat(result.getDescription()).isEqualTo("description");
     assertThat(result.getLocation()).isEqualTo("home");
     assertThat(result.isDeleted()).isEqualTo(false);
@@ -222,9 +222,10 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
         .setDescription("description")
         .setPoints(TEN)
         .setLocation("home")))
-        .setCreatedAt(parse("2016-02-02T20:15:30Z"))
         .setPhotoUrl("url://photo")
         .setCommunityId(id("community"));
+    Instant createdAt = testAd.getCreatedAt();
+    Instant updatedAt = testAd.getUpdatedAt();
 
     testAd.setTitle("Title2").setDescription("description2").setLocation("home2");
     inTransaction(() -> repository.update(testAd));
@@ -234,5 +235,7 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getTitle()).isEqualTo("Title2");
     assertThat(result.getDescription()).isEqualTo("description2");
     assertThat(result.getLocation()).isEqualTo("home2");
+    assertThat(result.getCreatedAt()).isEqualTo(createdAt);
+    assertTrue(result.getUpdatedAt().isAfter(updatedAt));
   }
 }

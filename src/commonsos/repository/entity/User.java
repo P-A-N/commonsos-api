@@ -13,15 +13,14 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "users")
-@Getter @Setter @Accessors(chain=true) @EqualsAndHashCode @ToString
-public class User {
+@Getter @Setter @Accessors(chain=true) @ToString
+public class User extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
   private String username;
   private String passwordHash;

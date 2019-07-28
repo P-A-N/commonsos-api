@@ -1,6 +1,5 @@
 package commonsos.service;
 
-import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
 import javax.inject.Inject;
@@ -38,7 +37,6 @@ public class AdService {
 
     Ad ad = new Ad()
       .setCreatedBy(user.getId())
-      .setCreatedAt(now())
       .setType(command.getType())
       .setTitle(command.getTitle())
       .setDescription(command.getDescription())

@@ -13,15 +13,14 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "temporary_users")
-@Getter @Setter @Accessors(chain=true) @EqualsAndHashCode @ToString
-public class TemporaryUser {
+@Getter @Setter @Accessors(chain=true) @ToString
+public class TemporaryUser extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
   private String accessIdHash;
   private Instant expirationTime;

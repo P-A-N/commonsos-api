@@ -7,8 +7,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import java.time.Instant;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +32,7 @@ public class GetMessageThreadTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setName("community"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
@@ -50,7 +48,8 @@ public class GetMessageThreadTest extends IntegrationTest {
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user2)
             )));
-    create(new Message().setThreadId(adThread.getId()).setText("adMessage").setCreatedAt(Instant.now().plusSeconds(60)));
+    create(new Message().setThreadId(adThread.getId()).setText("adMessage"));
+    Thread.sleep(1);
 
     groupThread = create(new MessageThread()
         .setTitle("groupThread")
@@ -62,7 +61,8 @@ public class GetMessageThreadTest extends IntegrationTest {
             new MessageThreadParty().setUser(user2),
             new MessageThreadParty().setUser(user3)
             )));
-    create(new Message().setThreadId(groupThread.getId()).setText("groupMessage").setCreatedAt(Instant.now().plusSeconds(30)));
+    create(new Message().setThreadId(groupThread.getId()).setText("groupMessage"));
+    Thread.sleep(1);
 
     directThread = create(new MessageThread()
         .setTitle("directThread")
@@ -73,7 +73,7 @@ public class GetMessageThreadTest extends IntegrationTest {
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user3)
             )));
-    create(new Message().setThreadId(directThread.getId()).setText("directMessage").setCreatedAt(Instant.now().plusSeconds(0)));
+    create(new Message().setThreadId(directThread.getId()).setText("directMessage"));
 
     sessionId = login("user1", "pass");
   }

@@ -51,7 +51,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
         .setParameter("wordpressId", wordpressId)
         .getSingleResult();
     assertThat(result.getCommunityId()).isEqualTo(community.getId());
-    assertThat(result.getUpdatedAt().toString()).isEqualTo("2019-01-01T03:10:10Z");
+    assertThat(result.getUpdatedNotificationAt().toString()).isEqualTo("2019-01-01T03:10:10Z");
 
     // call api yyyy-MM-dd HH:mm
     requestParam = new HashMap<>();
@@ -63,7 +63,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
 
     // verify
     emService.get().refresh(result);
-    assertThat(result.getUpdatedAt().toString()).isEqualTo("2020-01-01T03:10:00Z");
+    assertThat(result.getUpdatedNotificationAt().toString()).isEqualTo("2020-01-01T03:10:00Z");
 
     // call api yyyy-MM-dd HH
     requestParam = new HashMap<>();
@@ -75,7 +75,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
 
     // verify
     emService.get().refresh(result);
-    assertThat(result.getUpdatedAt().toString()).isEqualTo("2021-01-01T03:00:00Z");
+    assertThat(result.getUpdatedNotificationAt().toString()).isEqualTo("2021-01-01T03:00:00Z");
 
     // call api yyyy-MM-dd
     requestParam = new HashMap<>();
@@ -87,7 +87,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
 
     // verify
     emService.get().refresh(result);
-    assertThat(result.getUpdatedAt().toString()).isEqualTo("2021-12-31T15:00:00Z");
+    assertThat(result.getUpdatedNotificationAt().toString()).isEqualTo("2021-12-31T15:00:00Z");
   }
   
   @Test

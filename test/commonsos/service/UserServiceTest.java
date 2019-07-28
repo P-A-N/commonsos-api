@@ -38,7 +38,6 @@ import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.CreateAccountTemporaryCommand;
-import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
@@ -214,14 +213,5 @@ public class UserServiceTest {
     assertThat(user.getLocation()).isEqualTo(command.getLocation());
     
     assertThat(result).isEqualTo(user);
-  }
-
-  @Test
-  public void updateMobileDevice() {
-    MobileDeviceUpdateCommand command = new MobileDeviceUpdateCommand().setPushNotificationToken("12345");
-
-    userService.updateMobileDevice(new User(), command);
-
-    verify(userRepository).update(new User().setPushNotificationToken("12345"));
   }
 }

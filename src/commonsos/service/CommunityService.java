@@ -85,13 +85,13 @@ public class CommunityService {
       if (!notification.getCommunityId().equals(command.getCommunityId())) throw new BadRequestException(
           String.format("it is not a notification of community. wordpressId=%s communityId=%d", command.getWordpressId(), command.getCommunityId()));
       
-      notification.setUpdatedAt(command.getUpdatedAtInstant());
+      notification.setUpdatedNotificationAt(command.getUpdatedAtInstant());
       notificationRepository.update(notification);
     } else {
       CommunityNotification notification = new CommunityNotification()
           .setCommunityId(command.getCommunityId())
           .setWordpressId(command.getWordpressId())
-          .setUpdatedAt(command.getUpdatedAtInstant());
+          .setUpdatedNotificationAt(command.getUpdatedAtInstant());
 
       notificationRepository.create(notification);
     }

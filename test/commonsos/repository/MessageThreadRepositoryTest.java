@@ -507,8 +507,8 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     MessageThread thread = new MessageThread().setCommunityId(communityId).setParties(asList(myParty, counterParty));
     inTransaction(() -> {
       repository.create(thread);
-      messageRepository.create(new Message().setThreadId(thread.getId()).setCreatedAt(now())).setCreatedBy(otherUser.getId());
-      messageRepository.create(new Message().setThreadId(thread.getId()).setCreatedAt(now())).setCreatedBy(myUser.getId());
+      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedBy(otherUser.getId());
+      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedBy(myUser.getId());
     });
 
     return thread;

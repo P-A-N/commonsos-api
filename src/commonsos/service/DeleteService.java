@@ -1,7 +1,5 @@
 package commonsos.service;
 
-import static java.time.Instant.now;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -124,7 +122,6 @@ public class DeleteService {
     // send system message to message-thread
     Message systemMessage = new Message()
         .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
-        .setCreatedAt(now())
         .setThreadId(thread.getId())
         .setText(MessageUtil.getSystemMessageUnsubscribe(user.getUsername()));
     messageRepository.create(systemMessage);
