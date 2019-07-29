@@ -19,7 +19,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
-import commonsos.repository.TransactionRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
@@ -32,7 +32,7 @@ public class AdServiceTest {
   @Mock AdRepository adRepository;
   @Mock UserRepository userRepository;
   @Mock CommunityRepository communityRepository;
-  @Mock TransactionRepository transactionRepository;
+  @Mock TokenTransactionRepository transactionRepository;
   @Mock ImageUploadService imageService;
   @Captor ArgumentCaptor<Ad> adCaptor;
   @InjectMocks @Spy AdService service;

@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
-import commonsos.repository.TransactionRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
@@ -28,7 +28,7 @@ import commonsos.view.app.AdView;
 public class AdService {
   @Inject private AdRepository adRepository;
   @Inject private UserRepository userRepository;
-  @Inject private TransactionRepository transactionRepository;
+  @Inject private TokenTransactionRepository transactionRepository;
   @Inject private DeleteService deleteService;
   @Inject private ImageUploadService imageService;
 

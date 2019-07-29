@@ -11,7 +11,7 @@ import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
-import commonsos.service.TransactionService;
+import commonsos.service.TokenTransactionService;
 import commonsos.view.app.BalanceView;
 import spark.Request;
 import spark.Response;
@@ -19,7 +19,7 @@ import spark.Response;
 @ReadOnly
 public class BalanceController extends AfterLoginController {
 
-  @Inject TransactionService service;
+  @Inject TokenTransactionService service;
 
   @Override
   public BalanceView handleAfterLogin(User user, Request request, Response response) {

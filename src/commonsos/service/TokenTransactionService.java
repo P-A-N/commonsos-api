@@ -19,12 +19,12 @@ import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
-import commonsos.repository.TransactionRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
-import commonsos.repository.entity.Transaction;
+import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
@@ -40,9 +40,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class TransactionService {
+public class TokenTransactionService {
   
-  @Inject TransactionRepository repository;
+  @Inject TokenTransactionRepository repository;
   @Inject UserRepository userRepository;
   @Inject AdRepository adRepository;
   @Inject CommunityRepository communityRepository;
@@ -59,7 +59,7 @@ public class TransactionService {
     return view;
   }
   
-  private boolean isDebit(User user, Transaction transaction) {
+  private boolean isDebit(User user, TokenTransaction transaction) {
     return transaction.getRemitterId().equals(user.getId());
   }
 
@@ -72,10 +72,10 @@ public class TransactionService {
 
   public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
     communityRepository.findStrictById(communityId);
-    ResultList<Transaction> result = repository.transactions(user, communityId, null);
+    ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
 
     List<TransactionView> transactionViews = result.getList().stream()
-        .sorted(Comparator.comparing(Transaction::getCreatedAt).reversed())
+        .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
         .map(transaction -> view(user, transaction))
         .collect(toList());
     
@@ -87,7 +87,7 @@ public class TransactionService {
     return listView;
   }
 
-  public TransactionView view(User user, Transaction transaction) {
+  public TransactionView view(User user, TokenTransaction transaction) {
     TransactionView view = new TransactionView()
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
@@ -104,7 +104,7 @@ public class TransactionService {
     return view;
   }
 
-  public Transaction create(User user, TransactionCreateCommand command) {
+  public TokenTransaction create(User user, TransactionCreateCommand command) {
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
     if (isBlank(command.getDescription()))  throw new BadRequestException("description is blank");
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
@@ -122,7 +122,7 @@ public class TransactionService {
     BalanceView balanceView = balance(user, command.getCommunityId());
     if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
-    Transaction transaction = new Transaction()
+    TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())
       .setRemitterId(user.getId())
       .setAmount(command.getAmount())
@@ -142,12 +142,12 @@ public class TransactionService {
   }
 
   public void markTransactionCompleted(String blockChainTransactionHash) {
-    Optional<Transaction> result = repository.findByBlockchainTransactionHash(blockChainTransactionHash);
+    Optional<TokenTransaction> result = repository.findByBlockchainTransactionHash(blockChainTransactionHash);
     if (!result.isPresent()) {
       return;
     }
 
-    Transaction transaction = result.get();
+    TokenTransaction transaction = result.get();
 
     if (transaction.getBlockchainCompletedAt() != null) {
       log.info(format("Transaction %s already marked completed at %s", transaction.getBlockchainTransactionHash(), transaction.getBlockchainCompletedAt()));

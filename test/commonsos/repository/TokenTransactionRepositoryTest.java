@@ -16,17 +16,17 @@ import org.junit.jupiter.api.Test;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
-import commonsos.repository.entity.Transaction;
+import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.command.PaginationCommand;
 
-public class TransactionRepositoryTest extends AbstractRepositoryTest {
+public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
-  TransactionRepository repository = new TransactionRepository(emService);
+  TokenTransactionRepository repository = new TokenTransactionRepository(emService);
 
   @Test
   public void create() {
-    Long id = inTransaction(() -> repository.create(new Transaction()
+    Long id = inTransaction(() -> repository.create(new TokenTransaction()
       .setCommunityId(id("community id"))
       .setRemitterId(id("remitter id"))
       .setBeneficiaryId(id("beneficiary id"))
@@ -36,7 +36,7 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
       .setBlockchainTransactionHash("blockchain id")
       .getId());
 
-    Transaction result = em().find(Transaction.class, id);
+    TokenTransaction result = em().find(TokenTransaction.class, id);
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNotNull();
@@ -51,17 +51,17 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void update() {
-    Long id = inTransaction(() -> repository.create(new Transaction()
+    Long id = inTransaction(() -> repository.create(new TokenTransaction()
       .setCommunityId(id("community id"))
       .setAmount(TEN))
       .getId());
 
     inTransaction(() -> {
-      Transaction existing = em().find(Transaction.class, id);
+      TokenTransaction existing = em().find(TokenTransaction.class, id);
       repository.update(existing.setAmount(ONE));
     });
 
-    Transaction result = em().find(Transaction.class, id);
+    TokenTransaction result = em().find(TokenTransaction.class, id);
     assertThat(result.getAmount()).isEqualByComparingTo(ONE);
   }
 
@@ -90,7 +90,7 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Transaction> result = repository.transactions(user, id("community1"), pagination);
+    ResultList<TokenTransaction> result = repository.transactions(user, id("community1"), pagination);
     
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
@@ -105,10 +105,10 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void findByBlockchainTransactionHash() {
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setBlockchainTransactionHash("other value")));
-    Long id = inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setBlockchainTransactionHash("hash value")).getId());
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setBlockchainTransactionHash("other value")));
+    Long id = inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setBlockchainTransactionHash("hash value")).getId());
 
-    Optional<Transaction> result = repository.findByBlockchainTransactionHash("hash value");
+    Optional<TokenTransaction> result = repository.findByBlockchainTransactionHash("hash value");
 
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(id);
@@ -119,17 +119,17 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(repository.findByBlockchainTransactionHash("hash value")).isEmpty();
   }
 
-  private Transaction transaction(Long communityId, Long remitterId, Long beneficiary) {
-    return new Transaction().setCommunityId(communityId).setBeneficiaryId(beneficiary).setRemitterId(remitterId);
+  private TokenTransaction transaction(Long communityId, Long remitterId, Long beneficiary) {
+    return new TokenTransaction().setCommunityId(communityId).setBeneficiaryId(beneficiary).setRemitterId(remitterId);
   }
 
   @Test
   public void pendingTransactionsAmount() {
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("other user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("other community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("other user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("other community id")).setRemitterId(id("user")).setAmount(TEN)));
 
     BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community id"));
 
@@ -139,7 +139,7 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void hasPaid() {
     // prepare
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id")).setAdId(id("ad1"))));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setAdId(id("ad1"))));
     
     // execute
     boolean result = repository.hasPaid(new Ad().setId(id("ad1")));
@@ -156,11 +156,11 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void getBalanceFromTransactions() {
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u2")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u3")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c1")).setRemitterId(id("u3")).setBeneficiaryId(id("u1")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("c2")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u2")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u3")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u3")).setBeneficiaryId(id("u1")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c2")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
 
     
 //    ThreadValue.setReadOnly(true);
@@ -192,11 +192,11 @@ public class TransactionRepositoryTest extends AbstractRepositoryTest {
     long count = repository.pendingTransactionsCount();
     assertThat(count).isEqualTo(0L);
     
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id 1"))));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id 1"))));
     count = repository.pendingTransactionsCount();
     assertThat(count).isEqualTo(1L);
     
-    inTransaction(() -> repository.create(new Transaction().setCommunityId(id("community id 2")).setBlockchainCompletedAt(Instant.now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id 2")).setBlockchainCompletedAt(Instant.now())));
     count = repository.pendingTransactionsCount();
     assertThat(count).isEqualTo(1L);
   }

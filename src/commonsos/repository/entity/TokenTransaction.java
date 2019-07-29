@@ -15,9 +15,9 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-@Entity @Table(name="transactions")
+@Entity @Table(name="token_transactions")
 @Getter @Setter @Accessors(chain=true) @ToString
-public class Transaction extends AbstractEntity {
+public class TokenTransaction extends AbstractEntity {
   @Id @GeneratedValue(strategy=IDENTITY) private Long id;
   private Long communityId;
   private Long remitterId;

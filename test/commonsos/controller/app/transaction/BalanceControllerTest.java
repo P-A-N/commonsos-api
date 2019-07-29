@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import commonsos.controller.app.transaction.BalanceController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
-import commonsos.service.TransactionService;
+import commonsos.service.TokenTransactionService;
 import commonsos.view.app.BalanceView;
 import spark.Request;
 
@@ -22,7 +22,7 @@ import spark.Request;
 public class BalanceControllerTest {
 
   @Mock Request request;
-  @Mock TransactionService service;
+  @Mock TokenTransactionService service;
   @InjectMocks BalanceController controller;
 
   @Test

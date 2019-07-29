@@ -15,45 +15,45 @@ import javax.persistence.TypedQuery;
 
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
-import commonsos.repository.entity.Transaction;
+import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.command.PaginationCommand;
 
 @Singleton
-public class TransactionRepository extends Repository {
+public class TokenTransactionRepository extends Repository {
 
   @Inject
-  public TransactionRepository(EntityManagerService entityManagerService) {
+  public TokenTransactionRepository(EntityManagerService entityManagerService) {
     super(entityManagerService);
   }
 
-  public Transaction create(Transaction transaction) {
+  public TokenTransaction create(TokenTransaction transaction) {
     em().persist(transaction);
     return transaction;
   }
 
-  public ResultList<Transaction> transactions(User user, Long communityId, PaginationCommand pagination) {
-    TypedQuery<Transaction> query = em()
-      .createQuery("FROM Transaction WHERE communityId = :communityId " +
+  public ResultList<TokenTransaction> transactions(User user, Long communityId, PaginationCommand pagination) {
+    TypedQuery<TokenTransaction> query = em()
+      .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
           "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
-          "ORDER BY id", Transaction.class)
+          "ORDER BY id", TokenTransaction.class)
       .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId());
     
-    ResultList<Transaction> resultList = getResultList(query, pagination);
+    ResultList<TokenTransaction> resultList = getResultList(query, pagination);
     
     return resultList;
   }
 
-  public void update(Transaction transaction) {
+  public void update(TokenTransaction transaction) {
     em().merge(transaction);
   }
 
-  public Optional<Transaction> findByBlockchainTransactionHash(String blockchainTransactionHash) {
+  public Optional<TokenTransaction> findByBlockchainTransactionHash(String blockchainTransactionHash) {
     try {
       return of(em()
-        .createQuery("From Transaction WHERE blockchainTransactionHash = :hash", Transaction.class)
+        .createQuery("From TokenTransaction WHERE blockchainTransactionHash = :hash", TokenTransaction.class)
         .setLockMode(lockMode())
         .setParameter("hash", blockchainTransactionHash)
         .getSingleResult());
@@ -64,8 +64,8 @@ public class TransactionRepository extends Repository {
   }
 
   public boolean hasPaid(Ad ad) {
-    List<Transaction> resultList = em()
-      .createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
+    List<TokenTransaction> resultList = em()
+      .createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
       .setLockMode(lockMode())
       .setParameter("adId", ad.getId())
       .getResultList();
@@ -75,14 +75,14 @@ public class TransactionRepository extends Repository {
 
   public BigDecimal getBalanceFromTransactions(User user, Long communityId) {
     BigDecimal remitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM Transaction WHERE communityId = :communityId AND remitterId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterId = :userId ", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getSingleResult();
     if (remitAmount == null) remitAmount = BigDecimal.ZERO;
     
     BigDecimal benefitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM Transaction WHERE communityId = :communityId AND beneficiaryId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND beneficiaryId = :userId ", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getSingleResult();
@@ -94,7 +94,7 @@ public class TransactionRepository extends Repository {
 
   public BigDecimal pendingTransactionsAmount(Long userId, Long communityId) {
     BigDecimal amount = em()
-      .createQuery("SELECT SUM(amount) FROM Transaction " +
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction " +
           "WHERE communityId = :communityId " +
           "AND blockchainCompletedAt IS NULL " +
           "AND remitterId = :userId", BigDecimal.class)
@@ -106,7 +106,7 @@ public class TransactionRepository extends Repository {
   
   public Long pendingTransactionsCount() {
     Long count = em()
-      .createQuery("SELECT COUNT(*) FROM Transaction " +
+      .createQuery("SELECT COUNT(*) FROM TokenTransaction " +
           "WHERE blockchainCompletedAt IS NULL ", Long.class)
       .getSingleResult();
     return count != null ? count :  0L;

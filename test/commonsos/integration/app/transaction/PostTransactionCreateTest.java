@@ -18,7 +18,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
-import commonsos.repository.entity.Transaction;
+import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 
 public class PostTransactionCreateTest extends IntegrationTest {
@@ -64,7 +64,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("balance", notNullValue());
     
     // verify db
-    Transaction transaction = emService.get().createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
+    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
         .setParameter("adId", giveAd.getId())
         .getSingleResult();
     assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
@@ -135,7 +135,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("balance", notNullValue());
     
     // verify db
-    Transaction transaction = emService.get().createQuery("FROM Transaction WHERE adId = :adId", Transaction.class)
+    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
         .setParameter("adId", wantAd.getId())
         .getSingleResult();
     assertThat(transaction.getRemitterId()).isEqualTo(adCreator.getId());
@@ -225,7 +225,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("balance", notNullValue());
     
     // verify db
-    Transaction transaction = emService.get().createQuery("FROM Transaction WHERE beneficiaryId = :userId", Transaction.class)
+    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryId = :userId", TokenTransaction.class)
         .setParameter("userId", adCreator.getId())
         .getSingleResult();
     assertThat(transaction.getRemitterId()).isEqualTo(user.getId());

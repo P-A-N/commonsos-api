@@ -1,6 +1,6 @@
 package commonsos.controller.app.transaction;
 
-import static commonsos.annotation.SyncObject.REGIST_TRANSACTION;
+import static commonsos.annotation.SyncObject.REGIST_TOKEN_TRANSACTION;
 
 import javax.inject.Inject;
 
@@ -9,16 +9,16 @@ import com.google.gson.Gson;
 import commonsos.annotation.Synchronized;
 import commonsos.controller.app.AfterLoginController;
 import commonsos.repository.entity.User;
-import commonsos.service.TransactionService;
+import commonsos.service.TokenTransactionService;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.view.app.BalanceView;
 import spark.Request;
 import spark.Response;
 
-@Synchronized(REGIST_TRANSACTION)
+@Synchronized(REGIST_TOKEN_TRANSACTION)
 public class TransactionCreateController extends AfterLoginController {
 
-  @Inject TransactionService service;
+  @Inject TokenTransactionService service;
   @Inject Gson gson;
 
   @Override protected BalanceView handleAfterLogin(User user, Request request, Response response) {

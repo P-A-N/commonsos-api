@@ -23,7 +23,7 @@ import commonsos.JobService;
 import commonsos.di.Web3jProvider;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.EntityManagerService;
-import commonsos.repository.TransactionRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
@@ -36,7 +36,7 @@ public class TokenMigration {
   private static EntityManagerService emService;
   private static CommunityRepository communityRepository;
   private static UserRepository userRepository;
-  private static TransactionRepository transactionRepository;
+  private static TokenTransactionRepository transactionRepository;
   private static Credentials credentials;
   private static JobService jobService;
   private static Scanner scanner = new Scanner(System.in);
@@ -99,7 +99,7 @@ public class TokenMigration {
     emService = injector.getInstance(EntityManagerService.class);
     communityRepository = injector.getInstance(CommunityRepository.class);
     userRepository = injector.getInstance(UserRepository.class);
-    transactionRepository = injector.getInstance(TransactionRepository.class);
+    transactionRepository = injector.getInstance(TokenTransactionRepository.class);
     jobService = injector.getInstance(JobService.class);
   }
 

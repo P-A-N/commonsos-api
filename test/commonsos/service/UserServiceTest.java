@@ -53,7 +53,7 @@ public class UserServiceTest {
   @Mock AdRepository adRepository;
   @Mock BlockchainService blockchainService;
   @Mock CryptoService cryptoService;
-  @Mock TransactionService transactionService;
+  @Mock TokenTransactionService transactionService;
   @Mock ImageUploadService imageService;
   @Mock EmailService EmailService;
   @Mock JobService jobService;

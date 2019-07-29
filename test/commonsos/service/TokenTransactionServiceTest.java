@@ -31,12 +31,12 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
-import commonsos.repository.TransactionRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
-import commonsos.repository.entity.Transaction;
+import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
@@ -45,16 +45,16 @@ import commonsos.view.app.BalanceView;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class TransactionServiceTest {
+public class TokenTransactionServiceTest {
 
-  @Mock TransactionRepository repository;
+  @Mock TokenTransactionRepository repository;
   @Mock UserRepository userRepository;
   @Mock AdRepository adRepository;
   @Mock CommunityRepository communityRepository;
   @Mock BlockchainService blockchainService;
   @Mock BlockchainEventService blockchainEventService;
-  @Captor ArgumentCaptor<Transaction> captor;
-  @InjectMocks @Spy TransactionService service;
+  @Captor ArgumentCaptor<TokenTransaction> captor;
+  @InjectMocks @Spy TokenTransactionService service;
 
   @Test
   public void createTransaction() {
@@ -135,7 +135,7 @@ public class TransactionServiceTest {
 
   @Test
   public void markTransactionCompleted_alreadyCompleted() {
-    Transaction transaction = new Transaction().setBlockchainCompletedAt(now());
+    TokenTransaction transaction = new TokenTransaction().setBlockchainCompletedAt(now());
     when(repository.findByBlockchainTransactionHash("hash")).thenReturn(of(transaction));
 
     service.markTransactionCompleted("hash");

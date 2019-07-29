@@ -72,7 +72,7 @@ public class UserService {
   @Inject private CryptoService cryptoService;
   @Inject private AccessIdService accessIdService;
   @Inject private EmailService emailService;
-  @Inject private TransactionService transactionService;
+  @Inject private TokenTransactionService transactionService;
   @Inject private ImageUploadService imageService;
   @Inject private JobService jobService;
 

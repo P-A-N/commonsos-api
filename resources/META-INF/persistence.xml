@@ -11,7 +11,7 @@
 
     <class>commonsos.repository.entity.User</class>
     <class>commonsos.repository.entity.Ad</class>
-    <class>commonsos.repository.entity.Transaction</class>
+    <class>commonsos.repository.entity.TokenTransaction</class>
     <class>commonsos.repository.entity.Message</class>
     <class>commonsos.repository.entity.MessageThread</class>
     <class>commonsos.repository.entity.MessageThreadParty</class>

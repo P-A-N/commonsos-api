@@ -17,7 +17,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 import commonsos.ThreadValue;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.EntityManagerService;
-import commonsos.service.TransactionService;
+import commonsos.service.TokenTransactionService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BlockchainEventService {
 
   @Inject private Web3j web3j;
-  @Inject private TransactionService transactionService;
+  @Inject private TokenTransactionService transactionService;
   @Inject private EntityManagerService entityManagerService;
 
   public void listenEvents() {

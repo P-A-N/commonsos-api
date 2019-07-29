@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import commonsos.controller.app.transaction.TransactionCreateController;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
-import commonsos.service.TransactionService;
+import commonsos.service.TokenTransactionService;
 import commonsos.service.command.TransactionCreateCommand;
 import spark.Request;
 
@@ -24,7 +24,7 @@ import spark.Request;
 public class TransactionCreateControllerTest {
 
   @InjectMocks  TransactionCreateController controller;
-  @Mock TransactionService service;
+  @Mock TokenTransactionService service;
 
   @BeforeEach
   public void setUp() {
