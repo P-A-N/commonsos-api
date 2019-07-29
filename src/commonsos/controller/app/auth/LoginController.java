@@ -31,6 +31,7 @@ public class LoginController implements Route {
   @Override public PrivateUserView handle(Request request, Response response) {
     LoginCommand command = gson.fromJson(request.body(), LoginCommand.class);
     User user = userService.checkPassword(command.getUsername(), command.getPassword());
+    user = userService.updateLoggedinAt(user);
     
     Session session = request.session();
     session.attribute(USER_SESSION_ATTRIBUTE_NAME, userService.session(user));

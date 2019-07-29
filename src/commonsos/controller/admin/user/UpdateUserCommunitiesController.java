@@ -24,7 +24,7 @@ public class UpdateUserCommunitiesController implements Route {
     result.put("telNo", "00088884444");
     result.put("avatarUrl", "https://hogehoge.com/path/to/photo");
     result.put("emailAddress", "suzuki@admin.test");
-    result.put("lastLoginedAt", Instant.now().minusSeconds(600));
+    result.put("loggedinAt", Instant.now().minusSeconds(600));
     result.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
 
     Map<String, Object> community = new HashMap<>();

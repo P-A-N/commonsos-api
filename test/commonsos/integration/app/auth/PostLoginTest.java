@@ -2,10 +2,12 @@ package commonsos.integration.app.auth;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joda.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,13 +27,24 @@ public class PostLoginTest extends IntegrationTest {
     requestParam.put("username", "user");
     requestParam.put("password", "pass");
     
-    given()
+    String loggedinAt = given()
       .body(gson.toJson(requestParam))
-      .when()
-      .post("/login")
-      .then()
-      .statusCode(200)
-      .body("username", equalTo("user"));
+      .when().post("/login")
+      .then().statusCode(200)
+      .body("username", equalTo("user"))
+      .extract().path("loggedinAt");
+    
+    Instant loggedinAt1 = Instant.parse(loggedinAt);
+
+    loggedinAt = given()
+      .body(gson.toJson(requestParam))
+      .when().post("/login")
+      .then().statusCode(200)
+      .extract().path("loggedinAt");
+    
+    Instant loggedinAt2 = Instant.parse(loggedinAt);
+    
+    assertTrue(loggedinAt1.isBefore(loggedinAt2));
   }
   
   @Test

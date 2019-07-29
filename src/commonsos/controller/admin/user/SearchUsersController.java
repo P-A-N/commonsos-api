@@ -28,7 +28,7 @@ public class SearchUsersController implements Route {
     user1.put("telNo", "00088884444");
     user1.put("avatarUrl", "https://hogehoge.com/path/to/photo");
     user1.put("emailAddress", "suzuki@admin.test");
-    user1.put("lastLoginedAt", Instant.now().minusSeconds(600));
+    user1.put("loggedinAt", Instant.now().minusSeconds(600));
     user1.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
     Map<String, Object> community = new HashMap<>();
     community.put("id", 1);

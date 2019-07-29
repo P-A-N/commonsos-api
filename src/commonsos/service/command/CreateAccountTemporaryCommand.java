@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 public class CreateAccountTemporaryCommand {
   private String username;
   private String password;
+  private String telNo;
   private String firstName;
   private String lastName;
   private String description;

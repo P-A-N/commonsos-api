@@ -1,5 +1,6 @@
 package commonsos.view.app;
 
+import java.time.Instant;
 import java.util.List;
 
 import lombok.Getter;
@@ -14,10 +15,12 @@ public class PrivateUserView {
   private String lastName;
   private String username;
   private String status;
+  private String telNo;
   private List<CommunityUserView> communityList;
   private String description;
   private List<BalanceView> balanceList;
   private String location;
   private String avatarUrl;
   private String emailAddress;
+  private Instant loggedinAt;
 }

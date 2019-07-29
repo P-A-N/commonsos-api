@@ -4,6 +4,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,7 +58,8 @@ public class PostCreateAccountTest extends IntegrationTest {
     // createAccountComplete
     given()
       .when().post("/create-account/{accessId}", accessId)
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("loggedinAt", notNullValue());
 
     // login should success
     given()
@@ -102,7 +104,8 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> loginParam = getLoginParam();
     given()
       .when().post("/create-account/{accessId}", accessId)
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("loggedinAt", notNullValue());
 
     // login should success
     given()
@@ -126,7 +129,8 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> loginParam = getLoginParam();
     given()
       .when().post("/create-account/{accessId}", accessId)
-      .then().statusCode(200);
+      .then().statusCode(200)
+      .body("loggedinAt", notNullValue());
 
     // login should success
     given()
@@ -145,6 +149,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     requestParam.put("description", "description");
     requestParam.put("location", "location");
     requestParam.put("emailAddress", "test@test.com");
+    requestParam.put("telNo", "000-0000-0000");
     requestParam.put("waitUntilCompleted", false);
     List<Long> communityList = new ArrayList<Long>(Arrays.asList(community1.getId(), community2.getId()));
     requestParam.put("communityList", communityList);

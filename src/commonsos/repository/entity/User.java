@@ -2,6 +2,7 @@ package commonsos.repository.entity;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
+import java.time.Instant;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,11 +31,13 @@ public class User extends AbstractEntity {
   private String location;
   private String avatarUrl;
   private String status;
+  private String telNo;
   private String wallet;
   private String walletAddress;
   private String pushNotificationToken;
   private String emailAddress;
   private boolean deleted;
+  private Instant loggedinAt;
 
   @OneToMany(cascade = {CascadeType.ALL})
   @OrderBy("community.id ASC")

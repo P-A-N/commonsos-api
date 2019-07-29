@@ -24,7 +24,7 @@ public class CreateAdminCompleteController implements Route {
     result.put("telNo", "00088884444");
     result.put("department", "遠野市役所");
     result.put("photoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
-    result.put("lastLoginedAt", Instant.now().minusSeconds(600));
+    result.put("loggedinAt", Instant.now().minusSeconds(600));
     result.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
     
     return result;

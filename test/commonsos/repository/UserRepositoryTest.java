@@ -684,11 +684,13 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setDescription("description")
         .setLocation("location")
         .setStatus("status")
+        .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
-        .setEmailAddress("test@test.com");
+        .setEmailAddress("test@test.com")
+        .setLoggedinAt(Instant.now());
     
     return inTransaction(() -> repository.create(testUser));
   }
@@ -706,11 +708,13 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setDescription("description")
         .setLocation("location")
         .setStatus("status")
+        .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
-        .setEmailAddress("test@test.com");
+        .setEmailAddress("test@test.com")
+        .setLoggedinAt(Instant.now());
     
     return inTransaction(() -> repository.create(testUser));
   }
@@ -732,11 +736,13 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setDescription("description")
         .setLocation("location")
         .setStatus("status")
+        .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
-        .setEmailAddress("test@test.com");
+        .setEmailAddress("test@test.com")
+        .setLoggedinAt(Instant.now());
     
     return inTransaction(() -> repository.create(testUser));
   }
@@ -752,6 +758,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setLocation("location")
         .setPasswordHash("password hash")
         .setUsername("worker")
+        .setTelNo("00000000000")
         .setEmailAddress("test@test.com")
         .setWaitUntilCompleted(false)
         .setCommunityList(asList());
@@ -773,6 +780,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setLocation("location")
         .setPasswordHash("password hash")
         .setUsername("worker")
+        .setTelNo("00000000000")
         .setEmailAddress("test@test.com")
         .setWaitUntilCompleted(false)
         .setCommunityList(asList(community1));
@@ -796,6 +804,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setLocation("location")
         .setPasswordHash("password hash")
         .setUsername("worker")
+        .setTelNo("00000000000")
         .setEmailAddress("test@test.com")
         .setWaitUntilCompleted(false)
         .setCommunityList(asList(community1, community2));
@@ -831,11 +840,13 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getDescription()).isEqualTo(expect.getDescription());
     assertThat(actual.getLocation()).isEqualTo(expect.getLocation());
     assertThat(actual.getStatus()).isEqualTo(expect.getStatus());
+    assertThat(actual.getTelNo()).isEqualTo(expect.getTelNo());
     assertThat(actual.getAvatarUrl()).isEqualTo(expect.getAvatarUrl());
     assertThat(actual.getWallet()).isEqualTo(expect.getWallet());
     assertThat(actual.getWalletAddress()).isEqualTo(expect.getWalletAddress());
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
+    assertThat(actual.getLoggedinAt()).isEqualTo(expect.getLoggedinAt());
     assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
     assertThat(actual.getCreatedAt()).isNotNull();
     assertThat(actual.getUpdatedAt()).isNotNull();
@@ -865,6 +876,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getLocation()).isEqualTo(expect.getLocation());
     assertThat(actual.getPasswordHash()).isEqualTo(expect.getPasswordHash());
     assertThat(actual.getUsername()).isEqualTo(expect.getUsername());
+    assertThat(actual.getTelNo()).isEqualTo(expect.getTelNo());
     assertThat(actual.getEmailAddress()).isEqualTo(expect.getEmailAddress());
     assertThat(actual.isWaitUntilCompleted()).isEqualTo(expect.isWaitUntilCompleted());
 

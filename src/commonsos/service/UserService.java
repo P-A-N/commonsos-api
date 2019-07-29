@@ -157,6 +157,7 @@ public class UserService {
       .setLocation(command.getLocation())
       .setCommunityList(communityList)
       .setEmailAddress(command.getEmailAddress())
+      .setTelNo(command.getTelNo())
       .setWaitUntilCompleted(command.isWaitUntilCompleted());
 
     userRepository.createTemporary(tmpUser);
@@ -181,7 +182,9 @@ public class UserService {
         .setDescription(tempUser.getDescription())
         .setLocation(tempUser.getLocation())
         .setEmailAddress(tempUser.getEmailAddress())
-        .setStatus("");
+        .setTelNo(tempUser.getTelNo())
+        .setStatus("")
+        .setLoggedinAt(Instant.now());
 
     String wallet = blockchainService.createWallet(WALLET_PASSWORD);
     Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
@@ -290,6 +293,7 @@ public class UserService {
 //    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");
 //    if (command.getLastName() == null || command.getLastName().length() < 1) throw new BadRequestException("invalid last name");
     ValidateUtil.validateEmailAddress(command.getEmailAddress());
+    ValidateUtil.validateTelNo(command.getTelNo());
   }
 
   public User user(Long id) {
@@ -323,6 +327,7 @@ public class UserService {
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
     user.setLocation(command.getLocation());
+    user.setTelNo(command.getTelNo());
     return userRepository.update(user);
   }
 
@@ -368,6 +373,11 @@ public class UserService {
     ValidateUtil.validateStatus(command.getStatus());
     
     user.setStatus(command.getStatus());
+    return userRepository.update(user);
+  }
+
+  public User updateLoggedinAt(User user) {
+    user.setLoggedinAt(Instant.now());
     return userRepository.update(user);
   }
 

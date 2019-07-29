@@ -30,7 +30,7 @@ public class SearchAdminsController implements Route {
     admin1.put("telNo", "00088884444");
     admin1.put("department", "遠野市役所");
     admin1.put("photoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
-    admin1.put("lastLoginedAt", Instant.now().minusSeconds(600));
+    admin1.put("loggedinAt", Instant.now().minusSeconds(600));
     admin1.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
     adminList.add(admin1);
     adminList.add(admin1);

@@ -42,11 +42,13 @@ public class UserUtil {
       .setLastName(user.getLastName())
       .setUsername(user.getUsername())
       .setStatus(user.getStatus())
+      .setTelNo(user.getTelNo())
       .setCommunityList(communityUserList)
       .setLocation(user.getLocation())
       .setDescription(user.getDescription())
       .setAvatarUrl(user.getAvatarUrl())
-      .setEmailAddress(user.getEmailAddress());
+      .setEmailAddress(user.getEmailAddress())
+      .setLoggedinAt(user.getLoggedinAt());
   }
   
   public static CommunityUserView communityUserView(CommunityUser communityUser, String tokenSymbol) {

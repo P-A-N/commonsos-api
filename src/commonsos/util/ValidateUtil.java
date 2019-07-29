@@ -3,6 +3,7 @@ package commonsos.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -13,11 +14,18 @@ public class ValidateUtil {
   
   private static Pattern passwordPattern = Pattern.compile("^[a-zA-Z0-9_]+$");
   private static Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_]+$");
+  private static Pattern telNoPattern = Pattern.compile("^[0-9-]+$");
   
   private ValidateUtil() {}
 
   public static void validateEmailAddress(String emailAddress) {
     if (emailAddress == null || !EmailValidator.getInstance().isValid(emailAddress)) throw new BadRequestException("invalid email address");
+  }
+
+  public static void validateTelNo(String telNo) {
+    if (StringUtils.isEmpty(telNo)) return;
+    Matcher m = telNoPattern.matcher(telNo);
+    if (!m.find()) throw new DisplayableException("error.invalid_character_in_telNo");
   }
   
   public static void validateUrl(String url) {

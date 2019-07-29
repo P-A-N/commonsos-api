@@ -123,6 +123,18 @@ public class ValidateUtilTest {
   }
 
   @Test
+  public void validate_telNo() {
+    ValidateUtil.validateTelNo(null);
+    ValidateUtil.validateTelNo("");
+    ValidateUtil.validateTelNo("0123456789");
+    ValidateUtil.validateTelNo("012-3456-7890");
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateTelNo("０１２３４５６７８９"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateTelNo("abcdefg"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateTelNo("000_0000_0000"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateTelNo("000 0000 0000"));
+  }
+
+  @Test
   public void validateUrl_valid() {
     ValidateUtil.validateUrl("http://test.com");
     ValidateUtil.validateUrl("http://test.com/");
