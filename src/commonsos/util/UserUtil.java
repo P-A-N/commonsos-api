@@ -1,5 +1,6 @@
 package commonsos.util;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ public class UserUtil {
       .setLoggedinAt(user.getLoggedinAt());
   }
   
-  public static CommunityUserView communityUserView(CommunityUser communityUser, String tokenSymbol) {
+  public static CommunityUserView communityUserView(CommunityUser communityUser, String tokenSymbol, BigDecimal balance) {
     Long adminUserId = communityUser.getCommunity().getAdminUser() == null ? null : communityUser.getCommunity().getAdminUser().getId();
     return new CommunityUserView()
         .setId(communityUser.getCommunity().getId())
@@ -59,6 +60,7 @@ public class UserUtil {
         .setAdminUserId(adminUserId)
         .setDescription(communityUser.getCommunity().getDescription())
         .setTokenSymbol(tokenSymbol)
+        .setBalance(balance)
         .setPhotoUrl(communityUser.getCommunity().getPhotoUrl())
         .setCoverPhotoUrl(communityUser.getCommunity().getCoverPhotoUrl())
         .setWalletLastViewTime(communityUser.getWalletLastViewTime())

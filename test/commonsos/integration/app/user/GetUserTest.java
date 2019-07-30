@@ -49,6 +49,7 @@ public class GetUserTest extends IntegrationTest {
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))
+      .body("communityList.balance", contains(10))
       .body("communityList.walletLastViewTime", contains(notNullValue()));
   }
   

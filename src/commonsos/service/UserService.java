@@ -86,8 +86,9 @@ public class UserService {
     List<BalanceView> balanceList = new ArrayList<>();
     List<CommunityUserView> communityUserList = new ArrayList<>();
     user.getCommunityUserList().forEach(cu -> {
-      balanceList.add(transactionService.balance(user, cu.getCommunity().getId()));
-      communityUserList.add(UserUtil.communityUserView(cu, blockchainService.tokenSymbol(cu.getCommunity().getId())));
+      BalanceView balanceView = transactionService.balance(user, cu.getCommunity().getId());
+      balanceList.add(balanceView);
+      communityUserList.add(UserUtil.communityUserView(cu, balanceView.getTokenSymbol(), balanceView.getBalance()));
     });
     
     return UserUtil.privateView(user, balanceList, communityUserList);
@@ -124,7 +125,8 @@ public class UserService {
     
     CommunityUserListView listView = new CommunityUserListView();
     listView.setCommunityList(result.getList().stream().map(cu -> {
-      return UserUtil.communityUserView(cu, blockchainService.tokenSymbol(cu.getCommunity().getId()));
+      BalanceView balanceView = transactionService.balance(user, cu.getCommunity().getId());
+      return UserUtil.communityUserView(cu, balanceView.getTokenSymbol(), balanceView.getBalance());
     }).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     

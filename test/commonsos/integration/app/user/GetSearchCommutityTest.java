@@ -48,6 +48,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(3))
       .body("communityList.id", contains(community2.getId().intValue(), community3.getId().intValue(), community4.getId().intValue()))
+      .body("communityList.balance", contains(10, 10, 10))
       .body("communityList.walletLastViewTime", contains(Instant.EPOCH.toString(), Instant.EPOCH.toString(), Instant.EPOCH.toString()));
 
     // filter

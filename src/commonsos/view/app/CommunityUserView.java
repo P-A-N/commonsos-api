@@ -1,5 +1,6 @@
 package commonsos.view.app;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 import lombok.Getter;
@@ -13,6 +14,7 @@ public class CommunityUserView {
   private Long adminUserId;
   private String description;
   private String tokenSymbol;
+  private BigDecimal balance;
   private String photoUrl;
   private String coverPhotoUrl;
   private Instant walletLastViewTime;
