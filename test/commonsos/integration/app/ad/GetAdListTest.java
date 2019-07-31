@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
 import static java.util.Arrays.asList;
@@ -29,8 +30,8 @@ public class GetAdListTest extends IntegrationTest {
   
   @BeforeEach
   public void setupData() {
-    community = create(new Community().setName("community"));
-    otherCommunity = create(new Community().setName("otherCommunity"));
+    community = create(new Community().setName("community").setStatus(PUBLIC));
+    otherCommunity = create(new Community().setName("otherCommunity").setStatus(PUBLIC));
     /*user = */create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     fooUser = create(new User().setUsername("fooUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     barUser = create(new User().setUsername("barUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
@@ -65,7 +66,7 @@ public class GetAdListTest extends IntegrationTest {
   @Test
   public void adList_pagination() {
     // prepare
-    Community pageCommunity =  create(new Community().setName("page_community"));
+    Community pageCommunity =  create(new Community().setName("page_community").setStatus(PUBLIC));
     User pageUser = create(new User().setUsername("page_user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
     create(new Ad().setTitle("page_ad1").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
     create(new Ad().setTitle("page_ad2").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));

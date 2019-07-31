@@ -63,6 +63,7 @@ public class UserUtil {
         .setBalance(balance)
         .setPhotoUrl(communityUser.getCommunity().getPhotoUrl())
         .setCoverPhotoUrl(communityUser.getCommunity().getCoverPhotoUrl())
+        .setTransactionFee(communityUser.getCommunity().getFee())
         .setWalletLastViewTime(communityUser.getWalletLastViewTime())
         .setAdLastViewTime(communityUser.getAdLastViewTime())
         .setNotificationLastViewTime(communityUser.getNotificationLastViewTime());

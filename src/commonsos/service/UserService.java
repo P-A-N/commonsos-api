@@ -120,8 +120,8 @@ public class UserService {
 
   public CommunityUserListView searchUsersCommunity(User user, String filter, PaginationCommand pagination) {
     ResultList<CommunityUser> result = StringUtils.isEmpty(filter) ?
-        communityRepository.list(user.getCommunityUserList(), pagination) :
-        communityRepository.list(filter, user.getCommunityUserList(), pagination);
+        communityRepository.listPublic(user.getCommunityUserList(), pagination) :
+        communityRepository.listPublic(filter, user.getCommunityUserList(), pagination);
     
     CommunityUserListView listView = new CommunityUserListView();
     listView.setCommunityList(result.getList().stream().map(cu -> {
@@ -284,7 +284,7 @@ public class UserService {
   private List<Community> communityList(List<Long> communityList) {
     List<Community> result = new ArrayList<>();
     communityList.forEach(id -> {
-      result.add(communityRepository.findStrictById(id));
+      result.add(communityRepository.findPublicStrictById(id));
     });
     return result;
   }
@@ -346,7 +346,7 @@ public class UserService {
     });
     newCommunityIdList.forEach(id -> {
       if (!oldCommunityIdList.contains(id)) {
-        newCommunityUserList.add(new CommunityUser().setCommunity(communityRepository.findStrictById(id)));
+        newCommunityUserList.add(new CommunityUser().setCommunity(communityRepository.findPublicStrictById(id)));
       }
     });
     newCommunityUserList.sort((c1, c2) -> c1.getCommunity().getId().compareTo(c2.getCommunity().getId()));
@@ -408,7 +408,7 @@ public class UserService {
   }
 
   public void updateWalletLastViewTime(User user, LastViewTimeUpdateCommand command) {
-    Community community = communityRepository.findStrictById(command.getCommunityId());
+    Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
     user.getCommunityUserList().forEach(cu -> {
@@ -421,7 +421,7 @@ public class UserService {
   }
 
   public void updateAdLastViewTime(User user, LastViewTimeUpdateCommand command) {
-    Community community = communityRepository.findStrictById(command.getCommunityId());
+    Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
     user.getCommunityUserList().forEach(cu -> {
@@ -434,7 +434,7 @@ public class UserService {
   }
 
   public void updateNotificationLastViewTime(User user, LastViewTimeUpdateCommand command) {
-    Community community = communityRepository.findStrictById(command.getCommunityId());
+    Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
 
     user.getCommunityUserList().forEach(cu -> {

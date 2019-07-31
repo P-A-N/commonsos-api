@@ -1,5 +1,6 @@
 package commonsos.integration.app.blockchain;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -164,7 +165,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("creating community started. [communityName=%s]", communityName));
     
     String tokenAddress = blockchainService.createToken(admin, tokenSymbol, tokenName);
-    Community community = create(new Community().setName(communityName).setTokenContractAddress(tokenAddress).setAdminUser(admin));
+    Community community = create(new Community().setStatus(PUBLIC).setName(communityName).setTokenContractAddress(tokenAddress).setAdminUser(admin));
 
     update(admin.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 

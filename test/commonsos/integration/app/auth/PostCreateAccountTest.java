@@ -1,5 +1,6 @@
 package commonsos.integration.app.auth;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -29,8 +30,8 @@ public class PostCreateAccountTest extends IntegrationTest {
   @BeforeEach
   public void createUser() {
     admin = create(new User().setUsername("admin"));
-    community1 =  create(new Community().setName("community1").setAdminUser(admin));
-    community2 =  create(new Community().setName("community2").setAdminUser(admin));
+    community1 =  create(new Community().setName("community1").setAdminUser(admin).setStatus(PUBLIC));
+    community2 =  create(new Community().setName("community2").setAdminUser(admin).setStatus(PUBLIC));
   }
   
   @Test

@@ -17,6 +17,7 @@ public class CommunityUserView {
   private BigDecimal balance;
   private String photoUrl;
   private String coverPhotoUrl;
+  private BigDecimal transactionFee;
   private Instant walletLastViewTime;
   private Instant adLastViewTime;
   private Instant notificationLastViewTime;

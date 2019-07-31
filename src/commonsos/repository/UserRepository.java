@@ -69,29 +69,29 @@ public class UserRepository extends Repository {
   }
 
   public boolean isEmailAddressTaken(String emailAddress) {
-    boolean usernameTaken = findByEmailAddress(emailAddress).isPresent();
+    boolean emailAddressTaken = findByEmailAddress(emailAddress).isPresent();
     
-    if (!usernameTaken) {
+    if (!emailAddressTaken) {
       Long count = em().createQuery("SELECT COUNT(tu) FROM TemporaryUser tu WHERE emailAddress = :emailAddress"
           + " AND tu.invalid is FALSE"
           + " AND tu.expirationTime > CURRENT_TIMESTAMP", Long.class)
         .setParameter("emailAddress", emailAddress)
         .getSingleResult();
       
-      usernameTaken = (count != 0);
+      emailAddressTaken = (count != 0);
     }
     
-    if (!usernameTaken) {
+    if (!emailAddressTaken) {
       Long count = em().createQuery("SELECT COUNT(tea) FROM TemporaryEmailAddress tea WHERE emailAddress = :emailAddress"
           + " AND tea.invalid is FALSE"
           + " AND tea.expirationTime > CURRENT_TIMESTAMP", Long.class)
         .setParameter("emailAddress", emailAddress)
         .getSingleResult();
       
-      usernameTaken = (count != 0);
+      emailAddressTaken = (count != 0);
     }
     
-    return usernameTaken;
+    return emailAddressTaken;
   }
   
   public User create(User user) {
@@ -116,7 +116,7 @@ public class UserRepository extends Repository {
 
   public Optional<User> findById(Long id) {
     try {
-      return Optional.of(em().createQuery("FROM User WHERE id = :id AND deleted = FALSE", User.class)
+      return Optional.of(em().createQuery("FROM User WHERE id = :id AND deleted IS FALSE", User.class)
         .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()

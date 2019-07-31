@@ -86,7 +86,7 @@ public class MessageService {
   }
 
   public MessageThreadView group(User user, CreateGroupCommand command) {
-    communityRepository.findStrictById(command.getCommunityId());
+    communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new BadRequestException("User isn't a member of the community");
     List<User> users = validatePartiesCommunity(command.getMemberIds(), command.getCommunityId());
     List<MessageThreadParty> parties = usersToParties(users);
@@ -210,7 +210,7 @@ public class MessageService {
   }
 
   public MessageThreadListView searchThreads(User user, MessageThreadListCommand command, PaginationCommand pagination) {
-    communityRepository.findStrictById(command.getCommunityId());
+    communityRepository.findPublicStrictById(command.getCommunityId());
     
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user, command.getCommunityId());
     
@@ -329,6 +329,7 @@ public class MessageService {
   }
 
   public int unreadMessageThreadCount(User user, Long communityId) {
+    communityRepository.findPublicStrictById(communityId);
     return messageThreadRepository.unreadMessageThreadIds(user, communityId).size();
   }
 }

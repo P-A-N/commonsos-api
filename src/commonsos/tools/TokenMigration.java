@@ -50,7 +50,7 @@ public class TokenMigration {
 
     System.out.println("Token migration started.\n");
     
-    List<Community> communityList = emService.runInTransaction(() -> communityRepository.list(null).getList());
+    List<Community> communityList = emService.runInTransaction(() -> communityRepository.listPublic(null).getList());
     Set<Long> completedCommunity = new HashSet<>();
     showProgress(communityList, completedCommunity);
     

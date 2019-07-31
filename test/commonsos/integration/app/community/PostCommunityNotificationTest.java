@@ -1,5 +1,6 @@
 package commonsos.integration.app.community;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +28,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community =  create(new Community().setName("community"));
+    community =  create(new Community().setStatus(PUBLIC).setName("community"));
   }
   
   @Test

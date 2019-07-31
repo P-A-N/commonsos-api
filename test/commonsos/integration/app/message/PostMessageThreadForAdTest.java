@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +31,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community =  create(new Community().setName("community"));
+    community =  create(new Community().setStatus(PUBLIC).setName("community"));
     adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(adCreator.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 

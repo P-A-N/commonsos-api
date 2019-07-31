@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.equalTo;
@@ -28,8 +29,8 @@ public class GetUnreadMessageThreadCountTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community1 =  create(new Community().setName("community1"));
-    community2 =  create(new Community().setName("community2"));
+    community1 =  create(new Community().setStatus(PUBLIC).setName("community1"));
+    community2 =  create(new Community().setStatus(PUBLIC).setName("community2"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
 

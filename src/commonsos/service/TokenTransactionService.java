@@ -51,6 +51,7 @@ public class TokenTransactionService {
   @Inject PushNotificationService pushNotificationService;
 
   public BalanceView balance(User user, Long communityId) {
+    communityRepository.findPublicStrictById(communityId);
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
     BalanceView view = new BalanceView()
         .setCommunityId(communityId)
@@ -71,7 +72,7 @@ public class TokenTransactionService {
   }
 
   public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
-    communityRepository.findStrictById(communityId);
+    communityRepository.findPublicStrictById(communityId);
     ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
 
     List<TransactionView> transactionViews = result.getList().stream()
@@ -111,7 +112,7 @@ public class TokenTransactionService {
     if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException("user is beneficiary");
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryId());
     
-    Community community = communityRepository.findStrictById(command.getCommunityId());
+    Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new DisplayableException("error.userIsNotCommunityMember");
     if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 

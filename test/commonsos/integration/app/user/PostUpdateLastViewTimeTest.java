@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -28,9 +29,9 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() {
-    community1 = create(new Community().setName("community1").setTokenContractAddress("0x0"));
-    community2 = create(new Community().setName("community2").setTokenContractAddress("0x0"));
-    otherCommunity = create(new Community().setName("otherCommunity").setTokenContractAddress("0x0"));
+    community1 = create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0"));
+    community2 = create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0"));
+    otherCommunity = create(new Community().setStatus(PUBLIC).setName("otherCommunity").setTokenContractAddress("0x0"));
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2))));

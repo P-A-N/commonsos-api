@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -27,10 +28,10 @@ public class GetSearchCommutityTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() {
-    community1 = create(new Community().setName("comm_foo").setTokenContractAddress("0x0"));
-    community2 = create(new Community().setName("comm_foo_bar").setTokenContractAddress("0x0"));
-    community3 = create(new Community().setName("comm_bar").setTokenContractAddress("0x0"));
-    community4 = create(new Community().setName("comm_bar_foo").setTokenContractAddress("0x0"));
+    community1 = create(new Community().setStatus(PUBLIC).setName("comm_foo").setTokenContractAddress("0x0"));
+    community2 = create(new Community().setStatus(PUBLIC).setName("comm_foo_bar").setTokenContractAddress("0x0"));
+    community3 = create(new Community().setStatus(PUBLIC).setName("comm_bar").setTokenContractAddress("0x0"));
+    community4 = create(new Community().setStatus(PUBLIC).setName("comm_bar_foo").setTokenContractAddress("0x0"));
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community2),
         new CommunityUser().setCommunity(community3),
@@ -64,18 +65,18 @@ public class GetSearchCommutityTest extends IntegrationTest {
   @Test
   public void searchCommutity_nonFilter_pagination() throws Exception {
     // prepare
-    Community pageCommunity1 =  create(new Community().setName("page_community1").setTokenContractAddress("0x0"));
-    Community pageCommunity2 =  create(new Community().setName("page_community2").setTokenContractAddress("0x0"));
-    Community pageCommunity3 =  create(new Community().setName("page_community3").setTokenContractAddress("0x0"));
-    Community pageCommunity4 =  create(new Community().setName("page_community4").setTokenContractAddress("0x0"));
-    Community pageCommunity5 =  create(new Community().setName("page_community5").setTokenContractAddress("0x0"));
-    Community pageCommunity6 =  create(new Community().setName("page_community6").setTokenContractAddress("0x0"));
-    Community pageCommunity7 =  create(new Community().setName("page_community7").setTokenContractAddress("0x0"));
-    Community pageCommunity8 =  create(new Community().setName("page_community8").setTokenContractAddress("0x0"));
-    Community pageCommunity9 =  create(new Community().setName("page_community9").setTokenContractAddress("0x0"));
-    Community pageCommunity10 =  create(new Community().setName("page_community10").setTokenContractAddress("0x0"));
-    Community pageCommunity11 =  create(new Community().setName("page_community11").setTokenContractAddress("0x0"));
-    Community pageCommunity12 =  create(new Community().setName("page_community12").setTokenContractAddress("0x0"));
+    Community pageCommunity1 =  create(new Community().setStatus(PUBLIC).setName("page_community1").setTokenContractAddress("0x0"));
+    Community pageCommunity2 =  create(new Community().setStatus(PUBLIC).setName("page_community2").setTokenContractAddress("0x0"));
+    Community pageCommunity3 =  create(new Community().setStatus(PUBLIC).setName("page_community3").setTokenContractAddress("0x0"));
+    Community pageCommunity4 =  create(new Community().setStatus(PUBLIC).setName("page_community4").setTokenContractAddress("0x0"));
+    Community pageCommunity5 =  create(new Community().setStatus(PUBLIC).setName("page_community5").setTokenContractAddress("0x0"));
+    Community pageCommunity6 =  create(new Community().setStatus(PUBLIC).setName("page_community6").setTokenContractAddress("0x0"));
+    Community pageCommunity7 =  create(new Community().setStatus(PUBLIC).setName("page_community7").setTokenContractAddress("0x0"));
+    Community pageCommunity8 =  create(new Community().setStatus(PUBLIC).setName("page_community8").setTokenContractAddress("0x0"));
+    Community pageCommunity9 =  create(new Community().setStatus(PUBLIC).setName("page_community9").setTokenContractAddress("0x0"));
+    Community pageCommunity10 =  create(new Community().setStatus(PUBLIC).setName("page_community10").setTokenContractAddress("0x0"));
+    Community pageCommunity11 =  create(new Community().setStatus(PUBLIC).setName("page_community11").setTokenContractAddress("0x0"));
+    Community pageCommunity12 =  create(new Community().setStatus(PUBLIC).setName("page_community12").setTokenContractAddress("0x0"));
     User pageUser = create(new User().setUsername("page_user").setPasswordHash(hash("password")).setEmailAddress("page_user@test.com").setCommunityUserList(asList(
         new CommunityUser().setCommunity(pageCommunity1), new CommunityUser().setCommunity(pageCommunity2),
         new CommunityUser().setCommunity(pageCommunity3), new CommunityUser().setCommunity(pageCommunity4),
@@ -140,18 +141,18 @@ public class GetSearchCommutityTest extends IntegrationTest {
   @Test
   public void searchCommutity_filter_pagination() throws Exception {
     // prepare
-    Community pageCommunity1 =  create(new Community().setName("page_community1").setTokenContractAddress("0x0"));
-    Community pageCommunity2 =  create(new Community().setName("page_community2").setTokenContractAddress("0x0"));
-    Community pageCommunity3 =  create(new Community().setName("page_community3").setTokenContractAddress("0x0"));
-    Community pageCommunity4 =  create(new Community().setName("page_community4").setTokenContractAddress("0x0"));
-    Community pageCommunity5 =  create(new Community().setName("page_community5").setTokenContractAddress("0x0"));
-    Community pageCommunity6 =  create(new Community().setName("page_community6").setTokenContractAddress("0x0"));
-    Community pageCommunity7 =  create(new Community().setName("page_community7").setTokenContractAddress("0x0"));
-    Community pageCommunity8 =  create(new Community().setName("page_community8").setTokenContractAddress("0x0"));
-    Community pageCommunity9 =  create(new Community().setName("page_community9").setTokenContractAddress("0x0"));
-    Community pageCommunity10 =  create(new Community().setName("page_community10").setTokenContractAddress("0x0"));
-    Community pageCommunity11 =  create(new Community().setName("page_community11").setTokenContractAddress("0x0"));
-    Community pageCommunity12 =  create(new Community().setName("page_community12").setTokenContractAddress("0x0"));
+    Community pageCommunity1 =  create(new Community().setStatus(PUBLIC).setName("page_community1").setTokenContractAddress("0x0"));
+    Community pageCommunity2 =  create(new Community().setStatus(PUBLIC).setName("page_community2").setTokenContractAddress("0x0"));
+    Community pageCommunity3 =  create(new Community().setStatus(PUBLIC).setName("page_community3").setTokenContractAddress("0x0"));
+    Community pageCommunity4 =  create(new Community().setStatus(PUBLIC).setName("page_community4").setTokenContractAddress("0x0"));
+    Community pageCommunity5 =  create(new Community().setStatus(PUBLIC).setName("page_community5").setTokenContractAddress("0x0"));
+    Community pageCommunity6 =  create(new Community().setStatus(PUBLIC).setName("page_community6").setTokenContractAddress("0x0"));
+    Community pageCommunity7 =  create(new Community().setStatus(PUBLIC).setName("page_community7").setTokenContractAddress("0x0"));
+    Community pageCommunity8 =  create(new Community().setStatus(PUBLIC).setName("page_community8").setTokenContractAddress("0x0"));
+    Community pageCommunity9 =  create(new Community().setStatus(PUBLIC).setName("page_community9").setTokenContractAddress("0x0"));
+    Community pageCommunity10 =  create(new Community().setStatus(PUBLIC).setName("page_community10").setTokenContractAddress("0x0"));
+    Community pageCommunity11 =  create(new Community().setStatus(PUBLIC).setName("page_community11").setTokenContractAddress("0x0"));
+    Community pageCommunity12 =  create(new Community().setStatus(PUBLIC).setName("page_community12").setTokenContractAddress("0x0"));
     User pageUser = create(new User().setUsername("page_user").setPasswordHash(hash("password")).setEmailAddress("page_user@test.com").setCommunityUserList(asList(
         new CommunityUser().setCommunity(pageCommunity1), new CommunityUser().setCommunity(pageCommunity2),
         new CommunityUser().setCommunity(pageCommunity3), new CommunityUser().setCommunity(pageCommunity4),

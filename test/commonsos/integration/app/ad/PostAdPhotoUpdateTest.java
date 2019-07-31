@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 
@@ -26,7 +27,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
   
   @BeforeEach
   public void setupData() {
-    community =  create(new Community().setName("community"));
+    community =  create(new Community().setName("community").setStatus(PUBLIC));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
     

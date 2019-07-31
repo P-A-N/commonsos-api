@@ -1,13 +1,17 @@
 package commonsos.repository;
 
+import static commonsos.repository.entity.CommunityStatus.PRIVATE;
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityStatus;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
@@ -20,22 +24,24 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   CommunityRepository repository = new CommunityRepository(emService);
 
   @Test
-  public void findById() {
+  public void findPublicById() {
     // prepare
     User admin = inTransaction(() -> userRepository.create(new User().setUsername("admin")));
     Long id = inTransaction(() -> repository.create(new Community()
         .setName("Kaga")
         .setDescription("description")
         .setTokenContractAddress("66")
-        .setAdminUser(admin))).getId();
+        .setAdminUser(admin))
+        .setStatus(PUBLIC)).getId();
 
     // execute
-    Optional<Community> community = repository.findById(id);
+    Optional<Community> community = repository.findPublicById(id);
 
     // verify
     assertThat(community).isNotEmpty();
     assertThat(community.get().getId()).isEqualTo(id);
     assertThat(community.get().getName()).isEqualTo("Kaga");
+    assertThat(community.get().getStatus()).isEqualTo(PUBLIC);
     assertThat(community.get().getDescription()).isEqualTo("description");
     assertThat(community.get().getTokenContractAddress()).isEqualTo("66");
     assertThat(community.get().getAdminUser().getId()).isEqualTo(admin.getId());
@@ -43,13 +49,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void findById_noAdmin() {
+  public void findPublicById_noAdmin() {
     Long id = inTransaction(() -> repository.create(new Community()
         .setName("Kaga")
         .setDescription("description")
-        .setTokenContractAddress("66"))).getId();
+        .setTokenContractAddress("66"))
+        .setStatus(PUBLIC)).getId();
 
-    Optional<Community> community = repository.findById(id);
+    Optional<Community> community = repository.findPublicById(id);
 
     assertThat(community).isNotEmpty();
     assertThat(community.get().getId()).isEqualTo(id);
@@ -60,8 +67,30 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void findById_notFound() {
-    assertThat(repository.findById(123L)).isEmpty();
+  public void findPublicById_private() {
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setStatus(PRIVATE)
+        .setDeleted(false))).getId();
+
+    Optional<Community> community = repository.findPublicById(id);
+    assertThat(community).isEmpty();
+  }
+
+  @Test
+  public void findPublicById_deleted() {
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setStatus(PUBLIC)
+        .setDeleted(true))).getId();
+
+    Optional<Community> community = repository.findPublicById(id);
+    assertThat(community).isEmpty();
+  }
+
+  @Test
+  public void findPublicById_notFound() {
+    assertThat(repository.findPublicById(123L)).isEmpty();
   }
 
   @Test
@@ -69,13 +98,15 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     // prepare
     Long adminId = inTransaction(() -> userRepository.create(new User().setUsername("admin"))).getId();
     inTransaction(() -> {
-      em().persist(new Community().setName("community1").setDescription("des1").setTokenContractAddress("66").setAdminUser(new User().setId(adminId)));
-      em().persist(new Community().setName("community2").setDescription("des2").setTokenContractAddress("66"));
-      em().persist(new Community().setName("community3").setDescription("des3").setTokenContractAddress(null));
+      em().persist(new Community().setStatus(PUBLIC).setName("community1").setDescription("des1").setTokenContractAddress("66").setAdminUser(new User().setId(adminId)));
+      em().persist(new Community().setStatus(PUBLIC).setName("community2").setDescription("des2").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("community3").setDescription("des3").setTokenContractAddress(null));
+      em().persist(new Community().setStatus(PRIVATE).setName("community4").setDescription("des4").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("community5").setDescription("des5").setTokenContractAddress("66").setDeleted(true));
     });
 
     // execute
-    ResultList<Community> result = repository.list(null);
+    ResultList<Community> result = repository.listPublic(null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -90,22 +121,22 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_pagination() {
     // prepare
-    inTransaction(() -> em().persist(new Community().setName("community1").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community2").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community3").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community4").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community5").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community4").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0")));
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Community> result = repository.list(pagination);
+    ResultList<Community> result = repository.listPublic(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.list(pagination);
+    result = repository.listPublic(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -115,14 +146,16 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   public void list_filter() {
     // prepare
     inTransaction(() -> {
-      em().persist(new Community().setName("comm_foo").setTokenContractAddress("66"));
-      em().persist(new Community().setName("comm_Foo_bar").setTokenContractAddress("66"));
-      em().persist(new Community().setName("comm_bar").setTokenContractAddress("66"));
-      em().persist(new Community().setName("comm_bar_foo").setTokenContractAddress(null));
+      em().persist(new Community().setStatus(PUBLIC).setName("comm_foo").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("comm_Foo_bar").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("comm_bar").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("comm_bar_foo").setTokenContractAddress(null));
+      em().persist(new Community().setStatus(PRIVATE).setName("foo").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("foo").setTokenContractAddress("66").setDeleted(true));
     });
 
     // execute
-    ResultList<Community> result = repository.list("foo", null);
+    ResultList<Community> result = repository.listPublic("foo", null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -134,14 +167,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   public void list_filter_unicode() {
     // prepare
     inTransaction(() -> {
-      em().persist(new Community().setName("コミュニティ　フー").setTokenContractAddress("66"));
-      em().persist(new Community().setName("コミュニティ　フー　バー").setTokenContractAddress("66"));
-      em().persist(new Community().setName("コミュニティ　バー").setTokenContractAddress("66"));
-      em().persist(new Community().setName("コミュニティ　🍺").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("コミュニティ　フー").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("コミュニティ　フー　バー").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("コミュニティ　バー").setTokenContractAddress("66"));
+      em().persist(new Community().setStatus(PUBLIC).setName("コミュニティ　🍺").setTokenContractAddress("66"));
     });
 
     // execute
-    ResultList<Community> result = repository.list("フー", null);
+    ResultList<Community> result = repository.listPublic("フー", null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -149,7 +182,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getName()).isEqualTo("コミュニティ　フー　バー");
     
     // execute
-    result = repository.list("🍺", null); // 4 byte code
+    result = repository.listPublic("🍺", null); // 4 byte code
 
     // verify
     assertThat(result.getList().size()).isEqualTo(1);
@@ -159,22 +192,22 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_filter_pagination() {
     // prepare
-    inTransaction(() -> em().persist(new Community().setName("community1").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community2").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community3").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community4").setTokenContractAddress("0x0")));
-    inTransaction(() -> em().persist(new Community().setName("community5").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community4").setTokenContractAddress("0x0")));
+    inTransaction(() -> em().persist(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0")));
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Community> result = repository.list("community", pagination);
+    ResultList<Community> result = repository.listPublic("community", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.list("community", pagination);
+    result = repository.listPublic("community", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -183,17 +216,21 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_communityUser() {
     // prepare
-    Community community1 = inTransaction(() -> repository.create(new Community().setName("community1").setTokenContractAddress("0x0")));
-    Community community2 = inTransaction(() -> repository.create(new Community().setName("community2").setTokenContractAddress("0x0")));
-    Community community3 = inTransaction(() -> repository.create(new Community().setName("community3").setTokenContractAddress(null)));
+    Community community1 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    Community community2 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    Community community3 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress(null)));
+    Community community4 = inTransaction(() -> repository.create(new Community().setStatus(PRIVATE).setName("community4").setTokenContractAddress("0x0")));
+    Community community5 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0").setDeleted(true)));
     User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2),
-        new CommunityUser().setCommunity(community3)))));
+        new CommunityUser().setCommunity(community3),
+        new CommunityUser().setCommunity(community4),
+        new CommunityUser().setCommunity(community5)))));
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     // execute
-    ResultList<CommunityUser> result = repository.list(user1.getCommunityUserList(), null);
+    ResultList<CommunityUser> result = repository.listPublic(user1.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -201,7 +238,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getCommunity().getName()).isEqualTo("community2");
 
     // execute
-    result = repository.list(user2.getCommunityUserList(), null);
+    result = repository.listPublic(user2.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
@@ -210,11 +247,11 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_communityUser_pagination() {
     // prepare
-    Community community1 = inTransaction(() -> repository.create(new Community().setName("community1").setTokenContractAddress("0x0")));
-    Community community2 = inTransaction(() -> repository.create(new Community().setName("community2").setTokenContractAddress("0x0")));
-    Community community3 = inTransaction(() -> repository.create(new Community().setName("community3").setTokenContractAddress("0x0")));
-    Community community4 = inTransaction(() -> repository.create(new Community().setName("community4").setTokenContractAddress("0x0")));
-    Community community5 = inTransaction(() -> repository.create(new Community().setName("community5").setTokenContractAddress("0x0")));
+    Community community1 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    Community community2 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    Community community3 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0")));
+    Community community4 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community4").setTokenContractAddress("0x0")));
+    Community community5 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0")));
     User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2),
@@ -224,14 +261,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<CommunityUser> result = repository.list(user1.getCommunityUserList(), pagination);
+    ResultList<CommunityUser> result = repository.listPublic(user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.list(user1.getCommunityUserList(), pagination);
+    result = repository.listPublic(user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -240,19 +277,23 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_communityUser_filter() {
     // prepare
-    Community community1 = inTransaction(() -> repository.create(new Community().setName("community1").setTokenContractAddress("0x0")));
-    Community community2 = inTransaction(() -> repository.create(new Community().setName("community2").setTokenContractAddress("0x0")));
-    Community community3 = inTransaction(() -> repository.create(new Community().setName("community3").setTokenContractAddress(null)));
-    Community dummy = inTransaction(() -> repository.create(new Community().setName("dummy").setTokenContractAddress("0x0")));
+    Community community1 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    Community community2 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    Community community3 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress(null)));
+    Community community4 = inTransaction(() -> repository.create(new Community().setStatus(PRIVATE).setName("community4").setTokenContractAddress("0x0")));
+    Community community5 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0").setDeleted(true)));
+    Community dummy = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("dummy").setTokenContractAddress("0x0")));
     User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2),
         new CommunityUser().setCommunity(community3),
+        new CommunityUser().setCommunity(community4),
+        new CommunityUser().setCommunity(community5),
         new CommunityUser().setCommunity(dummy)))));
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     // execute
-    ResultList<CommunityUser> result = repository.list("com", user1.getCommunityUserList(), null);
+    ResultList<CommunityUser> result = repository.listPublic("com", user1.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -260,7 +301,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getCommunity().getName()).isEqualTo("community2");
 
     // execute
-    result = repository.list("com", user2.getCommunityUserList(), null);
+    result = repository.listPublic("com", user2.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
@@ -269,12 +310,12 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void list_communityUser_filter_pagination() {
     // prepare
-    Community community1 = inTransaction(() -> repository.create(new Community().setName("community1").setTokenContractAddress("0x0")));
-    Community community2 = inTransaction(() -> repository.create(new Community().setName("community2").setTokenContractAddress("0x0")));
-    Community community3 = inTransaction(() -> repository.create(new Community().setName("community3").setTokenContractAddress("0x0")));
-    Community community4 = inTransaction(() -> repository.create(new Community().setName("community4").setTokenContractAddress("0x0")));
-    Community community5 = inTransaction(() -> repository.create(new Community().setName("community5").setTokenContractAddress("0x0")));
-    Community dummy = inTransaction(() -> repository.create(new Community().setName("dummy").setTokenContractAddress("0x0")));
+    Community community1 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0")));
+    Community community2 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0")));
+    Community community3 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0")));
+    Community community4 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community4").setTokenContractAddress("0x0")));
+    Community community5 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community5").setTokenContractAddress("0x0")));
+    Community dummy = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("dummy").setTokenContractAddress("0x0")));
     User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2),
@@ -285,14 +326,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<CommunityUser> result = repository.list("com", user1.getCommunityUserList(), pagination);
+    ResultList<CommunityUser> result = repository.listPublic("com", user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.list("com", user1.getCommunityUserList(), pagination);
+    result = repository.listPublic("com", user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -305,7 +346,9 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
         .setName("community")
         .setDescription("description")
         .setTokenContractAddress("0x1234567")
-        .setAdminUser(new User().setId(adminId))).getId());
+        .setAdminUser(new User().setId(adminId))
+        .setStatus(CommunityStatus.PUBLIC)
+        .setFee(new BigDecimal("1.5"))).getId());
 
     Community community = em().find(Community.class, id);
 
@@ -313,6 +356,8 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(community.getDescription()).isEqualTo("description");
     assertThat(community.getTokenContractAddress()).isEqualTo("0x1234567");
     assertThat(community.getAdminUser().getUsername()).isEqualTo("admin");
+    assertThat(community.getStatus()).isEqualTo(CommunityStatus.PUBLIC);
+    assertThat(community.getFee().floatValue()).isEqualTo(1.5F);
   }
 
 
@@ -321,9 +366,9 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
     User user3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")));
-    Community community1 = inTransaction(() -> repository.create(new Community().setName("community1").setAdminUser(user1)));
-    Community community2 = inTransaction(() -> repository.create(new Community().setName("community2").setAdminUser(user2)));
-    Community community3 = inTransaction(() -> repository.create(new Community().setName("community3")));
+    Community community1 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community1").setAdminUser(user1)));
+    Community community2 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community2").setAdminUser(user2)));
+    Community community3 = inTransaction(() -> repository.create(new Community().setStatus(PUBLIC).setName("community3")));
 
     boolean result = repository.isAdmin(user1.getId(), community1.getId());
     

@@ -21,7 +21,8 @@ public class CommunityUtil {
         .setDescription(community.getDescription())
         .setTokenSymbol(tokenSymbol)
         .setPhotoUrl(community.getPhotoUrl())
-        .setCoverPhotoUrl(community.getCoverPhotoUrl());
+        .setCoverPhotoUrl(community.getCoverPhotoUrl())
+        .setTransactionFee(community.getFee());
   }
 
   public static List<CommunityNotificationView> notificationView(List<CommunityNotification> notificationList) {

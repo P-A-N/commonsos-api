@@ -1,5 +1,6 @@
 package commonsos.integration.app.community;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -20,8 +21,8 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community1 =  create(new Community().setName("community1"));
-    community2 =  create(new Community().setName("community2"));
+    community1 =  create(new Community().setName("community1").setStatus(PUBLIC));
+    community2 =  create(new Community().setName("community2").setStatus(PUBLIC));
     create(new CommunityNotification().setCommunityId(community1.getId()).setWordpressId("notification1_1").setUpdatedNotificationAt(Instant.parse("2019-01-01T12:10:10Z")));
     create(new CommunityNotification().setCommunityId(community1.getId()).setWordpressId("notification1_2").setUpdatedNotificationAt(Instant.parse("2019-01-02T12:10:10Z")));
     create(new CommunityNotification().setCommunityId(community1.getId()).setWordpressId("notification1_3").setUpdatedNotificationAt(Instant.parse("2019-01-03T12:10:10Z")));
@@ -49,7 +50,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   @Test
   public void communityNotificationList_pagenation() {
     // prepare
-    Community community =  create(new Community().setName("page_community"));
+    Community community =  create(new Community().setName("page_community").setStatus(PUBLIC));
     create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification1").setUpdatedNotificationAt(Instant.parse("2019-01-15T12:10:10Z")));
     create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification2").setUpdatedNotificationAt(Instant.parse("2019-01-14T12:10:10Z")));
     create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification3").setUpdatedNotificationAt(Instant.parse("2019-01-13T12:10:10Z")));

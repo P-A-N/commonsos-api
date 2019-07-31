@@ -1,6 +1,11 @@
 package commonsos.repository.entity;
 
+import static javax.persistence.EnumType.STRING;
+
+import java.math.BigDecimal;
+
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,6 +23,8 @@ import lombok.experimental.Accessors;
 public class Community extends AbstractEntity {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
   private String name;
+  @Enumerated(value = STRING)
+  private CommunityStatus status;
   private String description;
   private String tokenContractAddress;
   @OneToOne
@@ -25,4 +32,11 @@ public class Community extends AbstractEntity {
   private User adminUser;
   private String photoUrl;
   private String coverPhotoUrl;
+  private String mainWallet;
+  private String mainWalletAddress;
+  private String feeWallet;
+  private String feeWalletAddress;
+  private BigDecimal fee;
+  private String adminPageUrl;
+  private boolean deleted;
 }

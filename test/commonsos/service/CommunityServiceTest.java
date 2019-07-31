@@ -26,7 +26,7 @@ public class CommunityServiceTest {
 
   @Test
   public void community_community_found() {
-    when(repository.findById(any())).thenReturn(Optional.of(new Community()));
+    when(repository.findPublicById(any())).thenReturn(Optional.of(new Community()));
     Community community = service.community(1L);
 
     assertThat(community).isNotNull();
@@ -34,7 +34,7 @@ public class CommunityServiceTest {
 
   @Test
   public void community_community_not_found() {
-    when(repository.findById(any())).thenReturn(Optional.empty());
+    when(repository.findPublicById(any())).thenReturn(Optional.empty());
 
     assertThrows(BadRequestException.class, () -> service.community(1L));
   }

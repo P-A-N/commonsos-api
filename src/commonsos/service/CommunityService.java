@@ -36,7 +36,7 @@ public class CommunityService {
   @Inject private BlockchainService blockchainService;
 
   public CommunityListView list(String filter, PaginationCommand pagination) {
-    ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.list(pagination) : repository.list(filter, pagination);
+    ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.listPublic(pagination) : repository.listPublic(filter, pagination);
 
     CommunityListView listView = new CommunityListView();
     listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId()))).collect(toList()));
@@ -46,7 +46,7 @@ public class CommunityService {
   }
 
   public Community community(Long id) {
-    return repository.findById(id).orElseThrow(() -> new BadRequestException("community not found"));
+    return repository.findPublicById(id).orElseThrow(() -> new BadRequestException("community not found"));
   }
 
   public boolean isAdmin(Long userId, Long communityId) {
@@ -54,7 +54,7 @@ public class CommunityService {
   }
 
   public String updatePhoto(User user, UploadPhotoCommand command, Long communityId) {
-    Community community = repository.findStrictById(communityId);
+    Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
     String url = imageService.create(command);
@@ -66,7 +66,7 @@ public class CommunityService {
   }
 
   public String updateCoverPhoto(User user, UploadPhotoCommand command, Long communityId) {
-    Community community = repository.findStrictById(communityId);
+    Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
     String url = imageService.create(command);
@@ -98,7 +98,7 @@ public class CommunityService {
   }
   
   public CommunityNotificationListView notificationList(Long communityId, PaginationCommand pagination) {
-    repository.findStrictById(communityId);
+    repository.findPublicStrictById(communityId);
     
     ResultList<CommunityNotification> result = notificationRepository.findByCommunityId(communityId, pagination);
 

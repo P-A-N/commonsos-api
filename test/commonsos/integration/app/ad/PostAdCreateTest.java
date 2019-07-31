@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,7 +28,7 @@ public class PostAdCreateTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community =  create(new Community().setName("community"));
+    community =  create(new Community().setName("community").setStatus(PUBLIC));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
     sessionId = login("user", "pass");

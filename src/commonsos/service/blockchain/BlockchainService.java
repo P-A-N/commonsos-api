@@ -123,7 +123,7 @@ public class BlockchainService {
   }
 
   private String transferTokensRegular(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    Community community = communityRepository.findStrictById(communityId);
+    Community community = communityRepository.findPublicStrictById(communityId);
     User walletUser = community.getAdminUser();
     
     if (!isAllowed(remitter, community, toTokensWithoutDecimals(amount))) {
@@ -152,7 +152,7 @@ public class BlockchainService {
   }
 
   private String transferTokensAdmin(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
+    Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
 
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
 
@@ -243,7 +243,7 @@ public class BlockchainService {
   public BigDecimal tokenBalance(User user, Long communityId) {
     try {
       log.info("Token balance request for: " + user.getWalletAddress());
-      Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
+      Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
       Token token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
       BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
       log.info("Token balance request complete, balance " + balance.toString());
@@ -282,7 +282,7 @@ public class BlockchainService {
 
     try {
       log.info(String.format("Token symbol request for: communityId=%d", communityId));
-      Community community = communityRepository.findById(communityId).orElseThrow(RuntimeException::new);
+      Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
       Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
       tokenSymbol = token.symbol().send();
       log.info(String.format("Token symbol request complete: symbol=%s, communityId=%d", tokenSymbol, communityId));

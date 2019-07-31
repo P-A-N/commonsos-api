@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -22,8 +23,8 @@ public class GetUserSearchTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() {
-    community =  create(new Community().setName("community"));
-    otherCommunity =  create(new Community().setName("otherCommunity"));
+    community =  create(new Community().setStatus(PUBLIC).setName("community"));
+    otherCommunity =  create(new Community().setStatus(PUBLIC).setName("otherCommunity"));
     create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new User().setUsername("otherUser1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new User().setUsername("otherUser2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
@@ -64,7 +65,7 @@ public class GetUserSearchTest extends IntegrationTest {
   @Test
   public void userSearch_pagination() {
     // prepare
-    Community pageCommunity =  create(new Community().setName("page_community"));
+    Community pageCommunity =  create(new Community().setStatus(PUBLIC).setName("page_community"));
     create(new User().setUsername("page_user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
     create(new User().setUsername("page_user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
     create(new User().setUsername("page_user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));

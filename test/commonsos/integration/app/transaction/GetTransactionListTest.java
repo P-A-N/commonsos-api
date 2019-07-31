@@ -1,5 +1,6 @@
 package commonsos.integration.app.transaction;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -35,8 +36,8 @@ public class GetTransactionListTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    community1 =  create(new Community().setName("community1"));
-    community2 =  create(new Community().setName("community2"));
+    community1 =  create(new Community().setStatus(PUBLIC).setName("community1"));
+    community2 =  create(new Community().setStatus(PUBLIC).setName("community2"));
     admin1 = create(new User().setUsername("admin1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     admin2 = create(new User().setUsername("admin2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
     update(community1.setAdminUser(admin1));
@@ -129,7 +130,7 @@ public class GetTransactionListTest extends IntegrationTest {
   @Test
   public void transactionList_pagination() throws Exception {
     // prepare
-    Community community =  create(new Community().setName("page_community"));
+    Community community =  create(new Community().setStatus(PUBLIC).setName("page_community"));
     update(user1.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(user2.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
@@ -210,7 +211,7 @@ public class GetTransactionListTest extends IntegrationTest {
   @Test
   public void transactionListByAdmin_pagination() throws Exception {
     // prepare
-    Community community =  create(new Community().setName("page_community"));
+    Community community =  create(new Community().setStatus(PUBLIC).setName("page_community"));
     User admin = create(new User().setUsername("admin").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(community.setAdminUser(admin));
 

@@ -1,5 +1,6 @@
 package commonsos.integration.app.community;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -20,9 +21,9 @@ public class GetSearchCommutityTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() {
-    community1 = create(new Community().setName("comm_foo").setTokenContractAddress("0x0"));
-    community2 = create(new Community().setName("comm_foo_bar").setTokenContractAddress("0x0"));
-    community3 = create(new Community().setName("comm_bar").setTokenContractAddress("0x0"));
+    community1 = create(new Community().setStatus(PUBLIC).setName("comm_foo").setTokenContractAddress("0x0"));
+    community2 = create(new Community().setStatus(PUBLIC).setName("comm_foo_bar").setTokenContractAddress("0x0"));
+    community3 = create(new Community().setStatus(PUBLIC).setName("comm_bar").setTokenContractAddress("0x0"));
   }
   
   @Test
@@ -48,18 +49,18 @@ public class GetSearchCommutityTest extends IntegrationTest {
   @Test
   public void searchCommutity_pagination() throws Exception {
     // prepare
-    create(new Community().setName("page_community1").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community2").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community3").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community4").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community5").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community6").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community7").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community8").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community9").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community10").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community11").setTokenContractAddress("0x0"));
-    create(new Community().setName("page_community12").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community1").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community2").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community3").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community4").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community5").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community6").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community7").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community8").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community9").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community10").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community11").setTokenContractAddress("0x0"));
+    create(new Community().setStatus(PUBLIC).setName("page_community12").setTokenContractAddress("0x0"));
 
     // page 0 size 10 asc
     // filter

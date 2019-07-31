@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -34,9 +35,9 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() {
-    community1 = create(new Community().setName("community1").setTokenContractAddress("0x0"));
-    community2 = create(new Community().setName("community2").setTokenContractAddress("0x0"));
-    community3 = create(new Community().setName("community3").setTokenContractAddress("0x0"));
+    community1 = create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0"));
+    community2 = create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0"));
+    community3 = create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0"));
     admin1 = create(new User().setUsername("admin1").setPasswordHash(hash("password")).setEmailAddress("admin1@test.com").setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     admin2 = create(new User().setUsername("admin2").setPasswordHash(hash("password")).setEmailAddress("admin2@test.com").setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
     admin3 = create(new User().setUsername("admin3").setPasswordHash(hash("password")).setEmailAddress("admin3@test.com").setCommunityUserList(asList(new CommunityUser().setCommunity(community3))));

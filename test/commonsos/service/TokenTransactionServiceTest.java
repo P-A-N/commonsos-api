@@ -65,7 +65,7 @@ public class TokenTransactionServiceTest {
     Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedBy(id("user")).setType(WANT);
     BalanceView balance = new BalanceView().setBalance(TEN);
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
-    when(communityRepository.findStrictById(any())).thenReturn(community);
+    when(communityRepository.findPublicStrictById(any())).thenReturn(community);
     when(adRepository.findStrict(any())).thenReturn(ad);
     doReturn(balance).when(service).balance(any(), any());
     

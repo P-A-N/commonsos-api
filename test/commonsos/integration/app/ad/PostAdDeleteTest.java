@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,8 +30,8 @@ public class PostAdDeleteTest extends IntegrationTest {
   
   @BeforeEach
   public void setupData() {
-    community1 =  create(new Community().setName("community1"));
-    community2 =  create(new Community().setName("community2"));
+    community1 =  create(new Community().setName("community1").setStatus(PUBLIC));
+    community2 =  create(new Community().setName("community2").setStatus(PUBLIC));
     admin1 =  create(new User().setUsername("admin1").setPasswordHash(hash("pass")).setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     admin2 =  create(new User().setUsername("admin2").setPasswordHash(hash("pass")).setCommunityUserList(asList(
