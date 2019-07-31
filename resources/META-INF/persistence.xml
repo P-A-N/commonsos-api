@@ -21,6 +21,10 @@
     <class>commonsos.repository.entity.TemporaryUser</class>
     <class>commonsos.repository.entity.TemporaryEmailAddress</class>
     <class>commonsos.repository.entity.PasswordResetRequest</class>
+    <class>commonsos.repository.entity.Admin</class>
+    <class>commonsos.repository.entity.Role</class>
+    <class>commonsos.repository.entity.TemporaryAdmin</class>
+    <class>commonsos.repository.entity.TemporaryAdminEmailAddress</class>
 
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
 

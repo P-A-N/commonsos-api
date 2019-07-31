@@ -35,7 +35,11 @@ public class TestEntityManagerService extends EntityManagerService {
       "temporary_community_users",
       "temporary_users",
       "temporary_email_address",
-      "password_reset_request");
+      "password_reset_request",
+      "admins",
+//      "roles",
+      "temporary_admins",
+      "temporary_admin_email_address");
   
   public static Operation DROP_ALL = sql(
       "DROP TABLE IF EXISTS "
@@ -52,7 +56,11 @@ public class TestEntityManagerService extends EntityManagerService {
       + "temporary_users, "
       + "temporary_community_users, "
       + "temporary_email_address, "
-      + "password_reset_request "
+      + "password_reset_request, "
+      + "admins, "
+      + "roles, "
+      + "temporary_admins, "
+      + "temporary_admin_email_address "
       + "CASCADE;");
 
   @Override
