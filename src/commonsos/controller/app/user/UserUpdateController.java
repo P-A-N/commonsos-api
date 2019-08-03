@@ -2,7 +2,7 @@ package commonsos.controller.app.user;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserUpdateCommand;
@@ -12,7 +12,7 @@ import spark.Response;
 
 import javax.inject.Inject;
 
-public class UserUpdateController extends AfterLoginController {
+public class UserUpdateController extends AfterAppLoginController {
 
   @Inject UserService userService;
   @Inject Gson gson;

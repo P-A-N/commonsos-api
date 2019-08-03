@@ -55,9 +55,7 @@ public class PostLoginTest extends IntegrationTest {
     
     given()
       .body(gson.toJson(requestParam))
-      .when()
-      .post("/login")
-      .then()
-      .statusCode(401);
+      .when().post("/login")
+      .then().statusCode(401);
   }
 }

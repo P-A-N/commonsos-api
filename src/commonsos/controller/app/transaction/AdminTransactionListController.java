@@ -5,7 +5,7 @@ package commonsos.controller.app.transaction;
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.TokenTransactionService;
 import commonsos.service.command.PaginationCommand;
@@ -19,7 +19,7 @@ import spark.Response;
 
 @ReadOnly
 
-public class AdminTransactionListController extends AfterLoginController {
+public class AdminTransactionListController extends AfterAppLoginController {
 
   @Inject private TokenTransactionService service;
 

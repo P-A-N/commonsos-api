@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserNameUpdateCommand;
@@ -16,7 +16,7 @@ import spark.Request;
 import spark.Response;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class UserNameUpdateController extends AfterLoginController {
+public class UserNameUpdateController extends AfterAppLoginController {
 
   @Inject UserService userService;
   @Inject Gson gson;

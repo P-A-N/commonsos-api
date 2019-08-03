@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain=true)
-public class LoginCommand {
+public class AppLoginCommand {
   private String username;
   private String password;
 }

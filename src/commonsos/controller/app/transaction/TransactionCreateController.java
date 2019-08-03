@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.TokenTransactionService;
 import commonsos.service.command.TransactionCreateCommand;
@@ -16,7 +16,7 @@ import spark.Request;
 import spark.Response;
 
 @Synchronized(REGIST_TOKEN_TRANSACTION)
-public class TransactionCreateController extends AfterLoginController {
+public class TransactionCreateController extends AfterAppLoginController {
 
   @Inject TokenTransactionService service;
   @Inject Gson gson;

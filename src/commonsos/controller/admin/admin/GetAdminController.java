@@ -5,15 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import commonsos.annotation.ReadOnly;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 @ReadOnly
-public class GetAdminController implements Route {
+public class GetAdminController extends AfterAdminLoginController {
 
   @Override
-  public Object handle(Request request, Response response) {
+  protected Object handleAfterLogin(Admin admin, Request request, Response response) {
     Map<String, Object> result = new HashMap<>();
     result.put("id", 1);
     result.put("adminname", "鈴木太郎");

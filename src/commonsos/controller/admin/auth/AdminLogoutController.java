@@ -1,20 +1,18 @@
 package commonsos.controller.admin.auth;
 
-import java.util.HashMap;
-import java.util.Map;
+import static commonsos.controller.admin.auth.AdminLoginController.ADMIN_SESSION_ATTRIBUTE_NAME;
 
-import commonsos.annotation.ReadOnly;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import spark.Session;
 
-@ReadOnly
 public class AdminLogoutController implements Route {
 
   @Override
   public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    
-    return result;
+    Session session = request.session(false);
+    if (session != null) session.removeAttribute(ADMIN_SESSION_ATTRIBUTE_NAME);
+    return "";
   }
 }

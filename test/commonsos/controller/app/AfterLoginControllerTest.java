@@ -1,7 +1,7 @@
 package commonsos.controller.app;
 
 import static commonsos.TestId.id;
-import static commonsos.controller.app.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+import static commonsos.controller.app.auth.AppLoginController.USER_SESSION_ATTRIBUTE_NAME;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.session.UserSession;
@@ -41,7 +41,7 @@ public class AfterLoginControllerTest {
     verify(controller).handleAfterLogin(user, request, response);
   }
 
-  private static class SampleController extends AfterLoginController {
+  private static class SampleController extends AfterAppLoginController {
     @Override protected Object handleAfterLogin(User user, Request request, Response response) {
       return null;
     }

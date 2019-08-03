@@ -3,7 +3,7 @@ package commonsos.controller.app.user;
 import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.PaginationCommand;
@@ -13,7 +13,7 @@ import spark.Request;
 import spark.Response;
 
 @ReadOnly
-public class SearchUsersCommunityController extends AfterLoginController {
+public class SearchUsersCommunityController extends AfterAppLoginController {
 
   @Inject UserService service;
 

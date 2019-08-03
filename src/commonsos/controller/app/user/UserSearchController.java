@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.annotation.ReadOnly;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
@@ -19,7 +19,7 @@ import spark.Request;
 import spark.Response;
 
 @ReadOnly
-public class UserSearchController extends AfterLoginController {
+public class UserSearchController extends AfterAppLoginController {
 
   @Inject UserService service;
 

@@ -107,7 +107,32 @@ public class IntegrationTest {
       .when().post("/login")
       .then().statusCode(401);
   }
-  
+
+  public String loginAdmin(String emailAddress, String password) {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("emailAddress", emailAddress);
+    requestParam.put("password", password);
+    
+    String sessionId = given()
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/login")
+      .then().statusCode(200)
+      .extract().cookie("JSESSIONID");
+    
+    return sessionId;
+  }
+
+  public void failLoginAdmin(String emailAddress, String password) {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("emailAddress", emailAddress);
+    requestParam.put("password", password);
+    
+    given()
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/login")
+      .then().statusCode(401);
+  }
+
   public <T> T create(T entity) {
     emService.runInTransaction(() -> emService.get().persist(entity));
     emService.close();

@@ -4,12 +4,10 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import commonsos.annotation.ReadOnly;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-@ReadOnly
 public class CreateAdminCompleteController implements Route {
 
   @Override

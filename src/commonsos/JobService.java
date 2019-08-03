@@ -1,19 +1,19 @@
 package commonsos;
 
-import com.google.inject.Injector;
-
-import commonsos.repository.entity.User;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import static commonsos.filter.LogFilter.USERNAME_MDC_KEY;
+import org.slf4j.MDC;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import com.google.inject.Injector;
+
+import commonsos.filter.LogFilter;
+import commonsos.repository.entity.User;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Singleton
@@ -34,7 +34,7 @@ public class JobService {
   public void submit(User user, Runnable task) {
     injector.injectMembers(task);
     executor.submit(() -> {
-      MDC.put(USERNAME_MDC_KEY, user.getUsername());
+      MDC.put(LogFilter.USER_MDC_KEY, user.getUsername());
       try {
         task.run();
       }

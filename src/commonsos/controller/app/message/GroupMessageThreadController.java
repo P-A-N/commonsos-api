@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.service.command.CreateGroupCommand;
@@ -12,7 +12,7 @@ import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;
 
-public class GroupMessageThreadController extends AfterLoginController {
+public class GroupMessageThreadController extends AfterAppLoginController {
 
   @Inject Gson gson;
   @Inject MessageService service;

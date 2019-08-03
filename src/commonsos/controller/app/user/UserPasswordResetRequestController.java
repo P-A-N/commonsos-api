@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UserPasswordResetRequestCommand;
@@ -12,7 +12,7 @@ import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
 
-public class UserPasswordResetRequestController extends AfterLoginController {
+public class UserPasswordResetRequestController extends AfterAppLoginController {
 
   @Inject UserService userService;
   @Inject Gson gson;

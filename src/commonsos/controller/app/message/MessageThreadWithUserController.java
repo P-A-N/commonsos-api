@@ -10,7 +10,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
@@ -19,7 +19,7 @@ import spark.Request;
 import spark.Response;
 
 @Synchronized(MESSAGE_THRED_BETWEEN_USER)
-public class MessageThreadWithUserController extends AfterLoginController {
+public class MessageThreadWithUserController extends AfterAppLoginController {
 
   @Inject Gson gson;
   @Inject MessageService service;

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
@@ -18,7 +18,7 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-public class UpdateMessageThreadPersonalTitleController extends AfterLoginController {
+public class UpdateMessageThreadPersonalTitleController extends AfterAppLoginController {
 
   @Inject Gson gson;
   @Inject MessageService service;

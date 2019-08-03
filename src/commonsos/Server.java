@@ -68,8 +68,8 @@ import commonsos.controller.app.ad.AdminAdDeleteController;
 import commonsos.controller.app.ad.MyAdsController;
 import commonsos.controller.app.auth.CreateAccountCompleteController;
 import commonsos.controller.app.auth.CreateAccountTemporaryController;
-import commonsos.controller.app.auth.LoginController;
-import commonsos.controller.app.auth.LogoutController;
+import commonsos.controller.app.auth.AppLoginController;
+import commonsos.controller.app.auth.AppLogoutController;
 import commonsos.controller.app.auth.PasswordResetController;
 import commonsos.controller.app.auth.PasswordResetRequestCheckController;
 import commonsos.controller.app.auth.PasswordResetRequestController;
@@ -196,8 +196,8 @@ public class Server {
   }
 
   private void initAppUserRoutes() {
-    post("/login", injector.getInstance(LoginController.class), toJson);
-    post("/logout", injector.getInstance(LogoutController.class), toJson);
+    post("/login", injector.getInstance(AppLoginController.class), toJson);
+    post("/logout", injector.getInstance(AppLogoutController.class), toJson);
     post("/create-account", injector.getInstance(CreateAccountTemporaryController.class), toJson);
     post("/create-account/:accessId", injector.getInstance(CreateAccountCompleteController.class), toJson);
     get("/user", injector.getInstance(UserController.class), toJson);

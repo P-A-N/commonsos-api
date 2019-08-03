@@ -2,7 +2,7 @@ package commonsos.controller.app.auth;
 
 import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
 import static commonsos.annotation.SyncObject.USERNAME_AND_EMAIL_ADDRESS;
-import static commonsos.controller.app.auth.LoginController.USER_SESSION_ATTRIBUTE_NAME;
+import static commonsos.controller.app.auth.AppLoginController.USER_SESSION_ATTRIBUTE_NAME;
 
 import javax.inject.Inject;
 
@@ -36,7 +36,7 @@ public class CreateAccountCompleteController implements Route {
     session.attribute(USER_SESSION_ATTRIBUTE_NAME, userService.session(user));
     session.maxInactiveInterval(MAX_SESSION_AGE_IN_SECONDS);
 
-    MDC.put(LogFilter.USERNAME_MDC_KEY, user.getUsername());
+    MDC.put(LogFilter.USER_MDC_KEY, user.getUsername());
     csrf.setToken(request, response);
 
     return userService.privateView(user);

@@ -6,7 +6,7 @@ import static java.lang.Long.parseLong;
 import javax.inject.Inject;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AfterLoginController;
+import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.view.app.MessageThreadView;
@@ -14,7 +14,7 @@ import spark.Request;
 import spark.Response;
 
 @Synchronized(MESSAGE_THRED_FOR_AD)
-public class MessageThreadForAdController extends AfterLoginController {
+public class MessageThreadForAdController extends AfterAppLoginController {
 
   @Inject MessageService service;
 

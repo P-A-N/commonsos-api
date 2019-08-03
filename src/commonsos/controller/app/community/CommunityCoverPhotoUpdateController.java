@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.controller.app.UploadPhotoController;
+import commonsos.controller.app.UploadPhotoForAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.CommunityService;
@@ -14,7 +14,7 @@ import commonsos.service.command.UploadPhotoCommand;
 import spark.Request;
 import spark.Response;
 
-public class CommunityCoverPhotoUpdateController extends UploadPhotoController {
+public class CommunityCoverPhotoUpdateController extends UploadPhotoForAppController {
 
   @Inject CommunityService communityService;
 

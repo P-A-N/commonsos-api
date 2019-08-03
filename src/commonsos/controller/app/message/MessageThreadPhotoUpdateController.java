@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.controller.app.UploadPhotoController;
+import commonsos.controller.app.UploadPhotoForAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
@@ -13,7 +13,7 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-public class MessageThreadPhotoUpdateController extends UploadPhotoController {
+public class MessageThreadPhotoUpdateController extends UploadPhotoForAppController {
   @Inject MessageService service;
 
   @Override

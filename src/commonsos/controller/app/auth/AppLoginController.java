@@ -8,28 +8,27 @@ import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.LoginCommand;
+import commonsos.service.command.AppLoginCommand;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Session;
 
-@ReadOnly
-public class LoginController implements Route {
+public class AppLoginController implements Route {
 
   public static final String USER_SESSION_ATTRIBUTE_NAME = "user";
   @Inject Gson gson;
   @Inject UserService userService;
   @Inject CSRF csrf;
 
-  @Override public PrivateUserView handle(Request request, Response response) {
-    LoginCommand command = gson.fromJson(request.body(), LoginCommand.class);
+  @Override
+  public PrivateUserView handle(Request request, Response response) {
+    AppLoginCommand command = gson.fromJson(request.body(), AppLoginCommand.class);
     User user = userService.checkPassword(command.getUsername(), command.getPassword());
     user = userService.updateLoggedinAt(user);
     
@@ -37,7 +36,7 @@ public class LoginController implements Route {
     session.attribute(USER_SESSION_ATTRIBUTE_NAME, userService.session(user));
     session.maxInactiveInterval(MAX_SESSION_AGE_IN_SECONDS);
     
-    MDC.put(LogFilter.USERNAME_MDC_KEY, user.getUsername());
+    MDC.put(LogFilter.USER_MDC_KEY, user.getUsername());
     csrf.setToken(request, response);
     
     return userService.privateView(user);

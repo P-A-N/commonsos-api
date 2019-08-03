@@ -9,6 +9,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
+import commonsos.service.image.ImageType;
 
 public class ValidateUtil {
   
@@ -53,5 +54,9 @@ public class ValidateUtil {
   
   public static void validateStatus(String status) {
     if (status != null && StringUtil.unicodeLength(status) > 50) throw new BadRequestException("invalid status");
+  }
+  
+  public static void validateImageType(ImageType imageType) {
+    if (imageType == null) throw new DisplayableException("error.imageType_not_supported.");
   }
 }
