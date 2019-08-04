@@ -1,6 +1,7 @@
 package commonsos.service.email;
 
 import static commonsos.service.email.EmailTemplate.CREATE_ACCOUNT;
+import static commonsos.service.email.EmailTemplate.CREATE_ADMIN;
 import static commonsos.service.email.EmailTemplate.EMAIL_UPDATE;
 import static commonsos.service.email.EmailTemplate.PASSWORD_RESET;
 import static java.util.Arrays.asList;
@@ -86,6 +87,14 @@ public class EmailService {
     context.put("accessId", accessId);
     context.put("hostname", conf.commonsosHost());
     send(toAddress, CREATE_ACCOUNT.getSubject(), CREATE_ACCOUNT.getFilename(), context);
+  }
+
+  public void sendCreateAdminTemporary(String toAddress, String adminname, String accessId) {
+    VelocityContext context = new VelocityContext();
+    context.put("adminname", adminname);
+    context.put("accessId", accessId);
+    context.put("hostname", conf.adminPageHost());
+    send(toAddress, CREATE_ADMIN.getSubject(), CREATE_ADMIN.getFilename(), context);
   }
   
   public void sendUpdateEmailTemporary(String toAddress, String username, Long userId, String accessId) {

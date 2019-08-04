@@ -1,30 +1,43 @@
 package commonsos.controller.admin.admin;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
+import static commonsos.annotation.SyncObject.ADMIN_EMAIL_ADDRESS;
+import static commonsos.controller.admin.auth.AdminLoginController.ADMIN_SESSION_ATTRIBUTE_NAME;
 
+import javax.inject.Inject;
+
+import org.slf4j.MDC;
+
+import commonsos.annotation.Synchronized;
+import commonsos.filter.CSRF;
+import commonsos.filter.LogFilter;
+import commonsos.repository.entity.Admin;
+import commonsos.service.AdminService;
+import commonsos.util.AdminUtil;
+import commonsos.util.RequestUtil;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import spark.Session;
 
+@Synchronized(ADMIN_EMAIL_ADDRESS)
 public class CreateAdminCompleteController implements Route {
+
+  @Inject AdminService adminService;
+  @Inject CSRF csrf;
 
   @Override
   public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("id", 1);
-    result.put("adminname", "鈴木太郎");
-    result.put("communityId", 1);
-    result.put("roleId", 1);
-    result.put("rolename", "コミュニティ管理者");
-    result.put("emailAddress", "suzuki@admin.test");
-    result.put("telNo", "00088884444");
-    result.put("department", "遠野市役所");
-    result.put("photoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
-    result.put("loggedinAt", Instant.now().minusSeconds(600));
-    result.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
+    String accessId = RequestUtil.getPathParamString(request, "accessId");
+    Admin admin = adminService.createAdminComplete(accessId);
+
+    Session session = request.session();
+    session.attribute(ADMIN_SESSION_ATTRIBUTE_NAME, adminService.session(admin));
+    session.maxInactiveInterval(MAX_SESSION_AGE_IN_SECONDS);
+
+    MDC.put(LogFilter.ADMIN_MDC_KEY, admin.getEmailAddress());
+    csrf.setToken(request, response);
     
-    return result;
+    return AdminUtil.toView(admin);
   }
 }

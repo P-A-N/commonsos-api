@@ -19,22 +19,90 @@ import spark.Request;
 public class RequestUtil {
 
   private RequestUtil() {}
-  
-  public static Long getQueryParamLong(Request request, String param, boolean isRequired) {
-    String value = request.queryParams(param);
+
+  public static String getPathParamString(Request request, String param) {
+    String value = request.params(param);
     
     if (isEmpty(value)) {
-      if (!isRequired) {
-        return null;
-      } else {
-        throw new BadRequestException(String.format("%s is required", param));
-      }
+      throw new BadRequestException(String.format("%s is required", param));
+    }
+    
+    return value;
+  }
+
+  public static Long getPathParamLong(Request request, String param) {
+    String value = request.params(param);
+    
+    if (isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
     }
     
     if (NumberUtils.isParsable(value)) {
       return parseLong(value);
     } else {
       throw new BadRequestException(String.format("invalid %s", param));
+    }
+  }
+
+  public static String getQueryParamString(Request request, String param, boolean isRequired) {
+    String value = request.queryParams(param);
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    return value;
+  }
+
+  public static Long getQueryParamLong(Request request, String param, boolean isRequired) {
+    String value = request.queryParams(param);
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    if (NumberUtils.isParsable(value)) {
+      return parseLong(value);
+    } else {
+      throw new BadRequestException(String.format("invalid %s", param));
+    }
+  }
+
+  public static String getFileItemString(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
+    String value = null;
+    if (fileItemMap.containsKey(param)) {
+      value = fileItemMap.get(param).get(0).getString();
+    }
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    return value;
+  }
+  
+  public static Long getFileItemLong(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
+    String value = null;
+    if (fileItemMap.containsKey(param)) {
+      value = fileItemMap.get(param).get(0).getString();
+    }
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    if (NumberUtils.isParsable(value)) {
+      return parseLong(value);
+    } else {
+      throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
     }
   }
   

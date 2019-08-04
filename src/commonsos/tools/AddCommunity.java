@@ -26,7 +26,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.command.CreateAccountTemporaryCommand;
+import commonsos.service.command.CreateUserTemporaryCommand;
 
 public class AddCommunity {
 
@@ -122,7 +122,7 @@ public class AddCommunity {
     }
 
     emService.runInTransaction(() -> {
-      userService.createAccountTemporary(new CreateAccountTemporaryCommand()
+      userService.createAccountTemporary(new CreateUserTemporaryCommand()
           .setUsername(adminUsername)
           .setEmailAddress(adminEmailAddress)
           .setPassword(adminPassword)

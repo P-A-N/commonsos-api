@@ -31,7 +31,7 @@ import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.DelegateWalletTask;
-import commonsos.service.command.CreateAccountTemporaryCommand;
+import commonsos.service.command.CreateUserTemporaryCommand;
 import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PaginationCommand;
@@ -133,7 +133,7 @@ public class UserService {
     return listView;
   }
   
-  public void createAccountTemporary(CreateAccountTemporaryCommand command) {
+  public void createAccountTemporary(CreateUserTemporaryCommand command) {
     validate(command);
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
     if (userRepository.isEmailAddressTaken(command.getEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
@@ -289,7 +289,7 @@ public class UserService {
     return result;
   }
 
-  void validate(CreateAccountTemporaryCommand command) {
+  void validate(CreateUserTemporaryCommand command) {
     ValidateUtil.validateUsername(command.getUsername());
     ValidateUtil.validatePassword(command.getPassword());
 //    if (command.getFirstName() == null || command.getFirstName().length() < 1) throw new BadRequestException("invalid first name");

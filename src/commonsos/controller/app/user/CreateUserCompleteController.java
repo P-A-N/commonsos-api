@@ -1,4 +1,4 @@
-package commonsos.controller.app.auth;
+package commonsos.controller.app.user;
 
 import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
 import static commonsos.annotation.SyncObject.USERNAME_AND_EMAIL_ADDRESS;
@@ -9,11 +9,11 @@ import javax.inject.Inject;
 import org.slf4j.MDC;
 
 import commonsos.annotation.Synchronized;
-import commonsos.exception.BadRequestException;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
+import commonsos.util.RequestUtil;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
@@ -21,14 +21,13 @@ import spark.Route;
 import spark.Session;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class CreateAccountCompleteController implements Route {
+public class CreateUserCompleteController implements Route {
 
   @Inject UserService userService;
   @Inject CSRF csrf;
   
   @Override public PrivateUserView handle(Request request, Response response) {
-    String accessId = request.params("accessId");
-    if(accessId == null || accessId.isEmpty()) throw new BadRequestException("accessId is required");
+    String accessId = RequestUtil.getPathParamString(request, "accessId");
 
     User user = userService.createAccountComplete(accessId);
 

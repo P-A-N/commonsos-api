@@ -37,7 +37,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.command.CreateAccountTemporaryCommand;
+import commonsos.service.command.CreateUserTemporaryCommand;
 import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
@@ -58,7 +58,7 @@ public class UserServiceTest {
   @Mock EmailService EmailService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;
-  @Captor ArgumentCaptor<CreateAccountTemporaryCommand> accountCreatecommandCaptor;
+  @Captor ArgumentCaptor<CreateUserTemporaryCommand> accountCreatecommandCaptor;
   @Captor ArgumentCaptor<User> userCaptor;
   @Captor ArgumentCaptor<Ad> adCaptor;
 
@@ -157,7 +157,7 @@ public class UserServiceTest {
     when(userRepository.isUsernameTaken(any())).thenReturn(true);
 
     // execute
-    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
+    CreateUserTemporaryCommand command = new CreateUserTemporaryCommand();
     DisplayableException thrown = catchThrowableOfType(() -> userService.createAccountTemporary(command), DisplayableException.class);
 
     // verify
@@ -172,7 +172,7 @@ public class UserServiceTest {
     when(userRepository.isEmailAddressTaken(any())).thenReturn(true);
 
     // execute
-    CreateAccountTemporaryCommand command = new CreateAccountTemporaryCommand();
+    CreateUserTemporaryCommand command = new CreateUserTemporaryCommand();
     DisplayableException thrown = catchThrowableOfType(() -> userService.createAccountTemporary(command), DisplayableException.class);
 
     // verify

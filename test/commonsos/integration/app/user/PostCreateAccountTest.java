@@ -1,4 +1,4 @@
-package commonsos.integration.app.auth;
+package commonsos.integration.app.user;
 
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;

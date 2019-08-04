@@ -9,6 +9,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
+import commonsos.repository.entity.Role;
 import commonsos.service.image.ImageType;
 
 public class ValidateUtil {
@@ -58,5 +59,12 @@ public class ValidateUtil {
   
   public static void validateImageType(ImageType imageType) {
     if (imageType == null) throw new DisplayableException("error.imageType_not_supported.");
+  }
+  
+  public static void validateRole(Long id) {
+    for (Role role : Role.ROLES) {
+      if (role.getId().equals(id)) return;
+    }
+    throw new DisplayableException("error.invalid_roleId.");
   }
 }

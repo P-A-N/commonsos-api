@@ -47,7 +47,9 @@ public abstract class AbstractController implements Route {
     }
 
     File photoFile = getPhotoFile(fileItemMap, "photo");
-    ValidateUtil.validateImageType(imageService.getImageType(photoFile));
+    if (photoFile != null) {
+      ValidateUtil.validateImageType(imageService.getImageType(photoFile));
+    }
 
     File cropedPhotoFile = getCropedPhotoFile(photoFile, command);
     command.setPhotoFile(photoFile);
@@ -56,30 +58,37 @@ public abstract class AbstractController implements Route {
   }
   
   protected UploadPhotoCommand getUploadPhotoCommand(Map<String, List<FileItem>> fileItemMap, String paramName) throws Exception {
+    String widthKey = String.format("%s[%s]", paramName,"width");
+    String heightKey = String.format("%s[%s]", paramName,"height");
+    String xKey = String.format("%s[%s]", paramName,"x");
+    String yKey = String.format("%s[%s]", paramName,"y");
+    
     UploadPhotoCommand command = new UploadPhotoCommand();
-    if (fileItemMap.containsKey(String.format("%s[%s]", paramName,"width"))) {
-      String width = fileItemMap.get("width").get(0).getString();
+    if (fileItemMap.containsKey(widthKey)) {
+      String width = fileItemMap.get(widthKey).get(0).getString();
       if (!NumberUtils.isParsable(width)) throw new BadRequestException("invalid width");
       command.setWidth(Integer.parseInt(width));
     }
-    if (fileItemMap.containsKey("height")) {
-      String height = fileItemMap.get("height").get(0).getString();
+    if (fileItemMap.containsKey(heightKey)) {
+      String height = fileItemMap.get(heightKey).get(0).getString();
       if (!NumberUtils.isParsable(height)) throw new BadRequestException("invalid height");
       command.setHeight(Integer.parseInt(height));
     }
-    if (fileItemMap.containsKey("x")) {
-      String x = fileItemMap.get("x").get(0).getString();
+    if (fileItemMap.containsKey(xKey)) {
+      String x = fileItemMap.get(xKey).get(0).getString();
       if (!NumberUtils.isParsable(x)) throw new BadRequestException("invalid x");
       command.setX(Integer.parseInt(x));
     }
-    if (fileItemMap.containsKey("y")) {
-      String y = fileItemMap.get("y").get(0).getString();
+    if (fileItemMap.containsKey(yKey)) {
+      String y = fileItemMap.get(yKey).get(0).getString();
       if (!NumberUtils.isParsable(y)) throw new BadRequestException("invalid y");
       command.setY(Integer.parseInt(y));
     }
 
     File photoFile = getPhotoFile(fileItemMap, paramName);
-    ValidateUtil.validateImageType(imageService.getImageType(photoFile));
+    if (photoFile != null) {
+      ValidateUtil.validateImageType(imageService.getImageType(photoFile));
+    }
 
     File cropedPhotoFile = getCropedPhotoFile(photoFile, command);
     command.setPhotoFile(photoFile);
@@ -103,6 +112,8 @@ public abstract class AbstractController implements Route {
   }
 
   private File getPhotoFile(Map<String, List<FileItem>> fileItemMap, String paramName) throws Exception {
+    if (!fileItemMap.containsKey(paramName)) return null;
+    
     String tmpDirPath = System.getProperty("java.io.tmpdir");
     if (!tmpDirPath.endsWith(File.separator)) tmpDirPath = tmpDirPath + File.separator;
     
@@ -120,7 +131,9 @@ public abstract class AbstractController implements Route {
   }
 
   private File getCropedPhotoFile(File photoFile, UploadPhotoCommand command) throws Exception {
-    if (command.getWidth() != null
+    if (photoFile != null
+        && command != null
+        && command.getWidth() != null
         && command.getHeight() != null
         && command.getX() != null
         && command.getY() != null) {

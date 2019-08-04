@@ -57,6 +57,10 @@ public class Configuration {
     return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
   }
 
+  public String adminPageHost() {
+    return environmentVariable("ADMIN_PAGE_HOST", "admin.test.commonsos.love");
+  }
+
   public String accessControlAllowOrigin() {
     return environmentVariable("ACCESS_CONTROL_ALLOW_ORIGIN", "http://commonspeople.localhost:8888");
   }

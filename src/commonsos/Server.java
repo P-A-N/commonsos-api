@@ -66,8 +66,6 @@ import commonsos.controller.app.ad.AdPhotoUpdateController;
 import commonsos.controller.app.ad.AdUpdateController;
 import commonsos.controller.app.ad.AdminAdDeleteController;
 import commonsos.controller.app.ad.MyAdsController;
-import commonsos.controller.app.auth.CreateAccountCompleteController;
-import commonsos.controller.app.auth.CreateAccountTemporaryController;
 import commonsos.controller.app.auth.AppLoginController;
 import commonsos.controller.app.auth.AppLogoutController;
 import commonsos.controller.app.auth.PasswordResetController;
@@ -94,6 +92,8 @@ import commonsos.controller.app.transaction.AdminTransactionListController;
 import commonsos.controller.app.transaction.BalanceController;
 import commonsos.controller.app.transaction.TransactionCreateController;
 import commonsos.controller.app.transaction.TransactionListController;
+import commonsos.controller.app.user.CreateUserCompleteController;
+import commonsos.controller.app.user.CreateUserTemporaryController;
 import commonsos.controller.app.user.SearchUsersCommunityController;
 import commonsos.controller.app.user.UpdateAdLastViewTimeController;
 import commonsos.controller.app.user.UpdateEmailCompleteController;
@@ -198,8 +198,8 @@ public class Server {
   private void initAppUserRoutes() {
     post("/login", injector.getInstance(AppLoginController.class), toJson);
     post("/logout", injector.getInstance(AppLogoutController.class), toJson);
-    post("/create-account", injector.getInstance(CreateAccountTemporaryController.class), toJson);
-    post("/create-account/:accessId", injector.getInstance(CreateAccountCompleteController.class), toJson);
+    post("/create-account", injector.getInstance(CreateUserTemporaryController.class), toJson);
+    post("/create-account/:accessId", injector.getInstance(CreateUserCompleteController.class), toJson);
     get("/user", injector.getInstance(UserController.class), toJson);
     get("/users/:id", injector.getInstance(UserController.class), toJson);
     post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);

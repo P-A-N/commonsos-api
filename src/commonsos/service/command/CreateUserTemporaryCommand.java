@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain=true)
-public class CreateAccountTemporaryCommand {
+public class CreateUserTemporaryCommand {
   private String username;
   private String password;
   private String telNo;

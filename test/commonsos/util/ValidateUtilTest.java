@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
+import commonsos.repository.entity.Role;
+import commonsos.service.image.ImageType;
 
 public class ValidateUtilTest {
 
@@ -201,5 +203,24 @@ public class ValidateUtilTest {
   @Test
   public void validate_status_invalid3() {
     assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺")); // length = 51, 4 byte unicode
+  }
+  
+  @Test
+  public void validate_imageType() {
+    for (ImageType imageType : ImageType.values()) {
+      ValidateUtil.validateImageType(imageType);
+    }
+    
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateImageType(null));
+  }
+  
+  @Test
+  public void validate_role() {
+    for (Role role : Role.ROLES) {
+      ValidateUtil.validateRole(role.getId());
+    }
+    
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateRole(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateRole(-1L));
   }
 }
