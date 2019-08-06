@@ -38,6 +38,7 @@ import org.web3j.utils.Files;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import commonsos.Cache;
+import commonsos.Configuration;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.CommunityRepository;
@@ -64,6 +65,7 @@ public class BlockchainService {
   @Inject ObjectMapper objectMapper;
   @Inject Web3j web3j;
   @Inject Cache cache;
+  @Inject Configuration config;
 
   public boolean isConnected() {
     try {
@@ -111,6 +113,14 @@ public class BlockchainService {
       WalletFile walletFile = objectMapper.readValue(wallet, WalletFile.class);
       ECKeyPair keyPair = Wallet.decrypt(password, walletFile);
       return Credentials.create(keyPair);
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
+  public Credentials systemCredentials() {
+    try {
+      return WalletUtils.loadCredentials(config.systemWalletPassword(), new File(config.systemWallet()));
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
@@ -192,7 +202,7 @@ public class BlockchainService {
     Credentials credentials = credentials(remitter.getWallet(), WALLET_PASSWORD);
     transferEther(credentials, beneficiaryAddress, amount);
   }
-
+  
   public void transferEther(Credentials credentials, String beneficiaryAddress, BigInteger amount) {
     log.info(String.format("transferEther %d to %s", amount, beneficiaryAddress));
     TransactionReceipt receipt = handleBlockchainException(() -> {
@@ -215,9 +225,13 @@ public class BlockchainService {
   }
 
   public String createToken(User owner, String symbol, String name) {
+    Credentials credentials = credentials(owner.getWallet(), WALLET_PASSWORD);
+    return createToken(credentials, symbol, name);
+  }
+
+  public String createToken(Credentials credentials, String symbol, String name) {
     return handleBlockchainException(() -> {
-      Credentials credentials = credentials(owner.getWallet(), WALLET_PASSWORD);
-      log.info("Deploying token contract: " + name + " (" + symbol + "), owner: " + owner.getWalletAddress());
+      log.info("Deploying token contract: " + name + " (" + symbol + "), owner: " + credentials.getAddress());
       Token token = handleBlockchainException(() -> {
         return Token.deploy(
             web3j,

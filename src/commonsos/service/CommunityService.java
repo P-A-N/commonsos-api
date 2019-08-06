@@ -2,23 +2,36 @@ package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.web3j.crypto.Credentials;
 
+import commonsos.Configuration;
 import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
+import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityNotificationRepository;
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
+import commonsos.repository.entity.CommunityStatus;
 import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.Role;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.command.CommunityNotificationCommand;
+import commonsos.service.command.CreateCommunityCommand;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
@@ -29,12 +42,76 @@ import commonsos.view.app.CommunityNotificationListView;
 
 @Singleton
 public class CommunityService {
+  public static final String WALLET_PASSWORD = "test";
+  public static final BigDecimal INITIAL_ETHER = BigDecimal.TEN.pow(6);
+  public static final BigInteger INITIAL_WEI = BigInteger.TEN.pow(18 + 6);
 
   @Inject private CommunityRepository repository;
+  @Inject private AdminRepository adminRepository;
   @Inject private CommunityNotificationRepository notificationRepository;
   @Inject private ImageUploadService imageService;
   @Inject private BlockchainService blockchainService;
+  @Inject private Configuration config;
 
+  public Community createCommunity(Admin admin, CreateCommunityCommand command) {
+    // check role
+    if (Role.of(admin.getRole().getId()) != Role.NCL) throw new ForbiddenException();
+    // check adminList
+    List<Admin> adminList = new ArrayList<>();
+    if (command.getAdminIdList() != null) {
+      command.getAdminIdList().forEach(id -> {
+        Admin a = adminRepository.findStrictById(id);
+        if (a.getCommunity() != null) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
+        adminList.add(a);
+      });
+    }
+    // check fee
+    BigDecimal fee = BigDecimal.valueOf(command.getTransactionFee() == null ? 0D : command.getTransactionFee()).setScale(2, RoundingMode.DOWN);
+    if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
+    // check system balance
+    Credentials systemCredentials = blockchainService.systemCredentials();
+    BigDecimal systemBalance = blockchainService.getBalance(systemCredentials.getAddress());
+    if (systemBalance.compareTo(INITIAL_ETHER) < 0) throw new DisplayableException("error.notEnoughFunds");
+    
+    // create upload photo
+    String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand());
+    String coverPhotoUrl = command.getUploadCoverPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadCoverPhotoCommand());
+
+    // create wallet
+    String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
+    Credentials mainCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
+    String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
+    Credentials feeCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
+    
+    // transfer ether to main wallet
+    blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), INITIAL_WEI);
+    // create token
+    String tokenAddress = blockchainService.createToken(systemCredentials, command.getTokenSymbol(), command.getTokenName());
+    
+    // create community
+    Community community = new Community()
+        .setName(command.getCommunityName())
+        .setStatus(CommunityStatus.PRIVATE)
+        .setDescription(command.getDescription())
+        .setTokenContractAddress(tokenAddress)
+        .setPhotoUrl(photoUrl)
+        .setCoverPhotoUrl(coverPhotoUrl)
+        .setMainWallet(mainWallet)
+        .setMainWalletAddress(mainCredentials.getAddress())
+        .setFeeWallet(feeWallet)
+        .setFeeWalletAddress(feeCredentials.getAddress())
+        .setFee(fee);
+    community = repository.create(community);
+    
+    // set adminPageUrl
+    String adminPageUrl = String.format("https://%s/%d", config.adminPageHost(), community.getId());
+    community = repository.update(community.setAdminPageUrl(adminPageUrl));
+    
+    // update admin's communityId
+    
+    return community;
+  }
+  
   public CommunityListView list(String filter, PaginationCommand pagination) {
     ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.listPublic(pagination) : repository.listPublic(filter, pagination);
 

@@ -65,6 +65,14 @@ public class Configuration {
     return environmentVariable("ACCESS_CONTROL_ALLOW_ORIGIN", "http://commonspeople.localhost:8888");
   }
 
+  public String systemWallet() {
+    return environmentVariable("COMMONSOS_WALLET_FILE", "/path/to/wallet");
+  }
+
+  public String systemWalletPassword() {
+    return environmentVariable("COMMONSOS_WALLET_PASSWORD", "pass1");
+  }
+
   public String environmentVariable(String key) {
     return environmentVariable(key, null);
   }

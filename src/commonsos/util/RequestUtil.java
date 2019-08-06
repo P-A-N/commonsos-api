@@ -1,8 +1,10 @@
 package commonsos.util;
 
+import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -106,6 +108,51 @@ public class RequestUtil {
     }
   }
   
+  public static Double getFileItemDouble(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
+    String value = null;
+    if (fileItemMap.containsKey(param)) {
+      value = fileItemMap.get(param).get(0).getString();
+    }
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    if (NumberUtils.isParsable(value)) {
+      return parseDouble(value);
+    } else {
+      throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
+    }
+  }
+
+  public static List<Long> getFileItemLongList(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
+    String value = null;
+    if (fileItemMap.containsKey(param)) {
+      value = fileItemMap.get(param).get(0).getString();
+    }
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    String[] valueArray = value.split(",");
+    List<Long> result = new ArrayList<>();
+    for (String val : valueArray) {
+      if (!isEmpty(val.trim())) {
+        if (NumberUtils.isParsable(val.trim())) {
+          result.add(parseLong(val.trim()));
+        } else {
+          throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
+        }
+      }
+    }
+    
+    return result;
+  }
   public static Map<String, List<FileItem>> getFileItemMap(Request request) {
     ServletFileUpload fileUpload = new ServletFileUpload(new DiskFileItemFactory());
     try {
