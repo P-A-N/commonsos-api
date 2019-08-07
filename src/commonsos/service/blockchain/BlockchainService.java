@@ -279,6 +279,35 @@ public class BlockchainService {
       throw new RuntimeException(e);
     }
   }
+  
+  public String tokenName(Long communityId) {
+    String tokenName = cache.getTokenName(communityId);
+    
+    if (tokenName == null) {
+      tokenName = getTokenNameFromBlockchain(communityId);
+    }
+    
+    return tokenName;
+  }
+  
+  private synchronized String getTokenNameFromBlockchain(Long communityId) {
+    String tokenName = cache.getTokenName(communityId);
+    if (tokenName != null) return tokenName;
+
+    try {
+      log.info(String.format("Token name request for: communityId=%d", communityId));
+      Community community = communityRepository.findPublicStrictById(communityId);
+      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      tokenName = token.name().send();
+      log.info(String.format("Token name request complete: name=%s, communityId=%d", tokenName, communityId));
+      
+      cache.setTokenName(communityId, tokenName == null ? "" : tokenName);
+      return tokenName;
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public String tokenSymbol(Long communityId) {
     String tokenSymbol = cache.getTokenSymbol(communityId);
@@ -296,13 +325,43 @@ public class BlockchainService {
 
     try {
       log.info(String.format("Token symbol request for: communityId=%d", communityId));
-      Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
+      Community community = communityRepository.findPublicStrictById(communityId);
       Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
       tokenSymbol = token.symbol().send();
       log.info(String.format("Token symbol request complete: symbol=%s, communityId=%d", tokenSymbol, communityId));
       
       cache.setTokenSymbol(communityId, tokenSymbol == null ? "" : tokenSymbol);
       return tokenSymbol;
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public BigDecimal totalSupply(Long communityId) {
+    BigDecimal totalSupply = cache.getTotalSupply(communityId);
+    
+    if (totalSupply == null) {
+      totalSupply = getTotalSupplyFromBlockchain(communityId);
+    }
+    
+    return totalSupply;
+  }
+  
+  private synchronized BigDecimal getTotalSupplyFromBlockchain(Long communityId) {
+    BigDecimal totalSupply = cache.getTotalSupply(communityId);
+    if (totalSupply != null) return totalSupply;
+
+    try {
+      log.info(String.format("Token total supply request for: communityId=%d", communityId));
+      Community community = communityRepository.findPublicStrictById(communityId);
+      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      BigInteger totalSupplyInWei = token.totalSupply().send();
+      log.info(String.format("Token total supply complete: totalSupply=%d, communityId=%d", totalSupplyInWei, communityId));
+      
+      totalSupply = totalSupplyInWei == null ? BigDecimal.ZERO : toTokensWithDecimals(totalSupplyInWei);
+      cache.setTotalSupply(communityId, totalSupply);
+      return totalSupply;
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -324,5 +383,14 @@ public class BlockchainService {
     });
 
     log.info(format("Approving token transfer has sent. [hash=%s]", receipt.getTransactionHash()));
+  }
+  
+  public CommunityToken getCommunityToken(Community community) {
+    CommunityToken communityToken = new CommunityToken();
+    communityToken.setTokenName(tokenName(community.getId()));
+    communityToken.setTokenSymbol(tokenSymbol(community.getId()));
+    communityToken.setTotalSupply(totalSupply(community.getId()));
+    
+    return communityToken;
   }
 }

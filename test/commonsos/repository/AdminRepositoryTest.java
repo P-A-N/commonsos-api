@@ -8,14 +8,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.TemporaryAdmin;
 import commonsos.repository.entity.TemporaryAdminEmailAddress;
+import commonsos.service.command.PaginationCommand;
 
 public class AdminRepositoryTest extends AbstractRepositoryTest {
 
@@ -39,6 +42,61 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     // execute & verify
     result = repository.findById(-1L);
     assertFalse(result.isPresent());
+  }
+
+  @Test
+  public void findByCommunityId() {
+    // prepare
+    Community com1 = inTransaction(() -> communityRepository.create(new Community().setName("com1")));
+    Community com2 = inTransaction(() -> communityRepository.create(new Community().setName("com2")));
+    Community com3 = inTransaction(() -> communityRepository.create(new Community().setName("com3")));
+    Admin adm1 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm1").setCommunity(com1)));
+    Admin adm2 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm2").setCommunity(com1)));
+    Admin adm3 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm3").setCommunity(com1).setDeleted(true)));
+    Admin adm4 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm4").setCommunity(com2)));
+
+    // execute & verify
+    List<Admin> result = repository.findByCommunityId(com1.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getId()).isEqualTo(adm1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(adm2.getId());
+
+    // execute & verify
+    result = repository.findByCommunityId(com2.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getId()).isEqualTo(adm4.getId());
+
+    // execute & verify
+    result = repository.findByCommunityId(com3.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void findByCommunityId_pagination() {
+    // prepare
+    Community com1 = inTransaction(() -> communityRepository.create(new Community().setName("com1")));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm1").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm2").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm3").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm4").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm5").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm6").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm7").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm8").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm9").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm10").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm11").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm12").setCommunity(com1)));
+
+    // execute & verify
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
+    List<Admin> result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(10);
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(2);
   }
 
   @Test

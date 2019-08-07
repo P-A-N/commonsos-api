@@ -8,11 +8,14 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
 
 import commonsos.exception.AdminNotFoundException;
 import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryAdmin;
 import commonsos.repository.entity.TemporaryAdminEmailAddress;
+import commonsos.service.command.PaginationCommand;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -39,6 +42,17 @@ public class AdminRepository extends Repository {
 
   public Admin findStrictById(Long id) {
     return findById(id).orElseThrow(AdminNotFoundException::new);
+  }
+
+  public ResultList<Admin> findByCommunityId(Long communityId, PaginationCommand pagination) {
+    String sql = "FROM Admin WHERE community.id = :communityId AND deleted IS FALSE ORDER BY id";
+    TypedQuery<Admin> query = em().createQuery(sql, Admin.class)
+        .setLockMode(lockMode())
+        .setParameter("communityId", communityId);
+
+    ResultList<Admin> resultList = getResultList(query, pagination);
+    
+    return resultList;
   }
 
   public Optional<Admin> findByEmailAddress(String emailAddress) {

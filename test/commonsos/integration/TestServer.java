@@ -1,5 +1,6 @@
 package commonsos.integration;
 
+import static commonsos.service.CommunityService.INITIAL_ETHER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import commonsos.interceptor.TransactionInterceptor;
 import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
@@ -51,12 +53,17 @@ public class TestServer extends Server {
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     BlockchainService blockchainService = mock(BlockchainService.class);
     when(blockchainService.tokenBalance(any(), any())).thenReturn(BigDecimal.TEN);
+    when(blockchainService.getBalance(any())).thenReturn(INITIAL_ETHER);
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
+    when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");
     when(blockchainService.isConnected()).thenReturn(true);
     when(blockchainService.createWallet(any())).thenReturn("wallet");
+    when(blockchainService.getCommunityToken(any())).thenReturn(new CommunityToken());
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
+    when(blockchainService.systemCredentials()).thenReturn(credentials);
+    
     
     // s3
     ImageUploadService imageService = mock(ImageUploadService.class);

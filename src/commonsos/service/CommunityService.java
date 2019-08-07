@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -22,6 +23,7 @@ import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityNotificationRepository;
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
@@ -30,6 +32,7 @@ import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.command.CommunityNotificationCommand;
 import commonsos.service.command.CreateCommunityCommand;
 import commonsos.service.command.PaginationCommand;
@@ -37,6 +40,7 @@ import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
+import commonsos.view.admin.CommunityForAdminView;
 import commonsos.view.app.CommunityListView;
 import commonsos.view.app.CommunityNotificationListView;
 
@@ -48,6 +52,7 @@ public class CommunityService {
 
   @Inject private CommunityRepository repository;
   @Inject private AdminRepository adminRepository;
+  @Inject private UserRepository userRepository;
   @Inject private CommunityNotificationRepository notificationRepository;
   @Inject private ImageUploadService imageService;
   @Inject private BlockchainService blockchainService;
@@ -62,12 +67,14 @@ public class CommunityService {
       command.getAdminIdList().forEach(id -> {
         Admin a = adminRepository.findStrictById(id);
         if (a.getCommunity() != null) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
+        if (!a.getRole().getId().equals(Role.COMMUNITY_ADMIN.getId())) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
         adminList.add(a);
       });
     }
     // check fee
     BigDecimal fee = BigDecimal.valueOf(command.getTransactionFee() == null ? 0D : command.getTransactionFee()).setScale(2, RoundingMode.DOWN);
     if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
+    if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
     // check system balance
     Credentials systemCredentials = blockchainService.systemCredentials();
     BigDecimal systemBalance = blockchainService.getBalance(systemCredentials.getAddress());
@@ -108,6 +115,8 @@ public class CommunityService {
     community = repository.update(community.setAdminPageUrl(adminPageUrl));
     
     // update admin's communityId
+    Community c = new Community().setId(community.getId());
+    adminList.forEach(a -> adminRepository.update(a.setCommunity(c)));
     
     return community;
   }
@@ -184,5 +193,15 @@ public class CommunityService {
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
+  }
+  
+  public CommunityForAdminView viewForAdmin(Community community, List<Long> adminIdList) {
+    CommunityToken communityToken = blockchainService.getCommunityToken(community);
+    List<Admin> adminList = new ArrayList<>();
+    if (adminIdList != null) {
+      adminList = adminIdList.stream().map(id -> adminRepository.findStrictById(id)).collect(Collectors.toList());
+    }
+    int totalMember = userRepository.search(community.getId(), null, null).getList().size();
+    return CommunityUtil.viewForAdmin(community, communityToken, totalMember, adminList);
   }
 }

@@ -1,5 +1,6 @@
 package commonsos.integration.admin.auth;
 
+import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,7 @@ public class PostLogoutTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() {
-    admin = create(new Admin().setEmailAddress("admin@a.com").setPasswordHash(hash("pass")));
+    admin = create(new Admin().setEmailAddress("admin@a.com").setPasswordHash(hash("pass")).setRole(NCL));
     sessionId = loginAdmin("admin@a.com", "pass");
   }
   

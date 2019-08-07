@@ -39,7 +39,7 @@ public class CreateCommunityController extends MultipartFormdataController {
       deleteTmpFiles(command.getUploadPhotoCommand(), command.getUploadCoverPhotoCommand());
     }
     
-    return null;
+    return communityService.viewForAdmin(community, command.getAdminIdList());
   }
   
   private CreateCommunityCommand getCommand(Map<String, List<FileItem>> fileItemMap) {
