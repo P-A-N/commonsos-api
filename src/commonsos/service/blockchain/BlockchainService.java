@@ -80,7 +80,7 @@ public class BlockchainService {
 
   public boolean isAllowed(User user, Community community, BigInteger floor) {
     try {
-      Token token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
+      Token token = loadTokenReadOnly(community.getTokenContractAddress());
       BigInteger allowance = token.allowance(user.getWalletAddress(), community.getAdminUser().getWalletAddress()).send();
       log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%d", community.getId(), user.getId(), community.getAdminUser().getId(), allowance));
       return allowance.compareTo(floor) >= 0;
@@ -162,11 +162,29 @@ public class BlockchainService {
   }
 
   private String transferTokensAdmin(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
+    Community community = communityRepository.findPublicStrictById(communityId);
 
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
 
     Credentials credentials = credentials(remitter.getWallet(), WALLET_PASSWORD);
+    Token token = loadToken(
+        credentials,
+        community.getTokenContractAddress(),
+        GAS_PRICE,
+        TOKEN_TRANSFER_GAS_LIMIT);
+
+    TransactionReceipt receipt = handleBlockchainException(() -> {
+      return token.transfer(beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
+    });
+    
+    log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
+    return receipt.getTransactionHash();
+  }
+
+  public String transferTokensFromMainWallet(Community community, User beneficiary, BigDecimal amount) {
+    log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", community.getMainWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
+
+    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
@@ -194,7 +212,8 @@ public class BlockchainService {
     return Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
-  Token loadTokenReadOnly(String walletAddress, String tokenContractAddress) {
+  Token loadTokenReadOnly(String tokenContractAddress) {
+    String walletAddress = systemCredentials().getAddress();
     return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
@@ -258,7 +277,7 @@ public class BlockchainService {
     try {
       log.info("Token balance request for: " + user.getWalletAddress());
       Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
-      Token token = loadTokenReadOnly(user.getWalletAddress(), community.getTokenContractAddress());
+      Token token = loadTokenReadOnly(community.getTokenContractAddress());
       BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
       log.info("Token balance request complete, balance " + balance.toString());
       return toTokensWithDecimals(balance);
@@ -280,28 +299,27 @@ public class BlockchainService {
     }
   }
   
-  public String tokenName(Long communityId) {
-    String tokenName = cache.getTokenName(communityId);
+  public String tokenName(String tokenAddress) {
+    String tokenName = cache.getTokenName(tokenAddress);
     
     if (tokenName == null) {
-      tokenName = getTokenNameFromBlockchain(communityId);
+      tokenName = getTokenNameFromBlockchain(tokenAddress);
     }
     
     return tokenName;
   }
   
-  private synchronized String getTokenNameFromBlockchain(Long communityId) {
-    String tokenName = cache.getTokenName(communityId);
+  private synchronized String getTokenNameFromBlockchain(String tokenAddress) {
+    String tokenName = cache.getTokenName(tokenAddress);
     if (tokenName != null) return tokenName;
 
     try {
-      log.info(String.format("Token name request for: communityId=%d", communityId));
-      Community community = communityRepository.findPublicStrictById(communityId);
-      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      log.info(String.format("Token name request for: tokenAddress=%s", tokenAddress));
+      Token token = loadTokenReadOnly(tokenAddress);
       tokenName = token.name().send();
-      log.info(String.format("Token name request complete: name=%s, communityId=%d", tokenName, communityId));
+      log.info(String.format("Token name request complete: name=%s, tokenAddress=%s", tokenName, tokenAddress));
       
-      cache.setTokenName(communityId, tokenName == null ? "" : tokenName);
+      cache.setTokenName(tokenAddress, tokenName == null ? "" : tokenName);
       return tokenName;
     }
     catch (Exception e) {
@@ -309,28 +327,27 @@ public class BlockchainService {
     }
   }
 
-  public String tokenSymbol(Long communityId) {
-    String tokenSymbol = cache.getTokenSymbol(communityId);
+  public String tokenSymbol(String tokenAddress) {
+    String tokenSymbol = cache.getTokenSymbol(tokenAddress);
     
     if (tokenSymbol == null) {
-      tokenSymbol = getTokenSymbolFromBlockchain(communityId);
+      tokenSymbol = getTokenSymbolFromBlockchain(tokenAddress);
     }
     
     return tokenSymbol;
   }
   
-  private synchronized String getTokenSymbolFromBlockchain(Long communityId) {
-    String tokenSymbol = cache.getTokenSymbol(communityId);
+  private synchronized String getTokenSymbolFromBlockchain(String tokenAddress) {
+    String tokenSymbol = cache.getTokenSymbol(tokenAddress);
     if (tokenSymbol != null) return tokenSymbol;
 
     try {
-      log.info(String.format("Token symbol request for: communityId=%d", communityId));
-      Community community = communityRepository.findPublicStrictById(communityId);
-      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      log.info(String.format("Token symbol request for: tokenAddress=%s", tokenAddress));
+      Token token = loadTokenReadOnly(tokenAddress);
       tokenSymbol = token.symbol().send();
-      log.info(String.format("Token symbol request complete: symbol=%s, communityId=%d", tokenSymbol, communityId));
+      log.info(String.format("Token symbol request complete: symbol=%s, tokenAddress=%s", tokenSymbol, tokenAddress));
       
-      cache.setTokenSymbol(communityId, tokenSymbol == null ? "" : tokenSymbol);
+      cache.setTokenSymbol(tokenAddress, tokenSymbol == null ? "" : tokenSymbol);
       return tokenSymbol;
     }
     catch (Exception e) {
@@ -338,29 +355,28 @@ public class BlockchainService {
     }
   }
 
-  public BigDecimal totalSupply(Long communityId) {
-    BigDecimal totalSupply = cache.getTotalSupply(communityId);
+  public BigDecimal totalSupply(String tokenAddress) {
+    BigDecimal totalSupply = cache.getTotalSupply(tokenAddress);
     
     if (totalSupply == null) {
-      totalSupply = getTotalSupplyFromBlockchain(communityId);
+      totalSupply = getTotalSupplyFromBlockchain(tokenAddress);
     }
     
     return totalSupply;
   }
   
-  private synchronized BigDecimal getTotalSupplyFromBlockchain(Long communityId) {
-    BigDecimal totalSupply = cache.getTotalSupply(communityId);
+  private synchronized BigDecimal getTotalSupplyFromBlockchain(String tokenAddress) {
+    BigDecimal totalSupply = cache.getTotalSupply(tokenAddress);
     if (totalSupply != null) return totalSupply;
 
     try {
-      log.info(String.format("Token total supply request for: communityId=%d", communityId));
-      Community community = communityRepository.findPublicStrictById(communityId);
-      Token token = loadTokenReadOnly(community.getAdminUser().getWalletAddress(), community.getTokenContractAddress());
+      log.info(String.format("Token total supply request for: tokenAddress=%s", tokenAddress));
+      Token token = loadTokenReadOnly(tokenAddress);
       BigInteger totalSupplyInWei = token.totalSupply().send();
-      log.info(String.format("Token total supply complete: totalSupply=%d, communityId=%d", totalSupplyInWei, communityId));
+      log.info(String.format("Token total supply complete: totalSupply=%d, tokenAddress=%s", totalSupplyInWei, tokenAddress));
       
       totalSupply = totalSupplyInWei == null ? BigDecimal.ZERO : toTokensWithDecimals(totalSupplyInWei);
-      cache.setTotalSupply(communityId, totalSupply);
+      cache.setTotalSupply(tokenAddress, totalSupply);
       return totalSupply;
     }
     catch (Exception e) {
@@ -385,11 +401,11 @@ public class BlockchainService {
     log.info(format("Approving token transfer has sent. [hash=%s]", receipt.getTransactionHash()));
   }
   
-  public CommunityToken getCommunityToken(Community community) {
+  public CommunityToken getCommunityToken(String tokenAddress) {
     CommunityToken communityToken = new CommunityToken();
-    communityToken.setTokenName(tokenName(community.getId()));
-    communityToken.setTokenSymbol(tokenSymbol(community.getId()));
-    communityToken.setTotalSupply(totalSupply(community.getId()));
+    communityToken.setTokenName(tokenName(tokenAddress));
+    communityToken.setTokenSymbol(tokenSymbol(tokenAddress));
+    communityToken.setTotalSupply(totalSupply(tokenAddress));
     
     return communityToken;
   }

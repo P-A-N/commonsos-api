@@ -66,11 +66,19 @@ public class Configuration {
   }
 
   public String systemWallet() {
-    return environmentVariable("COMMONSOS_WALLET_FILE", "/path/to/wallet");
+    return environmentVariable("COMMONSOS_WALLET_FILE", "C:\\Ethereum\\localnet\\keystore\\UTC--2018-11-08T09-10-38.833302600Z--766a1c4737970feddde6f2b8659fca05bd0339ab");
   }
 
   public String systemWalletPassword() {
     return environmentVariable("COMMONSOS_WALLET_PASSWORD", "pass1");
+  }
+
+  public String initialEther() {
+    return environmentVariable("INITIAL_ETHER", "1");
+  }
+
+  public String initialWei() {
+    return environmentVariable("INITIAL_WEI", "1000000000000000000");
   }
 
   public String environmentVariable(String key) {

@@ -45,7 +45,7 @@ public class BlockchainServiceTest {
   public void prepare() {
     service.objectMapper = new ObjectMapper();
     doReturn(token).when(service).loadToken(any(), any(), any(), any());
-    doReturn(token).when(service).loadTokenReadOnly(any(), any());
+    doReturn(token).when(service).loadTokenReadOnly(any());
   }
 
   @Test

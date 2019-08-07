@@ -72,7 +72,9 @@ public class EntityManagerService {
   public <T> T runInTransaction(Executable<T> code) {
     EntityTransaction transaction = get().getTransaction();
     try {
-      if (!transaction.isActive()) transaction.begin();
+      if (!transaction.isActive()) {
+        transaction.begin();
+      }
       T result = code.execute();
       if (transaction.isActive()) transaction.commit();
       return result;

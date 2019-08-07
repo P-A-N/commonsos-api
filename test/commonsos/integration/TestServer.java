@@ -1,6 +1,5 @@
 package commonsos.integration;
 
-import static commonsos.service.CommunityService.INITIAL_ETHER;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -53,7 +52,7 @@ public class TestServer extends Server {
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     BlockchainService blockchainService = mock(BlockchainService.class);
     when(blockchainService.tokenBalance(any(), any())).thenReturn(BigDecimal.TEN);
-    when(blockchainService.getBalance(any())).thenReturn(INITIAL_ETHER);
+    when(blockchainService.getBalance(any())).thenReturn(BigDecimal.TEN.pow(18+6));
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");
     when(blockchainService.isConnected()).thenReturn(true);

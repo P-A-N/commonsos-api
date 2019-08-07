@@ -112,7 +112,7 @@ public class UserService {
   public PublicUserView publicUserAndCommunityView(User user) {
     List<CommunityView> communityList = new ArrayList<>();
     user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
-      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getId())));
+      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getTokenContractAddress())));
     });
     
     return UserUtil.publicView(user, communityList);

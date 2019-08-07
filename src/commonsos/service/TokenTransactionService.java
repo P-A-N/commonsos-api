@@ -51,11 +51,11 @@ public class TokenTransactionService {
   @Inject PushNotificationService pushNotificationService;
 
   public BalanceView balance(User user, Long communityId) {
-    communityRepository.findPublicStrictById(communityId);
+    Community community = communityRepository.findPublicStrictById(communityId);
     BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
     BalanceView view = new BalanceView()
         .setCommunityId(communityId)
-        .setTokenSymbol(blockchainService.tokenSymbol(communityId))
+        .setTokenSymbol(blockchainService.tokenSymbol(community.getTokenContractAddress()))
         .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
     return view;
   }
