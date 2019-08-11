@@ -11,3 +11,5 @@ dataSources
 .project
 .settings
 add_community.sh
+create_ncl_account.sh
+token_migration.sh

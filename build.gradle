@@ -65,6 +65,7 @@ dependencies {
 }
 
 test {
+  maxHeapSize = "1G"
   useJUnitPlatform()
 }
 
@@ -83,6 +84,16 @@ task copyCompileDependencies(type: Sync) {
 task createAddCommunityScript() {
   new File("$projectDir/add_community.sh").text =
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.AddCommunity \$1"""
+}
+
+task createTokenMigrationScript() {
+  new File("$projectDir/token_migration.sh").text =
+    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.TokenMigration \$1"""
+}
+
+task createNclAccountScript() {
+  new File("$projectDir/create_ncl_account.sh").text =
+    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
 }
 
 task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommunityScript]) {
