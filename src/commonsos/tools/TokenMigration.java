@@ -58,11 +58,13 @@ public class TokenMigration {
       Community c = communityList.get(i);
       
       emService.runInTransaction(() -> {
+        transferEtherToAdmin(c);
         String newTokenAddress = createToken(c);
         c.setTokenContractAddress(newTokenAddress);
         
         transferEtherToAdmin(c);
         allowAdmin(c);
+        
         transferEtherToAdmin(c);
         transferToken(c);
         
@@ -135,9 +137,9 @@ public class TokenMigration {
   private static void transferEtherToAdmin(Community c) {
     BigDecimal balance = blockchainService.getBalance(c.getAdminUser().getWalletAddress());
     System.out.println(String.format("Balance of admin=%f [admin address=%s]", balance, c.getAdminUser().getWalletAddress()));
-    if (balance.compareTo(BigDecimal.valueOf(10000)) < 0) {
+    if (balance.compareTo(BigDecimal.TEN.pow(5)) < 0) {
       System.out.println(String.format("Transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
-      blockchainService.transferEther(credentials, c.getAdminUser().getWalletAddress(), BigInteger.TEN.pow(24));
+      blockchainService.transferEther(credentials, c.getAdminUser().getWalletAddress(), BigInteger.TEN.pow(18 + 6));
       System.out.println(String.format("Finish transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
     }
     
