@@ -137,9 +137,9 @@ public class TokenMigration {
   private static void transferEtherToAdmin(Community c) {
     BigDecimal balance = blockchainService.getBalance(c.getAdminUser().getWalletAddress());
     System.out.println(String.format("Balance of admin=%f [admin address=%s]", balance, c.getAdminUser().getWalletAddress()));
-    if (balance.compareTo(BigDecimal.TEN.pow(5)) < 0) {
+    if (balance.compareTo(BigDecimal.TEN.pow(4)) < 0) {
       System.out.println(String.format("Transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
-      blockchainService.transferEther(credentials, c.getAdminUser().getWalletAddress(), BigInteger.TEN.pow(18 + 6));
+      blockchainService.transferEther(credentials, c.getAdminUser().getWalletAddress(), BigInteger.TEN.pow(18 + 5));
       System.out.println(String.format("Finish transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
     }
     
