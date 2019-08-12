@@ -60,7 +60,6 @@ public class PostCreateAccountTest extends IntegrationTest {
     given()
       .when().post("/create-account/{accessId}", accessId)
       .then().statusCode(200)
-      .body("qrCodeUrl", notNullValue())
       .body("loggedinAt", notNullValue());
 
     // login should success
