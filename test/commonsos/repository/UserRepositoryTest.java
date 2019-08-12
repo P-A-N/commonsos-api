@@ -686,6 +686,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setStatus("status")
         .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
+        .setQrCodeUrl("qr code url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
@@ -710,6 +711,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setStatus("status")
         .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
+        .setQrCodeUrl("qr code url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
@@ -738,6 +740,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
         .setStatus("status")
         .setTelNo("00000000000")
         .setAvatarUrl("avatar url")
+        .setQrCodeUrl("qr code url")
         .setWallet("wallet")
         .setWalletAddress("wallet address")
         .setPushNotificationToken("push notification token")
@@ -842,6 +845,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getStatus()).isEqualTo(expect.getStatus());
     assertThat(actual.getTelNo()).isEqualTo(expect.getTelNo());
     assertThat(actual.getAvatarUrl()).isEqualTo(expect.getAvatarUrl());
+    assertThat(actual.getQrCodeUrl()).isEqualTo(expect.getQrCodeUrl());
     assertThat(actual.getWallet()).isEqualTo(expect.getWallet());
     assertThat(actual.getWalletAddress()).isEqualTo(expect.getWalletAddress());
     assertThat(actual.getPushNotificationToken()).isEqualTo(expect.getPushNotificationToken());

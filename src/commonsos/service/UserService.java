@@ -2,6 +2,8 @@ package commonsos.service;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
+import commonsos.service.image.QrCodeService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
@@ -73,7 +76,8 @@ public class UserService {
   @Inject private AccessIdService accessIdService;
   @Inject private EmailService emailService;
   @Inject private TokenTransactionService transactionService;
-  @Inject private ImageUploadService imageService;
+  @Inject private ImageUploadService imageUploadService;
+  @Inject private QrCodeService qrCodeService;
   @Inject private JobService jobService;
 
   public User checkPassword(String username, String password) {
@@ -204,7 +208,13 @@ public class UserService {
 
     // create
     userRepository.updateTemporary(tempUser.setInvalid(true));
-    return userRepository.create(user);
+    userRepository.create(user);
+
+    // qr code
+    String qrCodeUrl = getQrCodeUrl(user, null);
+    userRepository.update(user.setQrCodeUrl(qrCodeUrl));
+    
+    return user;
   }
   
   public void updateEmailTemporary(UpdateEmailTemporaryCommand command) {
@@ -313,8 +323,8 @@ public class UserService {
   }
 
   public String updateAvatar(User user, UploadPhotoCommand command) {
-    String url = imageService.create(command);
-    imageService.delete(user.getAvatarUrl());
+    String url = imageUploadService.create(command);
+    imageUploadService.delete(user.getAvatarUrl());
     user.setAvatarUrl(url);
     userRepository.update(user);
     return url;
@@ -444,5 +454,20 @@ public class UserService {
     });
     
     userRepository.update(user);
+  }
+  
+  public String getQrCodeUrl(User user, BigDecimal amount) {
+    File imageFile = null;
+    try {
+      if (amount == null) {
+        imageFile = qrCodeService.getTransactionQrCode(user.getId());
+      } else {
+        imageFile = qrCodeService.getTransactionQrCode(user.getId(), amount);
+      }
+
+      return imageUploadService.create(imageFile);
+    } finally {
+      if (imageFile != null) imageFile.delete();
+    }
   }
 }

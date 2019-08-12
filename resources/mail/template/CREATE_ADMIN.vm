@@ -3,11 +3,11 @@
 <p>
 COMMONS PEOPLEの管理者アカウントを仮登録しました。<br>
 24時間以内に下記URLをクリックし、アカウント登録を完了してください。
-ログインパスワードはNCL運営者より別途ご連絡します。
+ログインパスワードは管理者より別途ご連絡します。
 </p>
 
 <p>
-https://${hostname}/create-admin/${accessId}
+https://${hostname}/admin/create-admin.html#${accessId}
 </p>
 
 <p>

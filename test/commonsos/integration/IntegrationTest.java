@@ -150,12 +150,16 @@ public class IntegrationTest {
   }
   
   public String extractAccessId(WiserMessage wiseMessage) throws Exception {
+    return extractAccessId(wiseMessage, "/");
+  }
+  
+  public String extractAccessId(WiserMessage wiseMessage, String lastIndex) throws Exception {
     String content = wiseMessage.getMimeMessage().getContent().toString();
     Pattern p = Pattern.compile("^https://.*$", Pattern.MULTILINE);
     Matcher m = p.matcher(content);
     if (m.find()) {
       String url = m.group();
-      String accessId = url.substring(url.lastIndexOf('/') + 1);
+      String accessId = url.substring(url.lastIndexOf(lastIndex) + 1);
       return accessId;
     }
     

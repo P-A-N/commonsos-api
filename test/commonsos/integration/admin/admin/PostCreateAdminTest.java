@@ -63,7 +63,7 @@ public class PostCreateAdminTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("comAdmin@test.com");
-    String accessId = extractAccessId(messages.get(0));
+    String accessId = extractAccessId(messages.get(0), "#");
 
     // login should fail at now
     failLoginAdmin("comAdmin@test.com", "password");
@@ -102,7 +102,7 @@ public class PostCreateAdminTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("comAdmin@test.com");
-    String accessId = extractAccessId(messages.get(0));
+    String accessId = extractAccessId(messages.get(0), "#");
 
     // login should fail at now
     failLoginAdmin("comAdmin@test.com", "password");
@@ -133,7 +133,7 @@ public class PostCreateAdminTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("teller@test.com");
-    String accessId = extractAccessId(messages.get(0));
+    String accessId = extractAccessId(messages.get(0), "#");
 
     // login should fail at now
     failLoginAdmin("teller@test.com", "password");
@@ -163,7 +163,7 @@ public class PostCreateAdminTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("teller@test.com");
-    String accessId = extractAccessId(messages.get(0));
+    String accessId = extractAccessId(messages.get(0), "#");
 
     // login should fail at now
     failLoginAdmin("teller@test.com", "password");
@@ -193,7 +193,7 @@ public class PostCreateAdminTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("ncl@test.com");
-    String accessId = extractAccessId(messages.get(0));
+    String accessId = extractAccessId(messages.get(0), "#");
 
     // login should fail at now
     failLoginAdmin("ncl@test.com", "password");
@@ -244,7 +244,7 @@ public class PostCreateAdminTest extends IntegrationTest {
       .then().statusCode(200);
 
     // complete create account
-    String accessId = extractAccessId(wiser.getMessages().get(0));
+    String accessId = extractAccessId(wiser.getMessages().get(0), "#");
     given()
       .when().post("/admin/create-admin/{accessId}", accessId)
       .then().statusCode(200);
@@ -289,7 +289,7 @@ public class PostCreateAdminTest extends IntegrationTest {
       .then().statusCode(200);
 
     // complete create account
-    String accessId = extractAccessId(wiser.getMessages().get(0));
+    String accessId = extractAccessId(wiser.getMessages().get(0), "#");
     given()
       .when().post("/admin/create-admin/{accessId}", accessId)
       .then().statusCode(200);

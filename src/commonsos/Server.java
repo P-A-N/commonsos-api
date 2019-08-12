@@ -94,6 +94,7 @@ import commonsos.controller.app.transaction.TransactionCreateController;
 import commonsos.controller.app.transaction.TransactionListController;
 import commonsos.controller.app.user.CreateUserCompleteController;
 import commonsos.controller.app.user.CreateUserTemporaryController;
+import commonsos.controller.app.user.GetTransactionQrCodeController;
 import commonsos.controller.app.user.SearchUsersCommunityController;
 import commonsos.controller.app.user.UpdateAdLastViewTimeController;
 import commonsos.controller.app.user.UpdateEmailCompleteController;
@@ -208,6 +209,7 @@ public class Server {
     post("/users/:id/passwordreset", injector.getInstance(UserPasswordResetRequestController.class), toJson);
     post("/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
     post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
+    get("/users/:id/qr", injector.getInstance(GetTransactionQrCodeController.class), toJson);
     post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
     get("/users", injector.getInstance(UserSearchController.class), toJson);
     get("/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);

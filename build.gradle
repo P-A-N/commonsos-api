@@ -31,6 +31,8 @@ dependencies {
   compile 'com.google.inject:guice:4.2.0'
   compile 'com.google.code.gson:gson:2.8.2'
   compile 'com.google.firebase:firebase-admin:6.2.0'
+  compile 'com.google.zxing:core:3.4.0'
+  compile 'com.google.zxing:javase:3.4.0'
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.338'
   
   compile 'org.apache.commons:commons-lang3:3.8.1'
@@ -96,6 +98,11 @@ task createNclAccountScript() {
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
 }
 
+task setQrCodeUrlScript() {
+  new File("$projectDir/set_qr_code_url.sh").text =
+    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.SetQrCodeUrl \$1"""
+}
+
 task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommunityScript]) {
   archiveName "commonsos-api.zip"
   from new File(buildDir, "libs")
@@ -104,5 +111,6 @@ task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommun
   from ('add_community.sh')
   from ('token_migration.sh')
   from ('create_ncl_account.sh')
+  from ('set_qr_code_url.sh')
   into "commonsos-api"
 }

@@ -42,6 +42,7 @@ import commonsos.service.command.UserUpdateCommand;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
+import commonsos.service.image.QrCodeService;
 import commonsos.session.UserSession;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +55,8 @@ public class UserServiceTest {
   @Mock BlockchainService blockchainService;
   @Mock CryptoService cryptoService;
   @Mock TokenTransactionService transactionService;
-  @Mock ImageUploadService imageService;
+  @Mock ImageUploadService imageUploadService;
+  @Mock QrCodeService qrCodeService;
   @Mock EmailService EmailService;
   @Mock JobService jobService;
   @InjectMocks @Spy UserService userService;

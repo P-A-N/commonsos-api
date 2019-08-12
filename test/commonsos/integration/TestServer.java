@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
@@ -25,6 +26,7 @@ import commonsos.repository.EntityManagerService;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
+import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
@@ -65,8 +67,10 @@ public class TestServer extends Server {
     
     
     // s3
-    ImageUploadService imageService = mock(ImageUploadService.class);
-    when(imageService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
+    ImageUploadService imageUploadService = mock(ImageUploadService.class);
+    when(imageUploadService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
+    when(imageUploadService.create(any(File.class))).thenReturn("http://test.com/ad/photo");
+    when(imageUploadService.create(any(UploadPhotoCommand.class))).thenReturn("http://test.com/ad/photo");
     
     // firebase
     PushNotificationService pushNotificationService = mock(PushNotificationService.class);
@@ -85,7 +89,7 @@ public class TestServer extends Server {
         }
 
         if (!imageuploadEnable) {
-          bind(ImageUploadService.class).toInstance(imageService);
+          bind(ImageUploadService.class).toInstance(imageUploadService);
         }
         
         bind(PushNotificationService.class).toInstance(pushNotificationService);

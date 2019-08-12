@@ -57,6 +57,14 @@ public class Configuration {
     return environmentVariable("COMMONSOS_HOST", "app.test.commons.love");
   }
 
+  public String downloadPagePath() {
+    return environmentVariable("DOWNLOAD_PAGE_PATH", "/download.html");
+  }
+
+  public String transactionQrCodeSize() {
+    return environmentVariable("TRANSACTION_QR_CODE_SIZE", "100");
+  }
+
   public String adminPageHost() {
     return environmentVariable("ADMIN_PAGE_HOST", "admin.test.commonsos.love");
   }
