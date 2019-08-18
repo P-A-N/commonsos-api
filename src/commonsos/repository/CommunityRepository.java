@@ -60,6 +60,18 @@ public class CommunityRepository extends Repository {
     return findPublicById(id).orElseThrow(CommunityNotFoundException::new);
   }
 
+  public ResultList<Community> list(PaginationCommand pagination) {
+    TypedQuery<Community> query = em().createQuery(
+        "FROM Community" +
+        " WHERE deleted IS FALSE" +
+        " ORDER BY id", Community.class)
+        .setLockMode(lockMode());
+    
+    ResultList<Community> resultList = getResultList(query, pagination);
+    
+    return resultList;
+  }
+
   public ResultList<Community> listPublic(String filter, PaginationCommand pagination) {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +

@@ -40,8 +40,8 @@ public class GetCommunityTest extends IntegrationTest {
     deleteCom =  create(new Community().setName("deleteCom").setStatus(PUBLIC).setDeleted(true));
     
     // create admins
-    publicComAdmin1 = create(new Admin().setEmailAddress("publicComAdmin1@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
-    publicComAdmin2 = create(new Admin().setEmailAddress("publicComAdmin2@before.each.com").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(publicCom));
+    publicComAdmin1 = create(new Admin().setEmailAddress("publicComAdmin1@before.each.com").setAdminname("publicComAdmin1").setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
+    publicComAdmin2 = create(new Admin().setEmailAddress("publicComAdmin2@before.each.com").setAdminname("publicComAdmin2").setRole(TELLER).setCommunity(publicCom));
 
     // create users
     create(new User().setUsername("publicComUser1").setCommunityUserList(asList(new CommunityUser().setCommunity(publicCom))));
@@ -62,7 +62,7 @@ public class GetCommunityTest extends IntegrationTest {
       .body("status", equalTo("PUBLIC"))
       .body("adminPageUrl", startsWith("url"))
       .body("totalMember", equalTo(2))
-      .body("adminList.name", contains(publicComAdmin1.getAdminname(), publicComAdmin2.getAdminname()));
+      .body("adminList.adminname", contains(publicComAdmin1.getAdminname(), publicComAdmin2.getAdminname()));
   }
   
   @Test

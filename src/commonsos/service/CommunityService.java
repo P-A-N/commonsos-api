@@ -41,6 +41,7 @@ import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.view.admin.CommunityForAdminView;
+import commonsos.view.admin.CommunityListForAdminView;
 import commonsos.view.app.CommunityListView;
 import commonsos.view.app.CommunityNotificationListView;
 
@@ -126,6 +127,16 @@ public class CommunityService {
 
     CommunityListView listView = new CommunityListView();
     listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getTokenContractAddress()))).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
+  }
+
+  public CommunityListForAdminView searchForAdmin(PaginationCommand pagination) {
+    ResultList<Community> result = repository.list(pagination);
+
+    CommunityListForAdminView listView = new CommunityListForAdminView();
+    listView.setCommunityList(result.getList().stream().map(this::viewForAdmin).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;

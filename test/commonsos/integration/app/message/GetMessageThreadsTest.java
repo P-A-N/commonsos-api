@@ -229,39 +229,39 @@ public class GetMessageThreadsTest extends IntegrationTest {
   public void getMessageThreads_pagination() throws Exception {
     // prepare
     Long id1 = create(new MessageThread().setCommunityId(community.getId()).setTitle("adThread").setAdId(ad.getId()).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id2 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id3 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id4 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id5 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id6 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id7 = create(new MessageThread().setCommunityId(community.getId()).setTitle("groupThread").setAdId(null).setGroup(true).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id8 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id9 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id10 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id11 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
-    Thread.sleep(1);
     Long id12 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id1).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id2).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id3).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id4).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id5).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id6).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id7).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id8).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id9).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id10).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id11).setText("page_message"));
+    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id12).setText("page_message"));
 
     
