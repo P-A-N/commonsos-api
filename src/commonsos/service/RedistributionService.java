@@ -1,5 +1,7 @@
 package commonsos.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.math.BigDecimal;
 
 import javax.inject.Inject;
@@ -13,10 +15,14 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Redistribution;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.command.CreateRedistributionCommand;
+import commonsos.service.command.PaginationCommand;
+import commonsos.util.PaginationUtil;
 import commonsos.util.RedistributionUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.admin.RedistributionListView;
 
 @Singleton
 public class RedistributionService {
@@ -52,5 +58,28 @@ public class RedistributionService {
         .setRate(rate);
     
     return repository.create(redistribution);
+  }
+  
+  public Redistribution getRedistribution(Admin admin, Long redistributionId, Long communityId) {
+    // validate role
+    if (!RedistributionUtil.isEditable(admin, communityId)) throw new ForbiddenException();
+    
+    Redistribution redistribution = repository.findStrictById(redistributionId);
+    if (!redistribution.getCommunity().getId().equals(communityId)) throw new BadRequestException(String.format("redistribution is not of community [redistributionId=%d, communityId=%d]", redistributionId, communityId));
+    
+    return redistribution;
+  }
+  
+  public RedistributionListView searchRedistribution(Admin admin, Long communityId, PaginationCommand pagination) {
+    // validate role
+    if (!RedistributionUtil.isEditable(admin, communityId)) throw new ForbiddenException();
+    
+    ResultList<Redistribution> result = repository.findByCommunityId(communityId, pagination);
+
+    RedistributionListView listView = new RedistributionListView();
+    listView.setRedistributionList(result.getList().stream().map(RedistributionUtil::toView).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 }
