@@ -24,6 +24,56 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
   CommunityRepository repository = new CommunityRepository(emService);
 
   @Test
+  public void findById() {
+    // prepare
+    User admin = inTransaction(() -> userRepository.create(new User().setUsername("admin")));
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setDescription("description")
+        .setTokenContractAddress("66")
+        .setAdminUser(admin)
+        .setStatus(PUBLIC))).getId();
+
+    // execute
+    Optional<Community> community = repository.findById(id);
+
+    // verify
+    assertThat(community).isNotEmpty();
+    assertThat(community.get().getId()).isEqualTo(id);
+    assertThat(community.get().getName()).isEqualTo("Kaga");
+    assertThat(community.get().getStatus()).isEqualTo(PUBLIC);
+    assertThat(community.get().getDescription()).isEqualTo("description");
+    assertThat(community.get().getTokenContractAddress()).isEqualTo("66");
+    assertThat(community.get().getAdminUser().getId()).isEqualTo(admin.getId());
+    assertThat(community.get().getAdminUser().getUsername()).isEqualTo("admin");
+
+    // prepare
+    id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setTokenContractAddress("66")
+        .setStatus(PRIVATE))).getId();
+
+    // execute
+    community = repository.findById(id);
+
+    // verify
+    assertThat(community).isNotEmpty();
+    assertThat(community.get().getId()).isEqualTo(id);
+    assertThat(community.get().getStatus()).isEqualTo(PRIVATE);
+  }
+
+  @Test
+  public void findById_deleted() {
+    Long id = inTransaction(() -> repository.create(new Community()
+        .setName("Kaga")
+        .setStatus(PUBLIC)
+        .setDeleted(true))).getId();
+
+    Optional<Community> community = repository.findById(id);
+    assertThat(community).isEmpty();
+  }
+
+  @Test
   public void findPublicById() {
     // prepare
     User admin = inTransaction(() -> userRepository.create(new User().setUsername("admin")));
@@ -31,8 +81,8 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
         .setName("Kaga")
         .setDescription("description")
         .setTokenContractAddress("66")
-        .setAdminUser(admin))
-        .setStatus(PUBLIC)).getId();
+        .setAdminUser(admin)
+        .setStatus(PUBLIC))).getId();
 
     // execute
     Optional<Community> community = repository.findPublicById(id);
@@ -53,8 +103,8 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     Long id = inTransaction(() -> repository.create(new Community()
         .setName("Kaga")
         .setDescription("description")
-        .setTokenContractAddress("66"))
-        .setStatus(PUBLIC)).getId();
+        .setTokenContractAddress("66")
+        .setStatus(PUBLIC))).getId();
 
     Optional<Community> community = repository.findPublicById(id);
 

@@ -15,6 +15,7 @@ import commonsos.repository.entity.Community;
 import commonsos.service.CommunityService;
 import commonsos.service.command.CreateCommunityCommand;
 import commonsos.util.RequestUtil;
+import commonsos.view.admin.CommunityForAdminView;
 import spark.Request;
 import spark.Response;
 
@@ -23,7 +24,7 @@ public class CreateCommunityController extends MultipartFormdataController {
   @Inject CommunityService communityService;
 
   @Override
-  protected Object handleMultipartFormdata(Admin admin, Map<String, List<FileItem>> fileItemMap, Request request, Response response) {
+  protected CommunityForAdminView handleMultipartFormdata(Admin admin, Map<String, List<FileItem>> fileItemMap, Request request, Response response) {
     CreateCommunityCommand command = getCommand(fileItemMap);
     
     Community community;

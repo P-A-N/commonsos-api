@@ -26,6 +26,23 @@ public class CommunityRepository extends Repository {
     super(entityManagerService);
   }
 
+  public Optional<Community> findById(Long id) {
+    try {
+      return Optional.of(em().createQuery("FROM Community WHERE id = :id AND deleted IS FALSE", Community.class)
+        .setLockMode(lockMode())
+        .setParameter("id", id)
+        .getSingleResult()
+      );
+    }
+    catch (NoResultException e) {
+        return empty();
+    }
+  }
+
+  public Community findStrictById(Long id) {
+    return findById(id).orElseThrow(CommunityNotFoundException::new);
+  }
+
   public Optional<Community> findPublicById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM Community WHERE id = :id AND status = 'PUBLIC' AND deleted IS FALSE", Community.class)

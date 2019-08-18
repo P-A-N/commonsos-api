@@ -132,7 +132,11 @@ public class CommunityService {
   }
 
   public Community community(Long id) {
-    return repository.findPublicById(id).orElseThrow(() -> new BadRequestException("community not found"));
+    return repository.findPublicStrictById(id);
+  }
+
+  public Community findCommunityForAdmin(Long id) {
+    return repository.findStrictById(id);
   }
 
   public boolean isAdmin(Long userId, Long communityId) {
@@ -193,6 +197,13 @@ public class CommunityService {
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
+  }
+  
+  public CommunityForAdminView viewForAdmin(Community community) {
+    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
+    List<Admin> adminList = adminRepository.findByCommunityId(community.getId(), null).getList();
+    int totalMember = userRepository.search(community.getId(), null, null).getList().size();
+    return CommunityUtil.viewForAdmin(community, communityToken, totalMember, adminList);
   }
   
   public CommunityForAdminView viewForAdmin(Community community, List<Long> adminIdList) {
