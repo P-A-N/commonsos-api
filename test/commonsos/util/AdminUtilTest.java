@@ -63,7 +63,7 @@ public class AdminUtilTest {
   }
   
   @Test
-  public void isSeeable() {
+  public void isSeeable_forGet() {
     // prepare
     Community com1 = new Community().setId(id("com1"));
     Community com2 = new Community().setId(id("com2"));
@@ -118,5 +118,50 @@ public class AdminUtilTest {
     assertTrue(AdminUtil.isSeeable(teller_none_1, teller_none_1));
     assertFalse(AdminUtil.isSeeable(teller_none_1, teller_com1_1));
     assertFalse(AdminUtil.isSeeable(teller_none_1, teller_none_2));
+  }
+
+  @Test
+  public void isSeeable_forSearch() {
+    // prepare
+    Community com1 = new Community().setId(id("com1"));
+    Community com2 = new Community().setId(id("com2"));
+    Admin ncl = new Admin().setId(id("ncl")).setRole(NCL);
+    Admin admin_com1 = new Admin().setId(id("admin_com1_1")).setRole(COMMUNITY_ADMIN).setCommunity(com1);
+    Admin teller_com1 = new Admin().setId(id("teller_com1_1")).setRole(TELLER).setCommunity(com1);
+    Admin admin_none = new Admin().setId(id("admin_none_1")).setRole(COMMUNITY_ADMIN);
+    Admin teller_none = new Admin().setId(id("teller_none_1")).setRole(TELLER);
+    
+    // [ncl] execute & verify
+    assertTrue(AdminUtil.isSeeable(ncl, com1.getId(), NCL.getId()));
+    assertTrue(AdminUtil.isSeeable(ncl, com1.getId(), COMMUNITY_ADMIN.getId()));
+    assertTrue(AdminUtil.isSeeable(ncl, com1.getId(), TELLER.getId()));
+
+    // [admin_com1] execute & verify
+    assertFalse(AdminUtil.isSeeable(admin_com1, com1.getId(), NCL.getId()));
+    assertTrue(AdminUtil.isSeeable(admin_com1, com1.getId(), COMMUNITY_ADMIN.getId()));
+    assertTrue(AdminUtil.isSeeable(admin_com1, com1.getId(), TELLER.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_com1, com2.getId(), COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_com1, com2.getId(), TELLER.getId()));
+
+    // [teller_com1] execute & verify
+    assertFalse(AdminUtil.isSeeable(teller_com1, com1.getId(), NCL.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_com1, com1.getId(), COMMUNITY_ADMIN.getId()));
+    assertTrue(AdminUtil.isSeeable(teller_com1, com1.getId(), TELLER.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_com1, com2.getId(), COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_com1, com2.getId(), TELLER.getId()));
+
+    // [admin_none] execute & verify
+    assertFalse(AdminUtil.isSeeable(admin_none, com1.getId(), NCL.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_none, com1.getId(), COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_none, com1.getId(), TELLER.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_none, null, COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(admin_none, null, TELLER.getId()));
+
+    // [teller_none] execute & verify
+    assertFalse(AdminUtil.isSeeable(teller_none, com1.getId(), NCL.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_none, com1.getId(), COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_none, com1.getId(), TELLER.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_none, null, COMMUNITY_ADMIN.getId()));
+    assertFalse(AdminUtil.isSeeable(teller_none, null, TELLER.getId()));
   }
 }

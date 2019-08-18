@@ -1,5 +1,7 @@
 package commonsos.service;
 
+import static java.util.stream.Collectors.toList;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -13,17 +15,21 @@ import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.TemporaryAdmin;
 import commonsos.service.command.AdminLoginCommand;
 import commonsos.service.command.CreateAdminTemporaryCommand;
+import commonsos.service.command.PaginationCommand;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.session.AdminSession;
 import commonsos.util.AdminUtil;
+import commonsos.util.PaginationUtil;
 import commonsos.util.ValidateUtil;
+import commonsos.view.admin.AdminListView;
 
 @Singleton
 public class AdminService {
@@ -44,6 +50,19 @@ public class AdminService {
     if (!AdminUtil.isSeeable(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", id));
     
     return target;
+  }
+
+  public AdminListView searchAdmin(Admin admin, Long communityId, Long roleId, PaginationCommand pagination) {
+    // validate role
+    if (!AdminUtil.isSeeable(admin, communityId, roleId)) throw new ForbiddenException();
+    
+    ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
+
+    AdminListView listView = new AdminListView();
+    listView.setAdminList(result.getList().stream().map(AdminUtil::toView).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public void createAdminTemporary(Admin admin, CreateAdminTemporaryCommand command) {

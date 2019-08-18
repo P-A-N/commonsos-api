@@ -60,4 +60,23 @@ public class AdminUtil {
     }
     return false;
   }
+  
+  public static boolean isSeeable(Admin admin, Long targetCommunityId, Long targetRoleId) {
+    Role adminRole = Role.of(admin.getRole().getId());
+    Role targetRole = Role.of(targetRoleId);
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    
+    if (adminRole == NCL) return true;
+    if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
+    
+    if (adminRole == COMMUNITY_ADMIN) {
+      if (targetRole == COMMUNITY_ADMIN || targetRole == TELLER) return true;
+    }
+
+    if (adminRole == TELLER) {
+      if (targetRole == TELLER) return true;
+    }
+    
+    return false;
+  }
 }

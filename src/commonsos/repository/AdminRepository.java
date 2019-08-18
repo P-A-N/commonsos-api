@@ -55,6 +55,18 @@ public class AdminRepository extends Repository {
     return resultList;
   }
 
+  public ResultList<Admin> findByCommunityIdAndRoleId(Long communityId, Long roleId, PaginationCommand pagination) {
+    String sql = "FROM Admin WHERE community.id = :communityId AND role.id = :roleId AND deleted IS FALSE ORDER BY id";
+    TypedQuery<Admin> query = em().createQuery(sql, Admin.class)
+        .setLockMode(lockMode())
+        .setParameter("communityId", communityId)
+        .setParameter("roleId", roleId);
+
+    ResultList<Admin> resultList = getResultList(query, pagination);
+    
+    return resultList;
+  }
+
   public Optional<Admin> findByEmailAddress(String emailAddress) {
     List<Admin> result = em().createQuery(
         "FROM Admin WHERE emailAddress = :emailAddress AND deleted IS FALSE", Admin.class)
