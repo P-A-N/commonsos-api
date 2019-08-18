@@ -21,7 +21,7 @@ public class SearchCommunityController extends AfterAdminLoginController {
   public CommunityListForAdminView handleAfterLogin(Admin admin, Request request, Response response) {
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    CommunityListForAdminView view = communityService.searchForAdmin(paginationCommand);
+    CommunityListForAdminView view = communityService.searchForAdmin(admin, paginationCommand);
     return view;
   }
 }

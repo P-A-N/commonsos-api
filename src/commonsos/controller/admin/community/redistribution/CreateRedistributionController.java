@@ -1,24 +1,35 @@
 package commonsos.controller.admin.community.redistribution;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import static commonsos.annotation.SyncObject.REDISTRIBUTION;
 
+import javax.inject.Inject;
+
+import com.google.gson.Gson;
+
+import commonsos.annotation.Synchronized;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.Redistribution;
+import commonsos.service.RedistributionService;
+import commonsos.service.command.CreateRedistributionCommand;
+import commonsos.util.RedistributionUtil;
+import commonsos.util.RequestUtil;
+import commonsos.view.admin.RedistributionView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
-public class CreateRedistributionController implements Route {
+@Synchronized(REDISTRIBUTION)
+public class CreateRedistributionController extends AfterAdminLoginController {
+
+  @Inject Gson gson;
+  @Inject RedistributionService redistributionService;
 
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("redistributionId", 1);
-    result.put("isAll", false);
-    result.put("userId", 1);
-    result.put("username", "suzuki");
-    result.put("redistributionRate", new BigDecimal("25"));
+  public RedistributionView handleAfterLogin(Admin admin, Request request, Response response) {
+    CreateRedistributionCommand command = gson.fromJson(request.body(), CreateRedistributionCommand.class);
+    command.setCommunityId(RequestUtil.getPathParamLong(request, "id"));
     
-    return result;
+    Redistribution redistribution = redistributionService.createRedistribution(admin, command);
+    return RedistributionUtil.toView(redistribution);
   }
 }

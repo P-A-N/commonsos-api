@@ -132,7 +132,10 @@ public class CommunityService {
     return listView;
   }
 
-  public CommunityListForAdminView searchForAdmin(PaginationCommand pagination) {
+  public CommunityListForAdminView searchForAdmin(Admin admin, PaginationCommand pagination) {
+    // check role
+    if (Role.of(admin.getRole().getId()) != Role.NCL) throw new ForbiddenException();
+    
     ResultList<Community> result = repository.list(pagination);
 
     CommunityListForAdminView listView = new CommunityListForAdminView();

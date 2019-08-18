@@ -1,5 +1,7 @@
 package commonsos.controller.admin.community;
 
+import static commonsos.annotation.SyncObject.COMMUNITY;
+
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.fileupload.FileItem;
 
+import commonsos.annotation.Synchronized;
 import commonsos.controller.admin.MultipartFormdataController;
 import commonsos.exception.CommonsOSException;
 import commonsos.exception.ServerErrorException;
@@ -19,6 +22,7 @@ import commonsos.view.admin.CommunityForAdminView;
 import spark.Request;
 import spark.Response;
 
+@Synchronized(COMMUNITY)
 public class CreateCommunityController extends MultipartFormdataController {
 
   @Inject CommunityService communityService;

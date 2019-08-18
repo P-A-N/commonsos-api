@@ -96,6 +96,67 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
+  public void findByUserId() {
+    // prepare
+    User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
+    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
+    Redistribution r1 = inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    Redistribution r2 = inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    Redistribution r3 = inTransaction(() -> repository.create(new Redistribution().setUser(user1).setDeleted(true)));
+
+    // execute & verify
+    List<Redistribution> result = repository.findByUserId(user1.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getId()).isEqualTo(r1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(r2.getId());
+
+    // execute & verify
+    result = repository.findByCommunityId(user2.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(0);
+  }
+
+  @Test
+  public void findByUserId_pagination() {
+    // prepare
+    User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)));
+    inTransaction(() -> repository.create(new Redistribution().setUser(user1)).setDeleted(true));
+
+    // execute & verify
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.DESC);
+    List<Redistribution> result = repository.findByUserId(user1.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(3);
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.findByUserId(user1.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(2);
+  }
+
+  @Test
+  public void sumByCommunityId() {
+    // prepare
+    Community com1 = inTransaction(() -> communityRepository.create(new Community().setName("com1")));
+    Community com2 = inTransaction(() -> communityRepository.create(new Community().setName("com2")));
+    inTransaction(() -> repository.create(new Redistribution().setCommunity(com1).setRate(new BigDecimal("1.5"))));
+    inTransaction(() -> repository.create(new Redistribution().setCommunity(com1).setRate(new BigDecimal("1.25"))));
+    inTransaction(() -> repository.create(new Redistribution().setCommunity(com1).setRate(new BigDecimal("0.1"))));
+    inTransaction(() -> repository.create(new Redistribution().setCommunity(com1).setRate(new BigDecimal("90")).setDeleted(true)));
+
+    // execute & verify
+    BigDecimal result = repository.sumByCommunityId(com1.getId());
+    assertThat(result.stripTrailingZeros()).isEqualTo(new BigDecimal("2.85"));
+
+    // execute & verify
+    result = repository.sumByCommunityId(com2.getId());
+    assertThat(result.stripTrailingZeros()).isEqualTo(new BigDecimal("0"));
+  }
+
+  @Test
   public void create() {
     // create
     Community com = inTransaction(() -> communityRepository.create(new Community().setName("com")));

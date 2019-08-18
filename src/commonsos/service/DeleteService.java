@@ -11,11 +11,13 @@ import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
+import commonsos.repository.RedistributionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
+import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
@@ -31,6 +33,7 @@ public class DeleteService {
   @Inject private UserRepository userRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
+  @Inject private RedistributionRepository redistributionRepository;
   @Inject private ImageUploadService imageService;
 
   public void deleteUser(User user) {
@@ -52,6 +55,10 @@ public class DeleteService {
     // delete user(logically)
     user.setDeleted(true);
     userRepository.update(user);
+    
+    // delete redistribution
+    List<Redistribution> redistributionList = redistributionRepository.findByUserId(user.getId(), null).getList();
+    redistributionList.forEach(r -> deleteRedistribution(r));
 
     log.info(String.format("deleted user. userId=%d", user.getId()));
   }
@@ -127,6 +134,16 @@ public class DeleteService {
     messageRepository.create(systemMessage);
 
     log.info(String.format("deleted message-thread-party. threadId=%d, userId=%d", threadId, user.getId()));
+  }
+  
+  public void deleteRedistribution(Redistribution redistribution) {
+    log.info(String.format("deleting redistribution. redistributionId=%d", redistribution.getId()));
+    
+    // delete redistribution
+    redistribution.setDeleted(true);
+    redistributionRepository.update(redistribution);
+
+    log.info(String.format("deleted redistribution. redistributionId=%d", redistribution.getId()));
   }
   
   public void deletePhoto(String photoUrl) {

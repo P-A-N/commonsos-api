@@ -2,6 +2,7 @@ package commonsos.repository;
 
 import static java.util.Optional.empty;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -48,6 +49,25 @@ public class RedistributionRepository extends Repository {
     ResultList<Redistribution> resultList = getResultList(query, pagination);
     
     return resultList;
+  }
+
+  public ResultList<Redistribution> findByUserId(Long userId, PaginationCommand pagination) {
+    String sql = "FROM Redistribution WHERE user.id = :userId AND deleted IS FALSE ORDER BY id";
+    TypedQuery<Redistribution> query = em().createQuery(sql, Redistribution.class)
+        .setLockMode(lockMode())
+        .setParameter("userId", userId);
+
+    ResultList<Redistribution> resultList = getResultList(query, pagination);
+    
+    return resultList;
+  }
+
+  public BigDecimal sumByCommunityId(Long communityId) {
+    BigDecimal result =  em()
+      .createQuery("SELECT SUM(rate) FROM Redistribution WHERE community.id = :communityId AND deleted IS FALSE", BigDecimal.class)
+      .setParameter("communityId", communityId)
+      .getSingleResult();
+    return result == null ? BigDecimal.ZERO : result;
   }
 
   public Redistribution create(Redistribution redistribution) {
