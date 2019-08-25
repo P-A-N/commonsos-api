@@ -1,27 +1,21 @@
-package commonsos.view.app;
+package commonsos.view.admin;
 
 import java.time.Instant;
 import java.util.List;
 
-import commonsos.view.BalanceView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class PrivateUserView {
+public class UserForAdminView {
   private Long id;
-  private String fullName;
-  private String firstName;
-  private String lastName;
   private String username;
   private String status;
   private String telNo;
-  private List<CommunityUserView> communityList;
-  private String description;
-  private List<BalanceView> balanceList;
-  private String location;
+  private List<CommunityUserForAdminView> communityList;
   private String avatarUrl;
   private String emailAddress;
   private Instant loggedinAt;
+  private Instant createdAt;
 }

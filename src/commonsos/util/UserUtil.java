@@ -1,13 +1,16 @@
 package commonsos.util;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
-import commonsos.view.app.BalanceView;
+import commonsos.view.BalanceView;
+import commonsos.view.admin.CommunityUserForAdminView;
+import commonsos.view.admin.UserForAdminView;
 import commonsos.view.app.CommunityUserView;
 import commonsos.view.app.CommunityView;
 import commonsos.view.app.PrivateUserView;
@@ -67,6 +70,33 @@ public class UserUtil {
         .setWalletLastViewTime(communityUser.getWalletLastViewTime())
         .setAdLastViewTime(communityUser.getAdLastViewTime())
         .setNotificationLastViewTime(communityUser.getNotificationLastViewTime());
+  }
+
+  public static UserForAdminView userForAdminView(User user, List<BalanceView> balanceList) {
+    return new UserForAdminView()
+      .setId(user.getId())
+      .setUsername(user.getUsername())
+      .setStatus(user.getStatus())
+      .setTelNo(user.getTelNo())
+      .setCommunityList(communityUserForAdminViewList(user.getCommunityUserList(), balanceList))
+      .setAvatarUrl(user.getAvatarUrl())
+      .setEmailAddress(user.getEmailAddress())
+      .setLoggedinAt(user.getLoggedinAt())
+      .setCreatedAt(user.getCreatedAt());
+  }
+  
+  public static List<CommunityUserForAdminView> communityUserForAdminViewList(List<CommunityUser> communityUserList, List<BalanceView> balanceList) {
+    List<CommunityUserForAdminView> list = new ArrayList<>();
+    communityUserList.stream().map(CommunityUser::getCommunity).forEach(c -> {
+      BalanceView balance = balanceList.stream().filter(b -> b.getCommunityId().equals(c.getId())).findFirst().get();
+      CommunityUserForAdminView view = new CommunityUserForAdminView()
+          .setId(c.getId())
+          .setName(c.getName())
+          .setTokenSymbol(balance.getTokenSymbol())
+          .setBalance(balance.getBalance());
+      list.add(view);
+    });
+    return list;
   }
   
   public static String fullName(User user) {

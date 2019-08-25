@@ -12,7 +12,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.TokenTransactionService;
-import commonsos.view.app.BalanceView;
+import commonsos.view.BalanceView;
 import spark.Request;
 import spark.Response;
 

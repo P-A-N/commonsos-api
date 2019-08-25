@@ -55,7 +55,7 @@ import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
-import commonsos.view.app.BalanceView;
+import commonsos.view.BalanceView;
 import commonsos.view.app.CommunityUserListView;
 import commonsos.view.app.CommunityUserView;
 import commonsos.view.app.CommunityView;

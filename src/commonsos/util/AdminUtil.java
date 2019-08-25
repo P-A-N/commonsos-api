@@ -5,7 +5,9 @@ import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
 
 import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Role;
+import commonsos.repository.entity.User;
 import commonsos.view.admin.AdminView;
 
 public class AdminUtil {
@@ -77,6 +79,17 @@ public class AdminUtil {
       if (targetRole == TELLER) return true;
     }
     
+    return false;
+  }
+  
+  public static boolean isSeeable(Admin admin, User target) {
+    Role adminRole = Role.of(admin.getRole().getId());
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    
+    if (adminRole == NCL) return true;
+    
+    if (target.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> c.getId().equals(adminCommunityId))) return true;
+
     return false;
   }
 }

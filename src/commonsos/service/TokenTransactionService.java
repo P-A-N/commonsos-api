@@ -7,6 +7,7 @@ import static java.util.stream.Collectors.toList;
 import static spark.utils.StringUtils.isBlank;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -36,8 +37,8 @@ import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.BalanceView;
 import commonsos.view.admin.BalanceForAdminView;
-import commonsos.view.app.BalanceView;
 import commonsos.view.app.TransactionListView;
 import commonsos.view.app.TransactionView;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,14 @@ public class TokenTransactionService {
         // TODO
         .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
     return view;
+  }
+
+  public List<BalanceView> balanceList(User user) {
+    List<BalanceView> list = new ArrayList<>();
+    user.getCommunityUserList().forEach(cu -> {
+      list.add(balance(user, cu.getCommunity().getId()));
+    });
+    return list;
   }
 
   public BalanceForAdminView balanceForAdmin(Admin admin, Long communityId, String walletDivision) {
