@@ -24,6 +24,7 @@ import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.UserRepository;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.PasswordResetRequest;
@@ -33,11 +34,13 @@ import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.DelegateWalletTask;
+import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.command.CreateUserTemporaryCommand;
 import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.service.command.MobileDeviceUpdateCommand;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.PasswordResetRequestCommand;
+import commonsos.service.command.SearchUserForAdminCommand;
 import commonsos.service.command.UpdateEmailTemporaryCommand;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.command.UserNameUpdateCommand;
@@ -53,9 +56,11 @@ import commonsos.service.image.QrCodeService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
+import commonsos.util.TransactionUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
-import commonsos.view.BalanceView;
+import commonsos.view.UserTokenBalanceView;
+import commonsos.view.admin.UserListForAdminView;
 import commonsos.view.app.CommunityUserListView;
 import commonsos.view.app.CommunityUserView;
 import commonsos.view.app.CommunityView;
@@ -75,7 +80,6 @@ public class UserService {
   @Inject private CryptoService cryptoService;
   @Inject private AccessIdService accessIdService;
   @Inject private EmailService emailService;
-  @Inject private TokenTransactionService transactionService;
   @Inject private ImageUploadService imageUploadService;
   @Inject private QrCodeService qrCodeService;
   @Inject private JobService jobService;
@@ -87,12 +91,12 @@ public class UserService {
   }
 
   public PrivateUserView privateView(User user) {
-    List<BalanceView> balanceList = new ArrayList<>();
+    List<UserTokenBalanceView> balanceList = new ArrayList<>();
     List<CommunityUserView> communityUserList = new ArrayList<>();
     user.getCommunityUserList().forEach(cu -> {
-      BalanceView balanceView = transactionService.balance(user, cu.getCommunity().getId());
-      balanceList.add(balanceView);
-      communityUserList.add(UserUtil.communityUserView(cu, balanceView.getTokenSymbol(), balanceView.getBalance()));
+      TokenBalance tokenBalance = blockchainService.getTokenBalance(user, cu.getCommunity().getId());
+      balanceList.add(TransactionUtil.userTokenBalanceView(tokenBalance));
+      communityUserList.add(UserUtil.communityUserView(cu, tokenBalance));
     });
     
     return UserUtil.privateView(user, balanceList, communityUserList);
@@ -129,8 +133,8 @@ public class UserService {
     
     CommunityUserListView listView = new CommunityUserListView();
     listView.setCommunityList(result.getList().stream().map(cu -> {
-      BalanceView balanceView = transactionService.balance(user, cu.getCommunity().getId());
-      return UserUtil.communityUserView(cu, balanceView.getTokenSymbol(), balanceView.getBalance());
+      TokenBalance tokenBalance = blockchainService.getTokenBalance(user, cu.getCommunity().getId());
+      return UserUtil.communityUserView(cu, tokenBalance);
     }).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
@@ -322,6 +326,16 @@ public class UserService {
     return listView;
   }
 
+  public UserListForAdminView searchUsersForAdmin(Admin admin, SearchUserForAdminCommand command, PaginationCommand pagination) {
+    ResultList<User> result = userRepository.search(command.getUsername(), command.getEmailAddress(), command.getCommunityId(), pagination);
+    
+    UserListForAdminView listView = new UserListForAdminView();
+    listView.setUserList(result.getList().stream().map(u -> UserUtil.userForAdminView(u, balanceViewList(u))).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
+  }
+
   public String updateAvatar(User user, UploadPhotoCommand command) {
     String url = imageUploadService.create(command);
     imageUploadService.delete(user.getAvatarUrl());
@@ -469,5 +483,14 @@ public class UserService {
     } finally {
       if (imageFile != null) imageFile.delete();
     }
+  }
+
+  public List<UserTokenBalanceView> balanceViewList(User user) {
+    List<UserTokenBalanceView> list = new ArrayList<>();
+    user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
+      TokenBalance tokenBalance = blockchainService.getTokenBalance(user, c.getId());
+      list.add(TransactionUtil.userTokenBalanceView(tokenBalance));
+    });
+    return list;
   }
 }

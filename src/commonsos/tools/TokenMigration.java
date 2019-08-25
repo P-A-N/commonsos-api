@@ -185,7 +185,7 @@ public class TokenMigration {
       
       waitUntilTransferredToken(u, c);
       BigDecimal balanceFromTransactions = transactionRepository.getBalanceFromTransactions(u, c.getId());
-      BigDecimal balanceFromBlockchain = blockchainService.tokenBalance(u, c.getId());
+      BigDecimal balanceFromBlockchain = blockchainService.getTokenBalance(u, c.getId()).getBalance();
       if (balanceFromTransactions.compareTo(balanceFromBlockchain) == 0) {
         System.out.println(String.format("Token balance is OK. [users=%s, community=%s, balance=%f]", u.getUsername(), c.getName(), balanceFromBlockchain));
       } else {
@@ -223,12 +223,12 @@ public class TokenMigration {
       return;
     }
     
-    BigDecimal balanceFromBlockchain = blockchainService.tokenBalance(u, c.getId());
+    BigDecimal balanceFromBlockchain = blockchainService.getTokenBalance(u, c.getId()).getBalance();
     
     while (balanceFromBlockchain.compareTo(BigDecimal.ZERO) == 0) {
       System.out.println(String.format("Waiting for transferred token [users=%s, community=%s, balance=%f]", u.getUsername(), c.getName(), balanceFromBlockchain));
       Thread.sleep(10000);
-      balanceFromBlockchain = blockchainService.tokenBalance(u, c.getId());
+      balanceFromBlockchain = blockchainService.getTokenBalance(u, c.getId()).getBalance();
       if (balanceFromBlockchain.compareTo(BigDecimal.ZERO) > 0) {
         System.out.println(String.format("Transferred token [users=%s, community=%s, balance=%f]", u.getUsername(), c.getName(), balanceFromBlockchain));
       }

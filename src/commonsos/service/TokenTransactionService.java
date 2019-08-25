@@ -7,7 +7,6 @@ import static java.util.stream.Collectors.toList;
 import static spark.utils.StringUtils.isBlank;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,22 +22,17 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
-import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
-import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.BalanceView;
-import commonsos.view.admin.BalanceForAdminView;
 import commonsos.view.app.TransactionListView;
 import commonsos.view.app.TransactionView;
 import lombok.extern.slf4j.Slf4j;
@@ -55,39 +49,6 @@ public class TokenTransactionService {
   @Inject BlockchainEventService blockchainEventService;
   @Inject PushNotificationService pushNotificationService;
 
-  public BalanceView balance(User user, Long communityId) {
-    Community community = communityRepository.findPublicStrictById(communityId);
-    BigDecimal tokenBalance = blockchainService.tokenBalance(user, communityId);
-    BalanceView view = new BalanceView()
-        .setCommunityId(communityId)
-        .setTokenSymbol(blockchainService.tokenSymbol(community.getTokenContractAddress()))
-        // TODO
-        .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
-    return view;
-  }
-
-  public List<BalanceView> balanceList(User user) {
-    List<BalanceView> list = new ArrayList<>();
-    user.getCommunityUserList().forEach(cu -> {
-      list.add(balance(user, cu.getCommunity().getId()));
-    });
-    return list;
-  }
-
-  public BalanceForAdminView balanceForAdmin(Admin admin, Long communityId, String walletDivision) {
-    Community community = communityRepository.findStrictById(communityId);
-    WalletType walletType = WalletType.of(walletDivision);
-    BigDecimal tokenBalance = blockchainService.tokenBalance(community, walletType);
-    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
-    BalanceForAdminView view = new BalanceForAdminView()
-        .setCommunityId(communityId)
-        .setWallet(walletType)
-        .setTokenSymbol(communityToken.getTokenSymbol())
-        // TODO
-        .setBalance(tokenBalance);
-    return view;
-  }
-  
   private boolean isDebit(User user, TokenTransaction transaction) {
     return transaction.getRemitterId() != null && transaction.getRemitterId().equals(user.getId());
   }
@@ -150,8 +111,8 @@ public class TokenTransactionService {
       Ad ad = adRepository.findStrict(command.getAdId());
       if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
     }
-    BalanceView balanceView = balance(user, command.getCommunityId());
-    if (balanceView.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
+    BigDecimal balance = blockchainService.getTokenBalance(user, command.getCommunityId()).getBalance();
+    if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
     TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())

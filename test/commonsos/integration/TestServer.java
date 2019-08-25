@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 
@@ -29,6 +31,7 @@ import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
+import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
@@ -56,14 +59,23 @@ public class TestServer extends Server {
     Web3j web3j = mock(Web3j.class);
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     BlockchainService blockchainService = mock(BlockchainService.class);
-    when(blockchainService.tokenBalance(any(User.class), any(Long.class))).thenReturn(BigDecimal.TEN);
-    when(blockchainService.tokenBalance(any(Community.class), any(WalletType.class))).thenReturn(BigDecimal.TEN);
+    TokenBalance tokenBalance = new TokenBalance().setBalance(BigDecimal.TEN).setToken(new CommunityToken());
+    when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenAnswer(new Answer<TokenBalance>() {
+      @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
+        return tokenBalance.setCommunityId((Long) invocation.getArgument(1));
+      }
+    });
+    when(blockchainService.getTokenBalance(any(Community.class), any(WalletType.class))).thenAnswer(new Answer<TokenBalance>() {
+      @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
+        return tokenBalance.setCommunityId(((Community) invocation.getArgument(0)).getId());
+      }
+    });
     when(blockchainService.getBalance(any())).thenReturn(BigDecimal.TEN.pow(18+6));
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");
     when(blockchainService.isConnected()).thenReturn(true);
     when(blockchainService.createWallet(any())).thenReturn("wallet");
-    when(blockchainService.getCommunityToken(any())).thenReturn(new CommunityToken());
+    when(blockchainService.getCommunityToken(any())).thenReturn(tokenBalance.getToken());
     Credentials credentials = mock(Credentials.class);
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);

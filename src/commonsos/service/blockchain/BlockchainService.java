@@ -42,6 +42,7 @@ import commonsos.Configuration;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.repository.entity.WalletType;
@@ -63,6 +64,7 @@ public class BlockchainService {
   public static final BigInteger INITIAL_TOKEN_AMOUNT = MAX_UINT_256.divide(TEN.pow(NUMBER_OF_DECIMALS)).subtract(ONE);
 
   @Inject CommunityRepository communityRepository;
+  @Inject TokenTransactionRepository tokenTransactionRepository;
   @Inject ObjectMapper objectMapper;
   @Inject Web3j web3j;
   @Inject Cache cache;
@@ -274,7 +276,7 @@ public class BlockchainService {
     });
   }
 
-  public BigDecimal tokenBalance(Community community, WalletType walletType) {
+  public TokenBalance getTokenBalance(Community community, WalletType walletType) {
     String walletAddress;
     switch (walletType) {
     case MAIN:
@@ -286,15 +288,26 @@ public class BlockchainService {
     default:
       throw new ServerErrorException();
     }
-    return tokenBalance(walletAddress, community.getTokenContractAddress());
+    BigDecimal balance = getTokenBalanceFromBlockchain(community.getId(), walletAddress, community.getTokenContractAddress());
+    TokenBalance tokenBalance = new TokenBalance()
+        .setBalance(balance) // TODO
+        .setCommunityId(community.getId())
+        .setToken(getCommunityToken(community.getTokenContractAddress()));
+    return tokenBalance;
   }
 
-  public BigDecimal tokenBalance(User user, Long communityId) {
+  public TokenBalance getTokenBalance(User user, Long communityId) {
     Community community = communityRepository.findPublicStrictById(communityId);
-    return tokenBalance(user.getWalletAddress(), community.getTokenContractAddress());
+    BigDecimal balance = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress());
+    BigDecimal pendingAmount = tokenTransactionRepository.pendingTransactionsAmount(user.getId(), communityId);
+    TokenBalance tokenBalance = new TokenBalance()
+        .setBalance(balance.subtract(pendingAmount)) // TODO
+        .setCommunityId(communityId)
+        .setToken(getCommunityToken(community.getTokenContractAddress()));
+    return tokenBalance;
   }
   
-  private BigDecimal tokenBalance(String walletAddress, String tokenContractAddress) {
+  private BigDecimal getTokenBalanceFromBlockchain(Long communityId, String walletAddress, String tokenContractAddress) {
     try {
       log.info("Token balance request for: " + walletAddress);
       Token token = loadTokenReadOnly(tokenContractAddress);
@@ -404,7 +417,7 @@ public class BlockchainService {
     }
   }
   
-  public void delegateTokenTransferRight(User walletOwner, Community community) {
+  public void approveOwner(User walletOwner, Community community) {
     log.info(format("Approving token transfer. [owner=%s, spender=%s, amount=%d]", walletOwner.getUsername(), community.getAdminUser().getUsername(), INITIAL_TOKEN_AMOUNT));
 
     Credentials credentials = credentials(walletOwner.getWallet(), WALLET_PASSWORD);

@@ -92,4 +92,15 @@ public class AdminUtil {
 
     return false;
   }
+  
+  public static boolean isSeeable(Admin admin, Long communityId) {
+    Role adminRole = Role.of(admin.getRole().getId());
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    
+    if (adminRole == NCL) return true;
+    
+    if (communityId != null && communityId.equals(adminCommunityId)) return true;
+
+    return false;
+  }
 }

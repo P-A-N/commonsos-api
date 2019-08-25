@@ -1,68 +1,38 @@
 package commonsos.controller.admin.user;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
-import commonsos.repository.entity.SortType;
-import commonsos.view.PaginationView;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.exception.ForbiddenException;
+import commonsos.repository.entity.Admin;
+import commonsos.service.UserService;
+import commonsos.service.command.PaginationCommand;
+import commonsos.service.command.SearchUserForAdminCommand;
+import commonsos.util.AdminUtil;
+import commonsos.util.PaginationUtil;
+import commonsos.util.RequestUtil;
+import commonsos.view.admin.UserListForAdminView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 @ReadOnly
-public class SearchUsersController implements Route {
+public class SearchUsersController extends AfterAdminLoginController {
 
+  @Inject UserService userService;
+  
   @Override
-  public Object handle(Request request, Response response) {
-    List<Object> userList = new ArrayList<>();
+  protected UserListForAdminView handleAfterLogin(Admin admin, Request request, Response response) {
+    SearchUserForAdminCommand command = new SearchUserForAdminCommand()
+        .setUsername(RequestUtil.getQueryParamString(request, "username", false))
+        .setEmailAddress(RequestUtil.getQueryParamString(request, "emailAddress", false))
+        .setCommunityId(RequestUtil.getQueryParamLong(request, "communityId", false));
 
-    Map<String, Object> user1 = new HashMap<>();
-    user1.put("id", 1);
-    user1.put("username", "suzuki");
-    user1.put("status", "元気");
-    user1.put("telNo", "00088884444");
-    user1.put("avatarUrl", "https://hogehoge.com/path/to/photo");
-    user1.put("emailAddress", "suzuki@admin.test");
-    user1.put("loggedinAt", Instant.now().minusSeconds(600));
-    user1.put("createdAt", Instant.parse("2019-02-02T12:06:00Z"));
-    Map<String, Object> community = new HashMap<>();
-    community.put("id", 1);
-    community.put("name", "遠野");
-    community.put("tokenSymbol", "tono");
-    community.put("balance", new BigDecimal("1000"));
-    List<Object> communityList = new ArrayList<>();
-    communityList.add(community);
-    communityList.add(community);
-    user1.put("communityList", communityList);
+    if (!AdminUtil.isSeeable(admin, command.getCommunityId())) throw new ForbiddenException();
     
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    userList.add(user1);
-    
-    PaginationView pagination = new PaginationView();
-    pagination.setPage(0);
-    pagination.setSize(10);
-    pagination.setSort(SortType.ASC);
-    pagination.setLastPage(5);
-    
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    Map<String, Object> result = new HashMap<>();
-    result.put("adminList", userList);
-    result.put("pagination", pagination);
-    
-    return result;
+    UserListForAdminView view = userService.searchUsersForAdmin(admin, command, paginationCommand);
+    return view;
   }
 }

@@ -3,7 +3,7 @@ package commonsos.view.app;
 import java.time.Instant;
 import java.util.List;
 
-import commonsos.view.BalanceView;
+import commonsos.view.UserTokenBalanceView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -19,7 +19,7 @@ public class PrivateUserView {
   private String telNo;
   private List<CommunityUserView> communityList;
   private String description;
-  private List<BalanceView> balanceList;
+  private List<UserTokenBalanceView> balanceList;
   private String location;
   private String avatarUrl;
   private String emailAddress;

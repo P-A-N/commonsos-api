@@ -9,12 +9,11 @@ import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.User;
-import commonsos.service.TokenTransactionService;
 import commonsos.service.UserService;
 import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.BalanceView;
+import commonsos.view.UserTokenBalanceView;
 import commonsos.view.admin.UserForAdminView;
 import spark.Request;
 import spark.Response;
@@ -23,7 +22,6 @@ import spark.Response;
 public class GetUserController extends AfterAdminLoginController {
 
   @Inject UserService userService;
-  @Inject TokenTransactionService tokenTransactionService;
   
   @Override
   protected UserForAdminView handleAfterLogin(Admin admin, Request request, Response response) {
@@ -31,7 +29,7 @@ public class GetUserController extends AfterAdminLoginController {
     
     User user = userService.user(id);
     if (!AdminUtil.isSeeable(admin, user)) throw new ForbiddenException();
-    List<BalanceView> balanceList = tokenTransactionService.balanceList(user);
+    List<UserTokenBalanceView> balanceList = userService.balanceViewList(user);
     
     return UserUtil.userForAdminView(user, balanceList);
   }

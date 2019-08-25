@@ -9,7 +9,6 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -40,8 +39,8 @@ import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.command.TransactionCreateCommand;
-import commonsos.view.BalanceView;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -63,11 +62,11 @@ public class TokenTransactionServiceTest {
     User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     User beneficiary = new User().setId(id("beneficiary")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedBy(id("user")).setType(WANT);
-    BalanceView balance = new BalanceView().setBalance(TEN);
+    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN);
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);
     when(adRepository.findStrict(any())).thenReturn(ad);
-    doReturn(balance).when(service).balance(any(), any());
+    when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenReturn(tokenBalance);
     
     // community is null
     TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);
@@ -106,9 +105,9 @@ public class TokenTransactionServiceTest {
     beneficiary.setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     
     // not enough funds
-    balance.setBalance(new BigDecimal("9"));
+    tokenBalance.setBalance(new BigDecimal("9"));
     assertThrows(DisplayableException.class, () -> service.create(user, command));
-    balance.setBalance(new BigDecimal("10"));
+    tokenBalance.setBalance(new BigDecimal("10"));
     
     // nothing to throw
     service.create(user, command);

@@ -1,6 +1,5 @@
 package commonsos.util;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +7,8 @@ import java.util.Optional;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
-import commonsos.view.BalanceView;
+import commonsos.service.blockchain.TokenBalance;
+import commonsos.view.UserTokenBalanceView;
 import commonsos.view.admin.CommunityUserForAdminView;
 import commonsos.view.admin.UserForAdminView;
 import commonsos.view.app.CommunityUserView;
@@ -37,7 +37,7 @@ public class UserUtil {
         .setCommunityList(communityList);
   }
 
-  public static PrivateUserView privateView(User user, List<BalanceView> balanceList, List<CommunityUserView> communityUserList) {
+  public static PrivateUserView privateView(User user, List<UserTokenBalanceView> balanceList, List<CommunityUserView> communityUserList) {
     return new PrivateUserView()
       .setId(user.getId())
       .setBalanceList(balanceList)
@@ -55,15 +55,15 @@ public class UserUtil {
       .setLoggedinAt(user.getLoggedinAt());
   }
   
-  public static CommunityUserView communityUserView(CommunityUser communityUser, String tokenSymbol, BigDecimal balance) {
+  public static CommunityUserView communityUserView(CommunityUser communityUser, TokenBalance tokenBalance) {
     Long adminUserId = communityUser.getCommunity().getAdminUser() == null ? null : communityUser.getCommunity().getAdminUser().getId();
     return new CommunityUserView()
         .setId(communityUser.getCommunity().getId())
         .setName(communityUser.getCommunity().getName())
         .setAdminUserId(adminUserId)
         .setDescription(communityUser.getCommunity().getDescription())
-        .setTokenSymbol(tokenSymbol)
-        .setBalance(balance)
+        .setTokenSymbol(tokenBalance.getToken().getTokenSymbol())
+        .setBalance(tokenBalance.getBalance())
         .setPhotoUrl(communityUser.getCommunity().getPhotoUrl())
         .setCoverPhotoUrl(communityUser.getCommunity().getCoverPhotoUrl())
         .setTransactionFee(communityUser.getCommunity().getFee())
@@ -72,7 +72,7 @@ public class UserUtil {
         .setNotificationLastViewTime(communityUser.getNotificationLastViewTime());
   }
 
-  public static UserForAdminView userForAdminView(User user, List<BalanceView> balanceList) {
+  public static UserForAdminView userForAdminView(User user, List<UserTokenBalanceView> balanceList) {
     return new UserForAdminView()
       .setId(user.getId())
       .setUsername(user.getUsername())
@@ -85,10 +85,10 @@ public class UserUtil {
       .setCreatedAt(user.getCreatedAt());
   }
   
-  public static List<CommunityUserForAdminView> communityUserForAdminViewList(List<CommunityUser> communityUserList, List<BalanceView> balanceList) {
+  public static List<CommunityUserForAdminView> communityUserForAdminViewList(List<CommunityUser> communityUserList, List<UserTokenBalanceView> balanceList) {
     List<CommunityUserForAdminView> list = new ArrayList<>();
     communityUserList.stream().map(CommunityUser::getCommunity).forEach(c -> {
-      BalanceView balance = balanceList.stream().filter(b -> b.getCommunityId().equals(c.getId())).findFirst().get();
+      UserTokenBalanceView balance = balanceList.stream().filter(b -> b.getCommunityId().equals(c.getId())).findFirst().get();
       CommunityUserForAdminView view = new CommunityUserForAdminView()
           .setId(c.getId())
           .setName(c.getName())

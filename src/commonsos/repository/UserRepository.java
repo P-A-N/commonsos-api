@@ -187,9 +187,9 @@ public class UserRepository extends Repository {
 
   public ResultList<User> search(Long communityId, String q, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
-    sql.append("SELECT u FROM User u JOIN u.communityUserList cu ");
-    sql.append("WHERE cu.community.id = :communityId ");
-    sql.append("AND u.deleted = FALSE ");
+    sql.append("SELECT u FROM User u ");
+    sql.append("WHERE EXISTS (FROM CommunityUser cu WHERE cu.userId = u.id AND cu.community.id = :communityId) ");
+    sql.append("AND u.deleted IS FALSE ");
     if (StringUtils.isNotEmpty(q)) {
       sql.append("AND LOWER(u.username) LIKE LOWER(:q) ");
     }
@@ -200,6 +200,42 @@ public class UserRepository extends Repository {
       .setParameter("communityId", communityId);
     if (StringUtils.isNotEmpty(q)) {
       query.setParameter("q", "%"+q+"%");
+    }
+    
+    ResultList<User> resultList = getResultList(query, pagination);
+    
+    return resultList;
+  }
+
+  public ResultList<User> search(
+      String username,
+      String emailAddress,
+      Long communityId,
+      PaginationCommand pagination) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("SELECT u FROM User u ");
+    sql.append("WHERE u.deleted IS FALSE  ");
+    if (StringUtils.isNotEmpty(username)) {
+      sql.append("AND LOWER(u.username) LIKE LOWER(:username) ");
+    }
+    if (StringUtils.isNotEmpty(emailAddress)) {
+      sql.append("AND LOWER(u.emailAddress) LIKE LOWER(:emailAddress) ");
+    }
+    if (communityId != null) {
+      sql.append("AND EXISTS (FROM CommunityUser cu WHERE cu.userId = u.id AND cu.community.id = :communityId) ");
+    }
+    sql.append("ORDER BY u.id");
+    
+    TypedQuery<User> query = em().createQuery(sql.toString(), User.class)
+      .setLockMode(lockMode());
+    if (StringUtils.isNotEmpty(username)) {
+      query.setParameter("username", "%"+username+"%");
+    }
+    if (StringUtils.isNotEmpty(emailAddress)) {
+      query.setParameter("emailAddress", "%"+emailAddress+"%");
+    }
+    if (communityId != null) {
+      query.setParameter("communityId", communityId);
     }
     
     ResultList<User> resultList = getResultList(query, pagination);
