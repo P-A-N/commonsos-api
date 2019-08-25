@@ -31,7 +31,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
     otherCommunity =  create(new Community().setStatus(PUBLIC).setName("otherCommunity"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));

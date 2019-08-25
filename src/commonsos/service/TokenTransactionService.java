@@ -22,17 +22,21 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.admin.BalanceForAdminView;
 import commonsos.view.app.BalanceView;
 import commonsos.view.app.TransactionListView;
 import commonsos.view.app.TransactionView;
@@ -56,12 +60,27 @@ public class TokenTransactionService {
     BalanceView view = new BalanceView()
         .setCommunityId(communityId)
         .setTokenSymbol(blockchainService.tokenSymbol(community.getTokenContractAddress()))
+        // TODO
         .setBalance(tokenBalance.subtract(repository.pendingTransactionsAmount(user.getId(), communityId)));
+    return view;
+  }
+
+  public BalanceForAdminView balanceForAdmin(Admin admin, Long communityId, String walletDivision) {
+    Community community = communityRepository.findStrictById(communityId);
+    WalletType walletType = WalletType.of(walletDivision);
+    BigDecimal tokenBalance = blockchainService.tokenBalance(community, walletType);
+    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
+    BalanceForAdminView view = new BalanceForAdminView()
+        .setCommunityId(communityId)
+        .setWallet(walletType)
+        .setTokenSymbol(communityToken.getTokenSymbol())
+        // TODO
+        .setBalance(tokenBalance);
     return view;
   }
   
   private boolean isDebit(User user, TokenTransaction transaction) {
-    return transaction.getRemitterId().equals(user.getId());
+    return transaction.getRemitterId() != null && transaction.getRemitterId().equals(user.getId());
   }
 
   public TransactionListView transactionsByAdmin(User admin, Long communityId, Long userId, PaginationCommand pagination) {
@@ -90,6 +109,7 @@ public class TokenTransactionService {
 
   public TransactionView view(User user, TokenTransaction transaction) {
     TransactionView view = new TransactionView()
+      .setIsFromAdmin(transaction.isFromAdmin())
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
       .setCreatedAt(transaction.getCreatedAt())
@@ -113,6 +133,7 @@ public class TokenTransactionService {
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryId());
     
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
+    if (command.getTransactionFee() == null || community.getFee().compareTo(command.getTransactionFee()) != 0) throw new DisplayableException("error.feeIncorrect");
     if (!UserUtil.isMember(user, community)) throw new DisplayableException("error.userIsNotCommunityMember");
     if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 

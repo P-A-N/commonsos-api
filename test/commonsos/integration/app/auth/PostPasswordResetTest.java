@@ -19,7 +19,7 @@ public class PostPasswordResetTest extends IntegrationTest {
   private User user;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("password1")).setEmailAddress("test@test.com"));
   }
   

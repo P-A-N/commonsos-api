@@ -46,13 +46,11 @@ public class GetTransactionListTest extends IntegrationTest {
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
-    /* tran1 = */create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)));
-    Thread.sleep(1);
-    /* tran2 = */create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)));
-    Thread.sleep(1);
-    /* tran3 = */create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user2.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(3)));
-    Thread.sleep(1);
-    /* tran4 = */create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user3.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(4)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setFromAdmin(true).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user2.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(3)));
+    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user3.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(4)));
   }
   
   @Test
@@ -64,13 +62,15 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community1.getId())
       .then().statusCode(200)
+      .body("transactionList.isFromAdmin",    contains(false, false, true))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
-      .body("transactionList.beneficiary.username", contains("user1", "user2"));
+      .body("transactionList.beneficiary.username", contains("user1", "user2", "user1"));
 
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community2.getId())
       .then().statusCode(200)
+      .body("transactionList.isFromAdmin",    contains(false, false))
       .body("transactionList.remitter.username",    contains("user3", "user1"))
       .body("transactionList.beneficiary.username", contains("user1", "user3"));
     
@@ -81,6 +81,7 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community1.getId())
       .then().statusCode(200)
+      .body("transactionList.isFromAdmin",    contains(false, false))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
       .body("transactionList.beneficiary.username", contains("user1", "user2"));
     
@@ -89,6 +90,7 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/transactions?communityId={communityId}", community2.getId())
       .then().statusCode(200)
+      .body("transactionList.isFromAdmin",    empty())
       .body("transactionList.remitter.username",    empty())
       .body("transactionList.beneficiary.username", empty());
   }
@@ -102,8 +104,9 @@ public class GetTransactionListTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions?communityId={communityId}&userId={userId}", community1.getId(), user1.getId())
       .then().statusCode(200)
+      .body("transactionList.isFromAdmin",    contains(false, false, true))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
-      .body("transactionList.beneficiary.username", contains("user1", "user2"));
+      .body("transactionList.beneficiary.username", contains("user1", "user2", "user1"));
 
     given()
       .cookie("JSESSIONID", sessionId)
@@ -114,6 +117,7 @@ public class GetTransactionListTest extends IntegrationTest {
     .cookie("JSESSIONID", sessionId)
     .when().get("/admin/transactions?communityId={communityId}&userId={userId}", community1.getId(), user3.getId())
     .then().statusCode(200)
+    .body("transactionList.isFromAdmin",    empty())
     .body("transactionList.remitter.username",    empty())
     .body("transactionList.beneficiary.username", empty());
 
@@ -126,7 +130,6 @@ public class GetTransactionListTest extends IntegrationTest {
       .then().statusCode(403);
   }
   
-  
   @Test
   public void transactionList_pagination() throws Exception {
     // prepare
@@ -134,27 +137,16 @@ public class GetTransactionListTest extends IntegrationTest {
     update(user1.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(user2.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
 
     sessionId = login("user1", "pass");
@@ -218,27 +210,16 @@ public class GetTransactionListTest extends IntegrationTest {
     update(user1.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(user2.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
-    Thread.sleep(1);
     create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
 
     sessionId = login("admin", "pass");

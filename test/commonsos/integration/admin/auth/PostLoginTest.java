@@ -17,7 +17,7 @@ import commonsos.repository.entity.Admin;
 public class PostLoginTest extends IntegrationTest {
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     create(new Admin().setEmailAddress("admin@a.com").setPasswordHash(hash("pass")));
   }
   

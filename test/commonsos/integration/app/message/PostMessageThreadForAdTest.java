@@ -30,7 +30,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
     adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(adCreator.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));

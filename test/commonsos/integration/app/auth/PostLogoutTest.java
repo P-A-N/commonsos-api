@@ -13,7 +13,7 @@ public class PostLogoutTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     create(new User().setUsername("user").setPasswordHash(hash("pass")));
     sessionId = login("user", "pass");
   }

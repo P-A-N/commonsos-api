@@ -28,7 +28,7 @@ public class GetUnreadMessageThreadCountTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community1 =  create(new Community().setStatus(PUBLIC).setName("community1"));
     community2 =  create(new Community().setStatus(PUBLIC).setName("community2"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));

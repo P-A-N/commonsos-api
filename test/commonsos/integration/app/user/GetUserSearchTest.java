@@ -22,7 +22,7 @@ public class GetUserSearchTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
     otherCommunity =  create(new Community().setStatus(PUBLIC).setName("otherCommunity"));
     create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
@@ -63,7 +63,7 @@ public class GetUserSearchTest extends IntegrationTest {
   }
 
   @Test
-  public void userSearch_pagination() {
+  public void userSearch_pagination() throws Exception {
     // prepare
     Community pageCommunity =  create(new Community().setStatus(PUBLIC).setName("page_community"));
     create(new User().setUsername("page_user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));

@@ -52,7 +52,7 @@ public class CreateCommunityController extends MultipartFormdataController {
         .setCommunityName(RequestUtil.getFileItemString(fileItemMap, "communityName", true))
         .setTokenName(RequestUtil.getFileItemString(fileItemMap, "tokenName", true))
         .setTokenSymbol(RequestUtil.getFileItemString(fileItemMap, "tokenSymbol", true))
-        .setTransactionFee(RequestUtil.getFileItemDouble(fileItemMap, "transactionFee", false))
+        .setTransactionFee(RequestUtil.getFileItemBigDecimal(fileItemMap, "transactionFee", false))
         .setDescription(RequestUtil.getFileItemString(fileItemMap, "description", false))
         .setAdminIdList(RequestUtil.getFileItemLongList(fileItemMap, "adminIdList", false));
   }

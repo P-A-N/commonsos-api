@@ -28,7 +28,7 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     community1 = create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0"));
     community2 = create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0"));
     otherCommunity = create(new Community().setStatus(PUBLIC).setName("otherCommunity").setTokenContractAddress("0x0"));

@@ -133,15 +133,17 @@ public class IntegrationTest {
       .then().statusCode(401);
   }
 
-  public <T> T create(T entity) {
+  public <T> T create(T entity) throws Exception {
     emService.runInTransaction(() -> emService.get().persist(entity));
     emService.close();
+    Thread.sleep(1);
     return entity;
   }
   
-  public <T> T update(T entity) {
+  public <T> T update(T entity) throws Exception {
     emService.runInTransaction(() -> emService.get().merge(entity));
     emService.close();
+    Thread.sleep(1);
     return entity;
   }
 

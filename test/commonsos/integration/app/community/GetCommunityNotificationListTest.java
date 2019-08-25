@@ -20,7 +20,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   private Community community2;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community1 =  create(new Community().setName("community1").setStatus(PUBLIC));
     community2 =  create(new Community().setName("community2").setStatus(PUBLIC));
     create(new CommunityNotification().setCommunityId(community1.getId()).setWordpressId("notification1_1").setUpdatedNotificationAt(Instant.parse("2019-01-01T12:10:10Z")));
@@ -48,7 +48,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   }
   
   @Test
-  public void communityNotificationList_pagenation() {
+  public void communityNotificationList_pagenation() throws Exception {
     // prepare
     Community community =  create(new Community().setName("page_community").setStatus(PUBLIC));
     create(new CommunityNotification().setCommunityId(community.getId()).setWordpressId("page_notification1").setUpdatedNotificationAt(Instant.parse("2019-01-15T12:10:10Z")));

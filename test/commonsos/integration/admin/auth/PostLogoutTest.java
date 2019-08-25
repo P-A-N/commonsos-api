@@ -15,7 +15,7 @@ public class PostLogoutTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     admin = create(new Admin().setEmailAddress("admin@a.com").setPasswordHash(hash("pass")).setRole(NCL));
     sessionId = loginAdmin("admin@a.com", "pass");
   }

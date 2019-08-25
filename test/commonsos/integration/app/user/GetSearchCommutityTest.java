@@ -27,7 +27,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     community1 = create(new Community().setStatus(PUBLIC).setName("comm_foo").setTokenContractAddress("0x0"));
     community2 = create(new Community().setStatus(PUBLIC).setName("comm_foo_bar").setTokenContractAddress("0x0"));
     community3 = create(new Community().setStatus(PUBLIC).setName("comm_bar").setTokenContractAddress("0x0"));

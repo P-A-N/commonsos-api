@@ -15,7 +15,7 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     create(new User().setUsername("user1").setPasswordHash(hash("pass")).setQrCodeUrl("qrCodeUrl"));
     sessionId = login("user1", "pass");
   }

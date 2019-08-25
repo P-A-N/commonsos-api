@@ -1,6 +1,7 @@
 package commonsos.repository;
 
 import static commonsos.TestId.id;
+import static commonsos.repository.entity.WalletType.MAIN;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
 import static java.math.BigDecimal.ZERO;
@@ -32,9 +33,10 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
       .setBeneficiaryId(id("beneficiary id"))
       .setAdId(id("ad id"))
       .setDescription("description")
-      .setAmount(TEN))
-      .setBlockchainTransactionHash("blockchain id")
-      .getId());
+      .setAmount(TEN)
+      .setFee(new BigDecimal("1.5"))
+      .setWalletDivision(MAIN)
+      .setBlockchainTransactionHash("blockchain id"))).getId();
 
     TokenTransaction result = em().find(TokenTransaction.class, id);
 
@@ -46,6 +48,8 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getAdId()).isEqualTo(id("ad id"));
     assertThat(result.getDescription()).isEqualTo("description");
     assertThat(result.getAmount()).isEqualTo(new BigDecimal("10.00"));
+    assertThat(result.getFee().stripTrailingZeros()).isEqualTo(new BigDecimal("1.5"));
+    assertThat(result.getWalletDivision()).isEqualTo(MAIN);
     assertThat(result.getBlockchainTransactionHash()).isEqualTo("blockchain id");
   }
 

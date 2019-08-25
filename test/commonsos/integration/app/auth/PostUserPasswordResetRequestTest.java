@@ -20,7 +20,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("old_password")).setEmailAddress("user@test.com"));
     
     sessionId = login("user", "old_password");

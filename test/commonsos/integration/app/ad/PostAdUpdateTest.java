@@ -28,7 +28,7 @@ public class PostAdUpdateTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setupData() {
+  public void setupData() throws Exception {
     community =  create(new Community().setName("community").setStatus(PUBLIC));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));

@@ -29,7 +29,7 @@ public class PostAdDeleteTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setupData() {
+  public void setupData() throws Exception {
     community1 =  create(new Community().setName("community1").setStatus(PUBLIC));
     community2 =  create(new Community().setName("community2").setStatus(PUBLIC));
     admin1 =  create(new User().setUsername("admin1").setPasswordHash(hash("pass")).setCommunityUserList(asList(

@@ -34,9 +34,9 @@ public class PostTransactionCreateTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
-    community =  create(new Community().setStatus(PUBLIC).setName("community"));
-    otherCommunity =  create(new Community().setStatus(PUBLIC).setName("otherCommunity"));
+  public void setup() throws Exception {
+    community =  create(new Community().setFee(BigDecimal.ONE).setStatus(PUBLIC).setName("community"));
+    otherCommunity =  create(new Community().setFee(BigDecimal.ONE).setStatus(PUBLIC).setName("otherCommunity"));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     adCreator =  create(new User().setUsername("adCreator").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
@@ -52,6 +52,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId()); // from user to adCreator
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1.0");
     requestParam.put("amount", "10");
     requestParam.put("adId", giveAd.getId());
     
@@ -93,6 +94,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", otherCommunity.getId()); // with other community id
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", giveAd.getId());
     
@@ -123,6 +125,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", user.getId()); // from adCreator to user
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", wantAd.getId());
     
@@ -157,7 +160,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
   }
 
   @Test
-  public void transactionForAd_want_wrongCommunityId() {
+  public void transactionForAd_want_wrongCommunityId() throws Exception {
     // user belong to same community
     update(user.setCommunityUserList(asList(new CommunityUser().setCommunity(community), new CommunityUser().setCommunity(otherCommunity))));
     update(adCreator.setCommunityUserList(asList(new CommunityUser().setCommunity(community), new CommunityUser().setCommunity(otherCommunity))));
@@ -166,6 +169,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", otherCommunity.getId()); // with wrong community id
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", giveAd.getId());
     
@@ -195,6 +199,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", otherCommunityUser.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", wantAd.getId());
     
@@ -213,6 +218,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", null);
     
@@ -242,6 +248,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", otherCommunityUser.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", "1");
     requestParam.put("amount", "10");
     requestParam.put("adId", null);
     
@@ -252,5 +259,23 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .when().post("/transactions")
       .then().statusCode(468)
       .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
+  }
+
+  @Test
+  public void transaction_feeIncorrect() {
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", community.getId());
+    requestParam.put("beneficiaryId", adCreator.getId());
+    requestParam.put("description", "description");
+    requestParam.put("transactionFee", "99"); // incorrect fee
+    requestParam.put("amount", "10");
+    requestParam.put("adId", null);
+    
+    // call api
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/transactions")
+      .then().statusCode(468);
   }
 }

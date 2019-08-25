@@ -71,7 +71,7 @@ public class CommunityService {
       });
     }
     // check fee
-    BigDecimal fee = BigDecimal.valueOf(command.getTransactionFee() == null ? 0D : command.getTransactionFee()).setScale(2, RoundingMode.DOWN);
+    BigDecimal fee = command.getTransactionFee() == null ? BigDecimal.ZERO : command.getTransactionFee().setScale(2, RoundingMode.DOWN);
     if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
     if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
     // check system balance

@@ -17,7 +17,7 @@ import commonsos.repository.entity.User;
 public class PostLoginTest extends IntegrationTest {
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     create(new User().setUsername("user").setPasswordHash(hash("pass")));
   }
   

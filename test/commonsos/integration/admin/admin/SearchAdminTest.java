@@ -26,7 +26,7 @@ public class SearchAdminTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     com1 =  create(new Community().setName("com1").setStatus(PUBLIC));
     com2 =  create(new Community().setName("com2").setStatus(PUBLIC));
     

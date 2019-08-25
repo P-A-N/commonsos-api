@@ -44,6 +44,7 @@ import commonsos.exception.ServerErrorException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -273,17 +274,36 @@ public class BlockchainService {
     });
   }
 
+  public BigDecimal tokenBalance(Community community, WalletType walletType) {
+    String walletAddress;
+    switch (walletType) {
+    case MAIN:
+      walletAddress = community.getMainWalletAddress();
+      break;
+    case FEE:
+      walletAddress = community.getFeeWalletAddress();
+      break;
+    default:
+      throw new ServerErrorException();
+    }
+    return tokenBalance(walletAddress, community.getTokenContractAddress());
+  }
+
   public BigDecimal tokenBalance(User user, Long communityId) {
+    Community community = communityRepository.findPublicStrictById(communityId);
+    return tokenBalance(user.getWalletAddress(), community.getTokenContractAddress());
+  }
+  
+  private BigDecimal tokenBalance(String walletAddress, String tokenContractAddress) {
     try {
-      log.info("Token balance request for: " + user.getWalletAddress());
-      Community community = communityRepository.findPublicById(communityId).orElseThrow(RuntimeException::new);
-      Token token = loadTokenReadOnly(community.getTokenContractAddress());
-      BigInteger balance = token.balanceOf(user.getWalletAddress()).send();
+      log.info("Token balance request for: " + walletAddress);
+      Token token = loadTokenReadOnly(tokenContractAddress);
+      BigInteger balance = token.balanceOf(walletAddress).send();
       log.info("Token balance request complete, balance " + balance.toString());
       return toTokensWithDecimals(balance);
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
 

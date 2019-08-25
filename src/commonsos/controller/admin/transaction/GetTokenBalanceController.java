@@ -12,6 +12,15 @@ import spark.Route;
 @ReadOnly
 public class GetTokenBalanceController implements Route {
 
+  /*@Override
+  protected Object handleAfterLogin(Admin admin, Request request, Response response) {
+    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
+    String wallet = RequestUtil.getQueryParamString(request, "wallet", true);
+    
+    Admin targetAdmin = adminService.getAdmin(admin, id);
+    return AdminUtil.toView(targetAdmin);
+  }*/
+  
   @Override
   public Object handle(Request request, Response response) {
     Map<String, Object> result = new HashMap<>();

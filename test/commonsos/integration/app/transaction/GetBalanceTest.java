@@ -21,9 +21,9 @@ public class GetBalanceTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
-    /* user = */ create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
+    create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
     sessionId = login("user", "pass");
   }

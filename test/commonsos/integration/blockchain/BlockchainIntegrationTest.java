@@ -166,7 +166,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       User admin,
       String communityName,
       String tokenSymbol,
-      String tokenName) {
+      String tokenName) throws Exception {
     log.info(String.format("creating community started. [communityName=%s]", communityName));
 
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
@@ -208,6 +208,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", to.getId());
     requestParam.put("description", "description");
+    requestParam.put("transactionFee", 0);
     requestParam.put("amount", amount);
     requestParam.put("adId", null);
     log.info(String.format("transfer token started. [from=%s, to=%s, community=%s]", from.getUsername(), to.getUsername(), community.getName()));

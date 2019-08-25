@@ -59,7 +59,7 @@ public class TokenTransactionServiceTest {
   @Test
   public void createTransaction() {
     // prepare
-    Community community = new Community().setId(id("community"));
+    Community community = new Community().setFee(BigDecimal.ONE).setId(id("community"));
     User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     User beneficiary = new User().setId(id("beneficiary")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedBy(id("user")).setType(WANT);
@@ -70,7 +70,7 @@ public class TokenTransactionServiceTest {
     doReturn(balance).when(service).balance(any(), any());
     
     // community is null
-    TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id");
+    TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);
     command.setCommunityId(null);
     assertThrows(BadRequestException.class, () -> service.create(user, command));
     command.setCommunityId(id("community"));

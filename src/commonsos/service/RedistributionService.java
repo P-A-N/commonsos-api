@@ -45,7 +45,7 @@ public class RedistributionService {
     if (user != null && !UserUtil.isMember(user, community)) throw new BadRequestException("user is not a member of community");
     // validate rate
     if (command.getRedistributionRate() == null) throw new BadRequestException("redistritution rate is required");
-    BigDecimal rate = BigDecimal.valueOf(command.getRedistributionRate());
+    BigDecimal rate = command.getRedistributionRate();
     BigDecimal currentRate = repository.sumByCommunityId(command.getCommunityId());
     if (rate.compareTo(BigDecimal.ZERO) <= 0) throw new BadRequestException(String.format("Rate is less or equal to 0 [rate=%f]", rate));
     if (currentRate.add(rate).compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Sum of rate is begger than 100 [rate=%f]", rate));

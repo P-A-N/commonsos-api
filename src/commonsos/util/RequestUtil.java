@@ -1,9 +1,9 @@
 package commonsos.util;
 
-import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +108,7 @@ public class RequestUtil {
     }
   }
   
-  public static Double getFileItemDouble(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
+  public static BigDecimal getFileItemBigDecimal(Map<String, List<FileItem>> fileItemMap, String param, boolean isRequired) {
     String value = null;
     if (fileItemMap.containsKey(param)) {
       value = fileItemMap.get(param).get(0).getString();
@@ -121,7 +121,7 @@ public class RequestUtil {
     }
     
     if (NumberUtils.isParsable(value)) {
-      return parseDouble(value);
+      return new BigDecimal(value);
     } else {
       throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
     }

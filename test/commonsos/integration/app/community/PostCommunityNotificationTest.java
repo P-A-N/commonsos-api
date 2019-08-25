@@ -27,7 +27,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
   private Community community;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
   }
   

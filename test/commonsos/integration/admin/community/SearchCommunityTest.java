@@ -32,7 +32,7 @@ public class SearchCommunityTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     publicCom =  create(new Community().setName("publicCom").setStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
     privateCom =  create(new Community().setName("privateCom").setStatus(PRIVATE));
@@ -64,7 +64,7 @@ public class SearchCommunityTest extends IntegrationTest {
   }
   
   @Test
-  public void searchCommunity_pagination() {
+  public void searchCommunity_pagination() throws Exception {
     update(publicCom.setDeleted(true));
     update(privateCom.setDeleted(true));
     

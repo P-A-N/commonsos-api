@@ -54,7 +54,7 @@ public abstract class Repository {
     ScrollableResults scrollable = query.unwrap(org.hibernate.query.Query.class).scroll();
     ResultList<T> resultList = new ResultList<>(pagination);
     if (scrollable.last()) {
-      resultList.setLastPage((scrollable.getRowNumber() + 1) / pagination.getSize());
+      resultList.setLastPage(scrollable.getRowNumber() / pagination.getSize());
       scrollable.first();
       
       if (scrollable.scroll(pagination.getPage() * pagination.getSize())) {
@@ -80,7 +80,7 @@ public abstract class Repository {
     ScrollableResults scrollable = query.unwrap(org.hibernate.query.Query.class).scroll();
     ResultList<T> resultList = new ResultList<>(pagination);
     if (scrollable.last()) {
-      resultList.setLastPage((scrollable.getRowNumber() + 1) / pagination.getSize());
+      resultList.setLastPage(scrollable.getRowNumber() / pagination.getSize());
       scrollable.beforeFirst();
       
       if (scrollable.scroll(-1 - (pagination.getPage() * pagination.getSize()))) {

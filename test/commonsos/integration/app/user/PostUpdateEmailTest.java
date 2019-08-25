@@ -23,7 +23,7 @@ public class PostUpdateEmailTest extends IntegrationTest {
   private String sessionId2;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("password")).setEmailAddress("user2@test.com"));
   }

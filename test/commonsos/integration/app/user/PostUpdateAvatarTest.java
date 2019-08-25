@@ -19,7 +19,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     
     sessionId = login("user", "password");

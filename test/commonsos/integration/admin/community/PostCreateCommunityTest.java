@@ -30,7 +30,7 @@ public class PostCreateCommunityTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setup() {
+  public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     tmp1 = create(new Admin().setEmailAddress("tmp1@before.each.com").setAdminname("tmp1").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN));
     tmp2 = create(new Admin().setEmailAddress("tmp2@before.each.com").setAdminname("tmp2").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN));
@@ -194,7 +194,7 @@ public class PostCreateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
       .then().statusCode(200)
-      .body("transactionFee", equalTo(0F));
+      .body("transactionFee", equalTo(0));
   }
   
   @Test

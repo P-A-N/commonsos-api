@@ -27,7 +27,7 @@ public class GetMyAdsTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void setupData() {
+  public void setupData() throws Exception {
     community = create(new Community().setName("community").setStatus(PUBLIC));
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
@@ -62,7 +62,7 @@ public class GetMyAdsTest extends IntegrationTest {
 
   
   @Test
-  public void myAds_pagination() {
+  public void myAds_pagination() throws Exception {
     // prepare
     Community pageCommunity1 =  create(new Community().setName("page_community1").setStatus(PUBLIC));
     Community pageCommunity2 =  create(new Community().setName("page_community2").setStatus(PUBLIC));

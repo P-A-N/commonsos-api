@@ -28,7 +28,7 @@ public class PostCreateAccountTest extends IntegrationTest {
   private User admin;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     admin = create(new User().setUsername("admin"));
     community1 =  create(new Community().setName("community1").setAdminUser(admin).setStatus(PUBLIC));
     community2 =  create(new Community().setName("community2").setAdminUser(admin).setStatus(PUBLIC));

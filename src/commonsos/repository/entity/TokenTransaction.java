@@ -1,11 +1,13 @@
 package commonsos.repository.entity;
 
+import static javax.persistence.EnumType.STRING;
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -22,6 +24,11 @@ public class TokenTransaction extends AbstractEntity {
   private Long communityId;
   private Long remitterId;
   private Long beneficiaryId;
+  private BigDecimal fee;
+  private boolean isFromAdmin;
+  @Enumerated(value = STRING)
+  private WalletType walletDivision;
+  private boolean redistributed;
   private String description;
   private Long adId;
   private BigDecimal amount;

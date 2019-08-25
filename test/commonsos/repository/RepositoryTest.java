@@ -122,6 +122,36 @@ public class RepositoryTest extends AbstractRepositoryTest {
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
+
+    // execute & verify (page 0 size 1 asc)
+    pagination = new PaginationCommand().setPage(0).setSize(1).setSort(SortType.ASC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 4 size 1 asc)
+    pagination = new PaginationCommand().setPage(4).setSize(1).setSort(SortType.ASC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 5 size 1 asc)
+    pagination = new PaginationCommand().setPage(5).setSize(1).setSort(SortType.ASC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 0 size 5 asc)
+    pagination = new PaginationCommand().setPage(0).setSize(5).setSort(SortType.ASC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(5);
+    assertThat(result.getLastPage()).isEqualTo(0);
+
+    // execute & verify (page 1 size 5 asc)
+    pagination = new PaginationCommand().setPage(1).setSize(5).setSort(SortType.ASC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getLastPage()).isEqualTo(0);
   }
   
   @Test
@@ -204,6 +234,36 @@ public class RepositoryTest extends AbstractRepositoryTest {
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
+
+    // execute & verify (page 0 size 1 desc)
+    pagination = new PaginationCommand().setPage(0).setSize(1).setSort(SortType.DESC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 4 size 1 desc)
+    pagination = new PaginationCommand().setPage(4).setSize(1).setSort(SortType.DESC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(1);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 5 size 1 desc)
+    pagination = new PaginationCommand().setPage(5).setSize(1).setSort(SortType.DESC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getLastPage()).isEqualTo(4);
+
+    // execute & verify (page 0 size 5 desc)
+    pagination = new PaginationCommand().setPage(0).setSize(5).setSort(SortType.DESC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(5);
+    assertThat(result.getLastPage()).isEqualTo(0);
+
+    // execute & verify (page 1 size 5 desc)
+    pagination = new PaginationCommand().setPage(1).setSize(5).setSort(SortType.DESC);
+    result = repository.getResultList(query, pagination);
+    assertThat(result.getList().size()).isEqualTo(0);
+    assertThat(result.getLastPage()).isEqualTo(0);
   }
 
   @Test

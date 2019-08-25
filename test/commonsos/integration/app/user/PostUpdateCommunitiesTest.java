@@ -34,7 +34,7 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
   private String sessionId;
   
   @BeforeEach
-  public void createUser() {
+  public void createUser() throws Exception {
     community1 = create(new Community().setStatus(PUBLIC).setName("community1").setTokenContractAddress("0x0"));
     community2 = create(new Community().setStatus(PUBLIC).setName("community2").setTokenContractAddress("0x0"));
     community3 = create(new Community().setStatus(PUBLIC).setName("community3").setTokenContractAddress("0x0"));
