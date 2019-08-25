@@ -7,6 +7,7 @@ import static commonsos.repository.entity.Role.TELLER;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.math.BigDecimal;
 
@@ -101,5 +102,72 @@ public class SearchRedistributionTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/communities/{id}/redistributions", com1.getId())
       .then().statusCode(403);
+  }
+
+  @Test
+  public void searchCommunity_pagination() throws Exception {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "password");
+
+    Community page_com = create(new Community().setName("page_com"));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("1")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("2")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("3")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("4")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("5")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("6")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("7")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("8")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("9")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("10")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("11")));
+    create(new Redistribution().setCommunity(page_com).setUser(user1).setRate(new BigDecimal("12")));
+
+    // page 0 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/communities/{id}/redistributions?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), "0", "10", "ASC")
+      .then().statusCode(200)
+      .body("redistributionList.redistributionRate", contains(
+          1F, 2F, 3F, 4F, 5F, 6F, 7F, 8F, 9F, 10F))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/communities/{id}/redistributions?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), "1", "10", "ASC")
+      .then().statusCode(200)
+      .body("redistributionList.redistributionRate", contains(
+          11F, 12F))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 0 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/communities/{id}/redistributions?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), "0", "10", "DESC")
+      .then().statusCode(200)
+      .body("redistributionList.redistributionRate", contains(
+          12F, 11F, 10F, 9F, 8F, 7F, 6F, 5F, 4F, 3F))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/communities/{id}/redistributions?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), "1", "10", "DESC")
+      .then().statusCode(200)
+      .body("redistributionList.redistributionRate", contains(
+          2F, 1F))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
   }
 }

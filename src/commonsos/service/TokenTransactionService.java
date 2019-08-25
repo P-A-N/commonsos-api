@@ -33,6 +33,9 @@ import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.admin.TransactionForAdminView;
+import commonsos.view.admin.TransactionListForAdminView;
+import commonsos.view.admin.UserForAdminView;
 import commonsos.view.app.TransactionListView;
 import commonsos.view.app.TransactionView;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +56,11 @@ public class TokenTransactionService {
     return transaction.getRemitterId() != null && transaction.getRemitterId().equals(user.getId());
   }
 
-  public TransactionListView transactionsByAdmin(User admin, Long communityId, Long userId, PaginationCommand pagination) {
+  private boolean isDebitOfCommunity(TokenTransaction transaction) {
+    return transaction.isFromAdmin();
+  }
+
+  public TransactionListView transactionsForAdminUser(User admin, Long communityId, Long userId, PaginationCommand pagination) {
     if (!UserUtil.isAdmin(admin, communityId)) throw new ForbiddenException(String.format("user is not a admin.[userId=%d, communityId=%d]", admin.getId(), communityId));
     
     User user = userRepository.findStrictById(userId);
@@ -77,6 +84,24 @@ public class TokenTransactionService {
     return listView;
   }
 
+  public TransactionListForAdminView transactionsForAdmin(Long userId, Long communityId, PaginationCommand pagination) {
+    User user = userRepository.findStrictById(userId);
+    communityRepository.findStrictById(communityId);
+    ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
+
+    List<TransactionForAdminView> transactionViews = result.getList().stream()
+        .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
+        .map(transaction -> viewForAdmin(transaction))
+        .collect(toList());
+    
+    TransactionListForAdminView listView = new TransactionListForAdminView();
+    listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
+    List<TransactionForAdminView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    listView.setTransactionList(paginationedViews);
+    
+    return listView;
+  }
+
   public TransactionView view(User user, TokenTransaction transaction) {
     TransactionView view = new TransactionView()
       .setIsFromAdmin(transaction.isFromAdmin())
@@ -91,6 +116,29 @@ public class TokenTransactionService {
     
     if (remitter.isPresent()) view.setRemitter(UserUtil.publicView(remitter.get()));
     if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicView(beneficiary.get()));
+    
+    return view;
+  }
+
+  public TransactionForAdminView viewForAdmin(TokenTransaction transaction) {
+    TransactionForAdminView view = new TransactionForAdminView()
+      .setCommunityId(transaction.getCommunityId())
+      .setWallet(transaction.getWalletDivision())
+      .setIsFromAdmin(transaction.isFromAdmin())
+      .setAmount(transaction.getAmount())
+      .setCreatedAt(transaction.getCreatedAt())
+      .setCompleted(transaction.getBlockchainCompletedAt() != null)
+      .setDebit(isDebitOfCommunity(transaction));
+
+    Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
+    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
+    
+    if (remitter.isPresent()) {
+      view.setRemitter(new UserForAdminView().setId(remitter.get().getId()).setUsername(remitter.get().getUsername()));
+    }
+    if (beneficiary.isPresent()) {
+      view.setBeneficiary(new UserForAdminView().setId(beneficiary.get().getId()).setUsername(beneficiary.get().getUsername()));
+    }
     
     return view;
   }

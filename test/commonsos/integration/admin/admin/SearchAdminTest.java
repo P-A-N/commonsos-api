@@ -6,6 +6,7 @@ import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,5 +104,74 @@ public class SearchAdminTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com2.getId(), TELLER.getId())
       .then().statusCode(403);
+  }
+
+  @Test
+  public void searchCommunity_pagination() throws Exception {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "password");
+
+    Community page_com =  create(new Community().setName("page_com").setStatus(PUBLIC));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a1").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a2").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a3").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a4").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a5").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a6").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a7").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a8").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a9").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a10").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a11").setCommunity(page_com));
+    create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a12").setCommunity(page_com));
+
+    // page 0 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={comId}&roleId={roleId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), COMMUNITY_ADMIN.getId(), "0", "10", "ASC")
+      .then().statusCode(200)
+      .body("adminList.emailAddress", contains(
+          "page_a1", "page_a2", "page_a3", "page_a4", "page_a5",
+          "page_a6", "page_a7", "page_a8", "page_a9", "page_a10"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={comId}&roleId={roleId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), COMMUNITY_ADMIN.getId(), "1", "10", "ASC")
+      .then().statusCode(200)
+      .body("adminList.emailAddress", contains(
+          "page_a11", "page_a12"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 0 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={comId}&roleId={roleId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), COMMUNITY_ADMIN.getId(), "0", "10", "DESC")
+      .then().statusCode(200)
+      .body("adminList.emailAddress", contains(
+          "page_a12", "page_a11", "page_a10", "page_a9", "page_a8",
+          "page_a7", "page_a6", "page_a5", "page_a4", "page_a3"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={comId}&roleId={roleId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", page_com.getId(), COMMUNITY_ADMIN.getId(), "1", "10", "DESC")
+      .then().statusCode(200)
+      .body("adminList.emailAddress", contains(
+          "page_a2", "page_a1"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
   }
 }

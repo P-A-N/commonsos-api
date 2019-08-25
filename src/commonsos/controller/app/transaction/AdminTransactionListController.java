@@ -29,7 +29,7 @@ public class AdminTransactionListController extends AfterAppLoginController {
     Long userId = RequestUtil.getQueryParamLong(request, "userId", true);
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    TransactionListView view = service.transactionsByAdmin(user, communityId, userId, paginationCommand);
+    TransactionListView view = service.transactionsForAdminUser(user, communityId, userId, paginationCommand);
     return view;
   }
 }

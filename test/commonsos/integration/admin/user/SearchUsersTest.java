@@ -8,6 +8,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -169,5 +170,73 @@ public class SearchUsersTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/users?communityId={id}", com1.getId())
       .then().statusCode(403);
+  }
+
+  @Test
+  public void searchCommunity_pagination() throws Exception {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "password");
+    
+    create(new User().setUsername("pu1"));
+    create(new User().setUsername("pu2"));
+    create(new User().setUsername("pu3"));
+    create(new User().setUsername("pu4"));
+    create(new User().setUsername("pu5"));
+    create(new User().setUsername("pu6"));
+    create(new User().setUsername("pu7"));
+    create(new User().setUsername("pu8"));
+    create(new User().setUsername("pu9"));
+    create(new User().setUsername("pu10"));
+    create(new User().setUsername("pu11"));
+    create(new User().setUsername("pu12"));
+
+    // page 0 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users?username={name}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "pu", "0", "10", "ASC")
+      .then().statusCode(200)
+      .body("userList.username", contains(
+          "pu1", "pu2", "pu3", "pu4", "pu5",
+          "pu6", "pu7", "pu8", "pu9", "pu10"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 asc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users?username={name}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "pu", "1", "10", "ASC")
+      .then().statusCode(200)
+      .body("userList.username", contains(
+          "pu11", "pu12"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("ASC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 0 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users?username={name}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "pu", "0", "10", "DESC")
+      .then().statusCode(200)
+      .body("userList.username", contains(
+          "pu12", "pu11", "pu10", "pu9", "pu8",
+          "pu7", "pu6", "pu5", "pu4", "pu3"))
+      .body("pagination.page", equalTo(0))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
+
+    // page 1 size 10 desc
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users?username={name}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "pu", "1", "10", "DESC")
+      .then().statusCode(200)
+      .body("userList.username", contains(
+          "pu2", "pu1"))
+      .body("pagination.page", equalTo(1))
+      .body("pagination.size", equalTo(10))
+      .body("pagination.sort", equalTo("DESC"))
+      .body("pagination.lastPage", equalTo(1));
   }
 }
