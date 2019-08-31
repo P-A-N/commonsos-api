@@ -1,5 +1,6 @@
 package commonsos.tools;
 
+import static commonsos.service.UserService.WALLET_PASSWORD;
 import static commonsos.service.blockchain.BlockchainService.INITIAL_TOKEN_AMOUNT;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
@@ -56,16 +58,21 @@ public class TokenMigration {
     
     for (int i = 0; i < communityList.size(); i++) {
       Community c = communityList.get(i);
+
+      emService.runInTransaction(() -> {
+        createWallet(c);
+        return null;
+      });
       
       emService.runInTransaction(() -> {
-        transferEtherToAdmin(c);
+        transferEtherToMainWallet(c);
         String newTokenAddress = createToken(c);
         c.setTokenContractAddress(newTokenAddress);
         
-        transferEtherToAdmin(c);
-        allowAdmin(c);
+        transferEtherToMainWallet(c);
+        allowMainWallet(c);
         
-        transferEtherToAdmin(c);
+        transferEtherToMainWallet(c);
         transferToken(c);
         
         checkTokenBalance(c);
@@ -119,6 +126,22 @@ public class TokenMigration {
     }
   }
 
+  private static void createWallet(Community c) {
+    if (StringUtils.isEmpty(c.getMainWallet())) {
+      String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
+      Credentials mainCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
+      c.setMainWallet(mainWallet);
+      c.setMainWalletAddress(mainCredentials.getAddress());
+      
+      String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
+      Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
+      c.setFeeWallet(feeWallet);
+      c.setFeeWalletAddress(feeCredentials.getAddress());
+      
+      communityRepository.update(c);
+    }
+  }
+
   private static String createToken(Community c) {
     System.out.println(String.format("Creating community's new token [Community name=%s]", c.getName()));
     
@@ -127,34 +150,34 @@ public class TokenMigration {
     System.out.print("Please enter community's token symbol: ");
     String tokenSymbol = scanner.nextLine();
     
-    String newTokenAddress = blockchainService.createToken(c.getAdminUser(), tokenSymbol, tokenName);
+    Credentials credentials = blockchainService.credentials(c.getMainWallet(), WALLET_PASSWORD);
+    String newTokenAddress = blockchainService.createToken(credentials, tokenSymbol, tokenName);
 
     System.out.println(String.format("Finished creating community's token [Community name=%s, Token address=%s]", c.getName(), newTokenAddress));
     System.out.println();
     return newTokenAddress;
   }
 
-  private static void transferEtherToAdmin(Community c) {
-    BigDecimal balance = blockchainService.getBalance(c.getAdminUser().getWalletAddress());
-    System.out.println(String.format("Balance of admin=%f [admin address=%s]", balance, c.getAdminUser().getWalletAddress()));
+  private static void transferEtherToMainWallet(Community c) {
+    BigDecimal balance = blockchainService.getBalance(c.getMainWalletAddress());
+    System.out.println(String.format("Balance of main wallet=%f [wallet address=%s]", balance, c.getMainWalletAddress()));
     if (balance.compareTo(BigDecimal.TEN.pow(4)) < 0) {
-      System.out.println(String.format("Transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
-      blockchainService.transferEther(credentials, c.getAdminUser().getWalletAddress(), BigInteger.TEN.pow(18 + 5));
-      System.out.println(String.format("Finish transfer ether to admin [admin address=%s]", c.getAdminUser().getWalletAddress()));
+      BigInteger amount = BigInteger.TEN.pow(18 + 5);
+      System.out.println(String.format("Transfer ether to main wallet [wallet address=%s, transferAmount=%f]", c.getMainWalletAddress(), amount));
+      blockchainService.transferEther(credentials, c.getMainWalletAddress(), amount);
+      System.out.println(String.format("Finish transfer ether to main wallet [wallet address=%s, transferAmount=%f]", c.getMainWalletAddress(), amount));
     }
     
     System.out.println();
   }
 
-  private static void allowAdmin(Community c) throws Exception {
-    waitUntilTransferredEther(c.getAdminUser().getWalletAddress());
+  private static void allowMainWallet(Community c) throws Exception {
+    waitUntilTransferredEther(c.getMainWalletAddress());
     
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
-      if (u.getId().equals(c.getAdminUser().getId())) continue;
-
-      System.out.println(String.format("Allowing admin [users=%s, admin=%s]", u.getUsername(), c.getAdminUser().getUsername()));
+      System.out.println(String.format("Allowing main wallet [users=%s]", u.getUsername()));
       DelegateWalletTask task = new DelegateWalletTask(u, c);
       jobService.submit(u, task);
       Thread.sleep(500);
@@ -162,17 +185,16 @@ public class TokenMigration {
   }
 
   private static void transferToken(Community c) throws Exception {
-    waitUntilTransferredEther(c.getAdminUser().getWalletAddress());
+    waitUntilTransferredEther(c.getMainWalletAddress());
     
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
-      if (u.getId().equals(c.getAdminUser().getId())) continue;
       waitUntilAllowed(u, c);
 
       BigDecimal balance = transactionRepository.getBalanceFromTransactions(u, c.getId());
-      System.out.println(String.format("Transfering token [users=%s, community=%s, amount=%f]", u.getUsername(), c.getAdminUser().getUsername(), balance));
-      blockchainService.transferTokens(c.getAdminUser(), u, c.getId(), balance);
+      System.out.println(String.format("Transfering token [users=%s, community=%s, amount=%f]", u.getUsername(), c.getName(), balance));
+      blockchainService.transferTokensFromMainWallet(c, u, balance);
       Thread.sleep(500);
     }
   }
@@ -181,7 +203,6 @@ public class TokenMigration {
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
-      if (u.getId().equals(c.getAdminUser().getId())) continue;
       
       waitUntilTransferredToken(u, c);
       BigDecimal balanceFromTransactions = transactionRepository.getBalanceFromTransactions(u, c.getId());

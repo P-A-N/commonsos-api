@@ -6,7 +6,6 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -27,7 +26,6 @@ import org.web3j.crypto.WalletUtils;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 
 public class BlockchainIntegrationTest extends IntegrationTest {
@@ -37,8 +35,6 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   private Admin ncl;
   private Community community1;
   private Community community2;
-  private User appAdmin1;
-  private User appAdmin2;
   private User user1;
   private User user2;
   private String sessionId;
@@ -49,10 +45,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   @BeforeAll
   public void setupTest() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("passpass")).setRole(NCL));
-    appAdmin1 = createAppAdmin("admin1_test", "passpass", "appAdmin1@test.com", true, null);
-    appAdmin2 = createAppAdmin("admin2_test", "passpass", "appAdmin2@test.com", true, null);
-    community1 = createCommunity(appAdmin1, "community1", "c1", "community1");
-    community2 = createCommunity(appAdmin2, "community2", "c2", "community2");
+    community1 = createCommunity("community1", "c1", "community1");
+    community2 = createCommunity("community2", "c2", "community2");
   }
   
   @Test
@@ -65,8 +59,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalance(user2, community2, 0);
 
     // transfer token from admin
-    transferToken(appAdmin1, user1, community1, 100);
-    waitUntilTransactionCompleted();
+    transferTokenFromAdmin(community1, user1, 100);
+    waitUntilTransactionCompleted(community1, user1, 100);
     checkBalance(user1, community1, 100);
 
     // transfer token from user
@@ -80,8 +74,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilAllowed(user1, community2);
     
     // transfer token from admin
-    transferToken(appAdmin2, user1, community2, 100);
-    waitUntilTransactionCompleted();
+    transferTokenFromAdmin(community2, user1, 100);
+    waitUntilTransactionCompleted(community2, user1, 100);
     checkBalance(user1, community2, 100);
 
     // transfer token from user
@@ -95,22 +89,6 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilTransactionCompleted();
     checkBalance(user1, community1, 90);
     checkBalance(user1, community2, 80);
-  }
-  
-  private User createAppAdmin(
-      String username,
-      String password,
-      String emailAddress,
-      boolean waitUntilCompleated,
-      List<Long> communityList
-      ) throws Exception {
-    User admin = createUser(username, password, emailAddress, waitUntilCompleated, communityList);
-
-    log.info(String.format("transfer ether to admin started. [username=%s]", username));
-    transferEtherToAdmin(admin);
-    log.info(String.format("transfer ether to admin completed. [username=%s]", username));
-    
-    return admin;
   }
   
   private User createUser(
@@ -154,16 +132,15 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     return user;
   }
   
-  private void transferEtherToAdmin(User admin) throws Exception {
+  private void transferEtherToMainWallet(Community community) throws Exception {
     URL url = this.getClass().getResource("/blockchain/UTC--2018-11-08T09-10-38.833302600Z--766a1c4737970feddde6f2b8659fca05bd0339ab");
     Credentials commonsos = WalletUtils.loadCredentials("pass1", new File(url.toURI()));
     
     BigInteger initialEtherAmountForAdmin = BigInteger.TEN.pow(20);
-    blockchainService.transferEther(commonsos, admin.getWalletAddress(), initialEtherAmountForAdmin);
+    blockchainService.transferEther(commonsos, community.getMainWalletAddress(), initialEtherAmountForAdmin);
   }
   
   private Community createCommunity(
-      User admin,
       String communityName,
       String tokenSymbol,
       String tokenName) throws Exception {
@@ -186,16 +163,18 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     Community community = emService.get().find(Community.class, (long) id);
     
-    update(community.setStatus(PUBLIC).setAdminUser(admin));
-    update(admin.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    blockchainService.transferTokensFromMainWallet(community, admin, new BigDecimal("100000"));
+    update(community.setStatus(PUBLIC));
     log.info(String.format("creating community completed. [communityName=%s]", communityName));
+
+    log.info(String.format("transfer ether to main wallet started. [main wallet=%s]", community.getMainWalletAddress()));
+    transferEtherToMainWallet(community);
+    log.info(String.format("transfer ether to main wallet completed. [username=%s]", community.getMainWalletAddress()));
+    
     return community;
   }
-  
-  private void transferToken(User from, User to, Community community, int amount) {
-    Matcher<Object> matcher = notNullValue();
-    transferToken(from, to, community, amount, matcher);
+
+  private void transferTokenFromAdmin(Community community, User to, int amount) {
+    blockchainService.transferTokensFromMainWallet(community, to, BigDecimal.valueOf(amount));
   }
 
   private void transferToken(User from, User to, Community community, int amount, float expectAmount) {
@@ -244,7 +223,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .then().statusCode(200);
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
   }
-  
+
   private void waitUntilTransactionCompleted() throws Exception {
     log.info(String.format("waiting for transaction."));
     for (int i = 0; i < 60; i++) {
@@ -252,6 +231,26 @@ public class BlockchainIntegrationTest extends IntegrationTest {
           "SELECT count(t) FROM TokenTransaction t WHERE blockchainCompletedAt is null", Long.class)
           .getSingleResult();
       if(count == 0) {
+        log.info(String.format("transaction completed."));
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("transaction didn't finish in 60 seconds.");
+  }
+  
+  private void waitUntilTransactionCompleted(Community community, User user, int expected) throws Exception {
+    log.info(String.format("waiting for transaction."));
+    sessionId = login(user.getUsername(), "passpass");
+
+    for (int i = 0; i < 60; i++) {
+      int balanceInt = given()
+        .cookie("JSESSIONID", sessionId)
+        .when().get("/balance?communityId={id}", community.getId())
+        .then().statusCode(200)
+        .extract().path("balance");
+      BigDecimal balance = BigDecimal.valueOf(balanceInt);
+      if(balance.compareTo(BigDecimal.valueOf(expected)) == 0) {
         log.info(String.format("transaction completed."));
         return;
       }

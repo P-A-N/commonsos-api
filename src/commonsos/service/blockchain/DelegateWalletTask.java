@@ -32,8 +32,8 @@ public class DelegateWalletTask implements Runnable {
   public void run() {
     if (blockchainService.isAllowed(walletOwner, community, INITIAL_TOKEN_AMOUNT.divide(BigInteger.TEN))) return;
     
-    log.info(String.format("Delegating user %s %s wallet to %s", walletOwner.getUsername(), walletOwner.getWalletAddress(), community.getAdminUser().getWalletAddress()));
-    blockchainService.transferEther(community.getAdminUser(), walletOwner.getWalletAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE));
+    log.info(String.format("Delegating user. [userId=%d, communityId=%d]", walletOwner.getId(), community.getId()));
+    blockchainService.transferEther(community, walletOwner.getWalletAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE));
     blockchainService.approveOwner(walletOwner, community);
   }
 }

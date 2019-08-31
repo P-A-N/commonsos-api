@@ -106,6 +106,7 @@ public class UserUtil {
   public static boolean isAdmin(User admin, Long communityId) {
     Optional<Community> community = admin.getCommunityUserList().stream().map(CommunityUser::getCommunity).filter(c -> c.getId().equals(communityId)).findFirst();
     return community.isPresent()
+        && community.get().getAdminUser() != null
         && community.get().getAdminUser().getId().equals(admin.getId());
   }
 

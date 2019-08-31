@@ -84,8 +84,8 @@ public class BlockchainService {
   public boolean isAllowed(User user, Community community, BigInteger floor) {
     try {
       Token token = loadTokenReadOnly(community.getTokenContractAddress());
-      BigInteger allowance = token.allowance(user.getWalletAddress(), community.getAdminUser().getWalletAddress()).send();
-      log.info(String.format("Token allowance info. communityId=%d, userId=%d, spenderId=%d, allowance=%d", community.getId(), user.getId(), community.getAdminUser().getId(), allowance));
+      BigInteger allowance = token.allowance(user.getWalletAddress(), community.getMainWalletAddress()).send();
+      log.info(String.format("Token allowance info. communityId=%d, userId=%d, allowance=%d", community.getId(), user.getId(), allowance));
       return allowance.compareTo(floor) >= 0;
     } catch (Exception e) {
       throw new ServerErrorException(e);
@@ -130,14 +130,7 @@ public class BlockchainService {
   }
 
   public String transferTokens(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    return communityRepository.isAdmin(remitter.getId(), communityId) ?
-      transferTokensAdmin(remitter, beneficiary, communityId, amount) :
-      transferTokensRegular(remitter, beneficiary, communityId, amount);
-  }
-
-  private String transferTokensRegular(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
     Community community = communityRepository.findPublicStrictById(communityId);
-    User walletUser = community.getAdminUser();
     
     if (!isAllowed(remitter, community, toTokensWithoutDecimals(amount))) {
       String message = String.format(
@@ -149,7 +142,7 @@ public class BlockchainService {
     
     log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
     
-    Credentials credentials = credentials(walletUser.getWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
@@ -158,26 +151,6 @@ public class BlockchainService {
     
     TransactionReceipt receipt = handleBlockchainException(() -> {
       return token.transferFrom(remitter.getWalletAddress(), beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
-    });
-    
-    log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
-    return receipt.getTransactionHash();
-  }
-
-  private String transferTokensAdmin(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    Community community = communityRepository.findPublicStrictById(communityId);
-
-    log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", remitter.getWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
-
-    Credentials credentials = credentials(remitter.getWallet(), WALLET_PASSWORD);
-    Token token = loadToken(
-        credentials,
-        community.getTokenContractAddress(),
-        GAS_PRICE,
-        TOKEN_TRANSFER_GAS_LIMIT);
-
-    TransactionReceipt receipt = handleBlockchainException(() -> {
-      return token.transfer(beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
     
     log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
@@ -220,8 +193,8 @@ public class BlockchainService {
     return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
-  public void transferEther(User remitter, String beneficiaryAddress, BigInteger amount) {
-    Credentials credentials = credentials(remitter.getWallet(), WALLET_PASSWORD);
+  public void transferEther(Community community, String beneficiaryAddress, BigInteger amount) {
+    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
     transferEther(credentials, beneficiaryAddress, amount);
   }
   
@@ -418,7 +391,7 @@ public class BlockchainService {
   }
   
   public void approveOwner(User walletOwner, Community community) {
-    log.info(format("Approving token transfer. [owner=%s, spender=%s, amount=%d]", walletOwner.getUsername(), community.getAdminUser().getUsername(), INITIAL_TOKEN_AMOUNT));
+    log.info(format("Approving token transfer. [communityId=%d, userId=%d, amount=%d]", community.getId(), walletOwner.getId(), INITIAL_TOKEN_AMOUNT));
 
     Credentials credentials = credentials(walletOwner.getWallet(), WALLET_PASSWORD);
     Token token = loadToken(
@@ -428,7 +401,7 @@ public class BlockchainService {
         TOKEN_APPROVE_GAS_LIMIT);
     
     TransactionReceipt receipt = handleBlockchainException(() -> {
-      return token.approve(community.getAdminUser().getWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
+      return token.approve(community.getMainWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
     });
 
     log.info(format("Approving token transfer has sent. [hash=%s]", receipt.getTransactionHash()));
