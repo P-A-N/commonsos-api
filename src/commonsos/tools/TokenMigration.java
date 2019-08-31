@@ -190,6 +190,7 @@ public class TokenMigration {
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
+      if (c.getAdminUser() != null && c.getAdminUser().getId().equals(u.getId())) continue;
       waitUntilAllowed(u, c);
 
       BigDecimal balance = transactionRepository.getBalanceFromTransactions(u, c.getId());
@@ -203,6 +204,7 @@ public class TokenMigration {
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
+      if (c.getAdminUser() != null && c.getAdminUser().getId().equals(u.getId())) continue;
       
       waitUntilTransferredToken(u, c);
       BigDecimal balanceFromTransactions = transactionRepository.getBalanceFromTransactions(u, c.getId());
