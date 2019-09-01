@@ -93,7 +93,7 @@ task createNclAccountScript() {
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
 }
 
-task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommunityScript]) {
+task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createTokenMigrationScript, createNclAccountScript]) {
   archiveName "commonsos-api.zip"
   from new File(buildDir, "libs")
   from ('start.sh')
