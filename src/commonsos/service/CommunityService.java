@@ -82,8 +82,8 @@ public class CommunityService {
     if (systemBalance.compareTo(initialEther) < 0) throw new DisplayableException("error.notEnoughFunds");
     
     // create upload photo
-    String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand());
-    String coverPhotoUrl = command.getUploadCoverPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadCoverPhotoCommand());
+    String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand(), "");
+    String coverPhotoUrl = command.getUploadCoverPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadCoverPhotoCommand(), "");
 
     // create wallet
     String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
@@ -161,7 +161,7 @@ public class CommunityService {
     Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
-    String url = imageService.create(command);
+    String url = imageService.create(command, "");
     imageService.delete(community.getPhotoUrl());
     
     community.setPhotoUrl(url);
@@ -173,7 +173,7 @@ public class CommunityService {
     Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
     
-    String url = imageService.create(command);
+    String url = imageService.create(command, "");
     imageService.delete(community.getCoverPhotoUrl());
     
     community.setCoverPhotoUrl(url);

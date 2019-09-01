@@ -65,6 +65,10 @@ public class Configuration {
     return environmentVariable("TRANSACTION_QR_CODE_SIZE", "100");
   }
 
+  public String s3QrPrefix() {
+    return environmentVariable("S3_QR_PREFIX", "qr/");
+  }
+
   public String adminPageHost() {
     return environmentVariable("ADMIN_PAGE_HOST", "admin.test.commonsos.love");
   }

@@ -100,7 +100,7 @@ public class AdService {
     Ad ad = adRepository.findStrict(adId);
     if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
 
-    String url = imageService.create(command);
+    String url = imageService.create(command, "");
     imageService.delete(ad.getPhotoUrl());
     
     ad.setPhotoUrl(url);

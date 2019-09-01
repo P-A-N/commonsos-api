@@ -17,6 +17,7 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
+import commonsos.Configuration;
 import commonsos.JobService;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
@@ -83,6 +84,7 @@ public class UserService {
   @Inject private ImageUploadService imageUploadService;
   @Inject private QrCodeService qrCodeService;
   @Inject private JobService jobService;
+  @Inject private Configuration config;
 
   public User checkPassword(String username, String password) {
     User user = userRepository.findByUsername(username).orElseThrow(AuthenticationException::new);
@@ -214,10 +216,6 @@ public class UserService {
     userRepository.updateTemporary(tempUser.setInvalid(true));
     userRepository.create(user);
 
-    // qr code
-    String qrCodeUrl = getQrCodeUrl(user, null);
-    userRepository.update(user.setQrCodeUrl(qrCodeUrl));
-    
     return user;
   }
   
@@ -337,7 +335,7 @@ public class UserService {
   }
 
   public String updateAvatar(User user, UploadPhotoCommand command) {
-    String url = imageUploadService.create(command);
+    String url = imageUploadService.create(command, "");
     imageUploadService.delete(user.getAvatarUrl());
     user.setAvatarUrl(url);
     userRepository.update(user);
@@ -470,16 +468,18 @@ public class UserService {
     userRepository.update(user);
   }
   
-  public String getQrCodeUrl(User user, BigDecimal amount) {
+  public String getQrCodeUrl(User user, Long communityId, BigDecimal amount) {
+    communityRepository.findPublicStrictById(communityId);
+    
     File imageFile = null;
     try {
       if (amount == null) {
-        imageFile = qrCodeService.getTransactionQrCode(user.getId());
+        imageFile = qrCodeService.getTransactionQrCode(user.getId(), communityId);
       } else {
-        imageFile = qrCodeService.getTransactionQrCode(user.getId(), amount);
+        imageFile = qrCodeService.getTransactionQrCode(user.getId(), communityId, amount);
       }
 
-      return imageUploadService.create(imageFile);
+      return imageUploadService.create(imageFile, config.s3QrPrefix());
     } finally {
       if (imageFile != null) imageFile.delete();
     }

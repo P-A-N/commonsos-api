@@ -302,7 +302,7 @@ public class MessageService {
     if (!thread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
 
     // updatePhoto
-    String url = imageService.create(command);
+    String url = imageService.create(command, "");
     imageService.delete(userMtp.get().getPhotoUrl());
     
     userMtp.get().setPhotoUrl(url);

@@ -84,9 +84,9 @@ public class TestServer extends Server {
     
     // s3
     ImageUploadService imageUploadService = mock(ImageUploadService.class);
-    when(imageUploadService.create(any(InputStream.class))).thenReturn("http://test.com/ad/photo");
-    when(imageUploadService.create(any(File.class))).thenReturn("http://test.com/ad/photo");
-    when(imageUploadService.create(any(UploadPhotoCommand.class))).thenReturn("http://test.com/ad/photo");
+    when(imageUploadService.create(any(InputStream.class), any(String.class))).thenReturn("http://test.com/ad/photo");
+    when(imageUploadService.create(any(File.class), any(String.class))).thenReturn("http://test.com/ad/photo");
+    when(imageUploadService.create(any(UploadPhotoCommand.class), any(String.class))).thenReturn("http://test.com/ad/photo");
     
     // firebase
     PushNotificationService pushNotificationService = mock(PushNotificationService.class);

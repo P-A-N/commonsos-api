@@ -31,14 +31,14 @@ public class QrCodeService {
   @Inject private Configuration config;
   @Inject private Random random;
 
-  public File getTransactionQrCode(Long userId) {
-    String url = String.format("%s?userId=%d", getDownloadPathUrl(), userId);
+  public File getTransactionQrCode(Long userId, Long communityId) {
+    String url = String.format("%s?userId=%d&communityId=%d", getDownloadPathUrl(), userId, communityId);
     int size = Integer.parseInt(config.transactionQrCodeSize());
     return getQrCode(url, size);
   }
   
-  public File getTransactionQrCode(Long userId, BigDecimal amount) {
-    String url = String.format("%s?userId=%d&amount=%s", getDownloadPathUrl(), userId, amount.stripTrailingZeros().toString());
+  public File getTransactionQrCode(Long userId, Long communityId, BigDecimal amount) {
+    String url = String.format("%s?userId=%d&communityId=%d&amount=%s", getDownloadPathUrl(), userId, communityId, amount.stripTrailingZeros().toString());
     int size = Integer.parseInt(config.transactionQrCodeSize());
     return getQrCode(url, size);
   }

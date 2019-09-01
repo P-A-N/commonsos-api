@@ -73,7 +73,7 @@ public class AdminService {
     
     Community community = command.getCommunityId() == null ? null : communityRepository.findPublicStrictById(command.getCommunityId());
     Role role = Role.of(command.getRoleId());
-    String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand());
+    String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand(), "");
 
     String accessId = accessIdService.generateAccessId(id -> {
       String accessIdHash = cryptoService.hash(id);

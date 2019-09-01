@@ -1,22 +1,25 @@
 package commonsos.integration.app.user;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.integration.IntegrationTest;
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 
 public class GetTransactionQrCodeTest extends IntegrationTest {
 
+  private Community com;
   private String sessionId;
   
   @BeforeEach
   public void setup() throws Exception {
-    create(new User().setUsername("user1").setPasswordHash(hash("pass")).setQrCodeUrl("qrCodeUrl"));
+    com = create(new Community().setName("com").setStatus(PUBLIC));
+    create(new User().setUsername("user1").setPasswordHash(hash("pass")));
     sessionId = login("user1", "pass");
   }
   
@@ -26,8 +29,14 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/users/1/qr")
+      .then().statusCode(400);
+    
+    // call api
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/users/1/qr?communityId={id}", com.getId())
       .then().statusCode(200)
-      .body("url",  equalTo("qrCodeUrl"));
+      .body("url",  notNullValue());
   }
   
   @Test
@@ -35,22 +44,22 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?amount=1")
+      .when().get("/users/1/qr?communityId={id}&amount=1", com.getId())
       .then().statusCode(200)
-      .body("url",  not(equalTo("qrCodeUrl")));
+      .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?amount=1.5")
+      .when().get("/users/1/qr?communityId={id}&amount=1.5", com.getId())
       .then().statusCode(200)
-      .body("url",  not(equalTo("qrCodeUrl")));
+      .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?amount=0.00001")
+      .when().get("/users/1/qr?communityId={id}&amount=0.00001", com.getId())
       .then().statusCode(200)
-      .body("url",  not(equalTo("qrCodeUrl")));
+      .body("url",  notNullValue());
   }
 }

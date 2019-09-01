@@ -83,11 +83,6 @@ task copyCompileDependencies(type: Sync) {
   into "build/libs"
 }
 
-task createAddCommunityScript() {
-  new File("$projectDir/add_community.sh").text =
-    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.AddCommunity \$1"""
-}
-
 task createTokenMigrationScript() {
   new File("$projectDir/token_migration.sh").text =
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.TokenMigration \$1"""
@@ -96,11 +91,6 @@ task createTokenMigrationScript() {
 task createNclAccountScript() {
   new File("$projectDir/create_ncl_account.sh").text =
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
-}
-
-task setQrCodeUrlScript() {
-  new File("$projectDir/set_qr_code_url.sh").text =
-    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.SetQrCodeUrl \$1"""
 }
 
 task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommunityScript]) {

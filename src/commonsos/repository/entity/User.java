@@ -30,7 +30,6 @@ public class User extends AbstractEntity {
   private String description;
   private String location;
   private String avatarUrl;
-  private String qrCodeUrl;
   private String status;
   private String telNo;
   private String wallet;

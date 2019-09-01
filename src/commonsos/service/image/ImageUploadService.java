@@ -31,7 +31,7 @@ public class ImageUploadService {
   private AmazonS3 s3client;
   private String bucketName;
 
-  @Inject Configuration config;
+  @Inject private Configuration config;
 
   @Inject void init() {
     bucketName = config.awsS3BucketName();
@@ -44,28 +44,28 @@ public class ImageUploadService {
       .build();
   }
 
-  public String create(InputStream inputStream) {
-    String filename = UUID.randomUUID().toString();
+  public String create(InputStream inputStream, String prefix) {
+    String filename = prefix + UUID.randomUUID().toString();
     s3client.putObject(new PutObjectRequest(bucketName, filename, inputStream, null)
       .withMetadata(metadata())
       .withCannedAcl(CannedAccessControlList.PublicRead));
     return "https://" + bucketName + ".s3.amazonaws.com/" + filename;
   }
   
-  public String create(File file) {
+  public String create(File file, String prefix) {
     try (FileInputStream in = new FileInputStream(file)) {
-      return create(in);
+      return create(in, prefix);
     } catch (Exception e) {
       throw new ServerErrorException(e);
     }
   }
   
-  public String create(UploadPhotoCommand command) {
+  public String create(UploadPhotoCommand command, String prefix) {
     if (command.getCropedPhotoFile() != null) {
-      return create(command.getCropedPhotoFile());
+      return create(command.getCropedPhotoFile(), prefix);
     }
     
-    return create(command.getPhotoFile());
+    return create(command.getPhotoFile(), prefix);
   }
 
   private ObjectMetadata metadata() {

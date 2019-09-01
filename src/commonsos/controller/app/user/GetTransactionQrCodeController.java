@@ -24,16 +24,19 @@ public class GetTransactionQrCodeController extends AfterAppLoginController {
 
   @Override
   protected Object handleAfterLogin(User user, Request request, Response response) {
+    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
     String amount = RequestUtil.getQueryParamString(request, "amount", false);
+
+    String url;
+    if (amount != null) {
+      if (!NumberUtils.isParsable(amount)) throw new BadRequestException("invalid amount");
+      url = userService.getQrCodeUrl(user, communityId, new BigDecimal(amount));
+    } else {
+      url = userService.getQrCodeUrl(user, communityId, null);
+    }
     
     Map<String, String> result = new HashMap<>();
-    if (amount == null) {
-      result.put("url", user.getQrCodeUrl()); 
-    } else {
-      if (!NumberUtils.isParsable(amount)) throw new BadRequestException("");
-      String url = userService.getQrCodeUrl(user, new BigDecimal(amount));
-      result.put("url", url); 
-    }
+    result.put("url", url);
     
     return result;
   }
