@@ -98,9 +98,7 @@ task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createAddCommun
   from new File(buildDir, "libs")
   from ('start.sh')
   from ('stop.sh')
-  from ('add_community.sh')
   from ('token_migration.sh')
   from ('create_ncl_account.sh')
-  from ('set_qr_code_url.sh')
   into "commonsos-api"
 }
