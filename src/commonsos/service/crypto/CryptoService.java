@@ -9,11 +9,16 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import commonsos.Configuration;
 import commonsos.exception.ServerErrorException;
 
 @Singleton
@@ -21,6 +26,8 @@ public class CryptoService {
 
   private static final int KEY_LENGTH = 256;
   private static final String HASH_ALGORITHM = "SHA-256";
+  
+  @Inject private Configuration config;
 
   Base64.Encoder encoder = Base64.getEncoder();
   Base64.Decoder decoder = Base64.getDecoder();
@@ -52,6 +59,38 @@ public class CryptoService {
 
     return Arrays.equals(expectedHash, pbe(plainPassword.toCharArray(), salt, iterations, KEY_LENGTH));
   }
+  
+  public String encryptoWithAES(String plainText) {
+    String aesKey = config.aesKey();
+    SecretKeySpec kSpec = new SecretKeySpec(aesKey.getBytes(), "AES");
+    String aesIv = config.aesIv();
+    IvParameterSpec ivSpec = new IvParameterSpec(aesIv.getBytes());
+    
+    try {
+      Cipher encrypter = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      encrypter.init(Cipher.ENCRYPT_MODE, kSpec, ivSpec);
+      byte[] b = encrypter.doFinal(plainText.getBytes());
+      return encoder.encodeToString(b);
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+  }
+  
+  public String decryptoWithAES(String encryptoText) {
+    String aesKey = config.aesKey();
+    SecretKeySpec kSpec = new SecretKeySpec(aesKey.getBytes(), "AES");
+    String aesIv = config.aesIv();
+    IvParameterSpec ivSpec = new IvParameterSpec(aesIv.getBytes());
+    
+    try {
+      Cipher decrypter = Cipher.getInstance("AES/CBC/PKCS5Padding");
+      decrypter.init(Cipher.DECRYPT_MODE, kSpec, ivSpec);
+      byte[] b = decrypter.doFinal(decoder.decode(encryptoText));
+      return new String(b);
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+  }
 
   byte[] pbe(final char[] text, final byte[] salt, final int iterations, final int keyLength) {
     try {
@@ -61,7 +100,7 @@ public class CryptoService {
       return key.getEncoded();
 
     } catch( NoSuchAlgorithmException | InvalidKeySpecException e ) {
-      throw new RuntimeException( e );
+      throw new ServerErrorException(e);
     }
   }
 

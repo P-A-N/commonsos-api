@@ -470,13 +470,14 @@ public class UserService {
   
   public String getQrCodeUrl(User user, Long communityId, BigDecimal amount) {
     communityRepository.findPublicStrictById(communityId);
+    String cryptoUserId = cryptoService.encryptoWithAES(String.valueOf(user.getId()));
     
     File imageFile = null;
     try {
       if (amount == null) {
-        imageFile = qrCodeService.getTransactionQrCode(user.getId(), communityId);
+        imageFile = qrCodeService.getTransactionQrCode(cryptoUserId, communityId);
       } else {
-        imageFile = qrCodeService.getTransactionQrCode(user.getId(), communityId, amount);
+        imageFile = qrCodeService.getTransactionQrCode(cryptoUserId, communityId, amount);
       }
 
       return imageUploadService.create(imageFile, config.s3QrPrefix());

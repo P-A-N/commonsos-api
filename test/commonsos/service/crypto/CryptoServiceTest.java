@@ -2,13 +2,25 @@ package commonsos.service.crypto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import commonsos.Configuration;
+
+@ExtendWith(MockitoExtension.class)
 public class CryptoServiceTest {
 
-  CryptoService service = spy(new CryptoService());
+  @InjectMocks @Spy CryptoService service;
+  @Spy Configuration config;
+  
+  @Before
+  public void setup() {
+  }
 
   @Test
   public void encryptoPassword() {
@@ -31,5 +43,15 @@ public class CryptoServiceTest {
     String hash = "AAECAwQFBgcICQABAgMEBQYHCAkAAQIDBAUGBwgJDA==|3wRb8pstRs3VEQ02hedNcVJJ6m2jfdcQ9aCAV+xKWyA=|10";
 
     assertThat(service.checkPassword("wrong", hash)).isFalse();
+  }
+  
+  @Test
+  public void encrypto_decrypto_withAES() {
+    String plainText = "hogehoge";
+    String encryptedText = service.encryptoWithAES(plainText);
+    String decryptedText = service.decryptoWithAES(encryptedText);
+
+    assertThat(plainText).isNotEqualTo(encryptedText);
+    assertThat(plainText).isEqualTo(decryptedText);
   }
 }

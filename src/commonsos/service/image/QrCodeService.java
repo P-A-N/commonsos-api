@@ -1,8 +1,13 @@
 package commonsos.service.image;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -13,6 +18,7 @@ import javax.inject.Singleton;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
+import com.google.zxing.client.j2se.MatrixToImageConfig;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -31,14 +37,28 @@ public class QrCodeService {
   @Inject private Configuration config;
   @Inject private Random random;
 
-  public File getTransactionQrCode(Long userId, Long communityId) {
-    String url = String.format("%s?userId=%d&communityId=%d", getDownloadPathUrl(), userId, communityId);
+  public File getTransactionQrCode(String cryptoUserId, Long communityId) {
+    String encodedCryptoUserId;
+    try {
+      encodedCryptoUserId = URLEncoder.encode(cryptoUserId, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new ServerErrorException(e);
+    }
+    
+    String url = String.format("%s?userId=%s&communityId=%d", getDownloadPathUrl(), encodedCryptoUserId, communityId);
     int size = Integer.parseInt(config.transactionQrCodeSize());
     return getQrCode(url, size);
   }
   
-  public File getTransactionQrCode(Long userId, Long communityId, BigDecimal amount) {
-    String url = String.format("%s?userId=%d&communityId=%d&amount=%s", getDownloadPathUrl(), userId, communityId, amount.stripTrailingZeros().toString());
+  public File getTransactionQrCode(String cryptoUserId, Long communityId, BigDecimal amount) {
+    String encodedCryptoUserId;
+    try {
+      encodedCryptoUserId = URLEncoder.encode(cryptoUserId, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new ServerErrorException(e);
+    }
+    
+    String url = String.format("%s?userId=%s&communityId=%d&amount=%s", getDownloadPathUrl(), encodedCryptoUserId, communityId, amount.stripTrailingZeros().toString());
     int size = Integer.parseInt(config.transactionQrCodeSize());
     return getQrCode(url, size);
   }
@@ -53,9 +73,24 @@ public class QrCodeService {
     File imageFile = null;
     try {
       BitMatrix bitMatrix = writer.encode(contents, BarcodeFormat.QR_CODE, size, size, hints);
-      BufferedImage bImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+      MatrixToImageConfig imageConfig = new MatrixToImageConfig(MatrixToImageConfig.BLACK, MatrixToImageConfig.WHITE);
+      
+      BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix, imageConfig);
+
+      URI uri = this.getClass().getResource(config.transactionQrCodeLogoFile()).toURI();
+      BufferedImage logoImage = ImageIO.read(new File(uri));
+      
+      int deltaHeight = qrImage.getHeight() - logoImage.getHeight();
+      int deltaWidth = qrImage.getWidth() - logoImage.getWidth();
+      
+      BufferedImage combined = new BufferedImage(qrImage.getHeight(), qrImage.getWidth(), BufferedImage.TYPE_INT_ARGB);
+      Graphics2D g = (Graphics2D) combined.getGraphics();
+      g.drawImage(qrImage, 0, 0, null);
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+      g.drawImage(logoImage, (int) Math.round(deltaWidth / 2), (int) Math.round(deltaHeight / 2), null);
+      
       imageFile = getTmpFile();
-      ImageIO.write(bImage, "png", imageFile);
+      ImageIO.write(combined, "png", imageFile);
     } catch (Exception e) {
       if (imageFile != null) imageFile.delete();
       log.info(String.format("fail to create qr code. [contents=%s]", contents), e);

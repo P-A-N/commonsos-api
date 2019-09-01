@@ -33,7 +33,7 @@ public class QrCodeServiceTest {
 
   @Test
   public void getTransactionQrCode() throws Exception {
-    File file = qrCodeService.getTransactionQrCode(1L, 2L);
+    File file = qrCodeService.getTransactionQrCode("hoge==", 2L);
     
     QRCodeReader reader = new QRCodeReader();
     BufferedImage image = ImageIO.read(file);
@@ -43,12 +43,12 @@ public class QrCodeServiceTest {
     String content = reader.decode(bitmap).getText();
     file.delete();
     
-    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=1&communityId=2");
+    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=hoge%3D%3D&communityId=2");
   }
   
   @Test
   public void getTransactionQrCode_amount1() throws Exception {
-    File file = qrCodeService.getTransactionQrCode(1L, 2L, new BigDecimal("1"));
+    File file = qrCodeService.getTransactionQrCode("hoge==", 2L, new BigDecimal("1"));
     
     QRCodeReader reader = new QRCodeReader();
     BufferedImage image = ImageIO.read(file);
@@ -58,12 +58,12 @@ public class QrCodeServiceTest {
     String content = reader.decode(bitmap).getText();
     file.delete();
     
-    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=1&communityId=2&amount=1");
+    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=hoge%3D%3D&communityId=2&amount=1");
   }
   
   @Test
   public void getTransactionQrCode_amount1_5() throws Exception {
-    File file = qrCodeService.getTransactionQrCode(1L, 2L, new BigDecimal("1.5"));
+    File file = qrCodeService.getTransactionQrCode("hoge==", 2L, new BigDecimal("1.5"));
     
     QRCodeReader reader = new QRCodeReader();
     BufferedImage image = ImageIO.read(file);
@@ -73,12 +73,12 @@ public class QrCodeServiceTest {
     String content = reader.decode(bitmap).getText();
     file.delete();
     
-    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=1&communityId=2&amount=1.5");
+    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=hoge%3D%3D&communityId=2&amount=1.5");
   }
   
   @Test
   public void getTransactionQrCode_amount0_00001() throws Exception {
-    File file = qrCodeService.getTransactionQrCode(1L, 2L, new BigDecimal("0.00001"));
+    File file = qrCodeService.getTransactionQrCode("hoge==", 2L, new BigDecimal("0.00001"));
     
     QRCodeReader reader = new QRCodeReader();
     BufferedImage image = ImageIO.read(file);
@@ -88,6 +88,6 @@ public class QrCodeServiceTest {
     String content = reader.decode(bitmap).getText();
     file.delete();
     
-    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=1&communityId=2&amount=0.00001");
+    assertThat(content).isEqualTo("https://" + config.commonsosHost() + config.downloadPagePath() + "?userId=hoge%3D%3D&communityId=2&amount=0.00001");
   }
 }

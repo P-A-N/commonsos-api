@@ -62,7 +62,11 @@ public class Configuration {
   }
 
   public String transactionQrCodeSize() {
-    return environmentVariable("TRANSACTION_QR_CODE_SIZE", "100");
+    return environmentVariable("TRANSACTION_QR_CODE_SIZE", "492");
+  }
+
+  public String transactionQrCodeLogoFile() {
+    return environmentVariable("TRANSACTION_QR_CODE_LOGO_FILE", "/images/logo_170x162.png");
   }
 
   public String s3QrPrefix() {
@@ -91,6 +95,14 @@ public class Configuration {
 
   public String initialWei() {
     return environmentVariable("INITIAL_WEI", "1000000000000000000");
+  }
+
+  public String aesKey() {
+    return environmentVariable("AES_KEY", "commonsos_aes_256bid_key_uSwVjWP");
+  }
+
+  public String aesIv() {
+    return environmentVariable("AES_IV", "commonsos_aes_iv");
   }
 
   public String environmentVariable(String key) {
