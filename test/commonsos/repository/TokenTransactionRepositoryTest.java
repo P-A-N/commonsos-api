@@ -57,8 +57,7 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   public void update() {
     Long id = inTransaction(() -> repository.create(new TokenTransaction()
       .setCommunityId(id("community id"))
-      .setAmount(TEN))
-      .getId());
+      .setAmount(TEN))).getId();
 
     inTransaction(() -> {
       TokenTransaction existing = em().find(TokenTransaction.class, id);

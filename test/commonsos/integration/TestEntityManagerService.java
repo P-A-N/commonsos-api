@@ -29,6 +29,7 @@ public class TestEntityManagerService extends EntityManagerService {
       "messages",
       "message_threads",
       "token_transactions",
+      "eth_transactions",
       "communities",
       "community_users",
       "community_notifications",
@@ -55,6 +56,7 @@ public class TestEntityManagerService extends EntityManagerService {
       + "message_threads, "
       + "message_thread_parties, "
       + "token_transactions, "
+      + "eth_transactions, "
       + "temporary_users, "
       + "temporary_community_users, "
       + "temporary_email_address, "

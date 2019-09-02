@@ -46,8 +46,8 @@ public class TokenTransactionRepository extends Repository {
     return resultList;
   }
 
-  public void update(TokenTransaction transaction) {
-    em().merge(transaction);
+  public TokenTransaction update(TokenTransaction transaction) {
+    return em().merge(transaction);
   }
 
   public Optional<TokenTransaction> findByBlockchainTransactionHash(String blockchainTransactionHash) {
