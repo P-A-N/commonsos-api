@@ -4,9 +4,9 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,24 +71,22 @@ public class QrCodeService {
     
     QRCodeWriter writer = new QRCodeWriter();
     File imageFile = null;
-    try {
+    try (InputStream logoIns = this.getClass().getResourceAsStream(config.transactionQrCodeLogoFile())) {
+      BufferedImage logoImage = ImageIO.read(logoIns);
+
       BitMatrix bitMatrix = writer.encode(contents, BarcodeFormat.QR_CODE, size, size, hints);
       MatrixToImageConfig imageConfig = new MatrixToImageConfig(MatrixToImageConfig.BLACK, MatrixToImageConfig.WHITE);
-      
       BufferedImage qrImage = MatrixToImageWriter.toBufferedImage(bitMatrix, imageConfig);
 
-      URI uri = this.getClass().getResource(config.transactionQrCodeLogoFile()).toURI();
-      BufferedImage logoImage = ImageIO.read(new File(uri));
-      
       int deltaHeight = qrImage.getHeight() - logoImage.getHeight();
       int deltaWidth = qrImage.getWidth() - logoImage.getWidth();
-      
+
       BufferedImage combined = new BufferedImage(qrImage.getHeight(), qrImage.getWidth(), BufferedImage.TYPE_INT_ARGB);
       Graphics2D g = (Graphics2D) combined.getGraphics();
       g.drawImage(qrImage, 0, 0, null);
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
       g.drawImage(logoImage, (int) Math.round(deltaWidth / 2), (int) Math.round(deltaHeight / 2), null);
-      
+
       imageFile = getTmpFile();
       ImageIO.write(combined, "png", imageFile);
     } catch (Exception e) {
