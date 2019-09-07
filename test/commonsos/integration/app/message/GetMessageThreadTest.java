@@ -76,7 +76,7 @@ public class GetMessageThreadTest extends IntegrationTest {
             )));
     create(new Message().setThreadId(directThread.getId()).setText("directMessage"));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
   }
   
   @Test
@@ -84,7 +84,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get adThreads
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/{id}", adThread.getId())
+      .when().get("/app/v99/message-threads/{id}", adThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(adThread.getId().intValue()))
       .body("title", equalTo("adThread"))
@@ -103,7 +103,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get groupThread
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/{id}", groupThread.getId())
+      .when().get("/app/v99/message-threads/{id}", groupThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(groupThread.getId().intValue()))
       .body("title", equalTo("groupThread"))
@@ -123,7 +123,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get directThread
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/{id}", directThread.getId())
+      .when().get("/app/v99/message-threads/{id}", directThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(directThread.getId().intValue()))
       .body("title", equalTo("directThread"))
@@ -143,12 +143,12 @@ public class GetMessageThreadTest extends IntegrationTest {
   @Test
   public void getMessageThreadsById_notMember() {
     // login with user who is not a member of adThreads
-    sessionId = login("user3", "pass");
+    sessionId = loginApp("user3", "pass");
     
     // get adThreads
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/{id}", adThread.getId())
+      .when().get("/app/v99/message-threads/{id}", adThread.getId())
       .then().statusCode(403);
   }
 }

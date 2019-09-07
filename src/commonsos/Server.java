@@ -166,7 +166,8 @@ public class Server {
     before(injector.getInstance(LogFilter.class));
     before((request, response) -> log.info(requestInfo(request)));
 
-    initAppUserRoutes();
+    initAppRoutes();
+    initWordPressRoutes();
     initAdminPageRoutes();
     
     exception(BadRequestException.class, (exception, request, response) -> {
@@ -196,70 +197,77 @@ public class Server {
     });
   }
 
-  private void initAppUserRoutes() {
-    post("/login", injector.getInstance(AppLoginController.class), toJson);
-    post("/logout", injector.getInstance(AppLogoutController.class), toJson);
-    post("/create-account", injector.getInstance(CreateUserTemporaryController.class), toJson);
-    post("/create-account/:accessId", injector.getInstance(CreateUserCompleteController.class), toJson);
-    get("/user", injector.getInstance(UserController.class), toJson);
-    get("/users/:id", injector.getInstance(UserController.class), toJson);
-    post("/users/:id", injector.getInstance(UserUpdateController.class), toJson);
-    post("/users/:id/username", injector.getInstance(UserNameUpdateController.class), toJson);
-    post("/users/:id/status", injector.getInstance(UserStatusUpdateController.class), toJson);
-    post("/users/:id/passwordreset", injector.getInstance(UserPasswordResetRequestController.class), toJson);
-    post("/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
-    post("/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
-    get("/users/:id/qr", injector.getInstance(GetTransactionQrCodeController.class), toJson);
-    post("/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
-    get("/users", injector.getInstance(UserSearchController.class), toJson);
-    get("/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);
-    post("/users/:id/communities", injector.getInstance(UserUpdateCommunitiesController.class), toJson);
-    post("/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
-    post("/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
-    post("/users/:id/wallet/lastViewTime", injector.getInstance(UpdateWalletLastViewTimeController.class), toJson);
-    post("/users/:id/ad/lastViewTime", injector.getInstance(UpdateAdLastViewTimeController.class), toJson);
-    post("/users/:id/notification/lastViewTime", injector.getInstance(UpdateNotificationLastViewTimeController.class), toJson);
-    post("/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);
-    get("/passwordreset/:accessId", injector.getInstance(PasswordResetRequestCheckController.class), toJson);
-    post("/passwordreset/:accessId", injector.getInstance(PasswordResetController.class), toJson);
+  private void initAppRoutes() {
+    post("/app/:version/login", injector.getInstance(AppLoginController.class), toJson);
+    post("/app/:version/logout", injector.getInstance(AppLogoutController.class), toJson);
+    post("/app/:version/create-account", injector.getInstance(CreateUserTemporaryController.class), toJson);
+    post("/app/:version/create-account/:accessId", injector.getInstance(CreateUserCompleteController.class), toJson);
+    get("/app/:version/user", injector.getInstance(UserController.class), toJson);
+    get("/app/:version/users/:id", injector.getInstance(UserController.class), toJson);
+    post("/app/:version/users/:id", injector.getInstance(UserUpdateController.class), toJson);
+    post("/app/:version/users/:id/username", injector.getInstance(UserNameUpdateController.class), toJson);
+    post("/app/:version/users/:id/status", injector.getInstance(UserStatusUpdateController.class), toJson);
+    post("/app/:version/users/:id/passwordreset", injector.getInstance(UserPasswordResetRequestController.class), toJson);
+    post("/app/:version/users/:id/delete", injector.getInstance(UserDeleteController.class), toJson);
+    post("/app/:version/users/:id/avatar", injector.getInstance(UserAvatarUpdateController.class), toJson);
+    get("/app/:version/users/:id/qr", injector.getInstance(GetTransactionQrCodeController.class), toJson);
+    post("/app/:version/users/:id/mobile-device", injector.getInstance(UserMobileDeviceUpdateController.class), toJson);
+    get("/app/:version/users", injector.getInstance(UserSearchController.class), toJson);
+    get("/app/:version/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);
+    post("/app/:version/users/:id/communities", injector.getInstance(UserUpdateCommunitiesController.class), toJson);
+    post("/app/:version/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
+    post("/app/:version/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
+    post("/app/:version/users/:id/wallet/lastViewTime", injector.getInstance(UpdateWalletLastViewTimeController.class), toJson);
+    post("/app/:version/users/:id/ad/lastViewTime", injector.getInstance(UpdateAdLastViewTimeController.class), toJson);
+    post("/app/:version/users/:id/notification/lastViewTime", injector.getInstance(UpdateNotificationLastViewTimeController.class), toJson);
+    post("/app/:version/passwordreset", injector.getInstance(PasswordResetRequestController.class), toJson);
+    get("/app/:version/passwordreset/:accessId", injector.getInstance(PasswordResetRequestCheckController.class), toJson);
+    post("/app/:version/passwordreset/:accessId", injector.getInstance(PasswordResetController.class), toJson);
 
-    post("/ads", injector.getInstance(AdCreateController.class), toJson);
-    get("/ads", injector.getInstance(AdListController.class), toJson);
-    get("/ads/:id", injector.getInstance(AdController.class), toJson);
-    post("/ads/:id", injector.getInstance(AdUpdateController.class), toJson);
-    post("/ads/:id/delete", injector.getInstance(AdDeleteController.class), toJson);
-    post("/ads/:id/photo", injector.getInstance(AdPhotoUpdateController.class), toJson);
-    get("/my-ads", injector.getInstance(MyAdsController.class), toJson);
+    post("/app/:version/ads", injector.getInstance(AdCreateController.class), toJson);
+    get("/app/:version/ads", injector.getInstance(AdListController.class), toJson);
+    get("/app/:version/ads/:id", injector.getInstance(AdController.class), toJson);
+    post("/app/:version/ads/:id", injector.getInstance(AdUpdateController.class), toJson);
+    post("/app/:version/ads/:id/delete", injector.getInstance(AdDeleteController.class), toJson);
+    post("/app/:version/ads/:id/photo", injector.getInstance(AdPhotoUpdateController.class), toJson);
+    get("/app/:version/my-ads", injector.getInstance(MyAdsController.class), toJson);
 
-    get("/balance", injector.getInstance(BalanceController.class), toJson);
-    get("/transactions", injector.getInstance(TransactionListController.class), toJson);
-    post("/transactions", injector.getInstance(TransactionCreateController.class), toJson);
+    get("/app/:version/balance", injector.getInstance(BalanceController.class), toJson);
+    get("/app/:version/transactions", injector.getInstance(TransactionListController.class), toJson);
+    post("/app/:version/transactions", injector.getInstance(TransactionCreateController.class), toJson);
 
-    post("/message-threads/for-ad/:adId", injector.getInstance(MessageThreadForAdController.class), toJson);
-    post("/message-threads/user/:userId", injector.getInstance(MessageThreadWithUserController.class), toJson);
+    post("/app/:version/message-threads/for-ad/:adId", injector.getInstance(MessageThreadForAdController.class), toJson);
+    post("/app/:version/message-threads/user/:userId", injector.getInstance(MessageThreadWithUserController.class), toJson);
 
-    post("/message-threads/group", injector.getInstance(GroupMessageThreadController.class), toJson);
-    post("/message-threads/:id/group", injector.getInstance(GroupMessageThreadUpdateController.class), toJson);
-    post("/message-threads/:id/title", injector.getInstance(UpdateMessageThreadPersonalTitleController.class), toJson);
-    post("/message-threads/:id/photo", injector.getInstance(MessageThreadPhotoUpdateController.class), toJson);
-    post("/message-threads/:id/unsubscribe", injector.getInstance(MessageThreadUnsubscribeController.class), toJson);
+    post("/app/:version/message-threads/group", injector.getInstance(GroupMessageThreadController.class), toJson);
+    post("/app/:version/message-threads/:id/group", injector.getInstance(GroupMessageThreadUpdateController.class), toJson);
+    post("/app/:version/message-threads/:id/title", injector.getInstance(UpdateMessageThreadPersonalTitleController.class), toJson);
+    post("/app/:version/message-threads/:id/photo", injector.getInstance(MessageThreadPhotoUpdateController.class), toJson);
+    post("/app/:version/message-threads/:id/unsubscribe", injector.getInstance(MessageThreadUnsubscribeController.class), toJson);
 
-    get("/message-threads/unread-count", injector.getInstance(MessageThreadUnreadCountController.class), toJson);
-    get("/message-threads/:id", injector.getInstance(MessageThreadController.class), toJson);
-    get("/message-threads", injector.getInstance(MessageThreadListController.class), toJson);
-    post("/message-threads/:id/messages", injector.getInstance(MessagePostController.class), toJson);
-    get("/message-threads/:id/messages", injector.getInstance(MessageListController.class), toJson);
+    get("/app/:version/message-threads/unread-count", injector.getInstance(MessageThreadUnreadCountController.class), toJson);
+    get("/app/:version/message-threads/:id", injector.getInstance(MessageThreadController.class), toJson);
+    get("/app/:version/message-threads", injector.getInstance(MessageThreadListController.class), toJson);
+    post("/app/:version/message-threads/:id/messages", injector.getInstance(MessagePostController.class), toJson);
+    get("/app/:version/message-threads/:id/messages", injector.getInstance(MessageListController.class), toJson);
 
-    get("/communities", injector.getInstance(CommunityListController.class), toJson);
-    post("/communities/:id/photo", injector.getInstance(CommunityPhotoUpdateController.class), toJson);
-    post("/communities/:id/coverPhoto", injector.getInstance(CommunityCoverPhotoUpdateController.class), toJson);
-    post("/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
-    get("/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
+    get("/app/:version/communities", injector.getInstance(CommunityListController.class), toJson);
+    post("/app/:version/communities/:id/photo", injector.getInstance(CommunityPhotoUpdateController.class), toJson);
+    post("/app/:version/communities/:id/coverPhoto", injector.getInstance(CommunityCoverPhotoUpdateController.class), toJson);
+    post("/app/:version/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
+    get("/app/:version/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
     // TODO change path
-    post("/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
+    post("/app/:version/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
     // TODO delete
-    get("/admin/transactions", injector.getInstance(AdminTransactionListController.class), toJson);
+    get("/app/:version/admin/transactions", injector.getInstance(AdminTransactionListController.class), toJson);
+  }
+
+  private void initWordPressRoutes() {
+    post("/wordpress/login", injector.getInstance(AppLoginController.class), toJson);
+    post("/wordpress/logout", injector.getInstance(AppLogoutController.class), toJson);
+    post("/wordpress/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
+    get("/wordpress/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
   }
   
   private void initAdminPageRoutes() {

@@ -40,7 +40,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> createAccountParam = getCreateAccountParam();
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(200);
     
     // verify email
@@ -53,25 +53,25 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> loginParam = getLoginParam();
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(401);
     
     // createAccountComplete
     given()
-      .when().post("/create-account/{accessId}", accessId)
+      .when().post("/app/v99/create-account/{accessId}", accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .body("communityList.name", contains("community1", "community2"));
     
     // check if accessId is invalid
     given()
-      .when().post("/create-account/{accessId}", accessId)
+      .when().post("/app/v99/create-account/{accessId}", accessId)
       .then().statusCode(400);
 
     // username already taken
@@ -79,7 +79,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     createAccountParam2.put("emailAddress", "test2@test.com");
     given()
       .body(gson.toJson(createAccountParam2))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(468);
 
     // email address already taken
@@ -87,7 +87,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     createAccountParam3.put("username", "user2");
     given()
       .body(gson.toJson(createAccountParam3))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(468);
   }
   
@@ -98,20 +98,20 @@ public class PostCreateAccountTest extends IntegrationTest {
 
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(200);
     
     String accessId = extractAccessId(wiser.getMessages().get(0));
     Map<String, Object> loginParam = getLoginParam();
     given()
-      .when().post("/create-account/{accessId}", accessId)
+      .when().post("/app/v99/create-account/{accessId}", accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .body("communityList.name", contains("community1"));
   }
@@ -123,20 +123,20 @@ public class PostCreateAccountTest extends IntegrationTest {
 
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(200);
     
     String accessId = extractAccessId(wiser.getMessages().get(0));
     Map<String, Object> loginParam = getLoginParam();
     given()
-      .when().post("/create-account/{accessId}", accessId)
+      .when().post("/app/v99/create-account/{accessId}", accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .body("communityList.name", empty());
   }

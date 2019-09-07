@@ -41,7 +41,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     // create group chat
     Map<String, Object> requestParam = new HashMap<>();
@@ -51,7 +51,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     int id = given()
         .cookie("JSESSIONID", sessionId)
         .body(gson.toJson(requestParam))
-        .when().post("/message-threads/group")
+        .when().post("/app/v99/message-threads/group")
         .then().statusCode(200)
         .extract().path("id");
     messageThreadId = (long) id;
@@ -68,7 +68,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     int id = given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/group", messageThreadId)
+      .when().post("/app/v99/message-threads/{id}/group", messageThreadId)
       .then().statusCode(200)
       .body("id", equalTo(messageThreadId.intValue()))
       .body("ad.id", nullValue())
@@ -110,7 +110,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/group", messageThreadId)
+      .when().post("/app/v99/message-threads/{id}/group", messageThreadId)
       .then().statusCode(400);
   }
 }

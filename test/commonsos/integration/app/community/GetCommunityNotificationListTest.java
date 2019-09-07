@@ -34,14 +34,14 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
   public void communityNotificationList() {
     // call api
     given()
-      .when().get("/communities/{id}/notification", community1.getId())
+      .when().get("/app/v99/communities/{id}/notification", community1.getId())
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains("notification1_1", "notification1_2", "notification1_3"))
       .body("notificationList.updatedAt", contains("2019-01-01T12:10:10Z", "2019-01-02T12:10:10Z", "2019-01-03T12:10:10Z"));
 
     // call api
     given()
-      .when().get("/communities/{id}/notification", community2.getId())
+      .when().get("/app/v99/communities/{id}/notification", community2.getId())
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains("notification2_1", "notification2_2"))
       .body("notificationList.updatedAt", contains("2019-02-01T12:10:10Z", "2019-02-02T12:10:10Z"));
@@ -66,7 +66,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
 
     // page 0 size 10 asc
     given()
-      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "ASC")
+      .when().get("/app/v99/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "ASC")
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains(
           "page_notification1", "page_notification2", "page_notification3", "page_notification4", "page_notification5",
@@ -78,7 +78,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
 
     // page 1 size 10 asc
     given()
-      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "ASC")
+      .when().get("/app/v99/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "ASC")
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains(
           "page_notification11", "page_notification12"))
@@ -89,7 +89,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
 
     // page 0 size 10 desc
     given()
-      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "DESC")
+      .when().get("/app/v99/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "DESC")
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains(
           "page_notification12", "page_notification11", "page_notification10", "page_notification9", "page_notification8",
@@ -101,7 +101,7 @@ public class GetCommunityNotificationListTest extends IntegrationTest {
 
     // page 1 size 10 desc
     given()
-      .when().get("/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "DESC")
+      .when().get("/app/v99/communities/{id}/notification?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "DESC")
       .then().statusCode(200)
       .body("notificationList.wordpressId", contains(
           "page_notification2", "page_notification1"))

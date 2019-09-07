@@ -44,7 +44,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
     ad =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     // create group thread
     Map<String, Object> requestParam = new HashMap<>();
@@ -54,7 +54,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     int id = given()
         .cookie("JSESSIONID", sessionId)
         .body(gson.toJson(requestParam))
-        .when().post("/message-threads/group")
+        .when().post("/app/v99/message-threads/group")
         .then().statusCode(200)
         .extract().path("id");
      groupThreadId = (long) id;
@@ -62,7 +62,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     // create ad thread
      id = given()
         .cookie("JSESSIONID", sessionId)
-        .when().post("/message-threads/for-ad/{adId}", ad.getId())
+        .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
         .then().statusCode(200)
         .extract().path("id");
      adThreadId = (long) id;
@@ -79,7 +79,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/{id}/photo", groupThreadId)
+      .when().post("/app/v99/message-threads/{id}/photo", groupThreadId)
       .then().statusCode(200);
 
     // crop
@@ -90,13 +90,13 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/{id}/photo", groupThreadId)
+      .when().post("/app/v99/message-threads/{id}/photo", groupThreadId)
       .then().statusCode(200);
   }
   
   @Test
   public void updatePhoto_notMember() throws URISyntaxException {
-    sessionId = login("otherCommunityUser", "pass");
+    sessionId = loginApp("otherCommunityUser", "pass");
 
     // prepare
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -107,7 +107,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/{id}/photo", groupThreadId)
+      .when().post("/app/v99/message-threads/{id}/photo", groupThreadId)
       .then().statusCode(400);
   }
   
@@ -122,7 +122,7 @@ public class PostMessageThreadPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/{id}/photo", adThreadId)
+      .when().post("/app/v99/message-threads/{id}/photo", adThreadId)
       .then().statusCode(400);
   }
 }

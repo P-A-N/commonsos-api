@@ -38,7 +38,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
   }
   
   @Test
@@ -50,7 +50,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
     int id = given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/user/{userId}", user2.getId())
+      .when().post("/app/v99/message-threads/user/{userId}", user2.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
@@ -89,7 +89,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/user/{userId}", otherCommunityUser.getId())
+      .when().post("/app/v99/message-threads/user/{userId}", otherCommunityUser.getId())
       .then().statusCode(400);
   }
 }

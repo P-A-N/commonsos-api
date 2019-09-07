@@ -22,7 +22,7 @@ public class PostUpdateUserTest extends IntegrationTest {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     create(new User().setUsername("user2").setPasswordHash(hash("password")).setEmailAddress("user2@test.com"));
     
-    sessionId = login("user", "password");
+    sessionId = loginApp("user", "password");
   }
   
   @Test
@@ -39,7 +39,7 @@ public class PostUpdateUserTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}", user.getId())
+      .when().post("/app/v99/users/{id}", user.getId())
       .then().statusCode(200)
       .body("fullName", equalTo("test_lastName test_firstName"))
       .body("firstName", equalTo("test_firstName"))

@@ -20,7 +20,7 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
   public void setup() throws Exception {
     com = create(new Community().setName("com").setStatus(PUBLIC));
     create(new User().setUsername("user1").setPasswordHash(hash("pass")));
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
   }
   
   @Test
@@ -28,13 +28,13 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr")
+      .when().get("/app/v99/users/1/qr")
       .then().statusCode(400);
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?communityId={id}", com.getId())
+      .when().get("/app/v99/users/1/qr?communityId={id}", com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
   }
@@ -44,21 +44,21 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?communityId={id}&amount=1", com.getId())
+      .when().get("/app/v99/users/1/qr?communityId={id}&amount=1", com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?communityId={id}&amount=1.5", com.getId())
+      .when().get("/app/v99/users/1/qr?communityId={id}&amount=1.5", com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/1/qr?communityId={id}&amount=0.00001", com.getId())
+      .when().get("/app/v99/users/1/qr?communityId={id}&amount=0.00001", com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
   }

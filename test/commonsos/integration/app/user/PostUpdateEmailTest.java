@@ -34,15 +34,15 @@ public class PostUpdateEmailTest extends IntegrationTest {
     Map<String, Object> updateEmailTemporaryParam = getUpdateEmailTemporaryParam();
     given()
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/users/{:id}/emailaddress", user.getId())
+      .when().post("/app/v99/users/{:id}/emailaddress", user.getId())
       .then().statusCode(401);
     
     // it should success after login
-    sessionId = login("user", "password");
+    sessionId = loginApp("user", "password");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/users/{id}/emailaddress", user.getId())
+      .when().post("/app/v99/users/{id}/emailaddress", user.getId())
       .then().statusCode(200);
     
     // verify email
@@ -56,35 +56,35 @@ public class PostUpdateEmailTest extends IntegrationTest {
     createAccountParam.put("emailAddress", "user@test.com");
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(468);
     createAccountParam.put("emailAddress", "updated@test.com");
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(468);
-    sessionId2 = login("user2", "password");
+    sessionId2 = loginApp("user2", "password");
     given()
       .cookie("JSESSIONID", sessionId2)
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/users/{id}/emailaddress", user2.getId())
+      .when().post("/app/v99/users/{id}/emailaddress", user2.getId())
       .then().statusCode(468);
     
     // updateEmail complete
     given()
-      .when().post("/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
+      .when().post("/app/v99/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
       .then().statusCode(200);
     
     // check email address is updated
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("emailAddress",  equalTo("updated@test.com"));
 
     // check if accessId is invalid
     given()
-      .when().post("/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
+      .when().post("/app/v99/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
       .then().statusCode(400);
   }
   

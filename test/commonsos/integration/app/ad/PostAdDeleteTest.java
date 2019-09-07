@@ -52,12 +52,12 @@ public class PostAdDeleteTest extends IntegrationTest {
   @Test
   public void adDelete_byUser() {
     // delete by non creator
-    sessionId = login("user2", "pass");
+    sessionId = loginApp("user2", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v99/ads/{id}/delete", ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -65,12 +65,12 @@ public class PostAdDeleteTest extends IntegrationTest {
     assertThat(actual.isDeleted()).isFalse();
 
     // delete by creator
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v99/ads/{id}/delete", ad_user1.getId())
       .then().statusCode(200);
     
     // verify
@@ -86,12 +86,12 @@ public class PostAdDeleteTest extends IntegrationTest {
   @Test
   public void adDelete_byAdmin() {
     // delete by creator
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -99,12 +99,12 @@ public class PostAdDeleteTest extends IntegrationTest {
     assertThat(actual.isDeleted()).isFalse();
 
     // delete by other admin
-    sessionId = login("admin2", "pass");
+    sessionId = loginApp("admin2", "pass");
 
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -112,12 +112,12 @@ public class PostAdDeleteTest extends IntegrationTest {
     assertThat(actual.isDeleted()).isFalse();
     
     // delete by admin
-    sessionId = login("admin1", "pass");
+    sessionId = loginApp("admin1", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
       .then().statusCode(200);
     
     // verify

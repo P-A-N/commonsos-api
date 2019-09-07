@@ -25,7 +25,7 @@ public class GetBalanceTest extends IntegrationTest {
     community =  create(new Community().setStatus(PUBLIC).setName("community"));
     create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -33,7 +33,7 @@ public class GetBalanceTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/balance?communityId={communityId}", community.getId())
+      .when().get("/app/v99/balance?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());

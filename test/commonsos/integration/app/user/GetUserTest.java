@@ -38,7 +38,7 @@ public class GetUserTest extends IntegrationTest {
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2))));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
   }
   
   @Test
@@ -46,7 +46,7 @@ public class GetUserTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))
@@ -56,12 +56,12 @@ public class GetUserTest extends IntegrationTest {
   
   @Test
   public void getUser_other_by_admin() {
-    sessionId = login("admin", "pass");
+    sessionId = loginApp("admin", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/{id}", user1.getId())
+      .when().get("/app/v99/users/{id}", user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))
@@ -70,12 +70,12 @@ public class GetUserTest extends IntegrationTest {
   
   @Test
   public void getUser_other_by_gneral() {
-    sessionId = login("user2", "pass");
+    sessionId = loginApp("user2", "pass");
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users/{id}", user1.getId())
+      .when().get("/app/v99/users/{id}", user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))

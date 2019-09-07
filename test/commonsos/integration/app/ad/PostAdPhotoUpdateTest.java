@@ -31,7 +31,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
     
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -45,7 +45,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}/photo", ad.getId())
+      .when().post("/app/v99/ads/{id}/photo", ad.getId())
       .then().statusCode(200);
     
     // call api (crop)
@@ -56,7 +56,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}/photo", ad.getId())
+      .when().post("/app/v99/ads/{id}/photo", ad.getId())
       .then().statusCode(200);
   }
 }

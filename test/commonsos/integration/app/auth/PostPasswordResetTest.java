@@ -29,7 +29,7 @@ public class PostPasswordResetTest extends IntegrationTest {
     Map<String, Object> passwordResetRequestParam = getPasswordResetRequestParam();
     given()
       .body(gson.toJson(passwordResetRequestParam))
-      .when().post("/passwordreset")
+      .when().post("/app/v99/passwordreset")
       .then().statusCode(200);
 
     // verify email
@@ -40,23 +40,23 @@ public class PostPasswordResetTest extends IntegrationTest {
     
     // passwordResetCheck
     given()
-      .when().get("/passwordreset/{accessId}", accessId)
+      .when().get("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(200);
 
     // passwordReset
     Map<String, Object> passwordResetParam = getPasswordResetParam();
     given()
       .body(gson.toJson(passwordResetParam))
-      .when().post("/passwordreset/{accessId}", accessId)
+      .when().post("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(200);
 
     // check if accessId is invalid
     given()
-      .when().get("/passwordreset/{accessId}", accessId)
+      .when().get("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(400);
     given()
       .body(gson.toJson(passwordResetParam))
-      .when().post("/passwordreset/{accessId}", accessId)
+      .when().post("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(400);
     
     // login
@@ -65,13 +65,13 @@ public class PostPasswordResetTest extends IntegrationTest {
     loginParam.put("password", "password1");
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(401);
     
     loginParam.put("password", "password2");
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200);
   }
   

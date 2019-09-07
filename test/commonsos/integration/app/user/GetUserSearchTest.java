@@ -30,7 +30,7 @@ public class GetUserSearchTest extends IntegrationTest {
     create(new User().setUsername("otherUser2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     create(new User().setUsername("otherCommunityUser1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
   }
   
   @Test
@@ -38,7 +38,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api (filter)
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}", community.getId(), "user1")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}", community.getId(), "user1")
       .then().statusCode(200)
       .body("userList.username", contains("otherUser1"))
       .body("userList.communityList.name", contains(contains("community")))
@@ -47,7 +47,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api (non filter)
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}", community.getId())
+      .when().get("/app/v99/users?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("userList.username", contains("otherUser1", "otherUser2"));
   }
@@ -57,7 +57,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}", otherCommunity.getId(), "user")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}", otherCommunity.getId(), "user")
       .then().statusCode(200)
       .body("userList.username", contains("otherCommunityUser1"));
   }
@@ -79,12 +79,12 @@ public class GetUserSearchTest extends IntegrationTest {
     create(new User().setUsername("page_user11").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
     create(new User().setUsername("page_user12").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity))));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
     
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user1", "page_user2", "page_user3", "page_user4", "page_user5",
@@ -97,7 +97,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user11", "page_user12"))
@@ -109,7 +109,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user12", "page_user11", "page_user10", "page_user9", "page_user8",
@@ -122,7 +122,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user2", "page_user1"))

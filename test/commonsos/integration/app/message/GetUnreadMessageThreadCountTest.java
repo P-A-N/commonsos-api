@@ -75,17 +75,17 @@ public class GetUnreadMessageThreadCountTest extends IntegrationTest {
   @Test
   public void getMessageThreads() {
     // get threads for user1
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/unread-count?communityId={communityId}", community1.getId())
+      .when().get("/app/v99/message-threads/unread-count?communityId={communityId}", community1.getId())
       .then().statusCode(200)
       .body("count", equalTo(2));
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads/unread-count?communityId={communityId}", community2.getId())
+      .when().get("/app/v99/message-threads/unread-count?communityId={communityId}", community2.getId())
       .then().statusCode(200)
       .body("count", equalTo(4));
   }

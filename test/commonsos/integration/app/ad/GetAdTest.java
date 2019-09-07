@@ -28,14 +28,14 @@ public class GetAdTest extends IntegrationTest {
     user = create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad = create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()).setPoints(TEN));
     
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
   public void adList() {
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads/{id}", ad.getId())
+      .when().get("/app/v99/ads/{id}", ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(ad.getId().intValue()));
   }

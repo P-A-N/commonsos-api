@@ -83,28 +83,28 @@ public class IntegrationTest {
     wiser.stop();
   }
   
-  public String login(String username, String password) {
+  public String loginApp(String username, String password) {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("username", username);
     requestParam.put("password", password);
     
     String sessionId = given()
       .body(gson.toJson(requestParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .extract().cookie("JSESSIONID");
     
     return sessionId;
   }
   
-  public void failLogin(String username, String password) {
+  public void failLoginApp(String username, String password) {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("username", username);
     requestParam.put("password", password);
     
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(401);
   }
 

@@ -21,7 +21,7 @@ public class PostUpdateStatusTest extends IntegrationTest {
   public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("password")).setEmailAddress("user@test.com"));
     
-    sessionId = login("user", "password");
+    sessionId = loginApp("user", "password");
   }
   
   @Test
@@ -33,7 +33,7 @@ public class PostUpdateStatusTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/status", user.getId())
+      .when().post("/app/v99/users/{id}/status", user.getId())
       .then().statusCode(200)
       .body("status", equalTo("hoge"));
   }

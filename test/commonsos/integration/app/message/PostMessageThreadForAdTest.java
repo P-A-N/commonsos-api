@@ -42,10 +42,10 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
   @Test
   public void messageThreadForAd() {
     // call api from user1 (1)
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
     int id1 = given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", equalTo(ad.getId().intValue()))
@@ -64,10 +64,10 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
       .extract().path("id");
     
     // call api from user2 (1)
-    sessionId = login("user2", "pass");
+    sessionId = loginApp("user2", "pass");
     int id2 = given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", equalTo(ad.getId().intValue()))
@@ -88,19 +88,19 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     assertThat(id1).isNotEqualTo(id2);
 
     // call api from user1 (2)
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(id1))
       .body("parties.id", contains(adCreator.getId().intValue()));
     
     // call api from user2 (2)
-    sessionId = login("user2", "pass");
+    sessionId = loginApp("user2", "pass");
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(id2))
       .body("parties.id", contains(adCreator.getId().intValue()));

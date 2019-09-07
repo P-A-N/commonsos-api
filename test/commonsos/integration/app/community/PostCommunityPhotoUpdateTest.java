@@ -34,7 +34,7 @@ public class PostCommunityPhotoUpdateTest extends IntegrationTest {
   
   @Test
   public void updatePhoto_admin() throws URISyntaxException {
-    sessionId = login("admin", "pass");
+    sessionId = loginApp("admin", "pass");
 
     // prepare
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -45,7 +45,7 @@ public class PostCommunityPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/communities/{id}/photo", community.getId())
+      .when().post("/app/v99/communities/{id}/photo", community.getId())
       .then().statusCode(200);
 
     // crop
@@ -56,13 +56,13 @@ public class PostCommunityPhotoUpdateTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/communities/{id}/photo", community.getId())
+      .when().post("/app/v99/communities/{id}/photo", community.getId())
       .then().statusCode(200);
   }
   
   @Test
   public void updatePhoto_not_admin() throws URISyntaxException {
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
 
     // prepare
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -73,7 +73,7 @@ public class PostCommunityPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/communities/{id}/photo", community.getId())
+      .when().post("/app/v99/communities/{id}/photo", community.getId())
       .then().statusCode(403);
   }
 }

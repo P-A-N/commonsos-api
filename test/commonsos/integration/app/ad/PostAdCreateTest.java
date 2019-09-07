@@ -31,7 +31,7 @@ public class PostAdCreateTest extends IntegrationTest {
     community =  create(new Community().setName("community").setStatus(PUBLIC));
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
 
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -49,7 +49,7 @@ public class PostAdCreateTest extends IntegrationTest {
     given()
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads")
+      .when().post("/app/v99/ads")
       .then().statusCode(200)
       .body("title", equalTo("title"))
       .body("description", equalTo("description"))

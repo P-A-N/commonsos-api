@@ -15,7 +15,7 @@ public class PostLogoutTest extends IntegrationTest {
   @BeforeEach
   public void createUser() throws Exception {
     create(new User().setUsername("user").setPasswordHash(hash("pass")));
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -23,19 +23,19 @@ public class PostLogoutTest extends IntegrationTest {
     // before logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().get("/user")
+    .when().get("/app/v99/user")
     .then().statusCode(200);
     
     // logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().post("/logout")
+    .when().post("/app/v99/logout")
     .then().statusCode(200);
     
     // after logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().get("/user")
+    .when().get("/app/v99/user")
     .then().statusCode(401);
   }
 }

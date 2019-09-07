@@ -33,7 +33,7 @@ public class PostAdUpdateTest extends IntegrationTest {
     user =  create(new User().setUsername("user").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     ad =  create(new Ad().setCreatedBy(user.getId()).setCommunityId(community.getId()));
     
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -50,7 +50,7 @@ public class PostAdUpdateTest extends IntegrationTest {
     given()
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
-      .when().post("/ads/{id}", ad.getId())
+      .when().post("/app/v99/ads/{id}", ad.getId())
       .then().statusCode(200)
       .body("title", equalTo("title"))
       .body("description", equalTo("description"))

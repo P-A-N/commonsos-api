@@ -29,7 +29,7 @@ public class PostLoginTest extends IntegrationTest {
     
     String loggedinAt = given()
       .body(gson.toJson(requestParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .body("username", equalTo("user"))
       .extract().path("loggedinAt");
@@ -38,7 +38,7 @@ public class PostLoginTest extends IntegrationTest {
 
     loggedinAt = given()
       .body(gson.toJson(requestParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(200)
       .extract().path("loggedinAt");
     
@@ -55,7 +55,7 @@ public class PostLoginTest extends IntegrationTest {
     
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/login")
+      .when().post("/app/v99/login")
       .then().statusCode(401);
   }
 }

@@ -99,11 +99,11 @@ public class GetMessageThreadsTest extends IntegrationTest {
   @Test
   public void getMessageThreads() {
     // get threads for user1
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(directThread.getId().intValue(), groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("directThread", "groupThread", "adThread"))
@@ -126,11 +126,11 @@ public class GetMessageThreadsTest extends IntegrationTest {
           ));
 
     // get threads for user2
-    sessionId = login("user2", "pass");
+    sessionId = loginApp("user2", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread", "adThread"))
@@ -150,11 +150,11 @@ public class GetMessageThreadsTest extends IntegrationTest {
           ));
 
     // get threads for user3
-    sessionId = login("user3", "pass");
+    sessionId = loginApp("user3", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(directThread.getId().intValue(), groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("directThread", "groupThread"))
@@ -177,11 +177,11 @@ public class GetMessageThreadsTest extends IntegrationTest {
   @Test
   public void getMessageThreads_memberFilter() {
     // get threads for user1
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&memberFilter={memberFilter}", community.getId(), user2.getUsername())
+      .when().get("/app/v99/message-threads?communityId={communityId}&memberFilter={memberFilter}", community.getId(), user2.getUsername())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread", "adThread"))
@@ -204,11 +204,11 @@ public class GetMessageThreadsTest extends IntegrationTest {
   @Test
   public void getMessageThreads_messageFilter() {
     // get threads for user1
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}", community.getId(), groupMessage.getText())
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}", community.getId(), groupMessage.getText())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread"))
@@ -241,37 +241,26 @@ public class GetMessageThreadsTest extends IntegrationTest {
     Long id11 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
     Long id12 = create(new MessageThread().setCommunityId(community.getId()).setTitle("directThread").setAdId(null).setGroup(false).setCreatedBy(user1.getId()).setParties(asList(new MessageThreadParty().setUser(user1),new MessageThreadParty().setUser(user2)))).getId();
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id1).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id2).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id3).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id4).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id5).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id6).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id7).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id8).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id9).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id10).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id11).setText("page_message"));
-    Thread.sleep(1);
     create(new Message().setCreatedBy(user1.getId()).setThreadId(id12).setText("page_message"));
 
     
     // get threads for user1
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id12.intValue(), id11.intValue(), id10.intValue(), id9.intValue(), id8.intValue(),
@@ -284,7 +273,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id2.intValue(), id1.intValue()))
@@ -296,7 +285,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 2 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "ASC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", emptyIterable())
       .body("pagination.page", equalTo(2))
@@ -307,7 +296,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id1.intValue(), id2.intValue(), id3.intValue(), id4.intValue(), id5.intValue(),
@@ -320,7 +309,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id11.intValue(), id12.intValue()))
@@ -332,7 +321,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 2 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "DESC")
+      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", emptyIterable())
       .body("pagination.page", equalTo(2))

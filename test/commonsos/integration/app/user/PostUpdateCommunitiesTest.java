@@ -48,7 +48,7 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
     update(community2.setAdminUser(admin2));
     update(community3.setAdminUser(admin3));
     
-    sessionId = login("user", "password");
+    sessionId = loginApp("user", "password");
   }
   
   @Test
@@ -60,7 +60,7 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/communities", user.getId())
+      .when().post("/app/v99/users/{id}/communities", user.getId())
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(1))
       .body("communityList.id", contains(community1.getId().intValue()))
@@ -71,7 +71,7 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/communities", user.getId())
+      .when().post("/app/v99/users/{id}/communities", user.getId())
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(2))
       .body("communityList.id", contains(community1.getId().intValue(), community3.getId().intValue()))
@@ -83,7 +83,7 @@ public class PostUpdateCommunitiesTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/communities", user.getId())
+      .when().post("/app/v99/users/{id}/communities", user.getId())
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(2))
       .body("communityList.id", contains(community2.getId().intValue(), community3.getId().intValue()))

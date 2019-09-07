@@ -23,7 +23,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
   public void createUser() throws Exception {
     user = create(new User().setUsername("user").setPasswordHash(hash("old_password")).setEmailAddress("user@test.com"));
     
-    sessionId = login("user", "old_password");
+    sessionId = loginApp("user", "old_password");
   }
   
   @Test
@@ -35,7 +35,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/passwordreset", user.getId())
+      .when().post("/app/v99/users/{id}/passwordreset", user.getId())
       .then().statusCode(200);
 
     // verify email
@@ -45,11 +45,11 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     String accessId = extractAccessId(messages.get(0));
     
     // password isn't reset yet
-    failLogin("user", "new_password");
+    failLoginApp("user", "new_password");
 
     // passwordResetCheck
     given()
-      .when().get("/passwordreset/{accessId}", accessId)
+      .when().get("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(200);
 
     // passwordReset
@@ -57,16 +57,16 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     requestParam.put("newPassword", "new_password");
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/passwordreset/{accessId}", accessId)
+      .when().post("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(200);
 
     // password is reset
-    login("user", "new_password");
-    failLogin("user", "old_password");
+    loginApp("user", "new_password");
+    failLoginApp("user", "old_password");
 
     // passwordResetCheck invalid
     given()
-      .when().get("/passwordreset/{accessId}", accessId)
+      .when().get("/app/v99/passwordreset/{accessId}", accessId)
       .then().statusCode(400);
   }
 
@@ -79,7 +79,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/passwordreset", user.getId())
+      .when().post("/app/v99/users/{id}/passwordreset", user.getId())
       .then().statusCode(401);
   }
 }

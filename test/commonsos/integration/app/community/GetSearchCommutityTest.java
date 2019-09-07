@@ -30,14 +30,14 @@ public class GetSearchCommutityTest extends IntegrationTest {
   public void searchCommutity() throws Exception {
     // non filter
     given()
-      .when().get("/communities")
+      .when().get("/app/v99/communities")
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(3))
       .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue(), community3.getId().intValue()));
 
     // filter
     String body = given()
-      .when().get("/communities?filter={filter}", "foo")
+      .when().get("/app/v99/communities?filter={filter}", "foo")
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(2))
       .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue()))
@@ -65,7 +65,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 0 size 10 asc
     // filter
     given()
-      .when().get("/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "ASC")
+      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community1", "page_community2", "page_community3", "page_community4", "page_community5",
@@ -78,7 +78,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 1 size 10 asc
     // filter
     given()
-      .when().get("/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "ASC")
+      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community11", "page_community12"))
@@ -90,7 +90,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 0 size 10 desc
     // filter
     given()
-      .when().get("/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "DESC")
+      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community12", "page_community11", "page_community10", "page_community9", "page_community8",
@@ -103,7 +103,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 1 size 10 desc
     // filter
     given()
-      .when().get("/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "DESC")
+      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community2", "page_community1"))

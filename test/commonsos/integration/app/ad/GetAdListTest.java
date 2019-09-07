@@ -43,7 +43,7 @@ public class GetAdListTest extends IntegrationTest {
     /*fooAd3 = */create(new Ad().setCreatedBy(otherCommunityUser.getId()).setCommunityId(otherCommunityUser.getId()).setPoints(TEN).setTitle("foo"));
     /*barAd =  */create(new Ad().setCreatedBy(barUser.getId()).setCommunityId(community.getId()).setPoints(TEN).setTitle("bar"));
     
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
   }
   
   @Test
@@ -51,7 +51,7 @@ public class GetAdListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads?communityId={communityId}&filter={filter}", community.getId(), "foo")
+      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}", community.getId(), "foo")
       .then().statusCode(200)
       .body("adList.id", contains(
           ad.getId().intValue(),
@@ -81,12 +81,12 @@ public class GetAdListTest extends IntegrationTest {
     create(new Ad().setTitle("page_ad11").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
     create(new Ad().setTitle("page_ad12").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity.getId()).setPoints(TEN));
 
-    sessionId = login("user", "pass");
+    sessionId = loginApp("user", "pass");
     
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad1", "page_ad2", "page_ad3", "page_ad4", "page_ad5",
@@ -99,7 +99,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad11", "page_ad12"))
@@ -111,7 +111,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad12", "page_ad11", "page_ad10", "page_ad9", "page_ad8",
@@ -124,7 +124,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad2", "page_ad1"))

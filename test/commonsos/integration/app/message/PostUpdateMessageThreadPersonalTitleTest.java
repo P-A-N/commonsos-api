@@ -41,7 +41,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     otherCommunityUser =  create(new User().setUsername("otherCommunityUser").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(otherCommunity))));
     ad =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
-    sessionId = login("user1", "pass");
+    sessionId = loginApp("user1", "pass");
 
     // create group thread
     Map<String, Object> requestParam = new HashMap<>();
@@ -51,7 +51,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     int id = given()
         .cookie("JSESSIONID", sessionId)
         .body(gson.toJson(requestParam))
-        .when().post("/message-threads/group")
+        .when().post("/app/v99/message-threads/group")
         .then().statusCode(200)
         .extract().path("id");
     groupThreadId = (long) id;
@@ -59,7 +59,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     // create ad thread
      id = given()
         .cookie("JSESSIONID", sessionId)
-        .when().post("/message-threads/for-ad/{adId}", ad.getId())
+        .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
         .then().statusCode(200)
         .extract().path("id");
      adThreadId = (long) id;
@@ -75,7 +75,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", groupThreadId)
+      .when().post("/app/v99/message-threads/{id}/title", groupThreadId)
       .then().statusCode(200)
       .body("id", equalTo(groupThreadId.intValue()))
       .body("title", equalTo("title"))
@@ -85,7 +85,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
   @Test
   public void updateMessageThreadPersonalTitle_not_member() {
     // login with non member of thread
-    sessionId = login("user3", "pass");
+    sessionId = loginApp("user3", "pass");
     
     // update personal title
     Map<String, Object> requestParam = new HashMap<>();
@@ -94,7 +94,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", groupThreadId)
+      .when().post("/app/v99/message-threads/{id}/title", groupThreadId)
       .then().statusCode(400);
   }
   
@@ -108,7 +108,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/message-threads/{id}/title", adThreadId)
+      .when().post("/app/v99/message-threads/{id}/title", adThreadId)
       .then().statusCode(400);
   }
 }

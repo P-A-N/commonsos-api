@@ -123,7 +123,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // create temporary user
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/create-account")
+      .when().post("/app/v99/create-account")
       .then().statusCode(200);
     
     // get accessId
@@ -135,7 +135,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // complete create user
     int userId = given()
-      .when().post("/create-account/{accessId}", accessId)
+      .when().post("/app/v99/create-account/{accessId}", accessId)
       .then().statusCode(200)
       .extract().path("id");
 
@@ -205,20 +205,20 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     requestParam.put("adId", null);
     log.info(String.format("transfer token started. [from=%s, to=%s, community=%s]", from.getUsername(), to.getUsername(), community.getName()));
     
-    sessionId = login(from.getUsername(), "passpass");
+    sessionId = loginApp(from.getUsername(), "passpass");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/transactions")
+      .when().post("/app/v99/transactions")
       .then().statusCode(200)
       .body("balance", expectAmount);
     log.info(String.format("transfer token completed. [from=%s, to=%s, community=%s]", from.getUsername(), to.getUsername(), community.getName()));
   }
   
   private void checkBalance(User user, Community community, int expected) {
-    sessionId = login(user.getUsername(), "passpass");
+    sessionId = loginApp(user.getUsername(), "passpass");
     given().cookie("JSESSIONID", sessionId)
-      .when().get("/balance?communityId={communityId}", community.getId())
+      .when().get("/app/v99/balance?communityId={communityId}", community.getId())
       .then().statusCode(200).body("balance", equalTo(expected));
     log.info(String.format("check balance ok. [user=%s, community=%s, balance=%d]", user.getUsername(), community.getName(), expected));
   }
@@ -228,11 +228,11 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     requestParam.put("communityList", communityList);
     log.info(String.format("change community started. [user=%s]", user.getUsername()));
     
-    sessionId = login(user.getUsername(), "passpass");
+    sessionId = loginApp(user.getUsername(), "passpass");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/communities", user.getId())
+      .when().post("/app/v99/users/{id}/communities", user.getId())
       .then().statusCode(200);
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
   }
@@ -265,12 +265,12 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   
   private void waitUntilTransactionCompleted(Community community, User user, int expected) throws Exception {
     log.info(String.format("waiting for transaction."));
-    sessionId = login(user.getUsername(), "passpass");
+    sessionId = loginApp(user.getUsername(), "passpass");
 
     for (int i = 0; i < 60; i++) {
       int balanceInt = given()
         .cookie("JSESSIONID", sessionId)
-        .when().get("/balance?communityId={id}", community.getId())
+        .when().get("/app/v99/balance?communityId={id}", community.getId())
         .then().statusCode(200)
         .extract().path("balance");
       BigDecimal balance = BigDecimal.valueOf(balanceInt);

@@ -36,7 +36,7 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
         new CommunityUser().setCommunity(community1),
         new CommunityUser().setCommunity(community2))));
     
-    sessionId = login("user", "password");
+    sessionId = loginApp("user", "password");
   }
   
   @Test
@@ -44,7 +44,7 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     // check last view time before testing
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           is(Instant.EPOCH.toString()),
@@ -62,12 +62,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/wallet/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/wallet/lastViewTime", user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -83,12 +83,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/ad/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/ad/lastViewTime", user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -104,12 +104,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/notification/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/notification/lastViewTime", user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/user")
+      .when().get("/app/v99/user")
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -131,21 +131,21 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/wallet/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/wallet/lastViewTime", user.getId())
       .then().statusCode(400);
 
     // update ad LastViewTime
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/ad/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/ad/lastViewTime", user.getId())
       .then().statusCode(400);
 
     // update notification LastViewTime
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/users/{id}/notification/lastViewTime", user.getId())
+      .when().post("/app/v99/users/{id}/notification/lastViewTime", user.getId())
       .then().statusCode(400);
   }
 }

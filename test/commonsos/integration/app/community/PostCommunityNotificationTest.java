@@ -43,7 +43,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     // call api
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(200);
     
     // verify
@@ -59,7 +59,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     requestParam.put("updatedAt", "2020-01-01 12:10");
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(200);
 
     // verify
@@ -71,7 +71,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     requestParam.put("updatedAt", "2021-01-01 12");
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(200);
 
     // verify
@@ -83,7 +83,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     requestParam.put("updatedAt", "2022-01-01");
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(200);
 
     // verify
@@ -103,7 +103,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     // call api
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(401);
   }
   
@@ -119,7 +119,7 @@ public class PostCommunityNotificationTest extends IntegrationTest {
     // call api
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
+      .when().post("/app/v99/communities/{id}/notification/{wordpressId}", community.getId(), wordpressId)
       .then().statusCode(400);
   }
 }
