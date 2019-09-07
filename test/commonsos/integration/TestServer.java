@@ -1,12 +1,13 @@
 package commonsos.integration;
 
+import static java.math.BigDecimal.ONE;
+import static java.math.BigDecimal.TEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.InputStream;
-import java.math.BigDecimal;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -59,7 +60,7 @@ public class TestServer extends Server {
     Web3j web3j = mock(Web3j.class);
     BlockchainEventService blockchainEventService = mock(BlockchainEventService.class);
     BlockchainService blockchainService = mock(BlockchainService.class);
-    TokenBalance tokenBalance = new TokenBalance().setBalance(BigDecimal.TEN).setToken(new CommunityToken());
+    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenName("name").setTokenSymbol("symbol").setTotalSupply(ONE));
     when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenAnswer(new Answer<TokenBalance>() {
       @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
         return tokenBalance.setCommunityId((Long) invocation.getArgument(1));
@@ -70,7 +71,7 @@ public class TestServer extends Server {
         return tokenBalance.setCommunityId(((Community) invocation.getArgument(0)).getId());
       }
     });
-    when(blockchainService.getBalance(any())).thenReturn(BigDecimal.TEN.pow(18+6));
+    when(blockchainService.getBalance(any())).thenReturn(TEN.pow(18+6));
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");
     when(blockchainService.isConnected()).thenReturn(true);

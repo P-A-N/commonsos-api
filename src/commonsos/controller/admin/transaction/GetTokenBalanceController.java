@@ -1,34 +1,38 @@
 package commonsos.controller.admin.transaction;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.exception.BadRequestException;
+import commonsos.exception.ForbiddenException;
+import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.WalletType;
+import commonsos.service.TokenTransactionService;
+import commonsos.service.blockchain.TokenBalance;
+import commonsos.util.AdminUtil;
+import commonsos.util.RequestUtil;
+import commonsos.util.TransactionUtil;
+import commonsos.view.CommunityTokenBalanceView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 @ReadOnly
-public class GetTokenBalanceController implements Route {
+public class GetTokenBalanceController extends AfterAdminLoginController {
 
-  /*@Override
-  protected Object handleAfterLogin(Admin admin, Request request, Response response) {
-    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
-    String wallet = RequestUtil.getQueryParamString(request, "wallet", true);
-    
-    Admin targetAdmin = adminService.getAdmin(admin, id);
-    return AdminUtil.toView(targetAdmin);
-  }*/
+  @Inject TokenTransactionService tokenTransactionService;
   
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("communityId", 1);
-    result.put("wallet", "MAIN");
-    result.put("tokenSymbol", "tono");
-    result.put("balance", new BigDecimal("999"));
+  protected CommunityTokenBalanceView handleAfterLogin(Admin admin, Request request, Response response) {
+    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
+    String walletTypeString = RequestUtil.getQueryParamString(request, "wallet", true);
     
-    return result;
+    WalletType walletType = WalletType.of(walletTypeString);
+    if (walletType == null) throw new BadRequestException("invalid wallet");
+    
+    if (!AdminUtil.isSeeable(admin, communityId)) throw new ForbiddenException();
+    
+    TokenBalance tokenBalance = tokenTransactionService.getTokenBalanceForAdmin(admin, communityId, walletType);
+    return TransactionUtil.communityTokenBalanceView(tokenBalance, walletType);
   }
 }

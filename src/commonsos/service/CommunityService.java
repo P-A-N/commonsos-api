@@ -89,7 +89,7 @@ public class CommunityService {
     String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
     Credentials mainCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
     String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
-    Credentials feeCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
+    Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
     
     // transfer ether to main wallet
     blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), initialWei);

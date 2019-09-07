@@ -1,11 +1,16 @@
 package commonsos.integration.blockchain;
 
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
+import static commonsos.repository.entity.Role.TELLER;
+import static commonsos.repository.entity.WalletType.FEE;
+import static commonsos.repository.entity.WalletType.MAIN;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -17,7 +22,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.hamcrest.Matcher;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
 import org.web3j.crypto.Credentials;
@@ -27,12 +31,15 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 
 public class BlockchainIntegrationTest extends IntegrationTest {
   
   private Logger log = Logger.getLogger(this.getClass().getName());
 
   private Admin ncl;
+  private Admin comAdmin;
+  private Admin comTeller;
   private Community community1;
   private Community community2;
   private User user1;
@@ -42,15 +49,17 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   @Override
   protected boolean isBlockchainEnable() { return true; }
   
-  @BeforeAll
-  public void setupTest() throws Exception {
-    ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("passpass")).setRole(NCL));
-    community1 = createCommunity("community1", "c1", "community1");
-    community2 = createCommunity("community2", "c2", "community2");
-  }
-  
   @Test
   public void testBlockchain() throws Exception {
+    // create community
+    ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("passpass")).setRole(NCL));
+    community1 = createCommunity("community1", "c1", "community1");
+    checkBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
+    checkBalanceOfCommunity(community1, FEE, equalTo(0));
+    community2 = createCommunity("community2", "c2", "community2");
+    comAdmin = create(new Admin().setEmailAddress("comAdmin@before.each.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN));
+    comTeller = create(new Admin().setEmailAddress("comTeller@before.each.com").setPasswordHash(hash("passpass")).setRole(TELLER));
+
     // create user
     user1 = createUser("user1_test", "passpass", "user1@test.com", true, asList(community1.getId()));
     user2 = createUser("user2_test", "passpass", "user2@test.com", true, asList(community1.getId(), community2.getId()));
@@ -58,39 +67,43 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalance(user2, community1, 0);
     checkBalance(user2, community2, 0);
 
-    // transfer token from admin
+    // transfer token to user from admin
     transferTokenFromAdmin(community1, user1, 100);
     waitUntilTransactionCompleted(community1, user1, 100);
     checkBalance(user1, community1, 100);
 
-    // transfer token from user
+    // transfer token to user from user
     transferToken(user1, user2, community1, 10, 90);
     waitUntilTransactionCompleted();
     checkBalance(user1, community1, 90);
     checkBalance(user2, community1, 10);
     
-    // change community
+    // change a community of user
     changeCommunity(user1, asList(community2.getId()));
     waitUntilAllowed(user1, community2);
     
-    // transfer token from admin
+    // transfer token to user from admin
     transferTokenFromAdmin(community2, user1, 100);
     waitUntilTransactionCompleted(community2, user1, 100);
     checkBalance(user1, community2, 100);
 
-    // transfer token from user
+    // transfer token to user from user
     transferToken(user1, user2, community2, 20, 80);
     waitUntilTransactionCompleted();
     checkBalance(user1, community2, 80);
     checkBalance(user2, community2, 20);
 
-    // change community
+    // change a community of user
     changeCommunity(user1, asList(community1.getId(), community2.getId()));
     waitUntilTransactionCompleted();
     checkBalance(user1, community1, 90);
     checkBalance(user1, community2, 80);
+    
+    // get TokenBalance of main wallet
+    checkBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
+    checkBalanceOfCommunity(community1, FEE, equalTo(0));
   }
-  
+
   private User createUser(
       String username,
       String password,
@@ -222,6 +235,17 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .when().post("/users/{id}/communities", user.getId())
       .then().statusCode(200);
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
+  }
+  
+  private void checkBalanceOfCommunity(Community com, WalletType walletType, Matcher<?> expect) {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/transactions/coin/balance?communityId={id}&wallet={wallet}", com.getId(), walletType.name())
+      .then().statusCode(200)
+      .body("balance", expect)
+      .extract().path("balance");
   }
 
   private void waitUntilTransactionCompleted() throws Exception {

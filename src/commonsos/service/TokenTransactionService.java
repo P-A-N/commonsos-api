@@ -22,15 +22,20 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
+import commonsos.repository.entity.Role;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.command.PaginationCommand;
 import commonsos.service.command.TransactionCreateCommand;
 import commonsos.service.notification.PushNotificationService;
+import commonsos.util.AdminUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.admin.TransactionForAdminView;
@@ -52,6 +57,14 @@ public class TokenTransactionService {
   @Inject BlockchainEventService blockchainEventService;
   @Inject PushNotificationService pushNotificationService;
 
+  public TokenBalance getTokenBalanceForAdmin(Admin admin, Long communityId, WalletType walletType) {
+    if (!AdminUtil.isSeeable(admin, communityId)) throw new ForbiddenException();
+    if (Role.TELLER.equals(admin.getRole())) throw new ForbiddenException();
+    Community com = communityRepository.findStrictById(communityId);
+    TokenBalance tokenBalance = blockchainService.getTokenBalance(com, walletType);
+    return tokenBalance;
+  }
+  
   private boolean isDebit(User user, TokenTransaction transaction) {
     return transaction.getRemitterId() != null && transaction.getRemitterId().equals(user.getId());
   }

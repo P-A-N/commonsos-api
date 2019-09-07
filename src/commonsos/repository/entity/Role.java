@@ -7,13 +7,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name = "roles")
-@Getter @Setter @Accessors(chain=true) @ToString
+@Getter @Setter @Accessors(chain=true) @ToString @EqualsAndHashCode(callSuper=false, of= {"id"})
 public class Role extends AbstractEntity {
   public final static Role NCL = new Role().setId(1L);
   public final static Role COMMUNITY_ADMIN = new Role().setId(2L);

@@ -293,8 +293,8 @@ public class Server {
 
     // transactions
     post("/admin/transactions/coin", injector.getInstance(CreateTokenTransactionController.class), toJson);
-    get("/admin/transactions/coin", injector.getInstance(GetTokenBalanceController.class), toJson);
-    get("/admin/transactions/coin/balance", injector.getInstance(SearchTokenTransactionsController.class), toJson);
+    get("/admin/transactions/coin", injector.getInstance(SearchTokenTransactionsController.class), toJson);
+    get("/admin/transactions/coin/balance", injector.getInstance(GetTokenBalanceController.class), toJson);
     post("/admin/transactions/eth", injector.getInstance(CreateEthTransactionController.class), toJson);
     get("/admin/transactions/eth/balance", injector.getInstance(GetEthBalanceController.class), toJson);
     get("/admin/transactions/eth/balance/histories", injector.getInstance(SearchEthBalanceHistoriesController.class), toJson);
