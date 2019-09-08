@@ -11,19 +11,21 @@ import commonsos.exception.ServerErrorException;
 import commonsos.repository.entity.User;
 import commonsos.service.command.UploadPhotoCommand;
 import commonsos.util.RequestUtil;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
 public abstract class UploadPhotoForAppController extends AfterAppLoginController {
 
-  @Override public Object handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public CommonView handleAfterLogin(User user, Request request, Response response) {
     Map<String, List<FileItem>> fileItemMap = RequestUtil.getFileItemMap(request);
     if (!fileItemMap.containsKey("photo")) {
       throw new BadRequestException("photo is required");
     }
     
     UploadPhotoCommand command = null;
-    Object result = null;
+    CommonView result = null;
     try {
       command = getUploadPhotoCommand(fileItemMap);
       
@@ -42,5 +44,5 @@ public abstract class UploadPhotoForAppController extends AfterAppLoginControlle
     return result;
   }
   
-  abstract protected Object handleUploadPhoto(User user, UploadPhotoCommand command, Request request, Response response);
+  abstract protected CommonView handleUploadPhoto(User user, UploadPhotoCommand command, Request request, Response response);
 }

@@ -2,12 +2,13 @@ package commonsos.view.app;
 
 import java.util.List;
 
+import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class PublicUserView {
+public class PublicUserView extends CommonView {
   private Long id;
   private String fullName;
   private String username;

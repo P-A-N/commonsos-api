@@ -16,7 +16,8 @@ import spark.Response;
 public class MessageThreadController extends AfterAppLoginController {
   @Inject MessageService service;
 
-  @Override protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
     return service.thread(user, parseLong(request.params("id")));
   }
 }

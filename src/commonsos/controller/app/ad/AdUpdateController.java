@@ -20,7 +20,8 @@ public class AdUpdateController extends AfterAppLoginController {
   @Inject AdService adService;
   @Inject Gson gson;
 
-  @Override public AdView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public AdView handleAfterLogin(User user, Request request, Response response) {
     AdUpdateCommand command = gson.fromJson(request.body(), AdUpdateCommand.class);
     command.setId(parseLong(request.params("id")));
     

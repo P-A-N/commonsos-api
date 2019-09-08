@@ -4,12 +4,13 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
+import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class CommunityForAdminView {
+public class CommunityForAdminView extends CommonView {
   private Long communityId;
   private String communityName;
   private String tokenName;

@@ -4,20 +4,20 @@ import static commonsos.controller.app.auth.AppLoginController.USER_SESSION_ATTR
 
 import javax.inject.Inject;
 
-import commonsos.controller.AbstractController;
 import commonsos.exception.AuthenticationException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.session.UserSession;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
-public abstract class AfterAppLoginController extends AbstractController {
+public abstract class AfterAppLoginController extends AbstcactAppController {
 
   @Inject UserService userService;
 
   @Override
-  public Object handle(Request request, Response response) {
+  public CommonView handleApp(Request request, Response response) {
     if (request.session().attribute(USER_SESSION_ATTRIBUTE_NAME) == null) throw new AuthenticationException();
     
     UserSession session = request.session().attribute(USER_SESSION_ATTRIBUTE_NAME);
@@ -25,5 +25,5 @@ public abstract class AfterAppLoginController extends AbstractController {
     return handleAfterLogin(user, request, response);
   }
 
-  abstract protected Object handleAfterLogin(User user, Request request, Response response);
+  abstract protected CommonView handleAfterLogin(User user, Request request, Response response);
 }

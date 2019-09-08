@@ -9,20 +9,22 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.controller.app.AbstcactAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.UserService;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.utils.StringUtils;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class UpdateEmailCompleteController implements Route {
+public class UpdateEmailCompleteController extends AbstcactAppController {
 
   @Inject UserService userService;
   @Inject Gson gson;
 
-  @Override public Object handle(Request request, Response response) {
+  @Override
+  public CommonView handleApp(Request request, Response response) {
     String id = request.params("id");
     String accessId = request.params("accessId");
     if(StringUtils.isEmpty(id)) throw new BadRequestException("id is required");
@@ -31,6 +33,6 @@ public class UpdateEmailCompleteController implements Route {
     
     userService.updateEmailComplete(Long.parseLong(id), accessId);
     
-    return null;
+    return new CommonView();
   }
 }

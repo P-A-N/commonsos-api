@@ -115,22 +115,6 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void messageView() {
-    Message message = new Message()
-      .setId(33L)
-      .setThreadId(id("thread id"))
-      .setCreatedBy(id("user id"))
-      .setText("hello");
-
-    MessageView result = service.view(message);
-
-    assertThat(result).isEqualTo(new MessageView()
-      .setId(33L)
-      .setCreatedBy(id("user id"))
-      .setText("hello"));
-  }
-
-  @Test
   public void ordersNewestThreadsFirst() {
     MessageThreadView view1 = new MessageThreadView().setLastMessage(new MessageView().setCreatedAt(now().minus(2, HOURS)));
     MessageThreadView view2 = new MessageThreadView().setLastMessage(new MessageView().setCreatedAt(now().minus(1, HOURS)));

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.MDC;
 
 import commonsos.annotation.Synchronized;
+import commonsos.controller.app.AbstcactAppController;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
@@ -17,16 +18,16 @@ import commonsos.util.RequestUtil;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Session;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class CreateUserCompleteController implements Route {
+public class CreateUserCompleteController extends AbstcactAppController {
 
   @Inject UserService userService;
   @Inject CSRF csrf;
   
-  @Override public PrivateUserView handle(Request request, Response response) {
+  @Override
+  public PrivateUserView handleApp(Request request, Response response) {
     String accessId = RequestUtil.getPathParamString(request, "accessId");
 
     User user = userService.createAccountComplete(accessId);

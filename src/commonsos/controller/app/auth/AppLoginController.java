@@ -8,6 +8,7 @@ import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 
+import commonsos.controller.app.AbstcactAppController;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
@@ -16,10 +17,9 @@ import commonsos.service.command.AppLoginCommand;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Session;
 
-public class AppLoginController implements Route {
+public class AppLoginController extends AbstcactAppController {
 
   public static final String USER_SESSION_ATTRIBUTE_NAME = "user";
   @Inject Gson gson;
@@ -27,7 +27,7 @@ public class AppLoginController implements Route {
   @Inject CSRF csrf;
 
   @Override
-  public PrivateUserView handle(Request request, Response response) {
+  public PrivateUserView handleApp(Request request, Response response) {
     AppLoginCommand command = gson.fromJson(request.body(), AppLoginCommand.class);
     User user = userService.checkPassword(command.getUsername(), command.getPassword());
     user = userService.updateLoggedinAt(user);

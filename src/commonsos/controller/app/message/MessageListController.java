@@ -17,7 +17,8 @@ public class MessageListController extends AfterAppLoginController {
 
   @Inject MessageService service;
 
-  @Override protected MessageListView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected MessageListView handleAfterLogin(User user, Request request, Response response) {
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     MessageListView view = service.messages(user, parseLong(request.params("id")), paginationCommand);
     return view;

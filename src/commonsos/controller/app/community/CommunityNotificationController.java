@@ -16,17 +16,18 @@ import com.google.gson.Gson;
 
 import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
+import commonsos.controller.app.AbstcactAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;
 import commonsos.service.command.CommunityNotificationCommand;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.utils.StringUtils;
 
 @Synchronized(REGIST_COMMUNITY_NOTIFICATION)
 @RestrictAccess(allow = WORDPRESS_SERVER)
-public class CommunityNotificationController implements Route {
+public class CommunityNotificationController extends AbstcactAppController {
   
   private static String[] DATE_FORMAT = {
       "yyyy-MM-dd HH:mm:ss",
@@ -39,7 +40,7 @@ public class CommunityNotificationController implements Route {
   @Inject CommunityService service;
 
   @Override
-  public Object handle(Request request, Response response) {
+  public CommonView handleApp(Request request, Response response) {
     CommunityNotificationCommand command = gson.fromJson(request.body(), CommunityNotificationCommand.class);
     
     String communityId = request.params("id");
@@ -60,6 +61,6 @@ public class CommunityNotificationController implements Route {
     }
     
     service.updateNotificationUpdateAt(command);
-    return "";
+    return new CommonView();
   }
 }

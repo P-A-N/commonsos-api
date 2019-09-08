@@ -13,6 +13,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.util.UserUtil;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
@@ -21,7 +22,8 @@ public class UserController extends AfterAppLoginController {
 
   @Inject private UserService userService;
 
-  @Override public Object handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public CommonView handleAfterLogin(User user, Request request, Response response) {
     if (isBlank(request.params("id"))) return userService.privateView(user);
 
     String userId = request.params("id");

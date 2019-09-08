@@ -18,7 +18,8 @@ public class MessageThreadForAdController extends AfterAppLoginController {
 
   @Inject MessageService service;
 
-  @Override protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
     return service.threadForAd(user, parseLong(request.params("adId")));
   }
 }

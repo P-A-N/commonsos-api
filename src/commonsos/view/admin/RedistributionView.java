@@ -2,12 +2,13 @@ package commonsos.view.admin;
 
 import java.math.BigDecimal;
 
+import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class RedistributionView {
+public class RedistributionView extends CommonView {
   private Long redistributionId;
   private Boolean isAll;
   private Long userId;

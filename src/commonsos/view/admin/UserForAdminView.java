@@ -3,12 +3,13 @@ package commonsos.view.admin;
 import java.time.Instant;
 import java.util.List;
 
+import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class UserForAdminView {
+public class UserForAdminView extends CommonView {
   private Long id;
   private String username;
   private String status;

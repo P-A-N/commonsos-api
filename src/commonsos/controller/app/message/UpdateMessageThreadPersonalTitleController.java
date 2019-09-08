@@ -23,7 +23,8 @@ public class UpdateMessageThreadPersonalTitleController extends AfterAppLoginCon
   @Inject Gson gson;
   @Inject MessageService service;
 
-  @Override protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
     UpdateMessageThreadPersonalTitleCommand command = gson.fromJson(request.body(), UpdateMessageThreadPersonalTitleCommand.class);
     
     String id = request.params("id");

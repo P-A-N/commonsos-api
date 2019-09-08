@@ -25,7 +25,8 @@ public class TransactionCreateController extends AfterAppLoginController {
   @Inject TokenTransactionService tokenTransactionService;
   @Inject BlockchainService blockchainService;
 
-  @Override protected UserTokenBalanceView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected UserTokenBalanceView handleAfterLogin(User user, Request request, Response response) {
     TransactionCreateCommand command = gson.fromJson(request.body(), TransactionCreateCommand.class);
     tokenTransactionService.create(user, command);
     TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());

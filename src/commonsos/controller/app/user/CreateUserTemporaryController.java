@@ -7,22 +7,24 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.controller.app.AbstcactAppController;
 import commonsos.service.UserService;
 import commonsos.service.command.CreateUserTemporaryCommand;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class CreateUserTemporaryController implements Route {
+public class CreateUserTemporaryController extends AbstcactAppController {
 
   @Inject Gson gson;
   @Inject UserService userService;
 
-  @Override public Object handle(Request request, Response response) {
+  @Override
+  public CommonView handleApp(Request request, Response response) {
     CreateUserTemporaryCommand command = gson.fromJson(request.body(), CreateUserTemporaryCommand.class);
     userService.createAccountTemporary(command);
     
-    return null;
+    return new CommonView();
   }
 }

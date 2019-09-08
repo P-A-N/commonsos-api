@@ -15,6 +15,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.service.command.CreateDirectMessageThreadCommand;
+import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;
 
@@ -24,7 +25,8 @@ public class MessageThreadWithUserController extends AfterAppLoginController {
   @Inject Gson gson;
   @Inject MessageService service;
 
-  @Override protected Object handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  protected MessageThreadView handleAfterLogin(User user, Request request, Response response) {
     CreateDirectMessageThreadCommand command = gson.fromJson(request.body(), CreateDirectMessageThreadCommand.class);
     
     String userId = request.params("userId");

@@ -11,6 +11,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
+import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
@@ -19,11 +20,11 @@ public class AdDeleteController extends AfterAppLoginController {
   @Inject AdService adService;
 
   @Override
-  public Object handleAfterLogin(User user, Request request, Response response) {
+  public CommonView handleAfterLogin(User user, Request request, Response response) {
     String id = request.params("id");
     if (isEmpty(id)) throw new BadRequestException("id is required");
     if (!NumberUtils.isParsable(id)) throw new BadRequestException("invalid id");
     adService.deleteAdLogicallyByUser(user, parseLong(id));
-    return "";
+    return new CommonView();
   }
 }

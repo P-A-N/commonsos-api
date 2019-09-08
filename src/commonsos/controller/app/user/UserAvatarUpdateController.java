@@ -6,6 +6,7 @@ import commonsos.controller.app.UploadPhotoForAppController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.service.command.UploadPhotoCommand;
+import commonsos.view.UrlView;
 import spark.Request;
 import spark.Response;
 
@@ -14,7 +15,8 @@ public class UserAvatarUpdateController extends UploadPhotoForAppController {
   @Inject UserService userService;
 
   @Override
-  protected String handleUploadPhoto(User user, UploadPhotoCommand command, Request request, Response response) {
-    return userService.updateAvatar(user, command);
+  protected UrlView handleUploadPhoto(User user, UploadPhotoCommand command, Request request, Response response) {
+    String url = userService.updateAvatar(user, command);
+    return new UrlView().setUrl(url);
   }
 }

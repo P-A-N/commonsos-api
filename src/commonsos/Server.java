@@ -17,6 +17,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import commonsos.controller.JsonTransformer;
+import commonsos.controller.PreflightController;
 import commonsos.controller.admin.admin.CreateAdminCompleteController;
 import commonsos.controller.admin.admin.CreateAdminTemporaryController;
 import commonsos.controller.admin.admin.DeleteAdminController;
@@ -56,8 +58,7 @@ import commonsos.controller.admin.user.UpdateUserCommunitiesController;
 import commonsos.controller.admin.user.UpdateUserController;
 import commonsos.controller.admin.user.UpdateUserEmailTemporaryController;
 import commonsos.controller.admin.user.UpdateUserNameController;
-import commonsos.controller.app.JsonTransformer;
-import commonsos.controller.app.PreflightController;
+import commonsos.controller.app.GetAppApiVersionController;
 import commonsos.controller.app.ad.AdController;
 import commonsos.controller.app.ad.AdCreateController;
 import commonsos.controller.app.ad.AdDeleteController;
@@ -198,6 +199,7 @@ public class Server {
   }
 
   private void initAppRoutes() {
+    get("/app/version", injector.getInstance(GetAppApiVersionController.class), toJson);
     post("/app/:version/login", injector.getInstance(AppLoginController.class), toJson);
     post("/app/:version/logout", injector.getInstance(AppLogoutController.class), toJson);
     post("/app/:version/create-account", injector.getInstance(CreateUserTemporaryController.class), toJson);

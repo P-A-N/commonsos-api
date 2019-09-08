@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class CommunityTokenBalanceView {
+public class CommunityTokenBalanceView extends CommonView {
   private Long communityId;
   private WalletType wallet;
   private String tokenSymbol;

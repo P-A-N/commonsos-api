@@ -21,7 +21,8 @@ public class UserNameUpdateController extends AfterAppLoginController {
   @Inject UserService userService;
   @Inject Gson gson;
 
-  @Override public PrivateUserView handleAfterLogin(User user, Request request, Response response) {
+  @Override
+  public PrivateUserView handleAfterLogin(User user, Request request, Response response) {
     UserNameUpdateCommand command = gson.fromJson(request.body(), UserNameUpdateCommand.class);
     User updatedUser = userService.updateUserName(user, command);
     return userService.privateView(updatedUser);

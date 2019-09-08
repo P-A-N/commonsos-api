@@ -1,4 +1,4 @@
-package commonsos.controller.app;
+package commonsos.controller;
 
 import com.google.gson.Gson;
 import spark.ResponseTransformer;
