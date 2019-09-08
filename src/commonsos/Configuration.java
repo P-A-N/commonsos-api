@@ -105,6 +105,10 @@ public class Configuration {
     return environmentVariable("AES_IV", "commonsos_aes_iv");
   }
 
+  public String maintenanceMode() {
+    return environmentVariable("MAINTENANCE_MODE", "false");
+  }
+
   public String environmentVariable(String key) {
     return environmentVariable(key, null);
   }

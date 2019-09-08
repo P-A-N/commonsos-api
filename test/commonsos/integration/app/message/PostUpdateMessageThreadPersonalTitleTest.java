@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -51,7 +52,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     int id = given()
         .cookie("JSESSIONID", sessionId)
         .body(gson.toJson(requestParam))
-        .when().post("/app/v99/message-threads/group")
+        .when().post("/app/v{v}/message-threads/group", APP_API_VERSION.getMajor())
         .then().statusCode(200)
         .extract().path("id");
     groupThreadId = (long) id;
@@ -59,7 +60,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     // create ad thread
      id = given()
         .cookie("JSESSIONID", sessionId)
-        .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
+        .when().post("/app/v{v}/message-threads/for-ad/{adId}", APP_API_VERSION.getMajor(), ad.getId())
         .then().statusCode(200)
         .extract().path("id");
      adThreadId = (long) id;
@@ -75,7 +76,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/{id}/title", groupThreadId)
+      .when().post("/app/v{v}/message-threads/{id}/title", APP_API_VERSION.getMajor(), groupThreadId)
       .then().statusCode(200)
       .body("id", equalTo(groupThreadId.intValue()))
       .body("title", equalTo("title"))
@@ -94,7 +95,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/{id}/title", groupThreadId)
+      .when().post("/app/v{v}/message-threads/{id}/title", APP_API_VERSION.getMajor(), groupThreadId)
       .then().statusCode(400);
   }
   
@@ -108,7 +109,7 @@ public class PostUpdateMessageThreadPersonalTitleTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/{id}/title", adThreadId)
+      .when().post("/app/v{v}/message-threads/{id}/title", APP_API_VERSION.getMajor(), adThreadId)
       .then().statusCode(400);
   }
 }

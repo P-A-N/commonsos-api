@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -34,7 +35,7 @@ public class PostUpdateUsernameTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/username", user.getId())
+      .when().post("/app/v{v}/users/{id}/username", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(468)
       .body("key", equalTo("error.usernameTaken"));
     
@@ -43,7 +44,7 @@ public class PostUpdateUsernameTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/username", user.getId())
+      .when().post("/app/v{v}/users/{id}/username", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200)
       .body("username", equalTo("user_updated"));
     

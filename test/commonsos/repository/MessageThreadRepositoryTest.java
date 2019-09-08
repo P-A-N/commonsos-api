@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
@@ -21,7 +22,6 @@ import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 
 public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 

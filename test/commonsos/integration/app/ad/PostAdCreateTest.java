@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -49,7 +50,7 @@ public class PostAdCreateTest extends IntegrationTest {
     given()
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/ads")
+      .when().post("/app/v{v}/ads", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("title", equalTo("title"))
       .body("description", equalTo("description"))

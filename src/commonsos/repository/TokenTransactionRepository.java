@@ -13,11 +13,11 @@ import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 
 @Singleton
 public class TokenTransactionRepository extends Repository {

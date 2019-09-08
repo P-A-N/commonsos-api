@@ -7,10 +7,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.gson.Gson;
 
 import commonsos.annotation.ReadOnly;
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.app.CommunityNotificationListView;
 import spark.Request;
@@ -18,7 +18,7 @@ import spark.Response;
 import spark.utils.StringUtils;
 
 @ReadOnly
-public class CommunityNotificationListController extends AbstcactAppController {
+public class CommunityNotificationListController extends AbstractAppController {
   
   @Inject Gson gson;
   @Inject CommunityService service;

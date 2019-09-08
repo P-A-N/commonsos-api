@@ -15,6 +15,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.PasswordResetRequest;
@@ -23,7 +24,6 @@ import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 
 public class UserRepositoryTest extends AbstractRepositoryTest {
 

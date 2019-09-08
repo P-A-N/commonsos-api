@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> createAccountParam = getCreateAccountParam();
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(200);
     
     // verify email
@@ -53,25 +54,25 @@ public class PostCreateAccountTest extends IntegrationTest {
     Map<String, Object> loginParam = getLoginParam();
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(401);
     
     // createAccountComplete
     given()
-      .when().post("/app/v99/create-account/{accessId}", accessId)
+      .when().post("/app/v{v}/create-account/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.name", contains("community1", "community2"));
     
     // check if accessId is invalid
     given()
-      .when().post("/app/v99/create-account/{accessId}", accessId)
+      .when().post("/app/v{v}/create-account/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(400);
 
     // username already taken
@@ -79,7 +80,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     createAccountParam2.put("emailAddress", "test2@test.com");
     given()
       .body(gson.toJson(createAccountParam2))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(468);
 
     // email address already taken
@@ -87,7 +88,7 @@ public class PostCreateAccountTest extends IntegrationTest {
     createAccountParam3.put("username", "user2");
     given()
       .body(gson.toJson(createAccountParam3))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(468);
   }
   
@@ -98,20 +99,20 @@ public class PostCreateAccountTest extends IntegrationTest {
 
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(200);
     
     String accessId = extractAccessId(wiser.getMessages().get(0));
     Map<String, Object> loginParam = getLoginParam();
     given()
-      .when().post("/app/v99/create-account/{accessId}", accessId)
+      .when().post("/app/v{v}/create-account/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.name", contains("community1"));
   }
@@ -123,20 +124,20 @@ public class PostCreateAccountTest extends IntegrationTest {
 
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(200);
     
     String accessId = extractAccessId(wiser.getMessages().get(0));
     Map<String, Object> loginParam = getLoginParam();
     given()
-      .when().post("/app/v99/create-account/{accessId}", accessId)
+      .when().post("/app/v{v}/create-account/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200)
       .body("loggedinAt", notNullValue());
 
     // login should success
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.name", empty());
   }

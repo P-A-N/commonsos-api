@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.MDC;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
@@ -21,7 +21,7 @@ import spark.Response;
 import spark.Session;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class CreateUserCompleteController extends AbstcactAppController {
+public class CreateUserCompleteController extends AbstractAppController {
 
   @Inject UserService userService;
   @Inject CSRF csrf;

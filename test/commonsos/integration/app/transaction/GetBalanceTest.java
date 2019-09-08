@@ -1,5 +1,6 @@
 package commonsos.integration.app.transaction;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -33,7 +34,7 @@ public class GetBalanceTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/balance?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/balance?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());

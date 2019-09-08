@@ -2,7 +2,7 @@ package commonsos.repository.entity;
 
 import java.util.List;
 
-import commonsos.service.command.PaginationCommand;
+import commonsos.controller.command.PaginationCommand;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

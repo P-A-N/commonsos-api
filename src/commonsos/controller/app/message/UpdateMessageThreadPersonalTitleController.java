@@ -9,10 +9,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.gson.Gson;
 
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.app.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;

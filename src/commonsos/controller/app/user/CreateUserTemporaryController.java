@@ -7,15 +7,15 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
+import commonsos.controller.command.app.CreateUserTemporaryCommand;
 import commonsos.service.UserService;
-import commonsos.service.command.CreateUserTemporaryCommand;
 import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class CreateUserTemporaryController extends AbstcactAppController {
+public class CreateUserTemporaryController extends AbstractAppController {
 
   @Inject Gson gson;
   @Inject UserService userService;

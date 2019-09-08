@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
@@ -51,7 +52,7 @@ public class GetAdListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}", community.getId(), "foo")
+      .when().get("/app/v{v}/ads?communityId={communityId}&filter={filter}", APP_API_VERSION.getMajor(), community.getId(), "foo")
       .then().statusCode(200)
       .body("adList.id", contains(
           ad.getId().intValue(),
@@ -86,7 +87,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v{v}/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad1", "page_ad2", "page_ad3", "page_ad4", "page_ad5",
@@ -99,7 +100,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v{v}/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad11", "page_ad12"))
@@ -111,7 +112,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v{v}/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad12", "page_ad11", "page_ad10", "page_ad9", "page_ad8",
@@ -124,7 +125,7 @@ public class GetAdListTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v{v}/ads?communityId={communityId}&filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("adList.title", contains(
           "page_ad2", "page_ad1"))

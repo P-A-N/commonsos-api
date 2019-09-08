@@ -13,12 +13,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.TemporaryAdmin;
 import commonsos.repository.entity.TemporaryAdminEmailAddress;
-import commonsos.service.command.PaginationCommand;
 
 public class AdminRepositoryTest extends AbstractRepositoryTest {
 

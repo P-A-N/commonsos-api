@@ -3,9 +3,9 @@ package commonsos.controller.app.user;
 import javax.inject.Inject;
 
 import commonsos.controller.app.UploadPhotoForAppController;
+import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.UploadPhotoCommand;
 import commonsos.view.UrlView;
 import spark.Request;
 import spark.Response;

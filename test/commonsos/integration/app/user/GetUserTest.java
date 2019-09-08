@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -46,7 +47,7 @@ public class GetUserTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))
@@ -61,7 +62,7 @@ public class GetUserTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}", user1.getId())
+      .when().get("/app/v{v}/users/{id}", APP_API_VERSION.getMajor(), user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))
@@ -75,7 +76,7 @@ public class GetUserTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}", user1.getId())
+      .when().get("/app/v{v}/users/{id}", APP_API_VERSION.getMajor(), user1.getId())
       .then().statusCode(200)
       .body("username",  equalTo("user1"))
       .body("communityList.name", contains("community1"))

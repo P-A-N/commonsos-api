@@ -16,10 +16,10 @@ import com.google.gson.Gson;
 
 import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
+import commonsos.controller.command.app.CommunityNotificationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;
-import commonsos.service.command.CommunityNotificationCommand;
 import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
@@ -27,7 +27,7 @@ import spark.utils.StringUtils;
 
 @Synchronized(REGIST_COMMUNITY_NOTIFICATION)
 @RestrictAccess(allow = WORDPRESS_SERVER)
-public class CommunityNotificationController extends AbstcactAppController {
+public class CommunityNotificationController extends AbstractAppController {
   
   private static String[] DATE_FORMAT = {
       "yyyy-MM-dd HH:mm:ss",

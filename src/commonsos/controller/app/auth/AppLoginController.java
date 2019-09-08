@@ -8,18 +8,18 @@ import org.slf4j.MDC;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
+import commonsos.controller.command.app.AppLoginCommand;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.AppLoginCommand;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
 
-public class AppLoginController extends AbstcactAppController {
+public class AppLoginController extends AbstractAppController {
 
   public static final String USER_SESSION_ATTRIBUTE_NAME = "user";
   @Inject Gson gson;

@@ -1,5 +1,6 @@
 package commonsos.integration.app.auth;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
@@ -29,7 +30,7 @@ public class PostLoginTest extends IntegrationTest {
     
     String loggedinAt = given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("username", equalTo("user"))
       .extract().path("loggedinAt");
@@ -38,7 +39,7 @@ public class PostLoginTest extends IntegrationTest {
 
     loggedinAt = given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .extract().path("loggedinAt");
     
@@ -55,7 +56,7 @@ public class PostLoginTest extends IntegrationTest {
     
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(401);
   }
 }

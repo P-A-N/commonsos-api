@@ -20,11 +20,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.gson.Gson;
 
 import commonsos.controller.app.ad.AdUpdateController;
+import commonsos.controller.command.app.AdUpdateCommand;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
-import commonsos.service.command.AdUpdateCommand;
 import commonsos.view.app.AdView;
 import spark.Request;
 

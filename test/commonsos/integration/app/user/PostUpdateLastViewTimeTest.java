@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -44,7 +45,7 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     // check last view time before testing
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           is(Instant.EPOCH.toString()),
@@ -62,12 +63,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/wallet/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/wallet/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -83,12 +84,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/ad/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/ad/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -104,12 +105,12 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/notification/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/notification/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.walletLastViewTime", contains(
           not(is(Instant.EPOCH.toString())),
@@ -131,21 +132,21 @@ public class PostUpdateLastViewTimeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/wallet/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/wallet/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(400);
 
     // update ad LastViewTime
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/ad/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/ad/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(400);
 
     // update notification LastViewTime
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/notification/lastViewTime", user.getId())
+      .when().post("/app/v{v}/users/{id}/notification/lastViewTime", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(400);
   }
 }

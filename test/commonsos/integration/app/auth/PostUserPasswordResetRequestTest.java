@@ -1,5 +1,6 @@
 package commonsos.integration.app.auth;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/passwordreset", user.getId())
+      .when().post("/app/v{v}/users/{id}/passwordreset", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
 
     // verify email
@@ -49,7 +50,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
 
     // passwordResetCheck
     given()
-      .when().get("/app/v99/passwordreset/{accessId}", accessId)
+      .when().get("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200);
 
     // passwordReset
@@ -57,7 +58,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     requestParam.put("newPassword", "new_password");
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/passwordreset/{accessId}", accessId)
+      .when().post("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200);
 
     // password is reset
@@ -66,7 +67,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
 
     // passwordResetCheck invalid
     given()
-      .when().get("/app/v99/passwordreset/{accessId}", accessId)
+      .when().get("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(400);
   }
 
@@ -79,7 +80,7 @@ public class PostUserPasswordResetRequestTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/passwordreset", user.getId())
+      .when().post("/app/v{v}/users/{id}/passwordreset", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(401);
   }
 }

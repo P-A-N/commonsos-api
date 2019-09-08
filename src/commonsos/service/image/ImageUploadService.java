@@ -21,8 +21,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 
 import commonsos.Configuration;
+import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.exception.ServerErrorException;
-import commonsos.service.command.UploadPhotoCommand;
 
 @Singleton
 public class ImageUploadService {

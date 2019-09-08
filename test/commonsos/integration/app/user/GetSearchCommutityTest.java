@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -45,7 +46,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // non filter
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities", user.getId())
+      .when().get("/app/v{v}/users/{id}/communities", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(3))
       .body("communityList.id", contains(community2.getId().intValue(), community3.getId().intValue(), community4.getId().intValue()))
@@ -55,7 +56,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // filter
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?filter={filter}", user.getId(), "foo")
+      .when().get("/app/v{v}/users/{id}/communities?filter={filter}", APP_API_VERSION.getMajor(), user.getId(), "foo")
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(2))
       .body("communityList.id", contains(community2.getId().intValue(), community4.getId().intValue()))
@@ -90,7 +91,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "0", "10", "ASC")
+      .when().get("/app/v{v}/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "0", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community1", "page_community2", "page_community3", "page_community4", "page_community5",
@@ -103,7 +104,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "1", "10", "ASC")
+      .when().get("/app/v{v}/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "1", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community11", "page_community12"))
@@ -115,7 +116,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "0", "10", "DESC")
+      .when().get("/app/v{v}/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "0", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community12", "page_community11", "page_community10", "page_community9", "page_community8",
@@ -128,7 +129,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "1", "10", "DESC")
+      .when().get("/app/v{v}/users/{id}/communities?pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "1", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community2", "page_community1"))
@@ -166,7 +167,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v{v}/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community1", "page_community2", "page_community3", "page_community4", "page_community5",
@@ -179,7 +180,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v{v}/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community11", "page_community12"))
@@ -191,7 +192,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v{v}/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community12", "page_community11", "page_community10", "page_community9", "page_community8",
@@ -204,7 +205,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // [non filter] page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageUser.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v{v}/users/{id}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageUser.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community2", "page_community1"))

@@ -1,5 +1,6 @@
 package commonsos.integration.app.auth;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +30,7 @@ public class PostPasswordResetTest extends IntegrationTest {
     Map<String, Object> passwordResetRequestParam = getPasswordResetRequestParam();
     given()
       .body(gson.toJson(passwordResetRequestParam))
-      .when().post("/app/v99/passwordreset")
+      .when().post("/app/v{v}/passwordreset", APP_API_VERSION.getMajor())
       .then().statusCode(200);
 
     // verify email
@@ -40,23 +41,23 @@ public class PostPasswordResetTest extends IntegrationTest {
     
     // passwordResetCheck
     given()
-      .when().get("/app/v99/passwordreset/{accessId}", accessId)
+      .when().get("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200);
 
     // passwordReset
     Map<String, Object> passwordResetParam = getPasswordResetParam();
     given()
       .body(gson.toJson(passwordResetParam))
-      .when().post("/app/v99/passwordreset/{accessId}", accessId)
+      .when().post("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200);
 
     // check if accessId is invalid
     given()
-      .when().get("/app/v99/passwordreset/{accessId}", accessId)
+      .when().get("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(400);
     given()
       .body(gson.toJson(passwordResetParam))
-      .when().post("/app/v99/passwordreset/{accessId}", accessId)
+      .when().post("/app/v{v}/passwordreset/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(400);
     
     // login
@@ -65,13 +66,13 @@ public class PostPasswordResetTest extends IntegrationTest {
     loginParam.put("password", "password1");
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(401);
     
     loginParam.put("password", "password2");
     given()
       .body(gson.toJson(loginParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200);
   }
   

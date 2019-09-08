@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import commonsos.controller.command.PaginationCommand;
+import commonsos.controller.command.admin.CreateRedistributionCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
@@ -17,8 +19,6 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
-import commonsos.service.command.CreateRedistributionCommand;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RedistributionUtil;
 import commonsos.util.UserUtil;

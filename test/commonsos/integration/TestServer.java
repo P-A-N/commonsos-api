@@ -22,6 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import commonsos.Server;
+import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.interceptor.TransactionInterceptor;
@@ -33,7 +34,6 @@ import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.TokenBalance;
-import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;

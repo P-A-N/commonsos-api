@@ -1,5 +1,6 @@
 package commonsos.integration;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.integration.TestEntityManagerService.DELETE_ALL;
 import static io.restassured.RestAssured.given;
 import static spark.Spark.awaitInitialization;
@@ -90,7 +91,7 @@ public class IntegrationTest {
     
     String sessionId = given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .extract().cookie("JSESSIONID");
     
@@ -104,7 +105,7 @@ public class IntegrationTest {
     
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/login")
+      .when().post("/app/v{v}/login", APP_API_VERSION.getMajor())
       .then().statusCode(401);
   }
 

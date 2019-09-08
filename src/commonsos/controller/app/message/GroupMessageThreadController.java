@@ -5,9 +5,9 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.app.CreateGroupCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.CreateGroupCommand;
 import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;

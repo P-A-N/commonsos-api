@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -51,7 +52,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     int id = given()
         .cookie("JSESSIONID", sessionId)
         .body(gson.toJson(requestParam))
-        .when().post("/app/v99/message-threads/group")
+        .when().post("/app/v{v}/message-threads/group", APP_API_VERSION.getMajor())
         .then().statusCode(200)
         .extract().path("id");
     messageThreadId = (long) id;
@@ -68,7 +69,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     int id = given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/{id}/group", messageThreadId)
+      .when().post("/app/v{v}/message-threads/{id}/group", APP_API_VERSION.getMajor(), messageThreadId)
       .then().statusCode(200)
       .body("id", equalTo(messageThreadId.intValue()))
       .body("ad.id", nullValue())
@@ -110,7 +111,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/{id}/group", messageThreadId)
+      .when().post("/app/v{v}/message-threads/{id}/group", APP_API_VERSION.getMajor(), messageThreadId)
       .then().statusCode(400);
   }
 }

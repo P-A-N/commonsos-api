@@ -12,10 +12,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.controller.app.message.GroupMessageThreadUpdateController;
+import commonsos.controller.command.app.GroupMessageThreadUpdateCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.GroupMessageThreadUpdateCommand;
 import commonsos.view.app.MessageThreadView;
 import spark.Request;
 

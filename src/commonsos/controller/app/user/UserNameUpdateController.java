@@ -8,9 +8,9 @@ import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.app.UserNameUpdateCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.UserNameUpdateCommand;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;

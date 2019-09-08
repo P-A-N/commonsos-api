@@ -4,16 +4,16 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
+import commonsos.controller.command.app.PasswordResetCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.service.UserService;
-import commonsos.service.command.PasswordResetCommand;
 import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-public class PasswordResetController extends AbstcactAppController {
+public class PasswordResetController extends AbstractAppController {
 
   @Inject UserService userService;
   @Inject Gson gson;

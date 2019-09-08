@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -79,13 +80,13 @@ public class GetUnreadMessageThreadCountTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/unread-count?communityId={communityId}", community1.getId())
+      .when().get("/app/v{v}/message-threads/unread-count?communityId={communityId}", APP_API_VERSION.getMajor(), community1.getId())
       .then().statusCode(200)
       .body("count", equalTo(2));
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/unread-count?communityId={communityId}", community2.getId())
+      .when().get("/app/v{v}/message-threads/unread-count?communityId={communityId}", APP_API_VERSION.getMajor(), community2.getId())
       .then().statusCode(200)
       .body("count", equalTo(4));
   }

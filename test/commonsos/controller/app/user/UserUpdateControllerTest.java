@@ -16,10 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.controller.app.user.UserUpdateController;
+import commonsos.controller.command.app.UserUpdateCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.UserUpdateCommand;
 import commonsos.view.app.PrivateUserView;
 import spark.Request;
 import spark.Response;

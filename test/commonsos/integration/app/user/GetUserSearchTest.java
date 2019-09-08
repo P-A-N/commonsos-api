@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -38,7 +39,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api (filter)
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}", community.getId(), "user1")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}", APP_API_VERSION.getMajor(), community.getId(), "user1")
       .then().statusCode(200)
       .body("userList.username", contains("otherUser1"))
       .body("userList.communityList.name", contains(contains("community")))
@@ -47,7 +48,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api (non filter)
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/users?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200)
       .body("userList.username", contains("otherUser1", "otherUser2"));
   }
@@ -57,7 +58,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}", otherCommunity.getId(), "user")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}", APP_API_VERSION.getMajor(), otherCommunity.getId(), "user")
       .then().statusCode(200)
       .body("userList.username", contains("otherCommunityUser1"));
   }
@@ -84,7 +85,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user1", "page_user2", "page_user3", "page_user4", "page_user5",
@@ -97,7 +98,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user11", "page_user12"))
@@ -109,7 +110,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user12", "page_user11", "page_user10", "page_user9", "page_user8",
@@ -122,7 +123,7 @@ public class GetUserSearchTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", pageCommunity.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v{v}/users?communityId={communityId}&q={q}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), pageCommunity.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("userList.username", contains(
           "page_user2", "page_user1"))

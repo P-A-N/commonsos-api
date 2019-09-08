@@ -44,6 +44,7 @@ import commonsos.controller.admin.community.redistribution.DeleteRedistributionC
 import commonsos.controller.admin.community.redistribution.GetRedistributionController;
 import commonsos.controller.admin.community.redistribution.SearchRedistributionController;
 import commonsos.controller.admin.community.redistribution.UpdateRedistributionController;
+import commonsos.controller.admin.system.UpdateMaintenanceModeController;
 import commonsos.controller.admin.transaction.CreateEthTransactionController;
 import commonsos.controller.admin.transaction.CreateTokenTransactionController;
 import commonsos.controller.admin.transaction.GetEthBalanceController;
@@ -118,6 +119,8 @@ import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
+import commonsos.exception.ServiceUnavailableException;
+import commonsos.exception.UrlNotFoundException;
 import commonsos.filter.AddHeaderFilter;
 import commonsos.filter.LogFilter;
 import commonsos.interceptor.TransactionInterceptor;
@@ -132,6 +135,8 @@ public class Server {
   @Inject private JsonTransformer toJson;
   @Inject private DatabaseMigrator databaseMigrator;
   @Inject private BlockchainEventService blockchainEventService;
+  @Inject private Configuration config;
+  @Inject private Cache cache;
   private Injector injector;
 
   public void start(String[] args) {
@@ -139,10 +144,11 @@ public class Server {
     databaseMigrator.execute();
     CookieSecuringEmbeddedJettyFactory.register();
     setupServer();
+    initCache();
     initRoutes();
     blockchainEventService.listenEvents();
   }
-  
+
   protected void setupServer() {
     // nothing to setup in production server.
   }
@@ -160,9 +166,12 @@ public class Server {
     injector.injectMembers(this);
     return injector;
   }
+  
+  private void initCache() {
+    cache.setSystemConfig(Cache.SYS_CONFIG_KEY_MAINTENANCE_MODE, config.maintenanceMode());
+  }
 
   private void initRoutes() {
-
     before(injector.getInstance(AddHeaderFilter.class));
     before(injector.getInstance(LogFilter.class));
     before((request, response) -> log.info(requestInfo(request)));
@@ -186,10 +195,20 @@ public class Server {
       response.status(403);
       response.body("");
     });
+    exception(UrlNotFoundException.class, (exception, request, response) -> {
+      log.error("Url not found", exception);
+      response.status(404);
+      response.body("");
+    });
     exception(DisplayableException.class, (exception, request, response) -> {
       log.error("Displayable error", exception);
       response.status(468);
       response.body(toJson.render(ImmutableMap.of("key", exception.getMessage())));
+    });
+    exception(ServiceUnavailableException.class, (exception, request, response) -> {
+      log.error("Service unavailable", exception);
+      response.status(503);
+      response.body("");
     });
     exception(Exception.class, (exception, request, response) -> {
       log.error("Processing failed", exception);
@@ -326,6 +345,9 @@ public class Server {
     get("/admin/communities/:id/redistributions/:redistributionId", injector.getInstance(GetRedistributionController.class), toJson);
     post("/admin/communities/:id/redistributions/:redistributionId", injector.getInstance(UpdateRedistributionController.class), toJson);
     post("/admin/communities/:id/redistributions/:redistributionId/delete", injector.getInstance(DeleteRedistributionController.class), toJson);
+    
+    // system
+    post("/admin/system/maintenance-mode", injector.getInstance(UpdateMaintenanceModeController.class), toJson);
   }
   
   private String requestInfo(Request request) {

@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -45,7 +46,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/ads/{id}/photo", ad.getId())
+      .when().post("/app/v{v}/ads/{id}/photo", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200);
     
     // call api (crop)
@@ -56,7 +57,7 @@ public class PostAdPhotoUpdateTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/ads/{id}/photo", ad.getId())
+      .when().post("/app/v{v}/ads/{id}/photo", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200);
   }
 }

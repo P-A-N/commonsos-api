@@ -11,10 +11,10 @@ import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.app.CreateDirectMessageThreadCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.CreateDirectMessageThreadCommand;
 import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;

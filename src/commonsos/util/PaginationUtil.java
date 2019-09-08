@@ -6,10 +6,10 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
-import commonsos.service.command.PaginationCommand;
 import commonsos.view.PaginationView;
 import spark.Request;
 

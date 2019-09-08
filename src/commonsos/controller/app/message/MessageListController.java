@@ -5,9 +5,9 @@ import static java.lang.Long.parseLong;
 import javax.inject.Inject;
 
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.app.MessageListView;
 import spark.Request;

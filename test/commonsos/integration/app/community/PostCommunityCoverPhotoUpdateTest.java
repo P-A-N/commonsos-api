@@ -1,5 +1,6 @@
 package commonsos.integration.app.community;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -45,7 +46,7 @@ public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/communities/{id}/coverPhoto", community.getId())
+      .when().post("/app/v{v}/communities/{id}/coverPhoto", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200);
 
     // crop
@@ -56,7 +57,7 @@ public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/communities/{id}/coverPhoto", community.getId())
+      .when().post("/app/v{v}/communities/{id}/coverPhoto", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200);
   }
   
@@ -73,7 +74,7 @@ public class PostCommunityCoverPhotoUpdateTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/communities/{id}/coverPhoto", community.getId())
+      .when().post("/app/v{v}/communities/{id}/coverPhoto", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(403);
   }
 }

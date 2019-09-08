@@ -1,5 +1,6 @@
 package commonsos.integration.app.transaction;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -60,7 +61,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -80,7 +81,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -102,7 +103,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468)
       .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
 
@@ -111,7 +112,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468)
       .body("key", equalTo("error.userIsNotCommunityMember"));
 
@@ -133,7 +134,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -153,7 +154,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -177,7 +178,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(400);
 
     // call api
@@ -185,7 +186,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -207,7 +208,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468)
       .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
   }
@@ -226,7 +227,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
@@ -256,7 +257,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468)
       .body("key", equalTo("error.beneficiaryIsNotCommunityMember"));
   }
@@ -275,7 +276,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468);
   }
 }

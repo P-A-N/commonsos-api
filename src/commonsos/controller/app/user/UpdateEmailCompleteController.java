@@ -9,7 +9,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AbstcactAppController;
+import commonsos.controller.app.AbstractAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.UserService;
 import commonsos.view.CommonView;
@@ -18,7 +18,7 @@ import spark.Response;
 import spark.utils.StringUtils;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class UpdateEmailCompleteController extends AbstcactAppController {
+public class UpdateEmailCompleteController extends AbstractAppController {
 
   @Inject UserService userService;
   @Inject Gson gson;

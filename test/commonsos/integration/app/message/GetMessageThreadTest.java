@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
@@ -84,7 +85,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get adThreads
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/{id}", adThread.getId())
+      .when().get("/app/v{v}/message-threads/{id}", APP_API_VERSION.getMajor(), adThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(adThread.getId().intValue()))
       .body("title", equalTo("adThread"))
@@ -103,7 +104,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get groupThread
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/{id}", groupThread.getId())
+      .when().get("/app/v{v}/message-threads/{id}", APP_API_VERSION.getMajor(), groupThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(groupThread.getId().intValue()))
       .body("title", equalTo("groupThread"))
@@ -123,7 +124,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get directThread
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/{id}", directThread.getId())
+      .when().get("/app/v{v}/message-threads/{id}", APP_API_VERSION.getMajor(), directThread.getId())
       .then().statusCode(200)
       .body("id", equalTo(directThread.getId().intValue()))
       .body("title", equalTo("directThread"))
@@ -148,7 +149,7 @@ public class GetMessageThreadTest extends IntegrationTest {
     // get adThreads
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads/{id}", adThread.getId())
+      .when().get("/app/v{v}/message-threads/{id}", APP_API_VERSION.getMajor(), adThread.getId())
       .then().statusCode(403);
   }
 }

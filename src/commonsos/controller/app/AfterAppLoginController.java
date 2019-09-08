@@ -12,7 +12,7 @@ import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 
-public abstract class AfterAppLoginController extends AbstcactAppController {
+public abstract class AfterAppLoginController extends AbstractAppController {
 
   @Inject UserService userService;
 

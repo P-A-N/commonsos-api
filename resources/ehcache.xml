@@ -33,4 +33,14 @@
       <offheap unit="MB">1</offheap> 
     </resources>
   </cache>
+  <cache alias="systemConfig"> 
+    <key-type>java.lang.String</key-type> 
+    <value-type>java.lang.String</value-type>
+    <expiry>
+      <none/>
+    </expiry>
+    <resources>
+      <offheap unit="MB">1</offheap> 
+    </resources>
+  </cache>
 </config>

@@ -12,12 +12,12 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 
 @Singleton
 public class MessageThreadRepository extends Repository {

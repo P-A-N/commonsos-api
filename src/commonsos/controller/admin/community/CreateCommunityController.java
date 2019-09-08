@@ -11,12 +11,12 @@ import org.apache.commons.fileupload.FileItem;
 
 import commonsos.annotation.Synchronized;
 import commonsos.controller.admin.MultipartFormdataController;
+import commonsos.controller.command.admin.CreateCommunityCommand;
 import commonsos.exception.CommonsOSException;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.service.CommunityService;
-import commonsos.service.command.CreateCommunityCommand;
 import commonsos.util.RequestUtil;
 import commonsos.view.admin.CommunityForAdminView;
 import spark.Request;

@@ -4,9 +4,9 @@ import javax.inject.Inject;
 
 import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.service.CommunityService;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.admin.CommunityListForAdminView;
 import spark.Request;

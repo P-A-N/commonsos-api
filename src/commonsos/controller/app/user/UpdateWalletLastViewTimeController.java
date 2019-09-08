@@ -5,9 +5,9 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.app.LastViewTimeUpdateCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.LastViewTimeUpdateCommand;
 import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;

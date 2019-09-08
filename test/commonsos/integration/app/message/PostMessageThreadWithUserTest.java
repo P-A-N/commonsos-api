@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -50,7 +51,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
     int id = given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/user/{userId}", user2.getId())
+      .when().post("/app/v{v}/message-threads/user/{userId}", APP_API_VERSION.getMajor(), user2.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", nullValue())
@@ -89,7 +90,7 @@ public class PostMessageThreadWithUserTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/message-threads/user/{userId}", otherCommunityUser.getId())
+      .when().post("/app/v{v}/message-threads/user/{userId}", APP_API_VERSION.getMajor(), otherCommunityUser.getId())
       .then().statusCode(400);
   }
 }

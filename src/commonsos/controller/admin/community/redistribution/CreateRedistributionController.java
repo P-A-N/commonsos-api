@@ -8,10 +8,10 @@ import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
 import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.controller.command.admin.CreateRedistributionCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Redistribution;
 import commonsos.service.RedistributionService;
-import commonsos.service.command.CreateRedistributionCommand;
 import commonsos.util.RedistributionUtil;
 import commonsos.util.RequestUtil;
 import commonsos.view.admin.RedistributionView;

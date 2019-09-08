@@ -1,5 +1,6 @@
 package commonsos.integration.blockchain;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
@@ -123,7 +124,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // create temporary user
     given()
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(200);
     
     // get accessId
@@ -135,7 +136,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // complete create user
     int userId = given()
-      .when().post("/app/v99/create-account/{accessId}", accessId)
+      .when().post("/app/v{v}/create-account/{accessId}", APP_API_VERSION.getMajor(), accessId)
       .then().statusCode(200)
       .extract().path("id");
 
@@ -209,7 +210,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/transactions")
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("balance", expectAmount);
     log.info(String.format("transfer token completed. [from=%s, to=%s, community=%s]", from.getUsername(), to.getUsername(), community.getName()));
@@ -218,7 +219,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   private void checkBalance(User user, Community community, int expected) {
     sessionId = loginApp(user.getUsername(), "passpass");
     given().cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/balance?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/balance?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200).body("balance", equalTo(expected));
     log.info(String.format("check balance ok. [user=%s, community=%s, balance=%d]", user.getUsername(), community.getName(), expected));
   }
@@ -232,7 +233,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/communities", user.getId())
+      .when().post("/app/v{v}/users/{id}/communities", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
   }
@@ -270,7 +271,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     for (int i = 0; i < 60; i++) {
       int balanceInt = given()
         .cookie("JSESSIONID", sessionId)
-        .when().get("/app/v99/balance?communityId={id}", community.getId())
+        .when().get("/app/v{v}/balance?communityId={id}", APP_API_VERSION.getMajor(), community.getId())
         .then().statusCode(200)
         .extract().path("balance");
       BigDecimal balance = BigDecimal.valueOf(balanceInt);

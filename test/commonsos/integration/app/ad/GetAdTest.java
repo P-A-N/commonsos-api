@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
@@ -35,7 +36,7 @@ public class GetAdTest extends IntegrationTest {
   public void adList() {
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/ads/{id}", ad.getId())
+      .when().get("/app/v{v}/ads/{id}", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(ad.getId().intValue()));
   }

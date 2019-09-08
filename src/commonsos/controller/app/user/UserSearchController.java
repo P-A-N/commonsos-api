@@ -9,10 +9,10 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.app.UserListView;
 import spark.Request;

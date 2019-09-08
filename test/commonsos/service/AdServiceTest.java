@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import commonsos.controller.command.app.AdUpdateCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -23,7 +24,6 @@ import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
-import commonsos.service.command.AdUpdateCommand;
 import commonsos.service.image.ImageUploadService;
 
 @ExtendWith(MockitoExtension.class)

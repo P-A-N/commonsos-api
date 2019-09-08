@@ -1,5 +1,6 @@
 package commonsos.integration.app.community;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,14 +31,14 @@ public class GetSearchCommutityTest extends IntegrationTest {
   public void searchCommutity() throws Exception {
     // non filter
     given()
-      .when().get("/app/v99/communities")
+      .when().get("/app/v{v}/communities", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(3))
       .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue(), community3.getId().intValue()));
 
     // filter
     String body = given()
-      .when().get("/app/v99/communities?filter={filter}", "foo")
+      .when().get("/app/v{v}/communities?filter={filter}", APP_API_VERSION.getMajor(), "foo")
       .then().statusCode(200)
       .body("communityList.id", iterableWithSize(2))
       .body("communityList.id", contains(community1.getId().intValue(), community2.getId().intValue()))
@@ -65,7 +66,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 0 size 10 asc
     // filter
     given()
-      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "ASC")
+      .when().get("/app/v{v}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community1", "page_community2", "page_community3", "page_community4", "page_community5",
@@ -78,7 +79,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 1 size 10 asc
     // filter
     given()
-      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "ASC")
+      .when().get("/app/v{v}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community11", "page_community12"))
@@ -90,7 +91,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 0 size 10 desc
     // filter
     given()
-      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "0", "10", "DESC")
+      .when().get("/app/v{v}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community12", "page_community11", "page_community10", "page_community9", "page_community8",
@@ -103,7 +104,7 @@ public class GetSearchCommutityTest extends IntegrationTest {
     // page 1 size 10 desc
     // filter
     given()
-      .when().get("/app/v99/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", "page", "1", "10", "DESC")
+      .when().get("/app/v{v}/communities?filter={filter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("communityList.name", contains(
           "page_community2", "page_community1"))

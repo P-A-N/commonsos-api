@@ -13,10 +13,13 @@ import org.ehcache.xml.XmlConfiguration;
 @Singleton
 public class Cache {
 
+  public static String SYS_CONFIG_KEY_MAINTENANCE_MODE = "maintenanceMode";
+  
   private CacheManager cacheManager;
   private org.ehcache.Cache<String, String> tokenSymbolCache;
   private org.ehcache.Cache<String, String> tokenNameCache;
   private org.ehcache.Cache<String, BigDecimal> totalSupplyCache;
+  private org.ehcache.Cache<String, String> systemConfigCache;
   
   public Cache() {
     URL url = this.getClass().getResource("/ehcache.xml"); 
@@ -27,6 +30,7 @@ public class Cache {
     tokenSymbolCache = cacheManager.getCache("tokenSymbol", String.class, String.class);
     tokenNameCache = cacheManager.getCache("tokenName", String.class, String.class);
     totalSupplyCache = cacheManager.getCache("totalSupply", String.class, BigDecimal.class);
+    systemConfigCache = cacheManager.getCache("systemConfig", String.class, String.class);
   }
   
   public String getTokenName(String tokenAddress) {
@@ -51,5 +55,13 @@ public class Cache {
   
   public void setTotalSupply(String tokenAddress, BigDecimal totalSupply) {
     totalSupplyCache.put(tokenAddress, totalSupply);
+  }
+  
+  public String getSystemConfig(String configKey) {
+    return systemConfigCache.get(configKey);
+  }
+  
+  public void setSystemConfig(String configKey, String value) {
+    systemConfigCache.put(configKey, value);
   }
 }

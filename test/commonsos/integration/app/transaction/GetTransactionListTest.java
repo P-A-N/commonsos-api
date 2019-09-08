@@ -1,5 +1,6 @@
 package commonsos.integration.app.transaction;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -60,7 +61,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}", community1.getId())
+      .when().get("/app/v{v}/transactions?communityId={communityId}", APP_API_VERSION.getMajor(), community1.getId())
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    contains(false, false, true))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
@@ -68,7 +69,7 @@ public class GetTransactionListTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}", community2.getId())
+      .when().get("/app/v{v}/transactions?communityId={communityId}", APP_API_VERSION.getMajor(), community2.getId())
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    contains(false, false))
       .body("transactionList.remitter.username",    contains("user3", "user1"))
@@ -79,7 +80,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}", community1.getId())
+      .when().get("/app/v{v}/transactions?communityId={communityId}", APP_API_VERSION.getMajor(), community1.getId())
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    contains(false, false))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
@@ -88,7 +89,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}", community2.getId())
+      .when().get("/app/v{v}/transactions?communityId={communityId}", APP_API_VERSION.getMajor(), community2.getId())
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    empty())
       .body("transactionList.remitter.username",    empty())
@@ -102,7 +103,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}", community1.getId(), user1.getId())
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}", APP_API_VERSION.getMajor(), community1.getId(), user1.getId())
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    contains(false, false, true))
       .body("transactionList.remitter.username",    contains("user2", "user1"))
@@ -110,12 +111,12 @@ public class GetTransactionListTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}", community2.getId(), user1.getId())
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}", APP_API_VERSION.getMajor(), community2.getId(), user1.getId())
       .then().statusCode(403);
 
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}", community1.getId(), user3.getId())
+    .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}", APP_API_VERSION.getMajor(), community1.getId(), user3.getId())
     .then().statusCode(200)
     .body("transactionList.isFromAdmin",    empty())
     .body("transactionList.remitter.username",    empty())
@@ -126,7 +127,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // call by user
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}", community1.getId(), user2.getId())
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}", APP_API_VERSION.getMajor(), community1.getId(), user2.getId())
       .then().statusCode(403);
   }
   
@@ -154,7 +155,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "ASC")
+      .when().get("/app/v{v}/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "0", "10", "ASC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "12", "11", "10", "9", "8", "7", "6", "5", "4", "3"))
@@ -166,7 +167,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "ASC")
+      .when().get("/app/v{v}/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "1", "10", "ASC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "2", "1"))
@@ -178,7 +179,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "0", "10", "DESC")
+      .when().get("/app/v{v}/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "0", "10", "DESC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"))
@@ -190,7 +191,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "1", "10", "DESC")
+      .when().get("/app/v{v}/transactions?communityId={communityId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "1", "10", "DESC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "11", "12"))
@@ -227,7 +228,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), user1.getId(), "0", "10", "ASC")
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), user1.getId(), "0", "10", "ASC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "12", "11", "10", "9", "8", "7", "6", "5", "4", "3"))
@@ -239,7 +240,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), user1.getId(), "1", "10", "ASC")
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), user1.getId(), "1", "10", "ASC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "2", "1"))
@@ -251,7 +252,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), user1.getId(), "0", "10", "DESC")
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), user1.getId(), "0", "10", "DESC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"))
@@ -263,7 +264,7 @@ public class GetTransactionListTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), user1.getId(), "1", "10", "DESC")
+      .when().get("/app/v{v}/admin/transactions?communityId={communityId}&userId={userId}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), user1.getId(), "1", "10", "DESC")
       .then().statusCode(200)
       .body("transactionList.description", contains(
           "11", "12"))

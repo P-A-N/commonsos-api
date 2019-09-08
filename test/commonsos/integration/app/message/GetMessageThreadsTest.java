@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
@@ -103,7 +104,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/message-threads?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(directThread.getId().intValue(), groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("directThread", "groupThread", "adThread"))
@@ -130,7 +131,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/message-threads?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread", "adThread"))
@@ -154,7 +155,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}", community.getId())
+      .when().get("/app/v{v}/message-threads?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(directThread.getId().intValue(), groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("directThread", "groupThread"))
@@ -181,7 +182,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&memberFilter={memberFilter}", community.getId(), user2.getUsername())
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&memberFilter={memberFilter}", APP_API_VERSION.getMajor(), community.getId(), user2.getUsername())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue(), adThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread", "adThread"))
@@ -208,7 +209,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
 
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}", community.getId(), groupMessage.getText())
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}", APP_API_VERSION.getMajor(), community.getId(), groupMessage.getText())
       .then().statusCode(200)
       .body("messageThreadList.id", contains(groupThread.getId().intValue()))
       .body("messageThreadList.title", contains("groupThread"))
@@ -260,7 +261,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 0 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "ASC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "0", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id12.intValue(), id11.intValue(), id10.intValue(), id9.intValue(), id8.intValue(),
@@ -273,7 +274,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 1 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "ASC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "1", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id2.intValue(), id1.intValue()))
@@ -285,7 +286,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 2 size 10 asc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "ASC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "2", "10", "ASC")
       .then().statusCode(200)
       .body("messageThreadList.id", emptyIterable())
       .body("pagination.page", equalTo(2))
@@ -296,7 +297,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 0 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "0", "10", "DESC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "0", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id1.intValue(), id2.intValue(), id3.intValue(), id4.intValue(), id5.intValue(),
@@ -309,7 +310,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 1 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "1", "10", "DESC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "1", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", contains(
           id11.intValue(), id12.intValue()))
@@ -321,7 +322,7 @@ public class GetMessageThreadsTest extends IntegrationTest {
     // page 2 size 10 desc
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", community.getId(), "page", "2", "10", "DESC")
+      .when().get("/app/v{v}/message-threads?communityId={communityId}&messageFilter={messageFilter}&pagination[page]={page}&pagination[size]={size}&pagination[sort]={sort}", APP_API_VERSION.getMajor(), community.getId(), "page", "2", "10", "DESC")
       .then().statusCode(200)
       .body("messageThreadList.id", emptyIterable())
       .body("pagination.page", equalTo(2))

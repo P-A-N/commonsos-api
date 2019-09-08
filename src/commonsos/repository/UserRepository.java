@@ -12,13 +12,13 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.UserNotFoundException;
 import commonsos.repository.entity.PasswordResetRequest;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton

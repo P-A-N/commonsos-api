@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
     
     // crop
@@ -47,7 +48,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
   }
   
@@ -62,7 +63,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
     
     // crop
@@ -73,7 +74,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
   }
   
@@ -88,7 +89,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(468);
     
     // crop
@@ -99,7 +100,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(468);
   }
   
@@ -114,7 +115,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(468);
     
     // crop
@@ -125,7 +126,7 @@ public class PostUpdateAvatarTest extends IntegrationTest {
       .multiPart("x", 100)
       .multiPart("y", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/users/{id}/avatar", user.getId())
+      .when().post("/app/v{v}/users/{id}/avatar", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(468);
   }
 }

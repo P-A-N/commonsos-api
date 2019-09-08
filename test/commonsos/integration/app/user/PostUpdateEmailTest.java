@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,7 +35,7 @@ public class PostUpdateEmailTest extends IntegrationTest {
     Map<String, Object> updateEmailTemporaryParam = getUpdateEmailTemporaryParam();
     given()
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/app/v99/users/{:id}/emailaddress", user.getId())
+      .when().post("/app/v{v}/users/{:id}/emailaddress", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(401);
     
     // it should success after login
@@ -42,7 +43,7 @@ public class PostUpdateEmailTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/app/v99/users/{id}/emailaddress", user.getId())
+      .when().post("/app/v{v}/users/{id}/emailaddress", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200);
     
     // verify email
@@ -56,35 +57,35 @@ public class PostUpdateEmailTest extends IntegrationTest {
     createAccountParam.put("emailAddress", "user@test.com");
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(468);
     createAccountParam.put("emailAddress", "updated@test.com");
     given()
       .body(gson.toJson(createAccountParam))
-      .when().post("/app/v99/create-account")
+      .when().post("/app/v{v}/create-account", APP_API_VERSION.getMajor())
       .then().statusCode(468);
     sessionId2 = loginApp("user2", "password");
     given()
       .cookie("JSESSIONID", sessionId2)
       .body(gson.toJson(updateEmailTemporaryParam))
-      .when().post("/app/v99/users/{id}/emailaddress", user2.getId())
+      .when().post("/app/v{v}/users/{id}/emailaddress", APP_API_VERSION.getMajor(), user2.getId())
       .then().statusCode(468);
     
     // updateEmail complete
     given()
-      .when().post("/app/v99/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
+      .when().post("/app/v{v}/users/{id}/emailaddress/{accessId}", APP_API_VERSION.getMajor(), user.getId(), accessId)
       .then().statusCode(200);
     
     // check email address is updated
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/user")
+      .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
       .then().statusCode(200)
       .body("emailAddress",  equalTo("updated@test.com"));
 
     // check if accessId is invalid
     given()
-      .when().post("/app/v99/users/{id}/emailaddress/{accessId}", user.getId(), accessId)
+      .when().post("/app/v{v}/users/{id}/emailaddress/{accessId}", APP_API_VERSION.getMajor(), user.getId(), accessId)
       .then().statusCode(400);
   }
   

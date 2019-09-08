@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
-import commonsos.service.command.UploadPhotoCommand;
 import commonsos.service.image.ImageService;
 import commonsos.util.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;

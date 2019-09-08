@@ -14,12 +14,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
-import commonsos.service.command.PaginationCommand;
 
 public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 

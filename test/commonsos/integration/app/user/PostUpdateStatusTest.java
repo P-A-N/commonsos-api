@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -33,7 +34,7 @@ public class PostUpdateStatusTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
-      .when().post("/app/v99/users/{id}/status", user.getId())
+      .when().post("/app/v{v}/users/{id}/status", APP_API_VERSION.getMajor(), user.getId())
       .then().statusCode(200)
       .body("status", equalTo("hoge"));
   }

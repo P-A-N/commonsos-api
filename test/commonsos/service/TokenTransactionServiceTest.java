@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import commonsos.controller.command.app.TransactionCreateCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
@@ -40,7 +41,6 @@ import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
-import commonsos.service.command.TransactionCreateCommand;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

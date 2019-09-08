@@ -1,5 +1,6 @@
 package commonsos.integration.app.message;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -45,7 +46,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     sessionId = loginApp("user1", "pass");
     int id1 = given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v{v}/message-threads/for-ad/{adId}", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", equalTo(ad.getId().intValue()))
@@ -67,7 +68,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     sessionId = loginApp("user2", "pass");
     int id2 = given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v{v}/message-threads/for-ad/{adId}", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200)
       .body("id", notNullValue())
       .body("ad.id", equalTo(ad.getId().intValue()))
@@ -91,7 +92,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     sessionId = loginApp("user1", "pass");
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v{v}/message-threads/for-ad/{adId}", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(id1))
       .body("parties.id", contains(adCreator.getId().intValue()));
@@ -100,7 +101,7 @@ public class PostMessageThreadForAdTest extends IntegrationTest {
     sessionId = loginApp("user2", "pass");
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/message-threads/for-ad/{adId}", ad.getId())
+      .when().post("/app/v{v}/message-threads/for-ad/{adId}", APP_API_VERSION.getMajor(), ad.getId())
       .then().statusCode(200)
       .body("id", equalTo(id2))
       .body("parties.id", contains(adCreator.getId().intValue()));

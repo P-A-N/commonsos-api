@@ -11,10 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.controller.app.user.UserMobileDeviceUpdateController;
+import commonsos.controller.command.app.MobileDeviceUpdateCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.service.command.MobileDeviceUpdateCommand;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

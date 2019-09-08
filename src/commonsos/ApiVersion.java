@@ -13,6 +13,18 @@ public enum ApiVersion {
     this.patch = patch;
   }
   
+  public int getMajor() {
+    return this.major;
+  }
+  
+  public int getMinor() {
+    return this.minor;
+  }
+  
+  public int getPatch() {
+    return this.patch;
+  }
+  
   public int conpareMajorTo(int major) {
     return Integer.compare(this.major, major);
   }

@@ -9,11 +9,11 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
+import commonsos.controller.command.PaginationCommand;
+import commonsos.controller.command.app.MessageThreadListCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.service.command.MessageThreadListCommand;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 import commonsos.view.app.MessageThreadListView;
 import spark.Request;

@@ -7,10 +7,10 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.controller.app.UploadPhotoForAppController;
+import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.CommunityService;
-import commonsos.service.command.UploadPhotoCommand;
 import commonsos.view.UrlView;
 import spark.Request;
 import spark.Response;

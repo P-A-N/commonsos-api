@@ -1,5 +1,6 @@
 package commonsos.integration.app.ad;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -57,7 +58,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v{v}/ads/{id}/delete", APP_API_VERSION.getMajor(), ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -70,7 +71,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v{v}/ads/{id}/delete", APP_API_VERSION.getMajor(), ad_user1.getId())
       .then().statusCode(200);
     
     // verify
@@ -91,7 +92,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v{v}/admin/ads/{id}/delete", APP_API_VERSION.getMajor(), ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -104,7 +105,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v{v}/admin/ads/{id}/delete", APP_API_VERSION.getMajor(), ad_user1.getId())
       .then().statusCode(403);
     
     // verify
@@ -117,7 +118,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().post("/app/v99/admin/ads/{id}/delete", ad_user1.getId())
+      .when().post("/app/v{v}/admin/ads/{id}/delete", APP_API_VERSION.getMajor(), ad_user1.getId())
       .then().statusCode(200);
     
     // verify

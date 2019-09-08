@@ -1,5 +1,6 @@
 package commonsos.integration.app.auth;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,19 +24,19 @@ public class PostLogoutTest extends IntegrationTest {
     // before logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().get("/app/v99/user")
+    .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
     .then().statusCode(200);
     
     // logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().post("/app/v99/logout")
+    .when().post("/app/v{v}/logout", APP_API_VERSION.getMajor())
     .then().statusCode(200);
     
     // after logout
     given()
     .cookie("JSESSIONID", sessionId)
-    .when().get("/app/v99/user")
+    .when().get("/app/v{v}/user", APP_API_VERSION.getMajor())
     .then().statusCode(401);
   }
 }

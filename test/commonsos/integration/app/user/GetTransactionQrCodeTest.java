@@ -1,5 +1,6 @@
 package commonsos.integration.app.user;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
@@ -28,13 +29,13 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/1/qr")
+      .when().get("/app/v{v}/users/1/qr", APP_API_VERSION.getMajor())
       .then().statusCode(400);
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/1/qr?communityId={id}", com.getId())
+      .when().get("/app/v{v}/users/1/qr?communityId={id}", APP_API_VERSION.getMajor(), com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
   }
@@ -44,21 +45,21 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/1/qr?communityId={id}&amount=1", com.getId())
+      .when().get("/app/v{v}/users/1/qr?communityId={id}&amount=1", APP_API_VERSION.getMajor(), com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/1/qr?communityId={id}&amount=1.5", com.getId())
+      .when().get("/app/v{v}/users/1/qr?communityId={id}&amount=1.5", APP_API_VERSION.getMajor(), com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
     
     // call api
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/app/v99/users/1/qr?communityId={id}&amount=0.00001", com.getId())
+      .when().get("/app/v{v}/users/1/qr?communityId={id}&amount=0.00001", APP_API_VERSION.getMajor(), com.getId())
       .then().statusCode(200)
       .body("url",  notNullValue());
   }

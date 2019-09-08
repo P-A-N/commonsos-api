@@ -14,8 +14,8 @@ import javax.persistence.TypedQuery;
 import org.hibernate.ScrollableResults;
 
 import commonsos.ThreadValue;
+import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.ResultList;
-import commonsos.service.command.PaginationCommand;
 import commonsos.util.PaginationUtil;
 
 public abstract class Repository {

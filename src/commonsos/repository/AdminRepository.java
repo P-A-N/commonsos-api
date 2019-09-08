@@ -10,12 +10,12 @@ import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
+import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.AdminNotFoundException;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryAdmin;
 import commonsos.repository.entity.TemporaryAdminEmailAddress;
-import commonsos.service.command.PaginationCommand;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
