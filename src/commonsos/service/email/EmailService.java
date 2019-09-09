@@ -87,6 +87,7 @@ public class EmailService {
     context.put("accessId", accessId);
     context.put("hostname", conf.commonsosHost());
     send(toAddress, CREATE_ACCOUNT.getSubject(), CREATE_ACCOUNT.getFilename(), context);
+    log.debug(String.format("Url for creating-user-complate. [https://%s/create-account/%s]", conf.commonsosHost(), accessId));
   }
 
   public void sendCreateAdminTemporary(String toAddress, String adminname, String accessId) {
@@ -95,6 +96,7 @@ public class EmailService {
     context.put("accessId", accessId);
     context.put("hostname", conf.adminPageHost());
     send(toAddress, CREATE_ADMIN.getSubject(), CREATE_ADMIN.getFilename(), context);
+    log.debug(String.format("Url for creating-admin-complate. [https://%s/admin/create-admin.html#%s]", conf.adminPageHost(), accessId));
   }
   
   public void sendUpdateEmailTemporary(String toAddress, String username, Long userId, String accessId) {
@@ -104,6 +106,7 @@ public class EmailService {
     context.put("accessId", accessId);
     context.put("hostname", conf.commonsosHost());
     send(toAddress, EMAIL_UPDATE.getSubject(), EMAIL_UPDATE.getFilename(), context);
+    log.debug(String.format("Url for update-emailAddress-complate. [https://%s/users/%d/emailaddress/%s]", conf.commonsosHost(), userId, accessId));
   }
   
   public void sendPasswordReset(String toAddress, String username, String accessId) {
@@ -112,6 +115,7 @@ public class EmailService {
     context.put("accessId", accessId);
     context.put("hostname", conf.commonsosHost());
     send(toAddress, PASSWORD_RESET.getSubject(), PASSWORD_RESET.getFilename(), context);
+    log.debug(String.format("Url for password-reset. [https://%s/passwordreset/%s]", conf.commonsosHost(), accessId));
   }
 
   private void send(

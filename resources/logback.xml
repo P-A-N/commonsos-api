@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
+  <property name="commonsos.log.level" value="${COMMONSOS_LOG_LEVEL:-info}" />
   <property name="defaultPattern"
             value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100} - [%X{ip}][%X{username}][%X{adminEmailAddress}][%X{sessionId}][%X{requestId}] %msg%n"/>
 
@@ -26,10 +27,10 @@
   </appender>
 
   <logger name="com.google.inject.internal.ProxyFactory" level="error"/>
-  <logger name="commonsos.service.blockchain.BlockchainEventService" level="info" additivity="false">
+  <logger name="commonsos.service.blockchain.BlockchainEventService" level="${commonsos.log.level}" additivity="false">
     <appender-ref ref="eth"/>
   </logger>
-  <root level="info">
+  <root level="${commonsos.log.level}">
     <appender-ref ref="app"/>
   </root>
 </configuration>
