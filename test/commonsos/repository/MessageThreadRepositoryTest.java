@@ -40,26 +40,26 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     MessageThread mt2 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt2")));
 
     // execute & verify
-    Optional<MessageThread> result = repository.byCreaterAndAdId(user1, id("ad1"));
+    Optional<MessageThread> result = repository.byCreaterAndAdId(user1.getId(), id("ad1"));
     assertThat(result.get().getTitle()).isEqualTo("mt1");
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user2, id("ad1"));
+    result = repository.byCreaterAndAdId(user2.getId(), id("ad1"));
     assertThat(result.get().getTitle()).isEqualTo("mt2");
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user3, id("ad1"));
+    result = repository.byCreaterAndAdId(user3.getId(), id("ad1"));
     assertThat(result).isEmpty();
     
     // prepare
     inTransaction(() -> repository.update(mt1.setDeleted(true)));
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user1, id("ad1"));
+    result = repository.byCreaterAndAdId(user1.getId(), id("ad1"));
     assertThat(result).isEmpty();
     
     // execute & verify
-    result = repository.byCreaterAndAdId(user2, id("ad2"));
+    result = repository.byCreaterAndAdId(user2.getId(), id("ad2"));
     assertThat(result).isEmpty();
   }
 

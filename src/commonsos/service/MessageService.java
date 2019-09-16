@@ -63,8 +63,21 @@ public class MessageService {
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user, adId).orElseGet(() -> createMessageThreadForAd(user, adId));
+    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user.getId(), adId).orElseGet(() -> createMessageThreadForAd(user, adId));
     return view(user, thread);
+  }
+
+  private MessageThread createMessageThreadForAd(User user, Long adId) {
+    Ad ad = adRepository.findStrict(adId);
+    User adCreator = userRepository.findStrictById(ad.getCreatedBy());
+
+    MessageThread messageThread = new MessageThread()
+      .setCommunityId(ad.getCommunityId())
+      .setCreatedBy(user.getId())
+      .setTitle(ad.getTitle()).setAdId(adId)
+      .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
+
+    return messageThreadRepository.createForAdIfNotExists(messageThread);
   }
 
   public MessageThreadView threadWithUser(User user, CreateDirectMessageThreadCommand command) {
@@ -73,7 +86,7 @@ public class MessageService {
     return view(user, thread);
   }
 
-  MessageThread createMessageThreadWithUser(User user, CreateDirectMessageThreadCommand command) {
+  private MessageThread createMessageThreadWithUser(User user, CreateDirectMessageThreadCommand command) {
     User otherUser = userRepository.findStrictById(command.getOtherUserId());
     if (!UserUtil.isMember(user, command.getCommunityId()) || !UserUtil.isMember(otherUser, command.getCommunityId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", command.getCommunityId()));
     
@@ -82,7 +95,7 @@ public class MessageService {
       .setCreatedBy(user.getId())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));
 
-    return messageThreadRepository.create(messageThread);
+    return messageThreadRepository.createForBetweenUserIfNotExists(messageThread);
   }
 
   public MessageThreadView group(User user, CreateGroupCommand command) {
@@ -143,19 +156,6 @@ public class MessageService {
   private MessageThread checkAccess(User user, MessageThread thread) {
     if (!isUserAllowedToAccessMessageThread(user, thread)) throw new ForbiddenException();
     return thread;
-  }
-
-  MessageThread createMessageThreadForAd(User user, Long adId) {
-    Ad ad = adRepository.findStrict(adId);
-    User adCreator = userRepository.findStrictById(ad.getCreatedBy());
-
-    MessageThread messageThread = new MessageThread()
-      .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(user.getId())
-      .setTitle(ad.getTitle()).setAdId(adId)
-      .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
-
-    return messageThreadRepository.create(messageThread);
   }
 
   public MessageThreadView view(User user, MessageThread thread) {

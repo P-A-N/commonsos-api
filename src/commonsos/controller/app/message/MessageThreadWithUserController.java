@@ -1,6 +1,5 @@
 package commonsos.controller.app.message;
 
-import static commonsos.annotation.SyncObject.MESSAGE_THRED_BETWEEN_USER;
 import static spark.utils.StringUtils.isEmpty;
 
 import javax.inject.Inject;
@@ -9,7 +8,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.gson.Gson;
 
-import commonsos.annotation.Synchronized;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.controller.command.app.CreateDirectMessageThreadCommand;
 import commonsos.exception.BadRequestException;
@@ -19,7 +17,6 @@ import commonsos.view.app.MessageThreadView;
 import spark.Request;
 import spark.Response;
 
-@Synchronized(MESSAGE_THRED_BETWEEN_USER)
 public class MessageThreadWithUserController extends AfterAppLoginController {
 
   @Inject Gson gson;

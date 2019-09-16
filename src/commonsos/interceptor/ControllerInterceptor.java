@@ -24,7 +24,7 @@ import spark.Request;
 import spark.Route;
 
 @Slf4j
-public class TransactionInterceptor extends AbstractModule implements MethodInterceptor {
+public class ControllerInterceptor extends AbstractModule implements MethodInterceptor {
   @Inject EntityManagerService entityManagerService;
   @Inject Configuration config;
 

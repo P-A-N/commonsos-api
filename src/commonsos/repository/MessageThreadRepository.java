@@ -12,6 +12,8 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
+import commonsos.annotation.SyncObject;
+import commonsos.annotation.Synchronized;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
@@ -27,12 +29,12 @@ public class MessageThreadRepository extends Repository {
     super(entityManagerService);
   }
 
-  public Optional<MessageThread> byCreaterAndAdId(User user, Long adId) {
+  public Optional<MessageThread> byCreaterAndAdId(Long userId, Long adId) {
     try {
       return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy AND deleted IS FALSE", MessageThread.class)
         .setLockMode(lockMode())
         .setParameter("adId", adId)
-        .setParameter("createdBy", user.getId())
+        .setParameter("createdBy", userId)
         .getSingleResult());
     }
     catch (NoResultException e) {
@@ -76,6 +78,27 @@ public class MessageThreadRepository extends Repository {
   }
 
   public MessageThread create(MessageThread messageThread) {
+    em().persist(messageThread);
+    return messageThread;
+  }
+
+  @Synchronized(SyncObject.MESSAGE_THRED_FOR_AD)
+  public MessageThread createForAdIfNotExists(MessageThread messageThread) {
+    Optional<MessageThread> mt = byCreaterAndAdId(messageThread.getCreatedBy(), messageThread.getAdId());
+    if (mt.isPresent()) return mt.get();
+    
+    em().persist(messageThread);
+    return messageThread;
+  }
+
+  @Synchronized(SyncObject.MESSAGE_THRED_BETWEEN_USER)
+  public MessageThread createForBetweenUserIfNotExists(MessageThread messageThread) {
+    Long userId = messageThread.getCreatedBy();
+    Long otherUserId = messageThread.getParties().stream().filter(p -> !p.getUser().getId().equals(userId)).findFirst().get().getId();
+    Long communityId = messageThread.getCommunityId();
+    Optional<MessageThread> mt = betweenUsers(userId, otherUserId, communityId);
+    if (mt.isPresent()) return mt.get();
+    
     em().persist(messageThread);
     return messageThread;
   }
