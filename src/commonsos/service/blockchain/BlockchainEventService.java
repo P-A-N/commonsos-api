@@ -14,7 +14,6 @@ import org.web3j.protocol.core.methods.response.EthBlock.Block;
 import org.web3j.protocol.core.methods.response.EthBlock.TransactionResult;
 import org.web3j.protocol.core.methods.response.Transaction;
 
-import commonsos.ThreadValue;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.EntityManagerService;
 import commonsos.service.TokenTransactionService;
@@ -64,7 +63,6 @@ public class BlockchainEventService {
   
   private void markTransactionCompleted(String transactionHash) {
     entityManagerService.runInTransaction(() -> {
-      ThreadValue.setReadOnly(false);
       transactionService.markTransactionCompleted(transactionHash);
       return Void.class;
     });

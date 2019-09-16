@@ -37,7 +37,6 @@ public class TokenTransactionRepository extends Repository {
       .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
           "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
           "ORDER BY id", TokenTransaction.class)
-      .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId());
     
@@ -47,6 +46,7 @@ public class TokenTransactionRepository extends Repository {
   }
 
   public TokenTransaction update(TokenTransaction transaction) {
+    checkLocked(transaction);
     return em().merge(transaction);
   }
 
@@ -54,7 +54,6 @@ public class TokenTransactionRepository extends Repository {
     try {
       return of(em()
         .createQuery("From TokenTransaction WHERE blockchainTransactionHash = :hash", TokenTransaction.class)
-        .setLockMode(lockMode())
         .setParameter("hash", blockchainTransactionHash)
         .getSingleResult());
     }
@@ -66,7 +65,6 @@ public class TokenTransactionRepository extends Repository {
   public boolean hasPaid(Ad ad) {
     List<TokenTransaction> resultList = em()
       .createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
-      .setLockMode(lockMode())
       .setParameter("adId", ad.getId())
       .getResultList();
     

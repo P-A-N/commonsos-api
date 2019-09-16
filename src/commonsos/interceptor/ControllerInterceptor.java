@@ -13,8 +13,6 @@ import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 
 import commonsos.Configuration;
-import commonsos.ThreadValue;
-import commonsos.annotation.ReadOnly;
 import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
 import commonsos.exception.AuthenticationException;
@@ -82,10 +80,6 @@ public class ControllerInterceptor extends AbstractModule implements MethodInter
   }
 
   private Object proceedMethod(MethodInvocation invocation) throws Throwable {
-    Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
-
-    // setup read-only
-    ThreadValue.setReadOnly(handleClass.isAnnotationPresent(ReadOnly.class));
     return entityManagerService.runInTransaction(invocation::proceed);
   }
 

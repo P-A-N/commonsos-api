@@ -29,7 +29,6 @@ public class CommunityRepository extends Repository {
   public Optional<Community> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM Community WHERE id = :id AND deleted IS FALSE", Community.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -46,7 +45,6 @@ public class CommunityRepository extends Repository {
   public Optional<Community> findPublicById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM Community WHERE id = :id AND status = 'PUBLIC' AND deleted IS FALSE", Community.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -64,8 +62,7 @@ public class CommunityRepository extends Repository {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +
         " WHERE deleted IS FALSE" +
-        " ORDER BY id", Community.class)
-        .setLockMode(lockMode());
+        " ORDER BY id", Community.class);
     
     ResultList<Community> resultList = getResultList(query, pagination);
     
@@ -80,7 +77,6 @@ public class CommunityRepository extends Repository {
         " AND status = 'PUBLIC'" +
         " AND deleted IS FALSE" +
         " ORDER BY id", Community.class)
-        .setLockMode(lockMode())
         .setParameter("filter", "%"+filter+"%");
     
     ResultList<Community> resultList = getResultList(query, pagination);
@@ -94,8 +90,7 @@ public class CommunityRepository extends Repository {
         " WHERE tokenContractAddress IS NOT NULL" +
         " AND status = 'PUBLIC'" +
         " AND deleted IS FALSE" +
-        " ORDER BY id", Community.class)
-        .setLockMode(lockMode());
+        " ORDER BY id", Community.class);
     
     ResultList<Community> resultList = getResultList(query, pagination);
     
@@ -117,7 +112,6 @@ public class CommunityRepository extends Repository {
         " AND community.status = 'PUBLIC'" +
         " AND community.deleted IS FALSE" +
         " ORDER BY community.id", CommunityUser.class)
-        .setLockMode(lockMode())
         .setParameter("ids", ids)
         .setParameter("filter", "%"+filter+"%");
     
@@ -140,7 +134,6 @@ public class CommunityRepository extends Repository {
         " AND community.status = 'PUBLIC'" +
         " AND community.deleted IS FALSE" +
         " ORDER BY community.id", CommunityUser.class)
-        .setLockMode(lockMode())
         .setParameter("ids", ids);
     
     ResultList<CommunityUser> resultList = getResultList(query, pagination);
@@ -161,7 +154,7 @@ public class CommunityRepository extends Repository {
   }
 
   public Community update(Community community) {
-    em().merge(community);
-    return community;
+    checkLocked(community);
+    return em().merge(community);
   }
 }

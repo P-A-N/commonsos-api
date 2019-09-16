@@ -213,6 +213,7 @@ public class UserService {
     });
 
     // create
+    userRepository.lockForUpdate(tempUser);
     userRepository.updateTemporary(tempUser.setInvalid(true));
     userRepository.create(user);
 
@@ -249,6 +250,8 @@ public class UserService {
     if (!user.getId().equals(tmpEmailAddr.getUserId())) throw new BadRequestException("invalid user id");
     
     // update
+    userRepository.lockForUpdate(user);
+    userRepository.lockForUpdate(tmpEmailAddr);
     user.setEmailAddress(tmpEmailAddr.getEmailAddress());
     userRepository.updateTemporaryEmailAddress(tmpEmailAddr.setInvalid(true));
     userRepository.update(user);
@@ -288,6 +291,8 @@ public class UserService {
     User user = userRepository.findStrictById(passReset.getUserId());
     
     // update
+    userRepository.lockForUpdate(user);
+    userRepository.lockForUpdate(passReset);
     user.setPasswordHash(cryptoService.encryptoPassword(newPassword));
     userRepository.updatePasswordResetRequest(passReset.setInvalid(true));
     userRepository.update(user);
@@ -337,6 +342,8 @@ public class UserService {
   public String updateAvatar(User user, UploadPhotoCommand command) {
     String url = imageUploadService.create(command, "");
     imageUploadService.delete(user.getAvatarUrl());
+    
+    userRepository.lockForUpdate(user);
     user.setAvatarUrl(url);
     userRepository.update(user);
     return url;
@@ -347,6 +354,7 @@ public class UserService {
   }
 
   public User updateUser(User user, UserUpdateCommand command) {
+    userRepository.lockForUpdate(user);
     user.setFirstName(command.getFirstName());
     user.setLastName(command.getLastName());
     user.setDescription(command.getDescription());
@@ -374,6 +382,7 @@ public class UserService {
     newCommunityUserList.sort((c1, c2) -> c1.getCommunity().getId().compareTo(c2.getCommunity().getId()));
 
     // set new communityUserList
+    userRepository.lockForUpdate(user);
     user.setCommunityUserList(newCommunityUserList);
 
     // update
@@ -389,6 +398,7 @@ public class UserService {
     ValidateUtil.validateUsername(command.getUsername());
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
     
+    userRepository.lockForUpdate(user);
     user.setUsername(command.getUsername());
     return userRepository.update(user);
   }
@@ -396,11 +406,13 @@ public class UserService {
   public User updateStatus(User user, UserStatusUpdateCommand command) {
     ValidateUtil.validateStatus(command.getStatus());
     
+    userRepository.lockForUpdate(user);
     user.setStatus(command.getStatus());
     return userRepository.update(user);
   }
 
   public User updateLoggedinAt(User user) {
+    userRepository.lockForUpdate(user);
     user.setLoggedinAt(Instant.now());
     return userRepository.update(user);
   }
@@ -425,6 +437,7 @@ public class UserService {
   }
 
   public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
+    userRepository.lockForUpdate(user);
     user.setPushNotificationToken(command.getPushNotificationToken());
     userRepository.update(user);
   }
@@ -433,6 +446,7 @@ public class UserService {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
+    userRepository.lockForUpdate(user);
     user.getCommunityUserList().forEach(cu -> {
       if (cu.getCommunity().getId().equals(community.getId())) {
         cu.setWalletLastViewTime(Instant.now());
@@ -446,6 +460,7 @@ public class UserService {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
+    userRepository.lockForUpdate(user);
     user.getCommunityUserList().forEach(cu -> {
       if (cu.getCommunity().getId().equals(community.getId())) {
         cu.setAdLastViewTime(Instant.now());
@@ -459,6 +474,7 @@ public class UserService {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
 
+    userRepository.lockForUpdate(user);
     user.getCommunityUserList().forEach(cu -> {
       if (cu.getCommunity().getId().equals(community.getId())) {
         cu.setNotificationLastViewTime(Instant.now());

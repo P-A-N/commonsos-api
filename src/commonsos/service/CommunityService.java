@@ -67,6 +67,7 @@ public class CommunityService {
         Admin a = adminRepository.findStrictById(id);
         if (a.getCommunity() != null) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
         if (!a.getRole().getId().equals(Role.COMMUNITY_ADMIN.getId())) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+        adminRepository.lockForUpdate(a);
         adminList.add(a);
       });
     }
@@ -112,6 +113,7 @@ public class CommunityService {
     community = repository.create(community);
     
     // set adminPageUrl
+    repository.lockForUpdate(community);
     String adminPageUrl = String.format("https://%s/%d", config.adminPageHost(), community.getId());
     community = repository.update(community.setAdminPageUrl(adminPageUrl));
     
@@ -164,6 +166,7 @@ public class CommunityService {
     String url = imageService.create(command, "");
     imageService.delete(community.getPhotoUrl());
     
+    repository.lockForUpdate(community);
     community.setPhotoUrl(url);
     repository.update(community);
     return url;
@@ -176,6 +179,7 @@ public class CommunityService {
     String url = imageService.create(command, "");
     imageService.delete(community.getCoverPhotoUrl());
     
+    repository.lockForUpdate(community);
     community.setCoverPhotoUrl(url);
     repository.update(community);
     return url;
@@ -189,6 +193,7 @@ public class CommunityService {
       if (!notification.getCommunityId().equals(command.getCommunityId())) throw new BadRequestException(
           String.format("it is not a notification of community. wordpressId=%s communityId=%d", command.getWordpressId(), command.getCommunityId()));
       
+      notificationRepository.lockForUpdate(notification);
       notification.setUpdatedNotificationAt(command.getUpdatedAtInstant());
       notificationRepository.update(notification);
     } else {

@@ -26,11 +26,10 @@ public class AdminRepository extends Repository {
   public AdminRepository(EntityManagerService entityManagerService) {
     super(entityManagerService);
   }
-
+  
   public Optional<Admin> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM Admin WHERE id = :id AND deleted IS FALSE", Admin.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -47,7 +46,6 @@ public class AdminRepository extends Repository {
   public ResultList<Admin> findByCommunityId(Long communityId, PaginationCommand pagination) {
     String sql = "FROM Admin WHERE community.id = :communityId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Admin> query = em().createQuery(sql, Admin.class)
-        .setLockMode(lockMode())
         .setParameter("communityId", communityId);
 
     ResultList<Admin> resultList = getResultList(query, pagination);
@@ -58,7 +56,6 @@ public class AdminRepository extends Repository {
   public ResultList<Admin> findByCommunityIdAndRoleId(Long communityId, Long roleId, PaginationCommand pagination) {
     String sql = "FROM Admin WHERE community.id = :communityId AND role.id = :roleId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Admin> query = em().createQuery(sql, Admin.class)
-        .setLockMode(lockMode())
         .setParameter("communityId", communityId)
         .setParameter("roleId", roleId);
 
@@ -70,7 +67,6 @@ public class AdminRepository extends Repository {
   public Optional<Admin> findByEmailAddress(String emailAddress) {
     List<Admin> result = em().createQuery(
         "FROM Admin WHERE emailAddress = :emailAddress AND deleted IS FALSE", Admin.class)
-        .setLockMode(lockMode())
         .setParameter("emailAddress", emailAddress).getResultList();
 
     if (result.isEmpty()) return empty();
@@ -110,7 +106,6 @@ public class AdminRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryAdmin.class)
-        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash)
         .getResultList();
     
@@ -129,7 +124,6 @@ public class AdminRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryAdminEmailAddress.class)
-        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash)
         .getResultList();
     
@@ -158,14 +152,17 @@ public class AdminRepository extends Repository {
   }
   
   public Admin update(Admin admin) {
+    checkLocked(admin);
     return em().merge(admin);
   }
 
   public TemporaryAdmin updateTemporaryAdmin(TemporaryAdmin tempAdmin) {
+    checkLocked(tempAdmin);
     return em().merge(tempAdmin);
   }
 
   public TemporaryAdminEmailAddress updateTemporaryEmail(TemporaryAdminEmailAddress tempEmailAddress) {
+    checkLocked(tempEmailAddress);
     return em().merge(tempEmailAddress);
   }
 }

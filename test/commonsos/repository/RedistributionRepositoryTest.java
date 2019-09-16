@@ -2,11 +2,15 @@ package commonsos.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -17,10 +21,17 @@ import commonsos.repository.entity.User;
 
 public class RedistributionRepositoryTest extends AbstractRepositoryTest {
 
-  private RedistributionRepository repository = new RedistributionRepository(emService);
-  private CommunityRepository communityRepository = new CommunityRepository(emService);
-  private UserRepository userRepository = new UserRepository(emService);
+  private RedistributionRepository repository = spy(new RedistributionRepository(emService));
+  private CommunityRepository communityRepository = spy(new CommunityRepository(emService));
+  private UserRepository userRepository = spy(new UserRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+    doNothing().when(communityRepository).checkLocked(any());
+    doNothing().when(userRepository).checkLocked(any());
+  }
+  
   @Test
   public void findById() {
     // prepare
@@ -191,8 +202,7 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
           .setUser(new User().setId(user1.getId()))));
 
     // update
-    Redistribution r2 = inTransaction(() -> repository.update(
-        r.setRate(new BigDecimal("0.999"))
+    Redistribution r2 = inTransaction(() -> repository.update(r.setRate(new BigDecimal("0.999"))
           .setCommunity(new Community().setId(com2.getId()))
           .setUser(new User().setId(user2.getId()))));
     

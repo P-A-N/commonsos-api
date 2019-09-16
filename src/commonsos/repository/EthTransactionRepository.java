@@ -23,7 +23,6 @@ public class EthTransactionRepository extends Repository {
     try {
       return of(em()
         .createQuery("From EthTransaction WHERE blockchainTransactionHash = :hash", EthTransaction.class)
-        .setLockMode(lockMode())
         .setParameter("hash", blockchainTransactionHash)
         .getSingleResult());
     }
@@ -38,6 +37,7 @@ public class EthTransactionRepository extends Repository {
   }
 
   public EthTransaction update(EthTransaction transaction) {
+    checkLocked(transaction);
     return em().merge(transaction);
   }
 }

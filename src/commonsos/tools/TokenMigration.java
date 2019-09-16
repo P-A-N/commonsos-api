@@ -60,11 +60,15 @@ public class TokenMigration {
       Community c = communityList.get(i);
 
       emService.runInTransaction(() -> {
+        communityRepository.lockForUpdate(c);
+        
         createWallet(c);
         return null;
       });
       
       emService.runInTransaction(() -> {
+        communityRepository.lockForUpdate(c);
+        
         transferEtherToMainWallet(c);
         String newTokenAddress = createToken(c);
         c.setTokenContractAddress(newTokenAddress);

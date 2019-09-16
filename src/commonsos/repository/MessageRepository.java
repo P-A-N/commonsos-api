@@ -28,7 +28,6 @@ public class MessageRepository extends Repository {
   public ResultList<Message> listByThread(Long threadId, PaginationCommand pagination) {
     TypedQuery<Message> query = em()
       .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt, id", Message.class)
-      .setLockMode(lockMode())
       .setParameter("threadId", threadId);
     
     ResultList<Message> resultList = getResultList(query, pagination);
@@ -42,7 +41,6 @@ public class MessageRepository extends Repository {
         "WHERE threadId = :threadId " +
         "AND createdBy <> :systemMessageCreatorId " +
         "ORDER BY createdAt DESC", Message.class)
-      .setLockMode(lockMode())
       .setParameter("threadId", threadId)
       .setParameter("systemMessageCreatorId", MessageUtil.getSystemMessageCreatorId())
       .setMaxResults(1)

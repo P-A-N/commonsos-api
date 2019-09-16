@@ -2,9 +2,13 @@ package commonsos.repository;
 
 import static commonsos.TestId.id;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -14,8 +18,13 @@ import commonsos.repository.entity.SortType;
 
 public class CommunityNotificationRepositoryTest extends AbstractRepositoryTest {
 
-  private CommunityNotificationRepository repository = new CommunityNotificationRepository(emService);
+  private CommunityNotificationRepository repository = spy(new CommunityNotificationRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+  }
+  
   @Test
   public void findByWordPressId() {
     // prepare

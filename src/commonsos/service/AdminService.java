@@ -99,6 +99,7 @@ public class AdminService {
 
   public Admin createAdminComplete(String accessId) {
     TemporaryAdmin tmpAdmin = adminRepository.findStrictTemporaryAdmin(cryptoService.hash(accessId));
+    adminRepository.lockForUpdate(tmpAdmin);
     
     Admin admin = new Admin()
         .setEmailAddress(tmpAdmin.getEmailAddress())
@@ -122,6 +123,8 @@ public class AdminService {
   }
 
   public Admin updateLoggedinAt(Admin admin) {
+    adminRepository.lockForUpdate(admin);
+    
     admin.setLoggedinAt(Instant.now());
     return adminRepository.update(admin);
   }

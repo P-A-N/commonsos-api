@@ -6,11 +6,15 @@ import static commonsos.repository.entity.Role.TELLER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -22,9 +26,15 @@ import commonsos.repository.entity.TemporaryAdminEmailAddress;
 
 public class AdminRepositoryTest extends AbstractRepositoryTest {
 
-  private AdminRepository repository = new AdminRepository(emService);
-  private CommunityRepository communityRepository = new CommunityRepository(emService);
+  private AdminRepository repository = spy(new AdminRepository(emService));
+  private CommunityRepository communityRepository = spy(new CommunityRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+    doNothing().when(communityRepository).checkLocked(any());
+  }
+  
   @Test
   public void findById() {
     // prepare

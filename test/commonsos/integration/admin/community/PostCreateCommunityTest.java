@@ -194,7 +194,7 @@ public class PostCreateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
       .then().statusCode(200)
-      .body("transactionFee", equalTo(0));
+      .body("transactionFee", equalTo(0F));
   }
   
   @Test

@@ -2,9 +2,13 @@ package commonsos.repository;
 
 import static commonsos.TestId.id;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -15,8 +19,13 @@ import commonsos.util.MessageUtil;
 
 public class MessageRepositoryTest extends AbstractRepositoryTest {
 
-  private MessageRepository repository = new MessageRepository(emService);
+  private MessageRepository repository = spy(new MessageRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+  }
+  
   @Test
   public void createMessage() {
     Message message = new Message()

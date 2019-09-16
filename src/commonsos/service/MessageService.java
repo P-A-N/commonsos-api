@@ -130,6 +130,7 @@ public class MessageService {
       .collect(toList());
 
     List<MessageThreadParty> newParties = usersToParties(newUsers);
+    messageThreadRepository.lockForUpdate(messageThread);
     messageThread.getParties().addAll(newParties);
     messageThread.setTitle(command.getTitle());
     messageThreadRepository.update(messageThread);
@@ -288,6 +289,7 @@ public class MessageService {
     if (!messageThread.isGroup()) throw new BadRequestException("Only group thread is allowed.");
     
     // updatePersonalTitle
+    messageThreadRepository.lockForUpdate(messageThread);
     userMtp.get().setPersonalTitle(command.getPersonalTitle());
     messageThreadRepository.update(messageThread);
     return view(user, messageThread);
@@ -305,6 +307,7 @@ public class MessageService {
     String url = imageService.create(command, "");
     imageService.delete(userMtp.get().getPhotoUrl());
     
+    messageThreadRepository.lockForUpdate(thread);
     userMtp.get().setPhotoUrl(url);
     messageThreadRepository.update(thread);
     return url;
@@ -320,6 +323,7 @@ public class MessageService {
 
   private void markVisited(User user, MessageThread thread) {
     MessageThreadParty me = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst().orElseThrow(RuntimeException::new);
+    messageThreadRepository.lockForUpdate(me);
     me.setVisitedAt(now());
     messageThreadRepository.update(me);
   }

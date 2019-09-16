@@ -29,7 +29,6 @@ public class AdRepository extends Repository {
   public ResultList<Ad> ads(Long communityId, PaginationCommand pagination) {
     TypedQuery<Ad> query = em()
       .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE ORDER BY id", Ad.class)
-      .setLockMode(lockMode())
       .setParameter("communityId", communityId);
     
     ResultList<Ad> resultList = getResultList(query, pagination);
@@ -47,7 +46,6 @@ public class AdRepository extends Repository {
           " OR LOWER(u.username) LIKE LOWER(:filter) " +
         " )" +
         " ORDER BY a.id", Ad.class)
-      .setLockMode(lockMode())
       .setParameter("communityId", communityId)
       .setParameter("filter", "%"+filter+"%");
     
@@ -59,7 +57,6 @@ public class AdRepository extends Repository {
   public ResultList<Ad> myAds(Long userId, PaginationCommand pagination) {
     TypedQuery<Ad> query = em()
       .createQuery("FROM Ad WHERE createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
-      .setLockMode(lockMode())
       .setParameter("userId", userId);
     
     ResultList<Ad> resultList = getResultList(query, pagination);
@@ -71,7 +68,6 @@ public class AdRepository extends Repository {
     try {
       return Optional.of(em()
         .createQuery("FROM Ad WHERE id = :id AND deleted = FALSE", Ad.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult());
     }
@@ -85,7 +81,7 @@ public class AdRepository extends Repository {
   }
 
   public Ad update(Ad ad) {
-    em().merge(ad);
-    return ad;
+    checkLocked(ad);
+    return em().merge(ad);
   }
 }

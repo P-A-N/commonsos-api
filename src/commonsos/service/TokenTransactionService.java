@@ -186,9 +186,11 @@ public class TokenTransactionService {
     repository.create(transaction);
 
     String blockchainTransactionHash = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
+    
+    repository.lockForUpdate(transaction);
     transaction.setBlockchainTransactionHash(blockchainTransactionHash);
-
     repository.update(transaction);
+    
     blockchainEventService.checkTransaction(blockchainTransactionHash);
 
     return transaction;
@@ -207,6 +209,7 @@ public class TokenTransactionService {
       return;
     }
 
+    repository.lockForUpdate(transaction);
     transaction.setBlockchainCompletedAt(now());
     repository.update(transaction);
 

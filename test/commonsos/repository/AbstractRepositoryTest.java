@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import com.ninja_squad.dbsetup.DbSetup;
 import com.ninja_squad.dbsetup.destination.DataSourceDestination;
 
-import commonsos.ThreadValue;
 import commonsos.integration.TestEntityManagerService;
 
 public class AbstractRepositoryTest {
@@ -31,7 +30,6 @@ public class AbstractRepositoryTest {
   
   @BeforeEach
   public void prepare() {
-    ThreadValue.setReadOnly(false);
     beginTran();
   }
 

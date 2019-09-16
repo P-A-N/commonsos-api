@@ -5,19 +5,28 @@ import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.repository.entity.EthTransaction;
 
 public class EthTransactionRepositoryTest extends AbstractRepositoryTest {
 
-  EthTransactionRepository repository = new EthTransactionRepository(emService);
+  EthTransactionRepository repository = spy(new EthTransactionRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+  }
+  
   @Test
   public void findByBlockchainTransactionHash() {
     // prepare

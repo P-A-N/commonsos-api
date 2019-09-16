@@ -7,11 +7,15 @@ import static java.math.BigDecimal.TEN;
 import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -23,8 +27,13 @@ import commonsos.repository.entity.User;
 
 public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
-  TokenTransactionRepository repository = new TokenTransactionRepository(emService);
+  TokenTransactionRepository repository = spy(new TokenTransactionRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+  }
+  
   @Test
   public void create() {
     Long id = inTransaction(() -> repository.create(new TokenTransaction()

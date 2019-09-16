@@ -88,6 +88,7 @@ public class AdService {
     if (!ad.getCreatedBy().equals(operator.getId())) throw new ForbiddenException();
     if (transactionRepository.hasPaid(ad)) throw new BadRequestException();
     
+    adRepository.lockForUpdate(ad);
     ad.setTitle(command.getTitle())
       .setDescription(command.getDescription())
       .setPoints(command.getPoints())
@@ -102,7 +103,8 @@ public class AdService {
 
     String url = imageService.create(command, "");
     imageService.delete(ad.getPhotoUrl());
-    
+
+    adRepository.lockForUpdate(ad);
     ad.setPhotoUrl(url);
     adRepository.update(ad);
     return url;

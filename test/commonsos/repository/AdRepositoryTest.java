@@ -5,10 +5,14 @@ import static commonsos.repository.entity.AdType.GIVE;
 import static java.math.BigDecimal.TEN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.time.Instant;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import commonsos.controller.command.PaginationCommand;
@@ -19,9 +23,15 @@ import commonsos.repository.entity.User;
 
 public class AdRepositoryTest extends AbstractRepositoryTest {
 
-  private AdRepository repository = new AdRepository(emService);
-  private UserRepository userRepository = new UserRepository(emService);
+  private AdRepository repository = spy(new AdRepository(emService));
+  private UserRepository userRepository = spy(new UserRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+    doNothing().when(userRepository).checkLocked(any());
+  }
+  
   @Test
   public void create() {
     Long id = inTransaction(() -> repository.create(new Ad()).getId());

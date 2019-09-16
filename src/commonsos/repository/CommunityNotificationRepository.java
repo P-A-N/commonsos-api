@@ -27,7 +27,6 @@ public class CommunityNotificationRepository extends Repository {
     List<CommunityNotification> result = em().createQuery(
         "FROM CommunityNotification" +
         " WHERE wordpressId = :wordpressId", CommunityNotification.class)
-        .setLockMode(lockMode())
         .setParameter("wordpressId", wordpressId)
         .getResultList();
 
@@ -41,7 +40,6 @@ public class CommunityNotificationRepository extends Repository {
         "FROM CommunityNotification" +
         " WHERE communityId = :communityId" +
         " ORDER BY id", CommunityNotification.class)
-        .setLockMode(lockMode())
         .setParameter("communityId", communityId);
     
     ResultList<CommunityNotification> resultList = getResultList(query, pagination);
@@ -55,7 +53,7 @@ public class CommunityNotificationRepository extends Repository {
   }
 
   public CommunityNotification update(CommunityNotification notification) {
-    em().merge(notification);
-    return notification;
+    checkLocked(notification);
+    return em().merge(notification);
   }
 }

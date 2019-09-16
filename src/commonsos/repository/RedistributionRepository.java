@@ -26,7 +26,6 @@ public class RedistributionRepository extends Repository {
   public Optional<Redistribution> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM Redistribution WHERE id = :id AND deleted IS FALSE", Redistribution.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -43,7 +42,6 @@ public class RedistributionRepository extends Repository {
   public ResultList<Redistribution> findByCommunityId(Long communityId, PaginationCommand pagination) {
     String sql = "FROM Redistribution WHERE community.id = :communityId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Redistribution> query = em().createQuery(sql, Redistribution.class)
-        .setLockMode(lockMode())
         .setParameter("communityId", communityId);
 
     ResultList<Redistribution> resultList = getResultList(query, pagination);
@@ -54,7 +52,6 @@ public class RedistributionRepository extends Repository {
   public ResultList<Redistribution> findByUserId(Long userId, PaginationCommand pagination) {
     String sql = "FROM Redistribution WHERE user.id = :userId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Redistribution> query = em().createQuery(sql, Redistribution.class)
-        .setLockMode(lockMode())
         .setParameter("userId", userId);
 
     ResultList<Redistribution> resultList = getResultList(query, pagination);
@@ -76,6 +73,7 @@ public class RedistributionRepository extends Repository {
   }
 
   public Redistribution update(Redistribution redistribution) {
+    checkLocked(redistribution);
     return em().merge(redistribution);
   }
 }

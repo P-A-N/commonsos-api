@@ -33,7 +33,6 @@ public class UserRepository extends Repository {
   public Optional<User> findByUsername(String username) {
     List<User> result = em().createQuery(
         "FROM User WHERE username = :username AND deleted = FALSE", User.class)
-        .setLockMode(lockMode())
         .setParameter("username", username).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -44,7 +43,6 @@ public class UserRepository extends Repository {
   public Optional<User> findByEmailAddress(String emailAddress) {
     List<User> result = em().createQuery(
         "FROM User WHERE emailAddress = :emailAddress AND deleted = FALSE", User.class)
-        .setLockMode(lockMode())
         .setParameter("emailAddress", emailAddress).getResultList();
 
     if (result.isEmpty()) return empty();
@@ -117,7 +115,6 @@ public class UserRepository extends Repository {
   public Optional<User> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM User WHERE id = :id AND deleted IS FALSE", User.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -137,7 +134,6 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryUser.class)
-        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -155,7 +151,6 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", TemporaryEmailAddress.class)
-        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -173,7 +168,6 @@ public class UserRepository extends Repository {
             + " WHERE accessIdHash = :accessIdHash"
             + " AND invalid is FALSE"
             + " AND expirationTime > CURRENT_TIMESTAMP", PasswordResetRequest.class)
-        .setLockMode(lockMode())
         .setParameter("accessIdHash", accessIdHash).getResultList();
     
     if (result.isEmpty()) return empty();
@@ -196,7 +190,6 @@ public class UserRepository extends Repository {
     sql.append("ORDER BY u.id");
     
     TypedQuery<User> query = em().createQuery(sql.toString(), User.class)
-      .setLockMode(lockMode())
       .setParameter("communityId", communityId);
     if (StringUtils.isNotEmpty(q)) {
       query.setParameter("q", "%"+q+"%");
@@ -226,8 +219,7 @@ public class UserRepository extends Repository {
     }
     sql.append("ORDER BY u.id");
     
-    TypedQuery<User> query = em().createQuery(sql.toString(), User.class)
-      .setLockMode(lockMode());
+    TypedQuery<User> query = em().createQuery(sql.toString(), User.class);
     if (StringUtils.isNotEmpty(username)) {
       query.setParameter("username", "%"+username+"%");
     }
@@ -244,18 +236,22 @@ public class UserRepository extends Repository {
   }
 
   public User update(User user) {
+    checkLocked(user);
     return em().merge(user);
   }
 
   public TemporaryUser updateTemporary(TemporaryUser temporaryUser) {
+    checkLocked(temporaryUser);
     return em().merge(temporaryUser);
   }
 
   public TemporaryEmailAddress updateTemporaryEmailAddress(TemporaryEmailAddress temporaryEmailAddress) {
+    checkLocked(temporaryEmailAddress);
     return em().merge(temporaryEmailAddress);
   }
 
   public PasswordResetRequest updatePasswordResetRequest(PasswordResetRequest passwordResetRequest) {
+    checkLocked(passwordResetRequest);
     return em().merge(passwordResetRequest);
   }
 }

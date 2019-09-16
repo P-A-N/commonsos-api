@@ -4,6 +4,9 @@ import static commonsos.TestId.id;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -12,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -27,9 +31,15 @@ import commonsos.repository.entity.User;
 
 public class UserRepositoryTest extends AbstractRepositoryTest {
 
-  private UserRepository repository = new UserRepository(emService);
-  private CommunityRepository communityRepository = new CommunityRepository(emService);
+  private UserRepository repository = spy(new UserRepository(emService));
+  private CommunityRepository communityRepository = spy(new CommunityRepository(emService));
 
+  @BeforeEach
+  public void ignoreCheckLocked() {
+    doNothing().when(repository).checkLocked(any());
+    doNothing().when(communityRepository).checkLocked(any());
+  }
+  
   @Test
   public void findByUsername() {
     // prepare
@@ -537,8 +547,8 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     Community community3 = inTransaction(() -> communityRepository.create(new Community().setName("community3")));
     Community community4 = inTransaction(() -> communityRepository.create(new Community().setName("community4")));
     inTransaction(() -> repository.update(admin.setCommunityUserList(asList(
-        new CommunityUser().setCommunity(community1),
-        new CommunityUser().setCommunity(community2)))));
+          new CommunityUser().setCommunity(community1),
+          new CommunityUser().setCommunity(community2)))));
     inTransaction(() -> repository.create(new User().setUsername("barUser").setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1)))));
     inTransaction(() -> repository.create(new User().setUsername("foobarUser").setCommunityUserList(asList(

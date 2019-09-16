@@ -53,6 +53,7 @@ public class DeleteService {
     deletePhoto(user.getAvatarUrl());
     
     // delete user(logically)
+    userRepository.lockForUpdate(user);
     user.setDeleted(true);
     userRepository.update(user);
     
@@ -98,6 +99,7 @@ public class DeleteService {
     }
     
     // delete ad(logically)
+    adRepository.lockForUpdate(ad);
     ad.setDeleted(true);
     adRepository.update(ad);
   }
@@ -106,6 +108,7 @@ public class DeleteService {
     log.info(String.format("deleting message-thread. threadId=%d", messageThread.getId()));
     
     // delete message-thread
+    messageThreadRepository.lockForUpdate(messageThread);
     messageThread.setDeleted(true);
     messageThreadRepository.update(messageThread);
     
@@ -124,7 +127,8 @@ public class DeleteService {
     deletePhoto(userMtp.get().getPhotoUrl());
     
     // delete message-thread-party
-    messageThreadRepository.deleteMessageThreadParty(user, threadId);
+    messageThreadRepository.lockForUpdate(thread);
+    messageThreadRepository.deleteMessageThreadParty(user, thread);
     
     // send system message to message-thread
     Message systemMessage = new Message()
@@ -140,6 +144,7 @@ public class DeleteService {
     log.info(String.format("deleting redistribution. redistributionId=%d", redistribution.getId()));
     
     // delete redistribution
+    redistributionRepository.lockForUpdate(redistribution);
     redistribution.setDeleted(true);
     redistributionRepository.update(redistribution);
 

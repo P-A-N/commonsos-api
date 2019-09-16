@@ -32,7 +32,6 @@ public class MessageThreadRepository extends Repository {
   public Optional<MessageThread> byCreaterAndAdId(Long userId, Long adId) {
     try {
       return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy AND deleted IS FALSE", MessageThread.class)
-        .setLockMode(lockMode())
         .setParameter("adId", adId)
         .setParameter("createdBy", userId)
         .getSingleResult());
@@ -47,7 +46,6 @@ public class MessageThreadRepository extends Repository {
     sql.append("FROM MessageThread WHERE adId = :adId AND deleted IS false ORDER BY id");
 
     TypedQuery<MessageThread> query = em().createQuery(sql.toString(), MessageThread.class)
-      .setLockMode(lockMode())
       .setParameter("adId", adId);
 
     ResultList<MessageThread> resultList = getResultList(query, pagination);
@@ -64,7 +62,6 @@ public class MessageThreadRepository extends Repository {
       "AND EXISTS (SELECT 1 FROM MessageThreadParty mtp WHERE mtp.messageThreadId = mt.id AND mtp.user.id = :userId2)";
     try {
       MessageThread singleResult = em().createQuery(sql, MessageThread.class)
-        .setLockMode(lockMode())
         .setParameter("communityId", communityId)
         .setParameter("userId1", userId1)
         .setParameter("userId2", userId2)
@@ -132,7 +129,6 @@ public class MessageThreadRepository extends Repository {
     sql.append("ORDER BY mt.id");
 
     TypedQuery<MessageThread> query = em().createQuery(sql.toString(), MessageThread.class);
-    query.setLockMode(lockMode());
     query.setParameter("communityId", communityId);
     query.setParameter("userId", user.getId());
     if (StringUtils.isNotBlank(memberFilter)) {
@@ -143,15 +139,12 @@ public class MessageThreadRepository extends Repository {
     }
     
     ResultList<MessageThread> resultList = getResultList(query, pagination);
-    resultList.getList().forEach(r -> em().lock(r, lockMode()));
-    
     return resultList;
   }
 
   public Optional<MessageThread> findById(Long id) {
     try {
       return Optional.of(em().createQuery("FROM MessageThread WHERE id = :id AND deleted IS FALSE", MessageThread.class)
-        .setLockMode(lockMode())
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -165,27 +158,23 @@ public class MessageThreadRepository extends Repository {
     return findById(id).orElseThrow(MessageThreadNotFoundException::new);
   }
 
-  public void update(MessageThreadParty party) {
-    em().merge(party);
+  public MessageThreadParty update(MessageThreadParty party) {
+    checkLocked(party);
+    return em().merge(party);
   }
 
-  public void update(MessageThread messageThread) {
-    em().merge(messageThread);
+  public MessageThread update(MessageThread messageThread) {
+    checkLocked(messageThread);
+    return em().merge(messageThread);
   }
 
-  public int deleteMessageThreadParty(User user) {
+  public int deleteMessageThreadParty(User user, MessageThread thread) {
+    checkLocked(thread);
     return em().createQuery(
-      "DELETE FROM MessageThreadParty mtp WHERE mtp.user = :user " +
-      "AND EXISTS (SELECT mt FROM MessageThread mt WHERE mt.id = mtp.messageThreadId AND (mt.adId IS NOT NULL OR mt.group IS TRUE))")
-      .setParameter("user", user).executeUpdate();
-  }
-
-  public int deleteMessageThreadParty(User user, Long threadId) {
-    return em().createQuery(
-      "DELETE FROM MessageThreadParty mtp WHERE mtp.user = :user " +
+      "DELETE FROM MessageThreadParty mtp WHERE mtp.user.id = :userId " +
       "AND mtp.messageThreadId = :threadId")
-      .setParameter("user", user)
-      .setParameter("threadId", threadId)
+      .setParameter("userId", user.getId())
+      .setParameter("threadId", thread.getId())
       .executeUpdate();
   }
 
@@ -194,12 +183,12 @@ public class MessageThreadRepository extends Repository {
       "SELECT mt.id " +
         "FROM MessageThread mt JOIN mt.parties p " +
         "WHERE mt.communityId = :communityId " +
-        "AND p.user = :user " +
+        "AND p.user.id = :userId " +
         "AND EXISTS (SELECT 1 FROM Message WHERE threadId = mt.id) "+
         "AND (p.visitedAt IS NULL OR p.visitedAt < (SELECT MAX(createdAt) FROM Message WHERE threadId = mt.id)) " +
         "ORDER BY mt.id", Long.class)
       .setParameter("communityId", communityId)
-      .setParameter("user", user)
+      .setParameter("userId", user.getId())
       .getResultList();
   }
 }
