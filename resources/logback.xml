@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
   <property name="commonsos.log.level" value="${COMMONSOS_LOG_LEVEL:-info}" />
+  <property name="commonsos.log.max.history" value="${COMMONSOS_LOG_MAX_HISTORY:-1}" />
   <property name="defaultPattern"
             value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100} - [%X{ip}][%X{username}][%X{adminEmailAddress}][%X{sessionId}][%X{requestId}] %msg%n"/>
 
@@ -8,7 +9,7 @@
     <file>../logs/app.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>../logs/app.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
-      <maxHistory>90</maxHistory>
+      <maxHistory>${commonsos.log.max.history}</maxHistory>
     </rollingPolicy>
     <encoder>
       <pattern>${defaultPattern}</pattern>
@@ -19,7 +20,7 @@
     <file>../logs/eth.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>../logs/eth.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
-      <maxHistory>90</maxHistory>
+      <maxHistory>${commonsos.log.max.history}</maxHistory>
     </rollingPolicy>
     <encoder>
       <pattern>${defaultPattern}</pattern>
