@@ -2,7 +2,6 @@ package commonsos.controller.admin.admin;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.repository.entity.Admin;
 import commonsos.service.AdminService;
@@ -12,7 +11,6 @@ import commonsos.view.admin.AdminView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class GetAdminController extends AfterAdminLoginController {
 
   @Inject AdminService adminService;

@@ -2,7 +2,6 @@ package commonsos.controller.app.transaction;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
@@ -13,7 +12,6 @@ import commonsos.view.UserTokenBalanceView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class BalanceController extends AfterAppLoginController {
 
   @Inject BlockchainService service;

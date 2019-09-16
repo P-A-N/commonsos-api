@@ -2,7 +2,6 @@ package commonsos.controller.app.user;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.User;
@@ -12,7 +11,6 @@ import commonsos.view.app.CommunityUserListView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class SearchUsersCommunityController extends AfterAppLoginController {
 
   @Inject UserService service;

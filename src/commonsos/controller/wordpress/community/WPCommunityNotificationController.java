@@ -1,33 +1,29 @@
-package commonsos.controller.app.community;
+package commonsos.controller.wordpress.community;
 
-import static commonsos.annotation.IP.WORDPRESS_SERVER;
 import static commonsos.annotation.SyncObject.REGIST_COMMUNITY_NOTIFICATION;
-import static java.lang.Long.parseLong;
 
 import java.text.ParseException;
 import java.util.Date;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.google.gson.Gson;
 
-import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
-import commonsos.controller.app.AbstractAppController;
 import commonsos.controller.command.app.CommunityNotificationCommand;
+import commonsos.controller.wordpress.AbstractWordpressController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;
+import commonsos.util.RequestUtil;
 import commonsos.view.CommonView;
 import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
 @Synchronized(REGIST_COMMUNITY_NOTIFICATION)
-@RestrictAccess(allow = WORDPRESS_SERVER)
-public class CommunityNotificationController extends AbstractAppController {
+public class WPCommunityNotificationController extends AbstractWordpressController {
   
   private static String[] DATE_FORMAT = {
       "yyyy-MM-dd HH:mm:ss",
@@ -40,17 +36,10 @@ public class CommunityNotificationController extends AbstractAppController {
   @Inject CommunityService service;
 
   @Override
-  public CommonView handleApp(Request request, Response response) {
+  public CommonView handleWordpress(Request request, Response response) {
     CommunityNotificationCommand command = gson.fromJson(request.body(), CommunityNotificationCommand.class);
-    
-    String communityId = request.params("id");
-    if (StringUtils.isEmpty(communityId)) throw new BadRequestException("communityId is required");
-    if (!NumberUtils.isParsable(communityId)) throw new BadRequestException("invalid communityId");
-    command.setCommunityId(parseLong(communityId));
-    
-    String wordpressId = request.params("wordpressId");
-    if (StringUtils.isEmpty(communityId)) throw new BadRequestException("wordpressId is required");
-    command.setWordpressId(wordpressId);
+    command.setCommunityId(RequestUtil.getPathParamLong(request, "id"));
+    command.setWordpressId(RequestUtil.getPathParamString(request, "wordpressId"));
     
     if (StringUtils.isEmpty(command.getUpdatedAt())) throw new BadRequestException("updatedAt is required");
     try {

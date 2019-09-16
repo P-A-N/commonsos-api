@@ -2,7 +2,6 @@ package commonsos.controller.admin.user;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.ForbiddenException;
@@ -15,7 +14,6 @@ import commonsos.view.admin.TransactionListForAdminView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class SearchUserTransactionsController extends AfterAdminLoginController {
 
   @Inject TokenTransactionService tokenTransactionService;

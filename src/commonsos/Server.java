@@ -76,7 +76,6 @@ import commonsos.controller.app.auth.PasswordResetRequestCheckController;
 import commonsos.controller.app.auth.PasswordResetRequestController;
 import commonsos.controller.app.community.CommunityCoverPhotoUpdateController;
 import commonsos.controller.app.community.CommunityListController;
-import commonsos.controller.app.community.CommunityNotificationController;
 import commonsos.controller.app.community.CommunityNotificationListController;
 import commonsos.controller.app.community.CommunityPhotoUpdateController;
 import commonsos.controller.app.message.GroupMessageThreadController;
@@ -114,6 +113,9 @@ import commonsos.controller.app.user.UserSearchController;
 import commonsos.controller.app.user.UserStatusUpdateController;
 import commonsos.controller.app.user.UserUpdateCommunitiesController;
 import commonsos.controller.app.user.UserUpdateController;
+import commonsos.controller.wordpress.community.WPCommunityListController;
+import commonsos.controller.wordpress.community.WPCommunityNotificationController;
+import commonsos.controller.wordpress.community.WPCommunityNotificationListController;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.exception.AuthenticationException;
@@ -279,7 +281,6 @@ public class Server {
     get("/app/:version/communities", injector.getInstance(CommunityListController.class), toJson);
     post("/app/:version/communities/:id/photo", injector.getInstance(CommunityPhotoUpdateController.class), toJson);
     post("/app/:version/communities/:id/coverPhoto", injector.getInstance(CommunityCoverPhotoUpdateController.class), toJson);
-    post("/app/:version/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
     get("/app/:version/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
 
     // TODO change path
@@ -315,10 +316,9 @@ public class Server {
   }
 
   private void initWordPressRoutes() {
-    post("/wordpress/login", injector.getInstance(AppLoginController.class), toJson);
-    post("/wordpress/logout", injector.getInstance(AppLogoutController.class), toJson);
-    post("/wordpress/communities/:id/notification/:wordpressId", injector.getInstance(CommunityNotificationController.class), toJson);
-    get("/wordpress/communities/:id/notification", injector.getInstance(CommunityNotificationListController.class), toJson);
+    get("/wordpress/communities", injector.getInstance(WPCommunityListController.class), toJson);
+    post("/wordpress/communities/:id/notification/:wordpressId", injector.getInstance(WPCommunityNotificationController.class), toJson);
+    get("/wordpress/communities/:id/notification", injector.getInstance(WPCommunityNotificationListController.class), toJson);
   }
   
   private void initAdminPageRoutes() {

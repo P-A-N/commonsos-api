@@ -104,6 +104,10 @@ public class Configuration {
   public String aesIv() {
     return environmentVariable("AES_IV", "commonsos_aes_iv");
   }
+  
+  public String wordpressServerIp() {
+    return environmentVariable("WORDPRESS_SERVER_IP", "127.0.0.2,127.0.0.1");
+  }
 
   public String maintenanceMode() {
     return environmentVariable("MAINTENANCE_MODE", "false");

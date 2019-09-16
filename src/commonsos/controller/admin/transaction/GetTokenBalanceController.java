@@ -2,7 +2,6 @@ package commonsos.controller.admin.transaction;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -17,7 +16,6 @@ import commonsos.view.CommunityTokenBalanceView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class GetTokenBalanceController extends AfterAdminLoginController {
 
   @Inject TokenTransactionService tokenTransactionService;

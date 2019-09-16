@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.BadRequestException;
@@ -18,7 +17,6 @@ import commonsos.view.app.AdListView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class AdListController extends AfterAppLoginController {
   @Inject AdService service;
 

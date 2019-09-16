@@ -2,7 +2,6 @@ package commonsos.controller.admin.community.redistribution;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Redistribution;
@@ -13,7 +12,6 @@ import commonsos.view.admin.RedistributionView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class GetRedistributionController extends AfterAdminLoginController {
 
   @Inject RedistributionService redistributionService;

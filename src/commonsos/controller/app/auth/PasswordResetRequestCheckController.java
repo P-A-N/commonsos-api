@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AbstractAppController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.UserService;
@@ -13,7 +12,6 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-@ReadOnly
 public class PasswordResetRequestCheckController extends AbstractAppController {
 
   @Inject UserService userService;

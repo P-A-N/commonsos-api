@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.entity.Admin;
@@ -18,7 +17,6 @@ import commonsos.view.admin.UserForAdminView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class GetUserController extends AfterAdminLoginController {
 
   @Inject UserService userService;

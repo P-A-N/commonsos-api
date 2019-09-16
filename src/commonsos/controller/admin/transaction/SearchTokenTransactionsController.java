@@ -7,14 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.repository.entity.SortType;
 import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-@ReadOnly
 public class SearchTokenTransactionsController implements Route {
 
   @Override

@@ -2,7 +2,6 @@ package commonsos.controller.admin.user;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.admin.AfterAdminLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.controller.command.admin.SearchUserForAdminCommand;
@@ -16,7 +15,6 @@ import commonsos.view.admin.UserListForAdminView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class SearchUsersController extends AfterAdminLoginController {
 
   @Inject UserService userService;

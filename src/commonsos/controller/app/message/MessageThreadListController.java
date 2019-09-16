@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.controller.command.app.MessageThreadListCommand;
@@ -19,7 +18,6 @@ import commonsos.view.app.MessageThreadListView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class MessageThreadListController extends AfterAppLoginController {
 
   @Inject MessageService service;

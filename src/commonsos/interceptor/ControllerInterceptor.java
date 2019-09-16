@@ -12,19 +12,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 
-import commonsos.Configuration;
-import commonsos.annotation.RestrictAccess;
 import commonsos.annotation.Synchronized;
-import commonsos.exception.AuthenticationException;
 import commonsos.repository.EntityManagerService;
 import lombok.extern.slf4j.Slf4j;
-import spark.Request;
 import spark.Route;
 
 @Slf4j
 public class ControllerInterceptor extends AbstractModule implements MethodInterceptor {
   @Inject EntityManagerService entityManagerService;
-  @Inject Configuration config;
 
   @Override
   protected void configure() {
@@ -35,14 +30,8 @@ public class ControllerInterceptor extends AbstractModule implements MethodInter
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
     try {
-      // check access
-      Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
-      RestrictAccess restrictAccess = handleClass.getAnnotation(RestrictAccess.class);
-      if (restrictAccess != null) {
-        checkAccess(invocation, restrictAccess);
-      }
-      
       // setup sync
+      Class<?> handleClass = invocation.getThis().getClass().getSuperclass();
       Synchronized sync = handleClass.getAnnotation(Synchronized.class);
       if (sync != null) {
         synchronized(sync.value()) {
@@ -55,28 +44,6 @@ public class ControllerInterceptor extends AbstractModule implements MethodInter
     } finally {
       close(entityManagerService);
     }
-  }
-  
-  private void checkAccess(MethodInvocation invocation, RestrictAccess restrictAccess) {
-    Object[] args = invocation.getArguments();
-    Request request = null;
-    for (Object arg : args) {
-      if (arg instanceof Request) {
-        request = (Request) arg;
-        break;
-      }
-    }
-    if (request == null) return;
-    
-    String AllowIps = config.environmentVariable(restrictAccess.allow().getConfigurationKey(), "");
-    if (AllowIps == null) return;
-    
-    String accessIp = request.ip();
-    for (String allowIp : AllowIps.split(",")) {
-      if (allowIp.equals(accessIp)) return;
-    }
-    
-    throw new AuthenticationException(String.format("Access from disallowed IP. IP=%s", accessIp));
   }
 
   private Object proceedMethod(MethodInvocation invocation) throws Throwable {

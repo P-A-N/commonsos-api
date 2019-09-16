@@ -2,7 +2,6 @@ package commonsos.controller.app.ad;
 
 import javax.inject.Inject;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.User;
@@ -12,7 +11,6 @@ import commonsos.view.app.AdListView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class MyAdsController extends AfterAppLoginController {
   @Inject AdService service;
 

@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.annotation.ReadOnly;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
@@ -16,7 +15,6 @@ import commonsos.view.UrlView;
 import spark.Request;
 import spark.Response;
 
-@ReadOnly
 public class GetTransactionQrCodeController extends AfterAppLoginController {
 
   @Inject UserService userService;
