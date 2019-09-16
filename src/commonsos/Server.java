@@ -60,6 +60,7 @@ import commonsos.controller.admin.user.UpdateUserController;
 import commonsos.controller.admin.user.UpdateUserEmailTemporaryController;
 import commonsos.controller.admin.user.UpdateUserNameController;
 import commonsos.controller.app.GetAppApiVersionController;
+import commonsos.controller.app.NoVersionRequestController;
 import commonsos.controller.app.ad.AdController;
 import commonsos.controller.app.ad.AdCreateController;
 import commonsos.controller.app.ad.AdDeleteController;
@@ -285,6 +286,32 @@ public class Server {
     post("/app/:version/admin/ads/:id/delete", injector.getInstance(AdminAdDeleteController.class), toJson);
     // TODO delete
     get("/app/:version/admin/transactions", injector.getInstance(AdminTransactionListController.class), toJson);
+
+    // TODO for no version api. delete it in the future
+    post("/login", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/logout", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/create-account", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/create-account/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/user", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/users", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/users/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/users/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/password*", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/password*", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/ads", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/ads", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/ads/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/ads/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/my-ads", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/balance", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/transactions", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/transactions", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/message-threads", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/message-threads/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/message-threads/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/communities", injector.getInstance(NoVersionRequestController.class), toJson);
+    get("/communities/*", injector.getInstance(NoVersionRequestController.class), toJson);
+    post("/communities/*", injector.getInstance(NoVersionRequestController.class), toJson);
   }
 
   private void initWordPressRoutes() {
