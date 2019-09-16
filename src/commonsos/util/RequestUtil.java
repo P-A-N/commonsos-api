@@ -154,7 +154,10 @@ public class RequestUtil {
     return result;
   }
   public static Map<String, List<FileItem>> getFileItemMap(Request request) {
-    ServletFileUpload fileUpload = new ServletFileUpload(new DiskFileItemFactory());
+    DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
+    fileItemFactory.setDefaultCharset("UTF-8");
+    ServletFileUpload fileUpload = new ServletFileUpload(fileItemFactory);
+    fileUpload.setHeaderEncoding("UTF-8");
     try {
       return fileUpload.parseParameterMap(request.raw());
     } catch (FileUploadException e) {
