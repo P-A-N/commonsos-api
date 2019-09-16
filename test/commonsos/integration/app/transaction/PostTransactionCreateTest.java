@@ -20,6 +20,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.Message;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 
@@ -66,7 +67,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
     
-    // verify db
+    // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
         .setParameter("adId", giveAd.getId())
         .getSingleResult();
@@ -74,6 +75,10 @@ public class PostTransactionCreateTest extends IntegrationTest {
     assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
+    
+    // verify db message
+    Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10.000000symbolを送信しました。\n【コメント】\ndescription");
     
     // call api
     sessionId = loginApp("adCreator", "pass");
@@ -232,7 +237,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
     
-    // verify db
+    // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryId = :userId", TokenTransaction.class)
         .setParameter("userId", adCreator.getId())
         .getSingleResult();
@@ -241,6 +246,10 @@ public class PostTransactionCreateTest extends IntegrationTest {
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
     assertThat(transaction.getAdId()).isNull();
+
+    // verify db message
+    Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10.000000symbolを送信しました。\n【コメント】\ndescription");
   }
 
   @Test

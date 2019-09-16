@@ -2,7 +2,6 @@ package commonsos.service;
 
 import static java.lang.String.format;
 import static java.time.Instant.now;
-import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
@@ -33,6 +32,7 @@ import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -40,6 +40,7 @@ import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
+import commonsos.service.sync.SyncService;
 import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
@@ -59,43 +60,22 @@ public class MessageService {
   @Inject private AdRepository adRepository;
   @Inject private CommunityRepository communityRepository;
   @Inject private DeleteService deleteService;
+  @Inject private SyncService syncService;
   @Inject private PushNotificationService pushNotificationService;
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user.getId(), adId).orElseGet(() -> createMessageThreadForAd(user, adId));
+    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user.getId(), adId).orElseGet(() -> syncService.createMessageThreadForAd(user, adId));
     return view(user, thread);
-  }
-
-  private MessageThread createMessageThreadForAd(User user, Long adId) {
-    Ad ad = adRepository.findStrict(adId);
-    User adCreator = userRepository.findStrictById(ad.getCreatedBy());
-
-    MessageThread messageThread = new MessageThread()
-      .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(user.getId())
-      .setTitle(ad.getTitle()).setAdId(adId)
-      .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
-
-    return messageThreadRepository.createForAdIfNotExists(messageThread);
   }
 
   public MessageThreadView threadWithUser(User user, CreateDirectMessageThreadCommand command) {
-    MessageThread thread = messageThreadRepository.betweenUsers(user.getId(), command.getOtherUserId(), command.getCommunityId())
-      .orElseGet(() -> createMessageThreadWithUser(user, command));
-    return view(user, thread);
-  }
-
-  private MessageThread createMessageThreadWithUser(User user, CreateDirectMessageThreadCommand command) {
     User otherUser = userRepository.findStrictById(command.getOtherUserId());
-    if (!UserUtil.isMember(user, command.getCommunityId()) || !UserUtil.isMember(otherUser, command.getCommunityId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", command.getCommunityId()));
+    Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     
-    MessageThread messageThread = new MessageThread()
-      .setCommunityId(command.getCommunityId())
-      .setCreatedBy(user.getId())
-      .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));
-
-    return messageThreadRepository.createForBetweenUserIfNotExists(messageThread);
+    MessageThread thread = messageThreadRepository.betweenUsers(user.getId(), command.getOtherUserId(), command.getCommunityId())
+      .orElseGet(() -> syncService.createMessageThreadWithUser(user, otherUser, community));
+    return view(user, thread);
   }
 
   public MessageThreadView group(User user, CreateGroupCommand command) {

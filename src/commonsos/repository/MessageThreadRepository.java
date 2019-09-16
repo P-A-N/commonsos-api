@@ -12,8 +12,6 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
-import commonsos.annotation.SyncObject;
-import commonsos.annotation.Synchronized;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.exception.MessageThreadNotFoundException;
 import commonsos.repository.entity.MessageThread;
@@ -75,27 +73,6 @@ public class MessageThreadRepository extends Repository {
   }
 
   public MessageThread create(MessageThread messageThread) {
-    em().persist(messageThread);
-    return messageThread;
-  }
-
-  @Synchronized(SyncObject.MESSAGE_THRED_FOR_AD)
-  public MessageThread createForAdIfNotExists(MessageThread messageThread) {
-    Optional<MessageThread> mt = byCreaterAndAdId(messageThread.getCreatedBy(), messageThread.getAdId());
-    if (mt.isPresent()) return mt.get();
-    
-    em().persist(messageThread);
-    return messageThread;
-  }
-
-  @Synchronized(SyncObject.MESSAGE_THRED_BETWEEN_USER)
-  public MessageThread createForBetweenUserIfNotExists(MessageThread messageThread) {
-    Long userId = messageThread.getCreatedBy();
-    Long otherUserId = messageThread.getParties().stream().filter(p -> !p.getUser().getId().equals(userId)).findFirst().get().getId();
-    Long communityId = messageThread.getCommunityId();
-    Optional<MessageThread> mt = betweenUsers(userId, otherUserId, communityId);
-    if (mt.isPresent()) return mt.get();
-    
     em().persist(messageThread);
     return messageThread;
   }

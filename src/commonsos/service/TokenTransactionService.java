@@ -6,13 +6,15 @@ import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 import static spark.utils.StringUtils.isBlank;
 
-import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import com.google.common.collect.ImmutableMap;
 
 import commonsos.controller.command.PaginationCommand;
 import commonsos.controller.command.app.TransactionCreateCommand;
@@ -21,11 +23,15 @@ import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.MessageRepository;
+import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
+import commonsos.repository.entity.Message;
+import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.TokenTransaction;
@@ -35,7 +41,9 @@ import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.notification.PushNotificationService;
+import commonsos.service.sync.SyncService;
 import commonsos.util.AdminUtil;
+import commonsos.util.MessageUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.admin.TransactionForAdminView;
@@ -49,13 +57,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TokenTransactionService {
   
-  @Inject TokenTransactionRepository repository;
-  @Inject UserRepository userRepository;
-  @Inject AdRepository adRepository;
-  @Inject CommunityRepository communityRepository;
-  @Inject BlockchainService blockchainService;
-  @Inject BlockchainEventService blockchainEventService;
-  @Inject PushNotificationService pushNotificationService;
+  @Inject private TokenTransactionRepository repository;
+  @Inject private UserRepository userRepository;
+  @Inject private AdRepository adRepository;
+  @Inject private CommunityRepository communityRepository;
+  @Inject private MessageThreadRepository messageThreadRepository;
+  @Inject private MessageRepository messageRepository;
+  @Inject private BlockchainService blockchainService;
+  @Inject private BlockchainEventService blockchainEventService;
+  @Inject private SyncService syncService;
+  @Inject private PushNotificationService pushNotificationService;
 
   public TokenBalance getTokenBalanceForAdmin(Admin admin, Long communityId, WalletType walletType) {
     if (!AdminUtil.isSeeable(admin, communityId)) throw new ForbiddenException();
@@ -157,6 +168,7 @@ public class TokenTransactionService {
   }
 
   public TokenTransaction create(User user, TransactionCreateCommand command) {
+    // validation
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
     if (isBlank(command.getDescription()))  throw new BadRequestException("description is blank");
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
@@ -172,9 +184,10 @@ public class TokenTransactionService {
       Ad ad = adRepository.findStrict(command.getAdId());
       if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
     }
-    BigDecimal balance = blockchainService.getTokenBalance(user, command.getCommunityId()).getBalance();
-    if (balance.compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
+    TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());
+    if (tokenBalance.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
 
+    // create transaction
     TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())
       .setRemitterId(user.getId())
@@ -192,6 +205,26 @@ public class TokenTransactionService {
     repository.update(transaction);
     
     blockchainEventService.checkTransaction(blockchainTransactionHash);
+
+    // create message
+    MessageThread thread = null;
+    if (command.getAdId() != null) {
+      Optional<MessageThread> threadForAd = messageThreadRepository.byCreaterAndAdId(user.getId(), command.getAdId());
+      thread = threadForAd.orElseGet(() -> syncService.createMessageThreadForAd(user, command.getAdId()));
+    } else {
+      Optional<MessageThread> threadBetweenUser = messageThreadRepository.betweenUsers(user.getId(), beneficiary.getId(), community.getId());
+      thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
+    }
+    
+    String messageText = MessageUtil.getSystemMessageTokenSend(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
+    Map<String, String> params = ImmutableMap.of(
+        "type", "new_message",
+        "threadId", Long.toString(thread.getId()));
+    messageRepository.create(new Message()
+        .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
+        .setThreadId(thread.getId())
+        .setText(messageText));
+    pushNotificationService.send(beneficiary, messageText, params);
 
     return transaction;
   }

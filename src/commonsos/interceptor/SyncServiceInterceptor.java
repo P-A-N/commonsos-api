@@ -11,15 +11,15 @@ import com.google.inject.matcher.Matchers;
 
 import commonsos.annotation.Synchronized;
 import commonsos.repository.EntityManagerService;
-import commonsos.repository.Repository;
+import commonsos.service.sync.SyncService;
 
-public class RepositoryInterceptor extends AbstractModule implements MethodInterceptor {
+public class SyncServiceInterceptor extends AbstractModule implements MethodInterceptor {
   @Inject EntityManagerService entityManagerService;
 
   @Override
   protected void configure() {
     requestInjection(this);
-    bindInterceptor(Matchers.subclassesOf(Repository.class), Matchers.annotatedWith(Synchronized.class), this);
+    bindInterceptor(Matchers.subclassesOf(SyncService.class), Matchers.annotatedWith(Synchronized.class), this);
   }
 
   @Override

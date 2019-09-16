@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,16 +32,22 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
+import commonsos.repository.MessageRepository;
+import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.TokenBalance;
+import commonsos.service.notification.PushNotificationService;
+import commonsos.service.sync.SyncService;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -50,8 +57,12 @@ public class TokenTransactionServiceTest {
   @Mock UserRepository userRepository;
   @Mock AdRepository adRepository;
   @Mock CommunityRepository communityRepository;
+  @Mock MessageThreadRepository messageThreadRepository;
+  @Mock MessageRepository messageRepository;
   @Mock BlockchainService blockchainService;
   @Mock BlockchainEventService blockchainEventService;
+  @Mock SyncService syncService;
+  @Mock PushNotificationService pushNotificationService;
   @Captor ArgumentCaptor<TokenTransaction> captor;
   @InjectMocks @Spy TokenTransactionService service;
 
@@ -59,14 +70,15 @@ public class TokenTransactionServiceTest {
   public void createTransaction() {
     // prepare
     Community community = new Community().setFee(BigDecimal.ONE).setId(id("community"));
-    User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
-    User beneficiary = new User().setId(id("beneficiary")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
+    User user = new User().setId(id("user")).setUsername("user").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
+    User beneficiary = new User().setId(id("beneficiary")).setUsername("beneficiary").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedBy(id("user")).setType(WANT);
-    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN);
+    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenSymbol("sys"));
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);
     when(adRepository.findStrict(any())).thenReturn(ad);
     when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenReturn(tokenBalance);
+    when(messageThreadRepository.byCreaterAndAdId(any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
     
     // community is null
     TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);

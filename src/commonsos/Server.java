@@ -125,7 +125,7 @@ import commonsos.exception.UrlNotFoundException;
 import commonsos.filter.AddHeaderFilter;
 import commonsos.filter.LogFilter;
 import commonsos.interceptor.ControllerInterceptor;
-import commonsos.interceptor.RepositoryInterceptor;
+import commonsos.interceptor.SyncServiceInterceptor;
 import commonsos.repository.DatabaseMigrator;
 import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
@@ -166,7 +166,7 @@ public class Server {
 
     Injector injector = Guice.createInjector(module,
         new ControllerInterceptor(),
-        new RepositoryInterceptor());
+        new SyncServiceInterceptor());
     injector.injectMembers(this);
     return injector;
   }

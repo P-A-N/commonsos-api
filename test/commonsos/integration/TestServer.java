@@ -26,7 +26,7 @@ import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.interceptor.ControllerInterceptor;
-import commonsos.interceptor.RepositoryInterceptor;
+import commonsos.interceptor.SyncServiceInterceptor;
 import commonsos.repository.EntityManagerService;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
@@ -118,7 +118,7 @@ public class TestServer extends Server {
 
     Injector injector = Guice.createInjector(module,
         new ControllerInterceptor(),
-        new RepositoryInterceptor());
+        new SyncServiceInterceptor());
     injector.injectMembers(this);
     
     this.blockchainService = injector.getInstance(BlockchainService.class);
