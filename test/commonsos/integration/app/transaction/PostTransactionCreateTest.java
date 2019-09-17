@@ -78,7 +78,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     
     // verify db message
     Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
-    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10.000000symbolを送信しました。\n【コメント】\ndescription");
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10 symbolを送信しました。\n【コメント】\ndescription");
     
     // call api
     sessionId = loginApp("adCreator", "pass");
@@ -225,7 +225,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("transactionFee", "1");
-    requestParam.put("amount", "10");
+    requestParam.put("amount", "9.9");
     requestParam.put("adId", null);
     
     // call api
@@ -243,13 +243,13 @@ public class PostTransactionCreateTest extends IntegrationTest {
         .getSingleResult();
     assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
     assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
-    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
+    assertThat(transaction.getAmount()).isEqualByComparingTo(new BigDecimal("9.9"));
     assertThat(transaction.getDescription()).isEqualTo("description");
     assertThat(transaction.getAdId()).isNull();
 
     // verify db message
     Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
-    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10.000000symbolを送信しました。\n【コメント】\ndescription");
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ9.9 symbolを送信しました。\n【コメント】\ndescription");
   }
 
   @Test

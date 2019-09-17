@@ -224,6 +224,7 @@ public class TokenTransactionService {
         .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
+    pushNotificationService.send(user, messageText, params);
     pushNotificationService.send(beneficiary, messageText, params);
 
     return transaction;

@@ -8,7 +8,7 @@ public class MessageUtil {
 
   private static final Long SYSTEM_MESSAGE_CREATOR_ID = -1L;
   private static final String SYSTEM_MESSAGE_UNSUBSCRIBE = "%sがグループから退出しました";
-  private static final String SYSTEM_MESSAGE_TOKEN_SEND = "%sさんから%sさんへ%f%sを送信しました。";
+  private static final String SYSTEM_MESSAGE_TOKEN_SEND = "%sさんから%sさんへ%s %sを送信しました。";
 
   private MessageUtil() {}
 
@@ -21,7 +21,7 @@ public class MessageUtil {
   }
   
   public static String getSystemMessageTokenSend(String remitterUsername, String beneficiaryUsername, BigDecimal amount, String symbol, String description) {
-    String message = String.format(SYSTEM_MESSAGE_TOKEN_SEND, remitterUsername, beneficiaryUsername, amount.stripTrailingZeros(), symbol);
+    String message = String.format(SYSTEM_MESSAGE_TOKEN_SEND, remitterUsername, beneficiaryUsername, amount.stripTrailingZeros().toPlainString(), symbol);
     if (StringUtils.isNotEmpty(description)) {
       message = message + String.format("\n【コメント】\n%s", description);
     }
