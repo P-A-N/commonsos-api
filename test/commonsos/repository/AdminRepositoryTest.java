@@ -110,6 +110,86 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
+  public void findByCommunityIdAndRoleId() {
+    // prepare
+    Community com1 = inTransaction(() -> communityRepository.create(new Community().setName("com1")));
+    Community com2 = inTransaction(() -> communityRepository.create(new Community().setName("com2")));
+    Admin ncl = inTransaction(() -> repository.create(new Admin().setRole(NCL).setEmailAddress("ncl")));
+    Admin comAd1 = inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("comAd1").setCommunity(com1)));
+    Admin comAd2 = inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("comAd2").setCommunity(com1)));
+    Admin comAd3 = inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("comAd2").setCommunity(com1).setDeleted(true)));
+    Admin comAd4 = inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("comAd4")));
+    Admin teller1 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller1").setCommunity(com1)));
+    Admin teller2 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller2").setCommunity(com1)));
+    Admin teller3 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller3").setCommunity(com1).setDeleted(true)));
+    Admin teller4 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller4")));
+
+    // execute & verify
+    List<Admin> result = repository.findByCommunityIdAndRoleId(null, NCL.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getId()).isEqualTo(ncl.getId());
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getId()).isEqualTo(comAd1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(comAd2.getId());
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(com2.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(0);
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(null, COMMUNITY_ADMIN.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getId()).isEqualTo(comAd4.getId());
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(com1.getId(), TELLER.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(2);
+    assertThat(result.get(0).getId()).isEqualTo(teller1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(teller2.getId());
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(com2.getId(), TELLER.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(0);
+    
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(null, TELLER.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getId()).isEqualTo(teller4.getId());
+  }
+
+  @Test
+  public void findByCommunityIdAndRoleId_pagination() {
+    // prepare
+    Community com1 = inTransaction(() -> communityRepository.create(new Community().setName("com1")));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm1").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm2").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm3").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm4").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm5").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm6").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm7").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm8").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm9").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm10").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm11").setCommunity(com1)));
+    inTransaction(() -> repository.create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("adm12").setCommunity(com1)));
+
+    // execute & verify
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
+    List<Admin> result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(10);
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
+    assertThat(result.size()).isEqualTo(2);
+  }
+
+
+  @Test
   public void findByEmailAddress() {
     // prepare
     Admin adm1 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm1")));

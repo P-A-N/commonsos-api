@@ -10,7 +10,6 @@ import javax.persistence.TypedQuery;
 import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.ResultList;
-import commonsos.util.MessageUtil;
 
 @Singleton
 public class MessageRepository extends Repository {
@@ -39,10 +38,8 @@ public class MessageRepository extends Repository {
     List<Message> messages = em().createQuery(
         "FROM Message " +
         "WHERE threadId = :threadId " +
-        "AND createdBy <> :systemMessageCreatorId " +
         "ORDER BY createdAt DESC", Message.class)
       .setParameter("threadId", threadId)
-      .setParameter("systemMessageCreatorId", MessageUtil.getSystemMessageCreatorId())
       .setMaxResults(1)
       .getResultList();
 

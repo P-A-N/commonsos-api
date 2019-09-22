@@ -19,7 +19,7 @@ public class SearchAdminsController extends AfterAdminLoginController {
   @Override
   public AdminListView handleAfterLogin(Admin admin, Request request, Response response) {
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
-    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
+    Long communityId = RequestUtil.getQueryParamLong(request, "communityId", false);
     Long roleId = RequestUtil.getQueryParamLong(request, "roleId", true);
     
     AdminListView view = adminService.searchAdmin(admin, communityId, roleId, paginationCommand);

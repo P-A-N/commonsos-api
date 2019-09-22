@@ -102,19 +102,26 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void lastThreadMessage() {
+    // prepare
     // oldestMessage
     inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user1"))));
     // olderMessage
     inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user2"))));
     // newestMessage
     Message newestMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user3"))));
-    // systemMessage
-    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(MessageUtil.getSystemMessageCreatorId())));
 
+    // verify
     Optional<Message> result = repository.lastMessage(id("thread"));
-
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(newestMessage.getId());
+
+    // prepare
+    // systemMessage
+    Message systemMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(MessageUtil.getSystemMessageCreatorId())));
+    // verify
+    result = repository.lastMessage(id("thread"));
+    assertThat(result).isNotEmpty();
+    assertThat(result.get().getId()).isEqualTo(systemMessage.getId());
   }
 
   @Test

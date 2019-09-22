@@ -22,8 +22,10 @@ public class SearchAdminTest extends IntegrationTest {
   private Admin ncl;
   private Admin com1Admin1;
   private Admin com1Admin2;
+  private Admin nonComAdmin1;
   private Admin com1Teller1;
   private Admin com1Teller2;
+  private Admin nonComTeller1;
   private String sessionId;
   
   @BeforeEach
@@ -34,8 +36,10 @@ public class SearchAdminTest extends IntegrationTest {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     com1Admin1 = create(new Admin().setEmailAddress("com1Admin1@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
     com1Admin2 = create(new Admin().setEmailAddress("com1Admin2@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
+    nonComAdmin1 = create(new Admin().setEmailAddress("nonComAdmin1@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN));
     com1Teller1 = create(new Admin().setEmailAddress("com1Teller1@before.each.com").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(com1));
     com1Teller2 = create(new Admin().setEmailAddress("com1Teller2@before.each.com").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(com1));
+    nonComTeller1 = create(new Admin().setEmailAddress("nonComTeller1@before.each.com").setPasswordHash(hash("password")).setRole(TELLER));
   }
   
   @Test
@@ -55,6 +59,26 @@ public class SearchAdminTest extends IntegrationTest {
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com1.getId(), TELLER.getId())
       .then().statusCode(200)
       .body("adminList.id",  contains(com1Teller1.getId().intValue(), com1Teller2.getId().intValue()));
+    
+    // search non-community community_admin
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", COMMUNITY_ADMIN.getId())
+      .then().statusCode(200)
+      .body("adminList.id",  contains(nonComAdmin1.getId().intValue()));
+
+    // search non-community teller
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", TELLER.getId())
+      .then().statusCode(200)
+      .body("adminList.id",  contains(nonComTeller1.getId().intValue()));
+
+    // search error
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins")
+      .then().statusCode(400);
   }
   
   @Test
@@ -75,10 +99,16 @@ public class SearchAdminTest extends IntegrationTest {
       .then().statusCode(200)
       .body("adminList.id",  contains(com1Teller1.getId().intValue(), com1Teller2.getId().intValue()));
 
-    // search community_admin [forbidden]
+    // search other-community community_admin [forbidden]
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com2.getId(), COMMUNITY_ADMIN.getId())
+      .then().statusCode(403);
+
+    // search non-community community_admin [forbidden]
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", COMMUNITY_ADMIN.getId())
       .then().statusCode(403);
   }
   
@@ -99,10 +129,16 @@ public class SearchAdminTest extends IntegrationTest {
       .then().statusCode(200)
       .body("adminList.id",  contains(com1Teller1.getId().intValue(), com1Teller2.getId().intValue()));
 
-    // search community_admin [forbidden]
+    // search other-community community_admin [forbidden]
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com2.getId(), TELLER.getId())
+      .then().statusCode(403);
+
+    // search non-community community_admin [forbidden]
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", TELLER.getId())
       .then().statusCode(403);
   }
 
