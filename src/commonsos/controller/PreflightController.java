@@ -5,9 +5,8 @@ import javax.inject.Inject;
 import commonsos.Configuration;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
-public class PreflightController implements Route {
+public class PreflightController extends AbstractController {
 
   @Inject Configuration config;
 

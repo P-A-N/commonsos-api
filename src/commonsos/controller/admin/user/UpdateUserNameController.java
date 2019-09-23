@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import commonsos.controller.AbstractController;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
-public class UpdateUserNameController implements Route {
+public class UpdateUserNameController extends AbstractController {
 
   @Override
   public Object handle(Request request, Response response) {

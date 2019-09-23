@@ -4,6 +4,7 @@ import static commonsos.controller.app.auth.AppLoginController.USER_SESSION_ATTR
 
 import javax.inject.Inject;
 
+import commonsos.ThreadValue;
 import commonsos.exception.AuthenticationException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
@@ -22,6 +23,9 @@ public abstract class AfterAppLoginController extends AbstractAppController {
     
     UserSession session = request.session().attribute(USER_SESSION_ATTRIBUTE_NAME);
     User user = userService.user(session.getUserId());
+    
+    ThreadValue.setRequestedBy(String.format("APP USER. [userId=%d]", user.getId()));
+    
     return handleAfterLogin(user, request, response);
   }
 

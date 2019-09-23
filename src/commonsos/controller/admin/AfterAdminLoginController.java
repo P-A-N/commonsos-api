@@ -4,6 +4,7 @@ import static commonsos.controller.admin.auth.AdminLoginController.ADMIN_SESSION
 
 import javax.inject.Inject;
 
+import commonsos.ThreadValue;
 import commonsos.controller.AbstractController;
 import commonsos.exception.AuthenticationException;
 import commonsos.repository.entity.Admin;
@@ -22,6 +23,9 @@ public abstract class AfterAdminLoginController extends AbstractController {
     
     AdminSession session = request.session().attribute(ADMIN_SESSION_ATTRIBUTE_NAME);
     Admin admin = adminService.getAdmin(session.getAdminId());
+
+    ThreadValue.setRequestedBy(String.format("ADMIN. [adminId=%d]", admin.getId()));
+    
     return handleAfterLogin(admin, request, response);
   }
 

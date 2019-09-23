@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.MDC;
 
 import commonsos.annotation.Synchronized;
+import commonsos.controller.AbstractController;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.Admin;
@@ -17,11 +18,10 @@ import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Session;
 
 @Synchronized(ADMIN_EMAIL_ADDRESS)
-public class CreateAdminCompleteController implements Route {
+public class CreateAdminCompleteController extends AbstractController {
 
   @Inject AdminService adminService;
   @Inject CSRF csrf;

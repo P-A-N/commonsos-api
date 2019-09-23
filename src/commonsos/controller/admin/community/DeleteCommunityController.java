@@ -3,11 +3,11 @@ package commonsos.controller.admin.community;
 import java.util.HashMap;
 import java.util.Map;
 
+import commonsos.controller.AbstractController;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
-public class DeleteCommunityController implements Route {
+public class DeleteCommunityController extends AbstractController {
 
   @Override
   public Object handle(Request request, Response response) {

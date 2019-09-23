@@ -3,6 +3,7 @@ package commonsos.controller.wordpress;
 import javax.inject.Inject;
 
 import commonsos.Configuration;
+import commonsos.ThreadValue;
 import commonsos.controller.AbstractController;
 import commonsos.exception.AuthenticationException;
 import commonsos.view.CommonView;
@@ -16,6 +17,9 @@ public abstract class AbstractWordpressController extends AbstractController {
   @Override
   public Object handle(Request request, Response response) {
     checkAccessIp(request);
+
+    ThreadValue.setRequestedBy("WORDPRESS");
+    
     CommonView view = handleWordpress(request, response);
     return view;
   }

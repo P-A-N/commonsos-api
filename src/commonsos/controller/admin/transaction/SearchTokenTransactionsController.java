@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import commonsos.controller.AbstractController;
 import commonsos.repository.entity.SortType;
 import commonsos.view.PaginationView;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
-public class SearchTokenTransactionsController implements Route {
+public class SearchTokenTransactionsController extends AbstractController {
 
   @Override
   public Object handle(Request request, Response response) {

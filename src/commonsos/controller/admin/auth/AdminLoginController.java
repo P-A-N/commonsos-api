@@ -9,6 +9,7 @@ import org.slf4j.MDC;
 import com.google.gson.Gson;
 
 import commonsos.command.admin.AdminLoginCommand;
+import commonsos.controller.AbstractController;
 import commonsos.filter.CSRF;
 import commonsos.filter.LogFilter;
 import commonsos.repository.entity.Admin;
@@ -16,10 +17,9 @@ import commonsos.service.AdminService;
 import commonsos.util.AdminUtil;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 import spark.Session;
 
-public class AdminLoginController implements Route {
+public class AdminLoginController extends AbstractController {
 
   public static final String ADMIN_SESSION_ATTRIBUTE_NAME = "admin";
   @Inject Gson gson;
