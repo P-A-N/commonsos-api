@@ -235,17 +235,20 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
         .setPhotoUrl("url://photo")
         .setCommunityId(id("community"));
     Instant createdAt = testAd.getCreatedAt();
-    Instant updatedAt = testAd.getUpdatedAt();
 
     testAd.setTitle("Title2").setDescription("description2").setLocation("home2");
     inTransaction(() -> repository.update(testAd));
     
     Ad result = repository.find(testAd.getId()).get();
+    Instant updatedAt = result.getUpdatedAt();
 
     assertThat(result.getTitle()).isEqualTo("Title2");
     assertThat(result.getDescription()).isEqualTo("description2");
     assertThat(result.getLocation()).isEqualTo("home2");
     assertThat(result.getCreatedAt()).isEqualTo(createdAt);
+    
+    inTransaction(() -> repository.update(testAd.setLocation("home2")));
+    result = repository.find(testAd.getId()).get();
     assertTrue(result.getUpdatedAt().isAfter(updatedAt));
   }
 }

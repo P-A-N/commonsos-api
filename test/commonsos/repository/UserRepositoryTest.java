@@ -487,7 +487,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     // prepare
     User user = createTestUser_BelongAtOneCommunity();
     Instant createdAt = user.getCreatedAt();
-    Instant updatedAt = user.getUpdatedAt();
     
     // execute
     inTransaction(() -> {
@@ -503,8 +502,7 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     User updatedUser = em().find(User.class, user.getId());
     assertThat(updatedUser.getFirstName()).isEqualTo("new first name");
     assertThat(updatedUser.getCreatedAt()).isEqualTo(createdAt);
-    assertThat(updatedUser.getUpdatedAt()).isNotEqualTo(updatedAt);
-    assertTrue(updatedUser.getUpdatedAt().isAfter(updatedAt));
+    assertTrue(updatedUser.getUpdatedAt().isAfter(createdAt));
   }
 
   @Disabled
@@ -978,7 +976,6 @@ public class UserRepositoryTest extends AbstractRepositoryTest {
     assertThat(actual.getLoggedinAt()).isEqualTo(expect.getLoggedinAt());
     assertThat(actual.isDeleted()).isEqualTo(expect.isDeleted());
     assertThat(actual.getCreatedAt()).isNotNull();
-    assertThat(actual.getUpdatedAt()).isNotNull();
 
     assertThat(actual.getCommunityUserList().size()).isEqualTo(expect.getCommunityUserList().size());
     actual.getCommunityUserList().sort((a,b) -> a.getId().compareTo(b.getId()));
