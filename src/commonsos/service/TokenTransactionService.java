@@ -221,7 +221,7 @@ public class TokenTransactionService {
         "type", "new_message",
         "threadId", Long.toString(thread.getId()));
     messageRepository.create(new Message()
-        .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
+        .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
     pushNotificationService.send(user, messageText, params);
@@ -279,7 +279,7 @@ public class TokenTransactionService {
         "type", "new_message",
         "threadId", Long.toString(thread.getId()));
     messageRepository.create(new Message()
-        .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
+        .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
     pushNotificationService.send(beneficiary, messageText, params);

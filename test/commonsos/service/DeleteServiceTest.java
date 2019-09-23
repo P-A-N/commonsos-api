@@ -53,8 +53,8 @@ public class DeleteServiceTest {
   public void deleteAdByUser() {
     // prepare
     User user = new User().setId(id("user"));
-    Ad ad1 = new Ad().setCreatedBy(id("user"));
-    Ad ad2 = new Ad().setCreatedBy(id("othreUser"));
+    Ad ad1 = new Ad().setCreatedUserId(id("user"));
+    Ad ad2 = new Ad().setCreatedUserId(id("othreUser"));
     
     // execute (checking error)
     service.deleteAdByUser(user, ad1);
@@ -68,7 +68,7 @@ public class DeleteServiceTest {
     User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     User admin = new User().setId(id("admin")).setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     community.setAdminUser(admin);
-    Ad ad = new Ad().setCreatedBy(id("othreUser")).setCommunityId(id("community"));
+    Ad ad = new Ad().setCreatedUserId(id("othreUser")).setCommunityId(id("community"));
     
     // execute (checking error)
     service.deleteAdByAdmin(admin, ad);

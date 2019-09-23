@@ -20,7 +20,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @ToString
 public class Ad extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
-  private Long createdBy;
+  private Long createdUserId;
   @Enumerated(value = STRING) private AdType type;
   private String title;
   private String description;

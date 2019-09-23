@@ -69,7 +69,7 @@ public class PostAdCreateTest extends IntegrationTest {
     assertThat(ad.getLocation()).isEqualTo("location");
     assertThat(ad.getType()).isEqualTo(AdType.GIVE);
     assertThat(ad.getCommunityId()).isEqualTo(community.getId());
-    assertThat(ad.getCreatedBy()).isEqualTo(user.getId());
+    assertThat(ad.getCreatedUserId()).isEqualTo(user.getId());
     assertThat(ad.isDeleted()).isEqualTo(false);
   }
 }

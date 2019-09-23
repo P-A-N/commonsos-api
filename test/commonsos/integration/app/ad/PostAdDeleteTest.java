@@ -45,7 +45,7 @@ public class PostAdDeleteTest extends IntegrationTest {
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(
         new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     
-    ad_user1 =  create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community1.getId()));
+    ad_user1 =  create(new Ad().setCreatedUserId(user1.getId()).setCommunityId(community1.getId()));
     messageThread_ad_user1_1 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
     messageThread_ad_user1_2 = create(new MessageThread().setAdId(ad_user1.getId()).setCommunityId(ad_user1.getCommunityId()));
   }

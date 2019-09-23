@@ -48,8 +48,8 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     User user1 = new User().setId(id("user1"));
     User user2 = new User().setId(id("user2"));
     User user3 = new User().setId(id("user3"));
-    MessageThread mt1 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1")));
-    MessageThread mt2 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt2")));
+    MessageThread mt1 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user1")).setTitle("mt1")));
+    MessageThread mt2 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt2")));
 
     // execute & verify
     Optional<MessageThread> result = repository.byCreaterAndAdId(user1.getId(), id("ad1"));
@@ -78,10 +78,10 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void byAdId() {
     // prepare
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1_1")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt1_2")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user3")).setTitle("mt1_3").setDeleted(true)));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad2")).setCreatedBy(id("user1")).setTitle("mt2_1")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user1")).setTitle("mt1_1")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt1_2")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user3")).setTitle("mt1_3").setDeleted(true)));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad2")).setCreatedUserId(id("user1")).setTitle("mt2_1")));
 
     // execute & verify
     ResultList<MessageThread> result = repository.byAdId(id("ad1"), null);
@@ -93,18 +93,18 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void byAdId_pagination() {
     // prepare
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user1")).setTitle("mt1_1")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user2")).setTitle("mt1_2")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user3")).setTitle("mt1_3")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user4")).setTitle("mt1_4")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user5")).setTitle("mt1_5")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user6")).setTitle("mt1_6")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user7")).setTitle("mt1_7")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user8")).setTitle("mt1_8")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user9")).setTitle("mt1_9")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user10")).setTitle("mt1_10")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user11")).setTitle("mt1_11")));
-    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedBy(id("user12")).setTitle("mt1_12")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user1")).setTitle("mt1_1")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt1_2")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user3")).setTitle("mt1_3")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user4")).setTitle("mt1_4")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user5")).setTitle("mt1_5")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user6")).setTitle("mt1_6")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user7")).setTitle("mt1_7")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user8")).setTitle("mt1_8")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user9")).setTitle("mt1_9")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user10")).setTitle("mt1_10")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user11")).setTitle("mt1_11")));
+    inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user12")).setTitle("mt1_12")));
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
@@ -472,8 +472,8 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     MessageThread thread = new MessageThread().setCommunityId(communityId).setParties(asList(myParty, counterParty));
     inTransaction(() -> {
       repository.create(thread);
-      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedBy(otherUser.getId());
-      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedBy(myUser.getId());
+      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedUserId(otherUser.getId());
+      messageRepository.create(new Message().setThreadId(thread.getId())).setCreatedUserId(myUser.getId());
     });
 
     return thread;

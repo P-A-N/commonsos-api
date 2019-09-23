@@ -63,9 +63,9 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
     Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
     Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setDescription("text").setCommunityId(id("community1"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setDescription("text").setCommunityId(id("community2"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setDescription("text").setCommunityId(id("community3"))).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId1).setDescription("text").setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId2).setDescription("text").setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId3).setDescription("text").setCommunityId(id("community3"))).getId());
 
     ResultList<Ad> result = repository.ads(id("community1"), "text", null);
 
@@ -77,9 +77,9 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
     Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
     Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setTitle("_title_").setCommunityId(id("community1"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setTitle("_title_").setCommunityId(id("community2"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setTitle("_title_").setCommunityId(id("community3"))).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId1).setTitle("_title_").setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId2).setTitle("_title_").setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId3).setTitle("_title_").setCommunityId(id("community3"))).getId());
 
     ResultList<Ad> result = repository.ads(id("community1"), "title", null);
 
@@ -91,9 +91,9 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
     Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")).getId());
     Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setCommunityId(id("community1"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community2"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community3"))).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId1).setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId2).setCommunityId(id("community2"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId3).setCommunityId(id("community3"))).getId());
 
     ResultList<Ad> result = repository.ads(id("community1"), "user", null);
 
@@ -105,9 +105,9 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     Long userId1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")).getId());
     Long userId2 = inTransaction(() -> userRepository.create(new User().setUsername("user2").setDeleted(true)).getId());
     Long userId3 = inTransaction(() -> userRepository.create(new User().setUsername("user3")).getId());
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId1).setCommunityId(id("community1"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId2).setCommunityId(id("community1"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedBy(userId3).setCommunityId(id("community1")).setDeleted(true)).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId1).setCommunityId(id("community1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId2).setCommunityId(id("community1"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCreatedUserId(userId3).setCommunityId(id("community1")).setDeleted(true)).getId());
 
     ResultList<Ad> result = repository.ads(id("community1"), "user", null);
 
@@ -147,11 +147,11 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void myAds() {
-    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedBy(id("user1"))).getId());
-    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedBy(id("user1"))).getId());
-    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedBy(id("user1")).setDeleted(true)).getId());
-    Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedBy(id("user2"))).getId());
-    Long id5 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2")).setCreatedBy(id("user1"))).getId());
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedUserId(id("user1"))).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedUserId(id("user1"))).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedUserId(id("user1")).setDeleted(true)).getId());
+    Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setCreatedUserId(id("user2"))).getId());
+    Long id5 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2")).setCreatedUserId(id("user1"))).getId());
 
     // execute
     ResultList<Ad> result = repository.myAds(id("user1"), null);
@@ -163,11 +163,11 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void myAds_pagination() {
     // prepare
-    inTransaction(() -> repository.create(new Ad().setTitle("ad1").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
-    inTransaction(() -> repository.create(new Ad().setTitle("ad2").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
-    inTransaction(() -> repository.create(new Ad().setTitle("ad3").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
-    inTransaction(() -> repository.create(new Ad().setTitle("ad4").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
-    inTransaction(() -> repository.create(new Ad().setTitle("ad5").setCommunityId(id("community1")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad1").setCommunityId(id("community1")).setCreatedUserId(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad2").setCommunityId(id("community1")).setCreatedUserId(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad3").setCommunityId(id("community1")).setCreatedUserId(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad4").setCommunityId(id("community1")).setCreatedUserId(id("user1"))));
+    inTransaction(() -> repository.create(new Ad().setTitle("ad5").setCommunityId(id("community1")).setCreatedUserId(id("user1"))));
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
@@ -188,7 +188,7 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
   public void findById() {
     Long id = inTransaction(() -> repository.create(new Ad()
         .setTitle("Title")
-        .setCreatedBy(id("john"))
+        .setCreatedUserId(id("john"))
         .setPoints(TEN).setType(GIVE)
         .setPhotoUrl("url://photo")
         .setDescription("description")
@@ -198,7 +198,7 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
     Ad result = repository.find(id).get();
 
     assertThat(result.getTitle()).isEqualTo("Title");
-    assertThat(result.getCreatedBy()).isEqualTo(id("john"));
+    assertThat(result.getCreatedUserId()).isEqualTo(id("john"));
     assertThat(result.getType()).isEqualTo(GIVE);
     assertThat(result.getPhotoUrl()).isEqualTo("url://photo");
     assertThat(result.getCreatedAt()).isNotNull();
@@ -226,7 +226,7 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void update() {
     Ad testAd = inTransaction(() -> repository.create(new Ad()
-        .setCreatedBy(id("john"))
+        .setCreatedUserId(id("john"))
         .setType(GIVE)
         .setTitle("Title")
         .setDescription("description")

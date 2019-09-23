@@ -83,7 +83,7 @@ public class TokenTransactionServiceTest {
     Community community = new Community().setFee(BigDecimal.ONE).setId(id("community"));
     User user = new User().setId(id("user")).setUsername("user").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     User beneficiary = new User().setId(id("beneficiary")).setUsername("beneficiary").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
-    Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedBy(id("user")).setType(WANT);
+    Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedUserId(id("user")).setType(WANT);
     TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenSymbol("sys"));
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);

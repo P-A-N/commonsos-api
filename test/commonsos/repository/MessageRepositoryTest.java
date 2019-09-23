@@ -29,7 +29,7 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void createMessage() {
     Message message = new Message()
-      .setCreatedBy(id("created by"))
+      .setCreatedUserId(id("created by"))
       .setText("message text")
       .setThreadId(id("thread id"));
 
@@ -39,7 +39,7 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
 
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNotNull();
-    assertThat(result.getCreatedBy()).isEqualTo(id("created by"));
+    assertThat(result.getCreatedUserId()).isEqualTo(id("created by"));
     assertThat(result.getText()).isEqualTo("message text");
     assertThat(result.getThreadId()).isEqualTo(id("thread id"));
   }
@@ -104,11 +104,11 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
   public void lastThreadMessage() {
     // prepare
     // oldestMessage
-    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user1"))));
+    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(id("user1"))));
     // olderMessage
-    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user2"))));
+    inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(id("user2"))));
     // newestMessage
-    Message newestMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(id("user3"))));
+    Message newestMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(id("user3"))));
 
     // verify
     Optional<Message> result = repository.lastMessage(id("thread"));
@@ -117,7 +117,7 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
 
     // prepare
     // systemMessage
-    Message systemMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedBy(MessageUtil.getSystemMessageCreatorId())));
+    Message systemMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(MessageUtil.getSystemMessageCreatorId())));
     // verify
     result = repository.lastMessage(id("thread"));
     assertThat(result).isNotEmpty();

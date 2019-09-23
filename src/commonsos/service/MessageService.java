@@ -89,7 +89,7 @@ public class MessageService {
       .setGroup(true)
       .setCommunityId(command.getCommunityId())
       .setTitle(command.getTitle())
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setParties(parties);
     return view(user, messageThreadRepository.create(messageThread));
   }
@@ -143,14 +143,14 @@ public class MessageService {
     MessageThreadParty userMtp = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst().get();
     
     List<UserView> parties = thread.getParties().stream()
-      .filter(p -> !p.getUser().getId().equals(thread.getCreatedBy()))
+      .filter(p -> !p.getUser().getId().equals(thread.getCreatedUserId()))
       .map(MessageThreadParty::getUser)
       .map(UserUtil::publicViewForApp)
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .collect(toList());
 
     UserView creator = thread.getParties().stream()
-      .filter(p -> p.getUser().getId().equals(thread.getCreatedBy()))
+      .filter(p -> p.getUser().getId().equals(thread.getCreatedUserId()))
       .map(MessageThreadParty::getUser)
       .map(UserUtil::publicViewForApp).findFirst().orElse(null);
 
@@ -162,8 +162,8 @@ public class MessageService {
     AdView adView = null;
     if (thread.getAdId() != null) {
       Ad ad = adRepository.findStrict(thread.getAdId());
-      User createdBy = userRepository.findStrictById(ad.getCreatedBy());
-      adView = AdUtil.view(ad, createdBy, user);
+      User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
+      adView = AdUtil.view(ad, createdUser, user);
     }
     MessageView lastMessage = messageRepository.lastMessage(thread.getId()).map(this::view).orElse(null);
 
@@ -186,7 +186,7 @@ public class MessageService {
     return new MessageView()
       .setId(message.getId())
       .setCreatedAt(message.getCreatedAt())
-      .setCreatedBy(message.getCreatedBy())
+      .setCreatedBy(message.getCreatedUserId())
       .setText(message.getText());
   }
 
@@ -224,7 +224,7 @@ public class MessageService {
   public MessageView postMessage(User user, MessagePostCommand command) {
     MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).map(thread -> checkAccess(user, thread)).get();
     Message message = messageRepository.create(new Message()
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setThreadId(command.getThreadId())
       .setText(command.getText()));
 

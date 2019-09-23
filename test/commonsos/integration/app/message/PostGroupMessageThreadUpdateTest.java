@@ -90,7 +90,7 @@ public class PostGroupMessageThreadUpdateTest extends IntegrationTest {
     MessageThread messageThread = emService.get().find(MessageThread.class, (long) id);
     assertThat(messageThread.getTitle()).isEqualTo("title2");
     assertThat(messageThread.getAdId()).isNull();
-    assertThat(messageThread.getCreatedBy()).isEqualTo(user1.getId());
+    assertThat(messageThread.getCreatedUserId()).isEqualTo(user1.getId());
     assertThat(messageThread.isGroup()).isEqualTo(true);
     
     messageThread.getParties().sort((a,b) -> a.getUser().getId().compareTo(b.getUser().getId()));

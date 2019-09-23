@@ -99,7 +99,7 @@ public class MessageServiceTest {
   public void messageThreadView() {
     User user = new User().setId(id("myself_mtv"));
     MessageThread messageThread = new MessageThread()
-      .setCreatedBy(id("creator_mtv"))
+      .setCreatedUserId(id("creator_mtv"))
       .setParties(asList(
           party(user),
           party(new User().setId(id("creator_mtv"))),
@@ -154,7 +154,7 @@ public class MessageServiceTest {
     verify(messageRepository).create(messageArgument.capture());
     Message message = messageArgument.getValue();
     assertThat(message.getThreadId()).isEqualTo(id("thread id"));
-    assertThat(message.getCreatedBy()).isEqualTo(id("user id"));
+    assertThat(message.getCreatedUserId()).isEqualTo(id("user id"));
     assertThat(message.getText()).isEqualTo("message text");
   }
 
@@ -162,7 +162,7 @@ public class MessageServiceTest {
   public void view_group() {
     // prepare
     User user = new User().setId(id("user2_v_g"));
-    MessageThread thread = new MessageThread().setGroup(true).setCreatedBy(id("user1_v_g")).setParties(asList(
+    MessageThread thread = new MessageThread().setGroup(true).setCreatedUserId(id("user1_v_g")).setParties(asList(
         new MessageThreadParty().setUser(new User().setId(id("user1_v_g"))),
         new MessageThreadParty().setUser(new User().setId(id("user2_v_g"))),
         new MessageThreadParty().setUser(new User().setId(id("user3_v_g")))
@@ -189,7 +189,7 @@ public class MessageServiceTest {
   public void view_between_user() {
     // prepare
     User user = new User().setId(id("user2_v_b_u"));
-    MessageThread thread = new MessageThread().setGroup(false).setCreatedBy(id("user1_v_b_u")).setParties(asList(
+    MessageThread thread = new MessageThread().setGroup(false).setCreatedUserId(id("user1_v_b_u")).setParties(asList(
         new MessageThreadParty().setUser(new User().setId(id("user1_v_b_u"))),
         new MessageThreadParty().setUser(new User().setId(id("user2_v_b_u")))
         ));

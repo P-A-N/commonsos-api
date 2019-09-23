@@ -39,13 +39,13 @@ public class GetMessageThreadTest extends IntegrationTest {
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    ad = create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
+    ad = create(new Ad().setCreatedUserId(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
 
     adThread = create(new MessageThread()
         .setTitle("adThread")
         .setAdId(ad.getId())
         .setGroup(false)
-        .setCreatedBy(user1.getId())
+        .setCreatedUserId(user1.getId())
         .setParties(asList(
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user2)
@@ -57,7 +57,7 @@ public class GetMessageThreadTest extends IntegrationTest {
         .setTitle("groupThread")
         .setAdId(null)
         .setGroup(true)
-        .setCreatedBy(user1.getId())
+        .setCreatedUserId(user1.getId())
         .setParties(asList(
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user2),
@@ -70,7 +70,7 @@ public class GetMessageThreadTest extends IntegrationTest {
         .setTitle("directThread")
         .setAdId(null)
         .setGroup(false)
-        .setCreatedBy(user1.getId())
+        .setCreatedUserId(user1.getId())
         .setParties(asList(
             new MessageThreadParty().setUser(user1),
             new MessageThreadParty().setUser(user3)

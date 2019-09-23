@@ -38,7 +38,7 @@ public class AdRepository extends Repository {
 
   public ResultList<Ad> ads(Long communityId, String filter, PaginationCommand pagination) {
     TypedQuery<Ad> query = em()
-      .createQuery("SELECT a FROM Ad a JOIN User u ON a.createdBy = u.id AND u.deleted = FALSE" +
+      .createQuery("SELECT a FROM Ad a JOIN User u ON a.createdUserId = u.id AND u.deleted = FALSE" +
         " WHERE a.communityId = :communityId " +
         " AND a.deleted = FALSE" +
         " AND (" +
@@ -56,7 +56,7 @@ public class AdRepository extends Repository {
 
   public ResultList<Ad> myAds(Long userId, PaginationCommand pagination) {
     TypedQuery<Ad> query = em()
-      .createQuery("FROM Ad WHERE createdBy = :userId AND deleted = FALSE ORDER BY id", Ad.class)
+      .createQuery("FROM Ad WHERE createdUserId = :userId AND deleted = FALSE ORDER BY id", Ad.class)
       .setParameter("userId", userId);
     
     ResultList<Ad> resultList = getResultList(query, pagination);

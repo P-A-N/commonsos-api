@@ -25,7 +25,7 @@ public class MessageThread extends AbstractEntity {
   private Long adId;
   private Long communityId;
   private String title;
-  private Long createdBy;
+  private Long createdUserId;
   @Column(name = "is_group") private boolean group;
   private boolean deleted;
 

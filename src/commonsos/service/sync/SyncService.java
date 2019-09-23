@@ -34,11 +34,11 @@ public class SyncService {
     if (optional.isPresent()) return optional.get();
     
     Ad ad = adRepository.findStrict(adId);
-    User adCreator = userRepository.findStrictById(ad.getCreatedBy());
+    User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
 
     MessageThread messageThread = new MessageThread()
       .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setTitle(ad.getTitle()).setAdId(adId)
       .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
 
@@ -54,7 +54,7 @@ public class SyncService {
     
     MessageThread messageThread = new MessageThread()
       .setCommunityId(community.getId())
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));
 
     return messageThreadRepository.create(messageThread);
@@ -69,7 +69,7 @@ public class SyncService {
     
     MessageThread messageThread = new MessageThread()
       .setCommunityId(community.getId())
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(new User().setId(MessageUtil.getSystemMessageCreatorId()))));
 
     return messageThreadRepository.create(messageThread);

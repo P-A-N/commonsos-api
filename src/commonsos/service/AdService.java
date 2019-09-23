@@ -36,7 +36,7 @@ public class AdService {
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
 
     Ad ad = new Ad()
-      .setCreatedBy(user.getId())
+      .setCreatedUserId(user.getId())
       .setType(command.getType())
       .setTitle(command.getTitle())
       .setDescription(command.getDescription())
@@ -70,9 +70,9 @@ public class AdService {
   }
 
   public AdView view(Ad ad, User user) {
-    User createdBy = userRepository.findStrictById(ad.getCreatedBy());
+    User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
     
-    return AdUtil.view(ad, createdBy, user);
+    return AdUtil.view(ad, createdUser, user);
   }
 
   public AdView view(User user, Long adId) {
@@ -85,7 +85,7 @@ public class AdService {
 
   public Ad updateAd(User operator, AdUpdateCommand command) {
     Ad ad = ad(command.getId());
-    if (!ad.getCreatedBy().equals(operator.getId())) throw new ForbiddenException();
+    if (!ad.getCreatedUserId().equals(operator.getId())) throw new ForbiddenException();
     if (transactionRepository.hasPaid(ad)) throw new BadRequestException();
     
     adRepository.lockForUpdate(ad);
@@ -99,7 +99,7 @@ public class AdService {
 
   public String updatePhoto(User user, UploadPhotoCommand command, Long adId) {
     Ad ad = adRepository.findStrict(adId);
-    if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
+    if (!ad.getCreatedUserId().equals(user.getId())) throw new ForbiddenException();
 
     String url = imageService.create(command, "");
     imageService.delete(ad.getPhotoUrl());

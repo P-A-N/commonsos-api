@@ -1,9 +1,5 @@
 package commonsos.util;
 
-import static commonsos.repository.entity.AdType.GIVE;
-import static commonsos.repository.entity.AdType.WANT;
-import static java.math.BigDecimal.ZERO;
-
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
 import commonsos.view.app.AdView;
@@ -13,15 +9,7 @@ public class AdUtil {
   private AdUtil() {}
 
   public static boolean isOwnAd(User user, Ad ad) {
-    return ad.getCreatedBy().equals(user.getId());
-  }
-
-  @Deprecated
-  public static boolean isPayableByUser(User user, Ad ad) {
-    if (ZERO.compareTo(ad.getPoints()) >= 0) return false;
-    if (isOwnAd(user, ad) && WANT == ad.getType()) return true;
-    if (!isOwnAd(user, ad) && GIVE == ad.getType()) return true;
-    return false;
+    return ad.getCreatedUserId().equals(user.getId());
   }
 
   public static AdView view(Ad ad, User createdBy, User user) {

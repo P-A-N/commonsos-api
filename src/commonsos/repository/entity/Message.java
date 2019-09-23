@@ -16,7 +16,7 @@ import lombok.experimental.Accessors;
 @Getter @Setter @Accessors(chain=true) @ToString
 public class Message extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
-  private Long createdBy;
+  private Long createdUserId;
   private Long threadId;
   private String text;
 }

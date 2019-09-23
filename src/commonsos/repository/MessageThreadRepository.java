@@ -27,11 +27,11 @@ public class MessageThreadRepository extends Repository {
     super(entityManagerService);
   }
 
-  public Optional<MessageThread> byCreaterAndAdId(Long userId, Long adId) {
+  public Optional<MessageThread> byCreaterAndAdId(Long createdUserId, Long adId) {
     try {
-      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdBy = :createdBy AND deleted IS FALSE", MessageThread.class)
+      return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdUserId = :createdUserId AND deleted IS FALSE", MessageThread.class)
         .setParameter("adId", adId)
-        .setParameter("createdBy", userId)
+        .setParameter("createdUserId", createdUserId)
         .getSingleResult());
     }
     catch (NoResultException e) {

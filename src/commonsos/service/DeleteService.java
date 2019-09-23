@@ -68,7 +68,7 @@ public class DeleteService {
     log.info(String.format("deleting ad by user. adId=%d, userId=%d", ad.getId(), user.getId()));
     
     // only creator is allowed to delete ad
-    if (!ad.getCreatedBy().equals(user.getId())) throw new ForbiddenException();
+    if (!ad.getCreatedUserId().equals(user.getId())) throw new ForbiddenException();
 
     // delete ad's photo
     deleteAd(ad);
@@ -132,7 +132,7 @@ public class DeleteService {
     
     // send system message to message-thread
     Message systemMessage = new Message()
-        .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
+        .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(MessageUtil.getSystemMessageUnsubscribe(user.getUsername()));
     messageRepository.create(systemMessage);

@@ -32,9 +32,9 @@ public class GetMyAdsTest extends IntegrationTest {
     community = create(new Community().setName("community").setStatus(PUBLIC));
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    ad1_1 = create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
-    ad1_2 = create(new Ad().setCreatedBy(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
-    ad2 = create(new Ad().setCreatedBy(user2.getId()).setCommunityId(community.getId()).setPoints(TEN));
+    ad1_1 = create(new Ad().setCreatedUserId(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
+    ad1_2 = create(new Ad().setCreatedUserId(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
+    ad2 = create(new Ad().setCreatedUserId(user2.getId()).setCommunityId(community.getId()).setPoints(TEN));
   }
   
   @Test
@@ -68,18 +68,18 @@ public class GetMyAdsTest extends IntegrationTest {
     Community pageCommunity1 =  create(new Community().setName("page_community1").setStatus(PUBLIC));
     Community pageCommunity2 =  create(new Community().setName("page_community2").setStatus(PUBLIC));
     User pageUser = create(new User().setUsername("page_user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(pageCommunity1), new CommunityUser().setCommunity(pageCommunity2))));
-    create(new Ad().setTitle("page_ad1").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad2").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad3").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad4").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad5").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad6").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad7").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad8").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad9").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad10").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad11").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
-    create(new Ad().setTitle("page_ad12").setCreatedBy(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad1").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad2").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad3").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad4").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad5").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad6").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad7").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad8").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad9").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad10").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad11").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity1.getId()).setPoints(TEN));
+    create(new Ad().setTitle("page_ad12").setCreatedUserId(pageUser.getId()).setCommunityId(pageCommunity2.getId()).setPoints(TEN));
 
     sessionId = loginApp("page_user1", "pass");
     

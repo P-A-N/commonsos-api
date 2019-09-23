@@ -38,37 +38,37 @@ public class GetUnreadMessageThreadCountTest extends IntegrationTest {
     // unread threads (community1)
     for (int i = 0; i < 2; i++) {
       Long threadId = create(new MessageThread().setCommunityId(community1.getId()).setTitle("thread" + i).setAdId(null)
-          .setGroup(true).setCreatedBy(user1.getId()).setParties(asList(
+          .setGroup(true).setCreatedUserId(user1.getId()).setParties(asList(
               new MessageThreadParty().setUser(user1).setVisitedAt(Instant.now().minusSeconds(100)),
               new MessageThreadParty().setUser(user2).setVisitedAt(Instant.now().minusSeconds(100))))).getId();
-      create(new Message().setCreatedBy(user1.getId()).setThreadId(threadId).setText("message" + i));
+      create(new Message().setCreatedUserId(user1.getId()).setThreadId(threadId).setText("message" + i));
     }
 
     // read threads (community1)
     for (int i = 0; i < 3; i++) {
       Long threadId = create(new MessageThread().setCommunityId(community1.getId()).setTitle("thread" + i).setAdId(null)
-          .setGroup(true).setCreatedBy(user1.getId()).setParties(asList(
+          .setGroup(true).setCreatedUserId(user1.getId()).setParties(asList(
               new MessageThreadParty().setUser(user1).setVisitedAt(Instant.now().plusSeconds(100)),
               new MessageThreadParty().setUser(user2).setVisitedAt(Instant.now().plusSeconds(100))))).getId();
-      create(new Message().setCreatedBy(user1.getId()).setThreadId(threadId).setText("message" + i));
+      create(new Message().setCreatedUserId(user1.getId()).setThreadId(threadId).setText("message" + i));
     }
 
     // unread threads (community2)
     for (int i = 0; i < 4; i++) {
       Long threadId = create(new MessageThread().setCommunityId(community2.getId()).setTitle("thread" + i).setAdId(null)
-          .setGroup(true).setCreatedBy(user1.getId()).setParties(asList(
+          .setGroup(true).setCreatedUserId(user1.getId()).setParties(asList(
               new MessageThreadParty().setUser(user1).setVisitedAt(Instant.now().minusSeconds(100)),
               new MessageThreadParty().setUser(user2).setVisitedAt(Instant.now().minusSeconds(100))))).getId();
-      create(new Message().setCreatedBy(user1.getId()).setThreadId(threadId).setText("message" + i));
+      create(new Message().setCreatedUserId(user1.getId()).setThreadId(threadId).setText("message" + i));
     }
 
     // read threads (community2)
     for (int i = 0; i < 5; i++) {
       Long threadId = create(new MessageThread().setCommunityId(community2.getId()).setTitle("thread" + i).setAdId(null)
-          .setGroup(true).setCreatedBy(user1.getId()).setParties(asList(
+          .setGroup(true).setCreatedUserId(user1.getId()).setParties(asList(
               new MessageThreadParty().setUser(user1).setVisitedAt(Instant.now().plusSeconds(100)),
               new MessageThreadParty().setUser(user2).setVisitedAt(Instant.now().plusSeconds(100))))).getId();
-      create(new Message().setCreatedBy(user1.getId()).setThreadId(threadId).setText("message" + i));
+      create(new Message().setCreatedUserId(user1.getId()).setThreadId(threadId).setText("message" + i));
     }
 
   }
