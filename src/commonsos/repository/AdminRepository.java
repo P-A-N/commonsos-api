@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class AdminRepository extends Repository {
+  
+  public static Long SEARCH_NON_COMMUNITY = -1L;
 
   @Inject
   public AdminRepository(EntityManagerService entityManagerService) {
@@ -55,16 +57,18 @@ public class AdminRepository extends Repository {
 
   public ResultList<Admin> findByCommunityIdAndRoleId(Long communityId, Long roleId, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
-    sql.append("FROM Admin WHERE community.id ");
-    if (communityId != null) {
-      sql.append("= :communityId ");
+    sql.append("FROM Admin WHERE role.id = :roleId AND deleted IS FALSE ");
+    if (SEARCH_NON_COMMUNITY.equals(communityId)) {
+      sql.append("AND community.id IS null ");
+    } else if (communityId != null) {
+      sql.append("AND community.id = :communityId ");
     } else {
-      sql.append("IS null ");
+      // nothing
     }
-    sql.append("AND role.id = :roleId AND deleted IS FALSE ORDER BY id");
+    sql.append("ORDER BY id");
 
     TypedQuery<Admin> query = em().createQuery(sql.toString(), Admin.class);
-    if (communityId != null) {
+    if (communityId != null && !SEARCH_NON_COMMUNITY.equals(communityId)) {
       query.setParameter("communityId", communityId);
     }
     query.setParameter("roleId", roleId);

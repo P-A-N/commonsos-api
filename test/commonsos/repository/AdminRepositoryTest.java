@@ -1,5 +1,6 @@
 package commonsos.repository;
 
+import static commonsos.repository.AdminRepository.SEARCH_NON_COMMUNITY;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -125,7 +126,12 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     Admin teller4 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller4")));
 
     // execute & verify
-    List<Admin> result = repository.findByCommunityIdAndRoleId(null, NCL.getId(), null).getList();
+    List<Admin> result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, NCL.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(1);
+    assertThat(result.get(0).getId()).isEqualTo(ncl.getId());
+
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(null, NCL.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(ncl.getId());
     
@@ -140,9 +146,16 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.size()).isEqualTo(0);
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(null, COMMUNITY_ADMIN.getId(), null).getList();
+    result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, COMMUNITY_ADMIN.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(comAd4.getId());
+
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(null, COMMUNITY_ADMIN.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get(0).getId()).isEqualTo(comAd1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(comAd2.getId());
+    assertThat(result.get(2).getId()).isEqualTo(comAd4.getId());
     
     // execute & verify
     result = repository.findByCommunityIdAndRoleId(com1.getId(), TELLER.getId(), null).getList();
@@ -155,9 +168,16 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.size()).isEqualTo(0);
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(null, TELLER.getId(), null).getList();
+    result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, TELLER.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(teller4.getId());
+
+    // execute & verify
+    result = repository.findByCommunityIdAndRoleId(null, TELLER.getId(), null).getList();
+    assertThat(result.size()).isEqualTo(3);
+    assertThat(result.get(0).getId()).isEqualTo(teller1.getId());
+    assertThat(result.get(1).getId()).isEqualTo(teller2.getId());
+    assertThat(result.get(2).getId()).isEqualTo(teller4.getId());
   }
 
   @Test

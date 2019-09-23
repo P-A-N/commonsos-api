@@ -1,5 +1,6 @@
 package commonsos.integration.admin.admin;
 
+import static commonsos.repository.AdminRepository.SEARCH_NON_COMMUNITY;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
@@ -59,20 +60,34 @@ public class SearchAdminTest extends IntegrationTest {
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com1.getId(), TELLER.getId())
       .then().statusCode(200)
       .body("adminList.id",  contains(com1Teller1.getId().intValue(), com1Teller2.getId().intValue()));
-    
+
     // search non-community community_admin
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/admin/admins?roleId={roleId}", COMMUNITY_ADMIN.getId())
+      .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", SEARCH_NON_COMMUNITY, COMMUNITY_ADMIN.getId())
       .then().statusCode(200)
       .body("adminList.id",  contains(nonComAdmin1.getId().intValue()));
 
     // search non-community teller
     given()
       .cookie("JSESSIONID", sessionId)
-      .when().get("/admin/admins?roleId={roleId}", TELLER.getId())
+      .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", SEARCH_NON_COMMUNITY, TELLER.getId())
       .then().statusCode(200)
       .body("adminList.id",  contains(nonComTeller1.getId().intValue()));
+
+    // search any community_admin
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", COMMUNITY_ADMIN.getId())
+      .then().statusCode(200)
+      .body("adminList.id",  contains(com1Admin1.getId().intValue(), com1Admin2.getId().intValue(), nonComAdmin1.getId().intValue()));
+
+    // search any teller
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?roleId={roleId}", TELLER.getId())
+      .then().statusCode(200)
+      .body("adminList.id",  contains(com1Teller1.getId().intValue(), com1Teller2.getId().intValue(), nonComTeller1.getId().intValue()));
 
     // search error
     given()
@@ -108,6 +123,12 @@ public class SearchAdminTest extends IntegrationTest {
     // search non-community community_admin [forbidden]
     given()
       .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", SEARCH_NON_COMMUNITY, COMMUNITY_ADMIN.getId())
+      .then().statusCode(403);
+
+    // search any community_admin [forbidden]
+    given()
+      .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins?roleId={roleId}", COMMUNITY_ADMIN.getId())
       .then().statusCode(403);
   }
@@ -133,6 +154,12 @@ public class SearchAdminTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", com2.getId(), TELLER.getId())
+      .then().statusCode(403);
+
+    // search non-community community_admin [forbidden]
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/admins?communityId={communityId}&roleId={roleId}", SEARCH_NON_COMMUNITY, TELLER.getId())
       .then().statusCode(403);
 
     // search non-community community_admin [forbidden]
