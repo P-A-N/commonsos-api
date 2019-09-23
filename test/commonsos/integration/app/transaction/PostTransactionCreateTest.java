@@ -71,10 +71,13 @@ public class PostTransactionCreateTest extends IntegrationTest {
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
         .setParameter("adId", giveAd.getId())
         .getSingleResult();
+    assertThat(transaction.getCommunityId()).isEqualTo(community.getId());
     assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
     assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
+    assertThat(transaction.getFee()).isEqualByComparingTo(BigDecimal.ONE);
+    assertThat(transaction.isRedistributed()).isFalse();
     
     // verify db message
     Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();

@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.Cache;
+import commonsos.command.admin.UpdateMaintenanceModeCommand;
 import commonsos.controller.admin.AfterAdminLoginController;
-import commonsos.controller.command.admin.UpdateMaintenanceModeCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.entity.Admin;

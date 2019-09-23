@@ -12,7 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.controller.command.app.CommunityNotificationCommand;
+import commonsos.command.app.CommunityNotificationCommand;
 import commonsos.controller.wordpress.AbstractWordpressController;
 import commonsos.exception.BadRequestException;
 import commonsos.service.CommunityService;

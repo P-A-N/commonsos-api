@@ -22,7 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import commonsos.Server;
-import commonsos.controller.command.app.UploadPhotoCommand;
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.interceptor.ControllerInterceptor;
@@ -70,6 +70,11 @@ public class TestServer extends Server {
     when(blockchainService.getTokenBalance(any(Community.class), any(WalletType.class))).thenAnswer(new Answer<TokenBalance>() {
       @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
         return tokenBalance.setCommunityId(((Community) invocation.getArgument(0)).getId());
+      }
+    });
+    when(blockchainService.getTokenBalance(any(Long.class), any(WalletType.class))).thenAnswer(new Answer<TokenBalance>() {
+      @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
+        return tokenBalance.setCommunityId(invocation.getArgument(0));
       }
     });
     when(blockchainService.getBalance(any())).thenReturn(TEN.pow(18+6));

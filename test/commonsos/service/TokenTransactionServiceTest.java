@@ -2,13 +2,21 @@ package commonsos.service;
 
 import static commonsos.TestId.id;
 import static commonsos.repository.entity.AdType.WANT;
+import static commonsos.repository.entity.CommunityStatus.PRIVATE;
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.Role.NCL;
+import static commonsos.repository.entity.Role.TELLER;
+import static commonsos.repository.entity.WalletType.MAIN;
+import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
+import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static java.util.Arrays.asList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -27,9 +35,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import commonsos.controller.command.app.TransactionCreateCommand;
+import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
+import commonsos.command.app.TransactionCreateCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
+import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
@@ -37,6 +47,7 @@ import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
@@ -67,7 +78,7 @@ public class TokenTransactionServiceTest {
   @InjectMocks @Spy TokenTransactionService service;
 
   @Test
-  public void createTransaction() {
+  public void createTransaction_app() {
     // prepare
     Community community = new Community().setFee(BigDecimal.ONE).setId(id("community"));
     User user = new User().setId(id("user")).setUsername("user").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
@@ -85,11 +96,6 @@ public class TokenTransactionServiceTest {
     command.setCommunityId(null);
     assertThrows(BadRequestException.class, () -> service.create(user, command));
     command.setCommunityId(id("community"));
-    
-    // description is blank
-    command.setDescription("");
-    assertThrows(BadRequestException.class, () -> service.create(user, command));
-    command.setDescription("description");
     
     // negative point
     command.setAmount(new BigDecimal("-1"));
@@ -123,6 +129,68 @@ public class TokenTransactionServiceTest {
     
     // nothing to throw
     service.create(user, command);
+  }
+
+
+  @Test
+  public void createTransaction_admin() {
+    // prepare
+    Admin admin = new Admin().setRole(NCL);
+    Community community = new Community().setId(id("community")).setStatus(PUBLIC);
+    User beneficiary = new User().setId(id("beneficiary")).setUsername("beneficiary").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
+    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenSymbol("sys"));
+    when(userRepository.findStrictById(any())).thenReturn(beneficiary);
+    when(communityRepository.findStrictById(any())).thenReturn(community);
+    doReturn(tokenBalance).when(service).getTokenBalanceForAdmin(any(), any(), any());
+    when(messageThreadRepository.betweenUsers(any(), any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
+
+    // community is null
+    CreateTokenTransactionFromAdminCommand command = new CreateTokenTransactionFromAdminCommand()
+        .setCommunityId(id("communityId"))
+        .setAmount(TEN)
+        .setWallet(MAIN)
+        .setBeneficiaryUserId(id("beneficiaryUserId"));
+    command.setCommunityId(null);
+    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    command.setCommunityId(id("communityId"));
+    
+    // amount is null
+    command.setAmount(null);
+    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    command.setAmount(TEN);
+    
+    // wallet is null
+    command.setWallet(null);
+    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    command.setWallet(MAIN);
+    
+    // beneficiaryUserId is null
+    command.setBeneficiaryUserId(null);
+    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    command.setBeneficiaryUserId(id("beneficiaryUserId"));
+    
+    // community is not public
+    community.setStatus(PRIVATE);
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
+    community.setStatus(PUBLIC);
+    
+    // admin is forbidden
+    admin.setRole(TELLER);
+    assertThrows(ForbiddenException.class, () -> service.create(admin, command));
+    admin.setRole(NCL);
+    
+    // negative amount
+    command.setAmount(ZERO);
+    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    command.setAmount(TEN);
+    
+    // not enough fund
+    tokenBalance.setBalance(TEN.subtract(ONE));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
+    tokenBalance.setBalance(TEN);
+    
+    // nothing to throw
+    service.create(admin, command);
   }
 
   private TransactionCreateCommand command(String communityId, String beneficiary, String amount, String description, String adId) {

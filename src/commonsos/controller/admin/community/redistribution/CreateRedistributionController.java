@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.command.admin.CreateRedistributionCommand;
 import commonsos.controller.admin.AfterAdminLoginController;
-import commonsos.controller.command.admin.CreateRedistributionCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Redistribution;
 import commonsos.service.RedistributionService;

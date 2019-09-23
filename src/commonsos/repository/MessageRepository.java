@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.TypedQuery;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.ResultList;
 

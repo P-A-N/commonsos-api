@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
+import commonsos.command.app.AdUpdateCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.app.AdUpdateCommand;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;

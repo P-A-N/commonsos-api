@@ -8,8 +8,8 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.gson.Gson;
 
+import commonsos.command.app.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.app.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;

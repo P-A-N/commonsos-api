@@ -5,6 +5,7 @@ import java.time.Instant;
 
 import commonsos.repository.entity.AdType;
 import commonsos.view.CommonView;
+import commonsos.view.UserView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -13,7 +14,7 @@ import lombok.experimental.Accessors;
 public class AdView extends CommonView {
   private Long id;
   private Long communityId;
-  private PublicUserView createdBy;
+  private UserView createdBy;
   private String title;
   private String description;
   private BigDecimal points;

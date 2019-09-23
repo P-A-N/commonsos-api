@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.command.app.CreateUserTemporaryCommand;
 import commonsos.controller.app.AbstractAppController;
-import commonsos.controller.command.app.CreateUserTemporaryCommand;
 import commonsos.service.UserService;
 import commonsos.view.CommonView;
 import spark.Request;

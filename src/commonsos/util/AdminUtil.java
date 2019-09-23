@@ -29,7 +29,7 @@ public class AdminUtil {
         .setCreatedAt(admin.getCreatedAt());
   }
   
-  public static boolean isCreatable(Admin admin, Long communityId, Long roleId) {
+  public static boolean isCreatableAdmin(Admin admin, Long communityId, Long roleId) {
     Role adminRole = Role.of(admin.getRole().getId());
     Role targetRole = Role.of(roleId);
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
@@ -44,7 +44,19 @@ public class AdminUtil {
     return false;
   }
   
-  public static boolean isSeeable(Admin admin, Admin target) {
+  public static boolean isCreatableTokenTransaction(Admin admin, Long targetCommunityId) {
+    Role adminRole = Role.of(admin.getRole().getId());
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    
+    if (adminRole == NCL) return true;
+    if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
+    
+    if (adminRole == COMMUNITY_ADMIN) return true;
+    
+    return false;
+  }
+  
+  public static boolean isSeeableAdmin(Admin admin, Admin target) {
     Role adminRole = Role.of(admin.getRole().getId());
     Role targetRole = Role.of(target.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
@@ -63,7 +75,7 @@ public class AdminUtil {
     return false;
   }
   
-  public static boolean isSeeable(Admin admin, Long targetCommunityId, Long targetRoleId) {
+  public static boolean isSeeableAdmin(Admin admin, Long targetCommunityId, Long targetRoleId) {
     Role adminRole = Role.of(admin.getRole().getId());
     Role targetRole = Role.of(targetRoleId);
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
@@ -82,7 +94,7 @@ public class AdminUtil {
     return false;
   }
   
-  public static boolean isSeeable(Admin admin, User target) {
+  public static boolean isSeeableUser(Admin admin, User target) {
     Role adminRole = Role.of(admin.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
@@ -93,7 +105,7 @@ public class AdminUtil {
     return false;
   }
   
-  public static boolean isSeeable(Admin admin, Long communityId) {
+  public static boolean isSeeableCommunity(Admin admin, Long communityId) {
     Role adminRole = Role.of(admin.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     

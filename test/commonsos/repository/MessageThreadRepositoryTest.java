@@ -18,7 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
@@ -181,7 +181,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     // execute
     List<MessageThreadParty> parties = asList(party(myself), party(counterparty));
     MessageThread messageThread = new MessageThread().setParties(parties);
-    Long id = inTransaction(() -> repository.create(messageThread).getId());
+    Long id = inTransaction(() -> repository.create(messageThread)).getId();
 
     // verify
     MessageThread result = em().find(MessageThread.class, id);
@@ -197,6 +197,19 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
     assertThat(party2.getUser().getUsername()).isEqualTo("counterparty");
     assertThat(party2.getVisitedAt()).isNull();
+    
+    // execute
+    List<MessageThreadParty> parties2 = asList(new MessageThreadParty().setUser(new User().setId(-1L)));
+    MessageThread messageThread2 = new MessageThread().setParties(parties2);
+    Long id2 = inTransaction(() -> repository.create(messageThread2)).getId();
+
+    // verify
+    MessageThread result2 = em().find(MessageThread.class, id2);
+    assertThat(result2.getParties().size()).isEqualTo(1);
+    assertThat(result2.getParties().get(0).getUser().getId()).isEqualTo(-1L);
+    
+    User user = em().find(User.class, -1L);
+    assertThat(user).isNull();
   }
 
   private MessageThreadParty party(User myself) {

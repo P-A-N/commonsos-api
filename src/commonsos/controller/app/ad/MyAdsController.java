@@ -2,8 +2,8 @@ package commonsos.controller.app.ad;
 
 import javax.inject.Inject;
 
+import commonsos.command.PaginationCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
 import commonsos.util.PaginationUtil;

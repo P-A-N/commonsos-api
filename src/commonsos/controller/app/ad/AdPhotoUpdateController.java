@@ -4,8 +4,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.controller.app.UploadPhotoForAppController;
-import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;

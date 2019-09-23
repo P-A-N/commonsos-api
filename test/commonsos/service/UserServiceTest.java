@@ -26,8 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
-import commonsos.controller.command.app.CreateUserTemporaryCommand;
-import commonsos.controller.command.app.UserUpdateCommand;
+import commonsos.command.app.CreateUserTemporaryCommand;
+import commonsos.command.app.UserUpdateCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;

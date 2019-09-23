@@ -17,7 +17,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.SortType;

@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.gson.Gson;
 
+import commonsos.command.app.AdCreateCommand;
 import commonsos.controller.app.ad.AdCreateController;
-import commonsos.controller.command.app.AdCreateCommand;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;

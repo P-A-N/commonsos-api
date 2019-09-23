@@ -19,19 +19,19 @@ import org.web3j.crypto.Credentials;
 
 import commonsos.Configuration;
 import commonsos.JobService;
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.admin.SearchUserForAdminCommand;
-import commonsos.controller.command.app.CreateUserTemporaryCommand;
-import commonsos.controller.command.app.LastViewTimeUpdateCommand;
-import commonsos.controller.command.app.MobileDeviceUpdateCommand;
-import commonsos.controller.command.app.PasswordResetRequestCommand;
-import commonsos.controller.command.app.UpdateEmailTemporaryCommand;
-import commonsos.controller.command.app.UploadPhotoCommand;
-import commonsos.controller.command.app.UserNameUpdateCommand;
-import commonsos.controller.command.app.UserPasswordResetRequestCommand;
-import commonsos.controller.command.app.UserStatusUpdateCommand;
-import commonsos.controller.command.app.UserUpdateCommand;
-import commonsos.controller.command.app.UserUpdateCommunitiesCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.admin.SearchUserForAdminCommand;
+import commonsos.command.app.CreateUserTemporaryCommand;
+import commonsos.command.app.LastViewTimeUpdateCommand;
+import commonsos.command.app.MobileDeviceUpdateCommand;
+import commonsos.command.app.PasswordResetRequestCommand;
+import commonsos.command.app.UpdateEmailTemporaryCommand;
+import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.app.UserNameUpdateCommand;
+import commonsos.command.app.UserPasswordResetRequestCommand;
+import commonsos.command.app.UserStatusUpdateCommand;
+import commonsos.command.app.UserUpdateCommand;
+import commonsos.command.app.UserUpdateCommunitiesCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -60,14 +60,11 @@ import commonsos.util.PaginationUtil;
 import commonsos.util.TransactionUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
+import commonsos.view.UserListView;
 import commonsos.view.UserTokenBalanceView;
-import commonsos.view.admin.UserListForAdminView;
+import commonsos.view.UserView;
 import commonsos.view.app.CommunityUserListView;
 import commonsos.view.app.CommunityUserView;
-import commonsos.view.app.CommunityView;
-import commonsos.view.app.PrivateUserView;
-import commonsos.view.app.PublicUserView;
-import commonsos.view.app.UserListView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -92,19 +89,19 @@ public class UserService {
     return user;
   }
 
-  public PrivateUserView privateView(User user) {
+  public UserView privateView(User user) {
     List<UserTokenBalanceView> balanceList = new ArrayList<>();
     List<CommunityUserView> communityUserList = new ArrayList<>();
     user.getCommunityUserList().forEach(cu -> {
       TokenBalance tokenBalance = blockchainService.getTokenBalance(user, cu.getCommunity().getId());
       balanceList.add(TransactionUtil.userTokenBalanceView(tokenBalance));
-      communityUserList.add(UserUtil.communityUserView(cu, tokenBalance));
+      communityUserList.add(UserUtil.communityUserViewForApp(cu, tokenBalance));
     });
     
-    return UserUtil.privateView(user, balanceList, communityUserList);
+    return UserUtil.privateViewForApp(user, balanceList, communityUserList);
   }
 
-  public PrivateUserView privateView(User currentUser, Long userId) {
+  public UserView privateView(User currentUser, Long userId) {
     User user = userRepository.findStrictById(userId);
     boolean isAdmin = user.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> {
       return c.getAdminUser() != null && c.getAdminUser().getId().equals(currentUser.getId());
@@ -114,18 +111,18 @@ public class UserService {
     return privateView(user);
   }
   
-  public PublicUserView publicUserAndCommunityView(Long id) {
+  public UserView publicUserAndCommunityView(Long id) {
     User user = userRepository.findStrictById(id);
     return publicUserAndCommunityView(user);
   }
   
-  public PublicUserView publicUserAndCommunityView(User user) {
-    List<CommunityView> communityList = new ArrayList<>();
+  public UserView publicUserAndCommunityView(User user) {
+    List<CommunityUserView> communityList = new ArrayList<>();
     user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
       communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getTokenContractAddress())));
     });
     
-    return UserUtil.publicView(user, communityList);
+    return UserUtil.publicViewForApp(user, communityList);
   }
 
   public CommunityUserListView searchUsersCommunity(User user, String filter, PaginationCommand pagination) {
@@ -136,7 +133,7 @@ public class UserService {
     CommunityUserListView listView = new CommunityUserListView();
     listView.setCommunityList(result.getList().stream().map(cu -> {
       TokenBalance tokenBalance = blockchainService.getTokenBalance(user, cu.getCommunity().getId());
-      return UserUtil.communityUserView(cu, tokenBalance);
+      return UserUtil.communityUserViewForApp(cu, tokenBalance);
     }).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
@@ -329,11 +326,11 @@ public class UserService {
     return listView;
   }
 
-  public UserListForAdminView searchUsersForAdmin(Admin admin, SearchUserForAdminCommand command, PaginationCommand pagination) {
+  public UserListView searchUsersForAdmin(Admin admin, SearchUserForAdminCommand command, PaginationCommand pagination) {
     ResultList<User> result = userRepository.search(command.getUsername(), command.getEmailAddress(), command.getCommunityId(), pagination);
     
-    UserListForAdminView listView = new UserListForAdminView();
-    listView.setUserList(result.getList().stream().map(u -> UserUtil.userForAdminView(u, balanceViewList(u))).collect(toList()));
+    UserListView listView = new UserListView();
+    listView.setUserList(result.getList().stream().map(u -> UserUtil.wideViewForAdmin(u, balanceViewList(u))).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;

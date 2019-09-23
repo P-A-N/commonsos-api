@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import commonsos.view.CommonView;
+import commonsos.view.UserView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -15,9 +16,9 @@ public class MessageThreadView extends CommonView {
   private Long communityId;
   private String title;
   private String personalTitle;
-  private List<PublicUserView> parties;
-  private PublicUserView creator;
-  private PublicUserView counterParty;
+  private List<UserView> parties;
+  private UserView creator;
+  private UserView counterParty;
   private MessageView lastMessage;
   private boolean unread;
   private boolean group;

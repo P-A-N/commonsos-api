@@ -7,11 +7,11 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.command.app.UserNameUpdateCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.app.UserNameUpdateCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.view.app.PrivateUserView;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
@@ -22,7 +22,7 @@ public class UserNameUpdateController extends AfterAppLoginController {
   @Inject Gson gson;
 
   @Override
-  public PrivateUserView handleAfterLogin(User user, Request request, Response response) {
+  public UserView handleAfterLogin(User user, Request request, Response response) {
     UserNameUpdateCommand command = gson.fromJson(request.body(), UserNameUpdateCommand.class);
     User updatedUser = userService.updateUserName(user, command);
     return userService.privateView(updatedUser);

@@ -15,12 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import commonsos.command.app.UserUpdateCommand;
 import commonsos.controller.app.user.UserUpdateController;
-import commonsos.controller.command.app.UserUpdateCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
-import commonsos.view.app.PrivateUserView;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
@@ -50,12 +50,12 @@ public class UserUpdateControllerTest {
     when(request.body()).thenReturn(json);
     User updatedUser = new User();
     when(userService.updateUser(any(), any())).thenReturn(updatedUser);
-    PrivateUserView privateView = new PrivateUserView();
+    UserView privateView = new UserView();
     when(userService.privateView(updatedUser)).thenReturn(privateView);
 
     // execute
     User user = new User();
-    PrivateUserView result = controller.handleAfterLogin(user, request, response);
+    UserView result = controller.handleAfterLogin(user, request, response);
 
     // verify
     ArgumentCaptor<UserUpdateCommand> commandCaptor = ArgumentCaptor.forClass(UserUpdateCommand.class);

@@ -9,20 +9,16 @@ import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.view.UserTokenBalanceView;
-import commonsos.view.admin.CommunityUserForAdminView;
-import commonsos.view.admin.UserForAdminView;
+import commonsos.view.UserView;
 import commonsos.view.app.CommunityUserView;
-import commonsos.view.app.CommunityView;
-import commonsos.view.app.PrivateUserView;
-import commonsos.view.app.PublicUserView;
 import spark.utils.CollectionUtils;
 
 public class UserUtil {
   
   private UserUtil() {}
 
-  public static PublicUserView publicView(User user) {
-    return new PublicUserView()
+  public static UserView publicViewForApp(User user) {
+    return new UserView()
         .setId(user.getId())
         .setFullName(fullName(user))
         .setUsername(user.getUsername())
@@ -32,13 +28,13 @@ public class UserUtil {
         .setAvatarUrl(user.getAvatarUrl());
   }
   
-  public static PublicUserView publicView(User user, List<CommunityView> communityList) {
-    return publicView(user)
+  public static UserView publicViewForApp(User user, List<CommunityUserView> communityList) {
+    return publicViewForApp(user)
         .setCommunityList(communityList);
   }
 
-  public static PrivateUserView privateView(User user, List<UserTokenBalanceView> balanceList, List<CommunityUserView> communityUserList) {
-    return new PrivateUserView()
+  public static UserView privateViewForApp(User user, List<UserTokenBalanceView> balanceList, List<CommunityUserView> communityUserList) {
+    return new UserView()
       .setId(user.getId())
       .setBalanceList(balanceList)
       .setFullName(fullName(user))
@@ -55,45 +51,52 @@ public class UserUtil {
       .setLoggedinAt(user.getLoggedinAt());
   }
   
-  public static CommunityUserView communityUserView(CommunityUser communityUser, TokenBalance tokenBalance) {
+  public static CommunityUserView communityUserViewForApp(CommunityUser communityUser, TokenBalance tokenBalance) {
     Long adminUserId = communityUser.getCommunity().getAdminUser() == null ? null : communityUser.getCommunity().getAdminUser().getId();
-    return new CommunityUserView()
+    CommunityUserView view = new CommunityUserView();
+    view.setBalance(tokenBalance.getBalance())
+        .setWalletLastViewTime(communityUser.getWalletLastViewTime())
+        .setAdLastViewTime(communityUser.getAdLastViewTime())
+        .setNotificationLastViewTime(communityUser.getNotificationLastViewTime())
         .setId(communityUser.getCommunity().getId())
         .setName(communityUser.getCommunity().getName())
         .setAdminUserId(adminUserId)
         .setDescription(communityUser.getCommunity().getDescription())
         .setTokenSymbol(tokenBalance.getToken().getTokenSymbol())
-        .setBalance(tokenBalance.getBalance())
         .setPhotoUrl(communityUser.getCommunity().getPhotoUrl())
         .setCoverPhotoUrl(communityUser.getCommunity().getCoverPhotoUrl())
-        .setTransactionFee(communityUser.getCommunity().getFee())
-        .setWalletLastViewTime(communityUser.getWalletLastViewTime())
-        .setAdLastViewTime(communityUser.getAdLastViewTime())
-        .setNotificationLastViewTime(communityUser.getNotificationLastViewTime());
+        .setTransactionFee(communityUser.getCommunity().getFee());
+    return view;
   }
 
-  public static UserForAdminView userForAdminView(User user, List<UserTokenBalanceView> balanceList) {
-    return new UserForAdminView()
+  public static UserView wideViewForAdmin(User user, List<UserTokenBalanceView> balanceList) {
+    return new UserView()
       .setId(user.getId())
       .setUsername(user.getUsername())
       .setStatus(user.getStatus())
       .setTelNo(user.getTelNo())
-      .setCommunityList(communityUserForAdminViewList(user.getCommunityUserList(), balanceList))
+      .setCommunityList(communityUserViewListForAdmin(user.getCommunityUserList(), balanceList))
       .setAvatarUrl(user.getAvatarUrl())
       .setEmailAddress(user.getEmailAddress())
       .setLoggedinAt(user.getLoggedinAt())
       .setCreatedAt(user.getCreatedAt());
   }
+
+  public static UserView narrowViewForAdmin(User user) {
+    return new UserView()
+      .setId(user.getId())
+      .setUsername(user.getUsername());
+  }
   
-  public static List<CommunityUserForAdminView> communityUserForAdminViewList(List<CommunityUser> communityUserList, List<UserTokenBalanceView> balanceList) {
-    List<CommunityUserForAdminView> list = new ArrayList<>();
+  public static List<CommunityUserView> communityUserViewListForAdmin(List<CommunityUser> communityUserList, List<UserTokenBalanceView> balanceList) {
+    List<CommunityUserView> list = new ArrayList<>();
     communityUserList.stream().map(CommunityUser::getCommunity).forEach(c -> {
       UserTokenBalanceView balance = balanceList.stream().filter(b -> b.getCommunityId().equals(c.getId())).findFirst().get();
-      CommunityUserForAdminView view = new CommunityUserForAdminView()
+      CommunityUserView view = new CommunityUserView();
+      view.setBalance(balance.getBalance())
           .setId(c.getId())
           .setName(c.getName())
-          .setTokenSymbol(balance.getTokenSymbol())
-          .setBalance(balance.getBalance());
+          .setTokenSymbol(balance.getTokenSymbol());
       list.add(view);
     });
     return list;

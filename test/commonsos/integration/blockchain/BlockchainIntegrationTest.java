@@ -188,7 +188,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   }
 
   private void transferTokenFromAdmin(Community community, User to, int amount) {
-    blockchainService.transferTokensFromMainWallet(community, to, BigDecimal.valueOf(amount));
+    blockchainService.transferTokensFromCommunity(community, MAIN, to, BigDecimal.valueOf(amount));
   }
 
   private void transferToken(User from, User to, Community community, int amount, float expectAmount) {

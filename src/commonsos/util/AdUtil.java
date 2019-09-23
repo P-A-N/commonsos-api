@@ -28,7 +28,7 @@ public class AdUtil {
     return new AdView()
       .setId(ad.getId())
       .setCommunityId(ad.getCommunityId())
-      .setCreatedBy(UserUtil.publicView(createdBy))
+      .setCreatedBy(UserUtil.publicViewForApp(createdBy))
       .setType(ad.getType())
       .setTitle(ad.getTitle())
       .setDescription(ad.getDescription())

@@ -28,8 +28,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import commonsos.controller.command.app.GroupMessageThreadUpdateCommand;
-import commonsos.controller.command.app.MessagePostCommand;
+import commonsos.command.app.GroupMessageThreadUpdateCommand;
+import commonsos.command.app.MessagePostCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.exception.UserNotFoundException;

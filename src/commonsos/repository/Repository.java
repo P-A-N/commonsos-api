@@ -11,7 +11,7 @@ import javax.persistence.TypedQuery;
 
 import org.hibernate.ScrollableResults;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.entity.ResultList;
 import commonsos.util.PaginationUtil;

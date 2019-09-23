@@ -13,7 +13,7 @@ import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.UserTokenBalanceView;
-import commonsos.view.admin.UserForAdminView;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 
@@ -22,13 +22,13 @@ public class GetUserController extends AfterAdminLoginController {
   @Inject UserService userService;
   
   @Override
-  protected UserForAdminView handleAfterLogin(Admin admin, Request request, Response response) {
+  protected UserView handleAfterLogin(Admin admin, Request request, Response response) {
     Long id = RequestUtil.getPathParamLong(request, "id");
     
     User user = userService.user(id);
-    if (!AdminUtil.isSeeable(admin, user)) throw new ForbiddenException();
+    if (!AdminUtil.isSeeableUser(admin, user)) throw new ForbiddenException();
     List<UserTokenBalanceView> balanceList = userService.balanceViewList(user);
     
-    return UserUtil.userForAdminView(user, balanceList);
+    return UserUtil.wideViewForAdmin(user, balanceList);
   }
 }

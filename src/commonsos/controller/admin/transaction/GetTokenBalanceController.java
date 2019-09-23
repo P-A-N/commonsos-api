@@ -28,7 +28,7 @@ public class GetTokenBalanceController extends AfterAdminLoginController {
     WalletType walletType = WalletType.of(walletTypeString);
     if (walletType == null) throw new BadRequestException("invalid wallet");
     
-    if (!AdminUtil.isSeeable(admin, communityId)) throw new ForbiddenException();
+    if (!AdminUtil.isSeeableCommunity(admin, communityId)) throw new ForbiddenException();
     
     TokenBalance tokenBalance = tokenTransactionService.getTokenBalanceForAdmin(admin, communityId, walletType);
     return TransactionUtil.communityTokenBalanceView(tokenBalance, walletType);

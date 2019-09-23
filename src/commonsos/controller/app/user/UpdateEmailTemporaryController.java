@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
+import commonsos.command.app.UpdateEmailTemporaryCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.app.UpdateEmailTemporaryCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;

@@ -11,16 +11,16 @@ import commonsos.service.blockchain.CommunityToken;
 import commonsos.view.admin.AdminView;
 import commonsos.view.admin.CommunityForAdminView;
 import commonsos.view.app.CommunityNotificationView;
-import commonsos.view.app.CommunityView;
+import commonsos.view.app.CommunityUserView;
 
 public class CommunityUtil {
   
   private CommunityUtil() {}
 
-  public static CommunityView view(Community community, String tokenSymbol) {
+  public static CommunityUserView view(Community community, String tokenSymbol) {
     Long adminUserId = community.getAdminUser() == null ? null : community.getAdminUser().getId();
-    return new CommunityView()
-        .setId(community.getId())
+    CommunityUserView view = new CommunityUserView();
+    view.setId(community.getId())
         .setName(community.getName())
         .setAdminUserId(adminUserId)
         .setDescription(community.getDescription())
@@ -28,6 +28,7 @@ public class CommunityUtil {
         .setPhotoUrl(community.getPhotoUrl())
         .setCoverPhotoUrl(community.getCoverPhotoUrl())
         .setTransactionFee(community.getFee());
+    return view;
   }
 
   public static List<CommunityNotificationView> notificationView(List<CommunityNotification> notificationList) {

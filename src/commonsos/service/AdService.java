@@ -5,10 +5,10 @@ import static java.util.stream.Collectors.toList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.app.AdCreateCommand;
-import commonsos.controller.command.app.AdUpdateCommand;
-import commonsos.controller.command.app.UploadPhotoCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.app.AdCreateCommand;
+import commonsos.command.app.AdUpdateCommand;
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;

@@ -18,6 +18,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
+import commonsos.util.MessageUtil;
 import commonsos.util.UserUtil;
 
 @Singleton
@@ -55,6 +56,21 @@ public class SyncService {
       .setCommunityId(community.getId())
       .setCreatedBy(user.getId())
       .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(otherUser)));
+
+    return messageThreadRepository.create(messageThread);
+  }
+
+  @Synchronized(SyncObject.MESSAGE_THRED_BETWEEN_USER)
+  public MessageThread createMessageThreadWithSystem(User user, Community community) {
+    if (!UserUtil.isMember(user, community.getId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", community.getId()));
+  
+    Optional<MessageThread> optional = messageThreadRepository.betweenUsers(user.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
+    if (optional.isPresent()) return optional.get();
+    
+    MessageThread messageThread = new MessageThread()
+      .setCommunityId(community.getId())
+      .setCreatedBy(user.getId())
+      .setParties(asList(new MessageThreadParty().setUser(user), new MessageThreadParty().setUser(new User().setId(MessageUtil.getSystemMessageCreatorId()))));
 
     return messageThreadRepository.create(messageThread);
   }

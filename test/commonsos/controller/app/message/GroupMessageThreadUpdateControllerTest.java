@@ -11,8 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import commonsos.command.app.GroupMessageThreadUpdateCommand;
 import commonsos.controller.app.message.GroupMessageThreadUpdateController;
-import commonsos.controller.command.app.GroupMessageThreadUpdateCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;

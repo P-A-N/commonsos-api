@@ -1,5 +1,6 @@
 package commonsos.tools;
 
+import static commonsos.repository.entity.WalletType.MAIN;
 import static commonsos.service.UserService.WALLET_PASSWORD;
 import static commonsos.service.blockchain.BlockchainService.INITIAL_TOKEN_AMOUNT;
 
@@ -199,7 +200,7 @@ public class TokenMigration {
 
       BigDecimal balance = transactionRepository.getBalanceFromTransactions(u, c.getId());
       System.out.println(String.format("Transfering token [users=%s, community=%s, amount=%f]", u.getUsername(), c.getName(), balance));
-      blockchainService.transferTokensFromMainWallet(c, u, balance);
+      blockchainService.transferTokensFromCommunity(c, MAIN, u, balance);
       Thread.sleep(500);
     }
   }

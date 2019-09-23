@@ -16,14 +16,14 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableMap;
 
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.app.CreateDirectMessageThreadCommand;
-import commonsos.controller.command.app.CreateGroupCommand;
-import commonsos.controller.command.app.GroupMessageThreadUpdateCommand;
-import commonsos.controller.command.app.MessagePostCommand;
-import commonsos.controller.command.app.MessageThreadListCommand;
-import commonsos.controller.command.app.UpdateMessageThreadPersonalTitleCommand;
-import commonsos.controller.command.app.UploadPhotoCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.app.CreateDirectMessageThreadCommand;
+import commonsos.command.app.CreateGroupCommand;
+import commonsos.command.app.GroupMessageThreadUpdateCommand;
+import commonsos.command.app.MessagePostCommand;
+import commonsos.command.app.MessageThreadListCommand;
+import commonsos.command.app.UpdateMessageThreadPersonalTitleCommand;
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -44,12 +44,12 @@ import commonsos.service.sync.SyncService;
 import commonsos.util.AdUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.view.UserView;
 import commonsos.view.app.AdView;
 import commonsos.view.app.MessageListView;
 import commonsos.view.app.MessageThreadListView;
 import commonsos.view.app.MessageThreadView;
 import commonsos.view.app.MessageView;
-import commonsos.view.app.PublicUserView;
 
 @Singleton
 public class MessageService {
@@ -142,19 +142,19 @@ public class MessageService {
   public MessageThreadView view(User user, MessageThread thread) {
     MessageThreadParty userMtp = thread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst().get();
     
-    List<PublicUserView> parties = thread.getParties().stream()
+    List<UserView> parties = thread.getParties().stream()
       .filter(p -> !p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(UserUtil::publicView)
+      .map(UserUtil::publicViewForApp)
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .collect(toList());
 
-    PublicUserView creator = thread.getParties().stream()
+    UserView creator = thread.getParties().stream()
       .filter(p -> p.getUser().getId().equals(thread.getCreatedBy()))
       .map(MessageThreadParty::getUser)
-      .map(UserUtil::publicView).findFirst().orElse(null);
+      .map(UserUtil::publicViewForApp).findFirst().orElse(null);
 
-    PublicUserView counterParty = concat(parties.stream(), of(creator))
+    UserView counterParty = concat(parties.stream(), of(creator))
       .filter(uv -> uv != null && uv.getId() != user.getId())
       .sorted((p1,p2) -> p1.getId().compareTo(p2.getId()))
       .findFirst().orElse(null);

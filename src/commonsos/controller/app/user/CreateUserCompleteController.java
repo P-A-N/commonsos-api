@@ -15,7 +15,7 @@ import commonsos.filter.LogFilter;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.util.RequestUtil;
-import commonsos.view.app.PrivateUserView;
+import commonsos.view.UserView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -27,7 +27,7 @@ public class CreateUserCompleteController extends AbstractAppController {
   @Inject CSRF csrf;
   
   @Override
-  public PrivateUserView handleApp(Request request, Response response) {
+  public UserView handleApp(Request request, Response response) {
     String accessId = RequestUtil.getPathParamString(request, "accessId");
 
     User user = userService.createAccountComplete(accessId);

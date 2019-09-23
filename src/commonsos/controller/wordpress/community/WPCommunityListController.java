@@ -2,7 +2,7 @@ package commonsos.controller.wordpress.community;
 
 import javax.inject.Inject;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.controller.wordpress.AbstractWordpressController;
 import commonsos.service.CommunityService;
 import commonsos.util.PaginationUtil;

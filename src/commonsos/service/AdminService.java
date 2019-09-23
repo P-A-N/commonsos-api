@@ -8,9 +8,9 @@ import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.admin.AdminLoginCommand;
-import commonsos.controller.command.admin.CreateAdminTemporaryCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.admin.AdminLoginCommand;
+import commonsos.command.admin.CreateAdminTemporaryCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -47,14 +47,14 @@ public class AdminService {
 
   public Admin getAdmin(Admin admin, Long id) {
     Admin target = adminRepository.findStrictById(id);
-    if (!AdminUtil.isSeeable(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", id));
+    if (!AdminUtil.isSeeableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", id));
     
     return target;
   }
 
   public AdminListView searchAdmin(Admin admin, Long communityId, Long roleId, PaginationCommand pagination) {
     // validate role
-    if (!AdminUtil.isSeeable(admin, communityId, roleId)) throw new ForbiddenException();
+    if (!AdminUtil.isSeeableAdmin(admin, communityId, roleId)) throw new ForbiddenException();
     
     ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
 
@@ -66,7 +66,7 @@ public class AdminService {
   }
 
   public void createAdminTemporary(Admin admin, CreateAdminTemporaryCommand command) {
-    if (!AdminUtil.isCreatable(admin, command.getCommunityId(), command.getRoleId())) throw new ForbiddenException(String.format("[communityId=%d, roleId=%d]", command.getCommunityId(), command.getRoleId()));
+    if (!AdminUtil.isCreatableAdmin(admin, command.getCommunityId(), command.getRoleId())) throw new ForbiddenException(String.format("[communityId=%d, roleId=%d]", command.getCommunityId(), command.getRoleId()));
     
     validate(command);
     if (adminRepository.isEmailAddressTaken(command.getEmailAddress())) throw new DisplayableException("error.emailAddressTaken");

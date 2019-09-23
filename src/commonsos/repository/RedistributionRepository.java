@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.exception.RedistributionNotFoundException;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;

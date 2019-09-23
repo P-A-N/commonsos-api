@@ -17,10 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
 import commonsos.Configuration;
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.admin.CreateCommunityCommand;
-import commonsos.controller.command.app.CommunityNotificationCommand;
-import commonsos.controller.command.app.UploadPhotoCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.admin.CreateCommunityCommand;
+import commonsos.command.app.CommunityNotificationCommand;
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;

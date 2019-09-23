@@ -10,8 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.fileupload.FileItem;
 
 import commonsos.annotation.Synchronized;
+import commonsos.command.admin.CreateCommunityCommand;
 import commonsos.controller.admin.MultipartFormdataController;
-import commonsos.controller.command.admin.CreateCommunityCommand;
 import commonsos.exception.CommonsOSException;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.entity.Admin;

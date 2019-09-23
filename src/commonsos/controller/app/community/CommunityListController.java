@@ -2,8 +2,8 @@ package commonsos.controller.app.community;
 
 import javax.inject.Inject;
 
+import commonsos.command.PaginationCommand;
 import commonsos.controller.app.AbstractAppController;
-import commonsos.controller.command.PaginationCommand;
 import commonsos.service.CommunityService;
 import commonsos.util.PaginationUtil;
 import commonsos.view.app.CommunityListView;

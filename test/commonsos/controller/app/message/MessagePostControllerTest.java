@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import commonsos.command.app.MessagePostCommand;
 import commonsos.controller.app.message.MessagePostController;
-import commonsos.controller.command.app.MessagePostCommand;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;

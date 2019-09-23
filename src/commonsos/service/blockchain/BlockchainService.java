@@ -157,10 +157,21 @@ public class BlockchainService {
     return receipt.getTransactionHash();
   }
 
-  public String transferTokensFromMainWallet(Community community, User beneficiary, BigDecimal amount) {
-    log.info(format("Creating token transaction from %s to %s amount %.0f contract %s", community.getMainWalletAddress(), beneficiary.getWalletAddress(), amount, community.getTokenContractAddress()));
+  public String transferTokensFromCommunity(Community community, WalletType walletType, User beneficiary, BigDecimal amount) {
+    Credentials credentials;
+    switch (walletType) {
+    case MAIN:
+      credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+      break;
+    case FEE:
+      credentials = credentials(community.getFeeWallet(), WALLET_PASSWORD);
+      break;
+    default:
+      throw new ServerErrorException();
+    }
 
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    log.info(format("Creating token transaction from community to user. [communityId=%d, wallet=%s, userId=%d, amount=%.0f, tokenContractAddress=%s]", community.getId(), walletType.name(), beneficiary.getId(), amount, community.getTokenContractAddress()));
+
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
@@ -171,7 +182,7 @@ public class BlockchainService {
       return token.transfer(beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
     
-    log.info(format("Token transaction sent, hash %s", receipt.getTransactionHash()));
+    log.info(format("Creating token transaction finished. [transactionHash=%s]", receipt.getTransactionHash()));
     return receipt.getTransactionHash();
   }
 
@@ -249,6 +260,11 @@ public class BlockchainService {
     });
   }
 
+  public TokenBalance getTokenBalance(Long communityId, WalletType walletType) {
+    Community community = communityRepository.findStrictById(communityId);
+    return getTokenBalance(community, walletType);
+  }
+  
   public TokenBalance getTokenBalance(Community community, WalletType walletType) {
     String walletAddress;
     switch (walletType) {

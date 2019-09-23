@@ -4,8 +4,8 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
+import commonsos.command.app.UserPasswordResetRequestCommand;
 import commonsos.controller.app.AfterAppLoginController;
-import commonsos.controller.command.app.UserPasswordResetRequestCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.view.CommonView;

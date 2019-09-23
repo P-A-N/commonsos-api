@@ -2,8 +2,8 @@ package commonsos.controller.admin.community;
 
 import javax.inject.Inject;
 
+import commonsos.command.PaginationCommand;
 import commonsos.controller.admin.AfterAdminLoginController;
-import commonsos.controller.command.PaginationCommand;
 import commonsos.repository.entity.Admin;
 import commonsos.service.CommunityService;
 import commonsos.util.PaginationUtil;

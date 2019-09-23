@@ -12,7 +12,7 @@ import javax.persistence.TypedQuery;
 
 import org.apache.commons.lang3.StringUtils;
 
-import commonsos.controller.command.PaginationCommand;
+import commonsos.command.PaginationCommand;
 import commonsos.exception.UserNotFoundException;
 import commonsos.repository.entity.PasswordResetRequest;
 import commonsos.repository.entity.ResultList;

@@ -1,10 +1,10 @@
 package commonsos.service;
 
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
-import static spark.utils.StringUtils.isBlank;
 
 import java.util.Comparator;
 import java.util.List;
@@ -16,8 +16,9 @@ import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableMap;
 
-import commonsos.controller.command.PaginationCommand;
-import commonsos.controller.command.app.TransactionCreateCommand;
+import commonsos.command.PaginationCommand;
+import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
+import commonsos.command.app.TransactionCreateCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -46,12 +47,10 @@ import commonsos.util.AdminUtil;
 import commonsos.util.MessageUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.admin.TransactionForAdminView;
-import commonsos.view.admin.TransactionListForAdminView;
-import commonsos.view.admin.UserForAdminView;
-import commonsos.view.app.TransactionListView;
-import commonsos.view.app.TransactionView;
+import commonsos.view.TransactionListView;
+import commonsos.view.TransactionView;
 import lombok.extern.slf4j.Slf4j;
+import spark.utils.StringUtils;
 
 @Singleton
 @Slf4j
@@ -69,7 +68,7 @@ public class TokenTransactionService {
   @Inject private PushNotificationService pushNotificationService;
 
   public TokenBalance getTokenBalanceForAdmin(Admin admin, Long communityId, WalletType walletType) {
-    if (!AdminUtil.isSeeable(admin, communityId)) throw new ForbiddenException();
+    if (!AdminUtil.isSeeableCommunity(admin, communityId)) throw new ForbiddenException();
     if (Role.TELLER.equals(admin.getRole())) throw new ForbiddenException();
     Community com = communityRepository.findStrictById(communityId);
     TokenBalance tokenBalance = blockchainService.getTokenBalance(com, walletType);
@@ -108,19 +107,19 @@ public class TokenTransactionService {
     return listView;
   }
 
-  public TransactionListForAdminView transactionsForAdmin(Long userId, Long communityId, PaginationCommand pagination) {
+  public TransactionListView transactionsForAdmin(Long userId, Long communityId, PaginationCommand pagination) {
     User user = userRepository.findStrictById(userId);
     communityRepository.findStrictById(communityId);
     ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
 
-    List<TransactionForAdminView> transactionViews = result.getList().stream()
+    List<TransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
         .map(transaction -> viewForAdmin(transaction))
         .collect(toList());
     
-    TransactionListForAdminView listView = new TransactionListForAdminView();
+    TransactionListView listView = new TransactionListView();
     listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
-    List<TransactionForAdminView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
     listView.setTransactionList(paginationedViews);
     
     return listView;
@@ -128,6 +127,7 @@ public class TokenTransactionService {
 
   public TransactionView view(User user, TokenTransaction transaction) {
     TransactionView view = new TransactionView()
+      .setCommunityId(transaction.getCommunityId())
       .setIsFromAdmin(transaction.isFromAdmin())
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
@@ -138,14 +138,14 @@ public class TokenTransactionService {
     Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
     Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
     
-    if (remitter.isPresent()) view.setRemitter(UserUtil.publicView(remitter.get()));
-    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicView(beneficiary.get()));
+    if (remitter.isPresent()) view.setRemitter(UserUtil.publicViewForApp(remitter.get()));
+    if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicViewForApp(beneficiary.get()));
     
     return view;
   }
 
-  public TransactionForAdminView viewForAdmin(TokenTransaction transaction) {
-    TransactionForAdminView view = new TransactionForAdminView()
+  public TransactionView viewForAdmin(TokenTransaction transaction) {
+    TransactionView view = new TransactionView()
       .setCommunityId(transaction.getCommunityId())
       .setWallet(transaction.getWalletDivision())
       .setIsFromAdmin(transaction.isFromAdmin())
@@ -158,10 +158,10 @@ public class TokenTransactionService {
     Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
     
     if (remitter.isPresent()) {
-      view.setRemitter(new UserForAdminView().setId(remitter.get().getId()).setUsername(remitter.get().getUsername()));
+      view.setRemitter(UserUtil.narrowViewForAdmin(remitter.get()));
     }
     if (beneficiary.isPresent()) {
-      view.setBeneficiary(new UserForAdminView().setId(beneficiary.get().getId()).setUsername(beneficiary.get().getUsername()));
+      view.setBeneficiary(UserUtil.narrowViewForAdmin(beneficiary.get()));
     }
     
     return view;
@@ -170,7 +170,6 @@ public class TokenTransactionService {
   public TokenTransaction create(User user, TransactionCreateCommand command) {
     // validation
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
-    if (isBlank(command.getDescription()))  throw new BadRequestException("description is blank");
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
     if (user.getId().equals(command.getBeneficiaryId())) throw new BadRequestException("user is beneficiary");
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryId());
@@ -192,8 +191,9 @@ public class TokenTransactionService {
       .setCommunityId(command.getCommunityId())
       .setRemitterId(user.getId())
       .setAmount(command.getAmount())
+      .setFee(community.getFee())
       .setBeneficiaryId(command.getBeneficiaryId())
-      .setDescription(command.getDescription())
+      .setDescription(StringUtils.isBlank(command.getDescription()) ? null : command.getDescription())
       .setAdId(command.getAdId());
 
     repository.create(transaction);
@@ -216,7 +216,7 @@ public class TokenTransactionService {
       thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
     }
     
-    String messageText = MessageUtil.getSystemMessageTokenSend(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
+    String messageText = MessageUtil.getSystemMessageTokenSend1(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
     Map<String, String> params = ImmutableMap.of(
         "type", "new_message",
         "threadId", Long.toString(thread.getId()));
@@ -225,6 +225,63 @@ public class TokenTransactionService {
         .setThreadId(thread.getId())
         .setText(messageText));
     pushNotificationService.send(user, messageText, params);
+    pushNotificationService.send(beneficiary, messageText, params);
+
+    return transaction;
+  }
+
+  public TokenTransaction create(Admin admin, CreateTokenTransactionFromAdminCommand command) {
+    // validation
+    if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
+    if (command.getAmount() == null) throw new BadRequestException("amount is required");
+    if (command.getWallet() == null) throw new BadRequestException("wallet is required");
+    if (command.getBeneficiaryUserId() == null) throw new BadRequestException("beneficiaryUser is required");
+    
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (community.getStatus() != PUBLIC) throw new DisplayableException("error.CommunityIsNotPublic");
+    
+    User beneficiary = userRepository.findStrictById(command.getBeneficiaryUserId());
+    if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
+    
+    if (!AdminUtil.isCreatableTokenTransaction(admin, command.getCommunityId())) throw new ForbiddenException();
+    
+    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
+
+    TokenBalance tokenBalance = getTokenBalanceForAdmin(admin, command.getCommunityId(), command.getWallet());
+    if (tokenBalance.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
+
+    // create transaction
+    TokenTransaction transaction = new TokenTransaction()
+      .setCommunityId(command.getCommunityId())
+      .setBeneficiaryId(command.getBeneficiaryUserId())
+      .setFromAdmin(true)
+      .setWalletDivision(command.getWallet())
+      .setAmount(command.getAmount())
+      .setFee(ZERO)
+      .setRedistributed(true);
+
+    repository.create(transaction);
+
+    String blockchainTransactionHash = blockchainService.transferTokensFromCommunity(community, command.getWallet(), beneficiary, command.getAmount());
+
+    repository.lockForUpdate(transaction);
+    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
+    repository.update(transaction);
+    
+    blockchainEventService.checkTransaction(blockchainTransactionHash);
+
+    // create message
+    Optional<MessageThread> threadBetweenUser = messageThreadRepository.betweenUsers(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
+    MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
+
+    String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol());
+    Map<String, String> params = ImmutableMap.of(
+        "type", "new_message",
+        "threadId", Long.toString(thread.getId()));
+    messageRepository.create(new Message()
+        .setCreatedBy(MessageUtil.getSystemMessageCreatorId())
+        .setThreadId(thread.getId())
+        .setText(messageText));
     pushNotificationService.send(beneficiary, messageText, params);
 
     return transaction;

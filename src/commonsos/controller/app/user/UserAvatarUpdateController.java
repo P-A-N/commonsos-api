@@ -2,8 +2,8 @@ package commonsos.controller.app.user;
 
 import javax.inject.Inject;
 
+import commonsos.command.app.UploadPhotoCommand;
 import commonsos.controller.app.UploadPhotoForAppController;
-import commonsos.controller.command.app.UploadPhotoCommand;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.view.UrlView;
