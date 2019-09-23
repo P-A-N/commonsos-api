@@ -304,10 +304,6 @@ public class TokenTransactionService {
     transaction.setBlockchainCompletedAt(now());
     repository.update(transaction);
 
-    User beneficiary = userRepository.findStrictById(transaction.getBeneficiaryId());
-    User remitter = userRepository.findStrictById(transaction.getRemitterId());
-    pushNotificationService.send(beneficiary, format("%s\n+%.2f %s", remitter.getUsername(), transaction.getAmount(), transaction.getDescription()));
-
     log.info(format("Transaction %s marked completed", transaction.getBlockchainTransactionHash()));
   }
 }

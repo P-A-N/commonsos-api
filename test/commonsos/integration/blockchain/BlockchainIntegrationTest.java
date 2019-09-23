@@ -4,7 +4,6 @@ import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
-import static commonsos.repository.entity.Role.TELLER;
 import static commonsos.repository.entity.WalletType.FEE;
 import static commonsos.repository.entity.WalletType.MAIN;
 import static io.restassured.RestAssured.given;
@@ -39,8 +38,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   private Logger log = Logger.getLogger(this.getClass().getName());
 
   private Admin ncl;
-  private Admin comAdmin;
-  private Admin comTeller;
+  private Admin com1Admin;
+  private Admin com2Admin;
   private Community community1;
   private Community community2;
   private User user1;
@@ -53,13 +52,13 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   @Test
   public void testBlockchain() throws Exception {
     // create community
-    ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("passpass")).setRole(NCL));
+    ncl = create(new Admin().setEmailAddress("ncl@test.com").setPasswordHash(hash("passpass")).setRole(NCL));
     community1 = createCommunity("community1", "c1", "community1");
     checkBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
     checkBalanceOfCommunity(community1, FEE, equalTo(0));
     community2 = createCommunity("community2", "c2", "community2");
-    comAdmin = create(new Admin().setEmailAddress("comAdmin@before.each.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN));
-    comTeller = create(new Admin().setEmailAddress("comTeller@before.each.com").setPasswordHash(hash("passpass")).setRole(TELLER));
+    com1Admin = create(new Admin().setEmailAddress("com1Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community1));
+    com2Admin = create(new Admin().setEmailAddress("com2Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community2));
 
     // create user
     user1 = createUser("user1_test", "passpass", "user1@test.com", true, asList(community1.getId()));
@@ -69,7 +68,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalance(user2, community2, 0);
 
     // transfer token to user from admin
-    transferTokenFromAdmin(community1, user1, 100);
+    transferTokenFromAdmin(com1Admin, user1, 100);
     waitUntilTransactionCompleted(community1, user1, 100);
     checkBalance(user1, community1, 100);
 
@@ -84,7 +83,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilAllowed(user1, community2);
     
     // transfer token to user from admin
-    transferTokenFromAdmin(community2, user1, 100);
+    transferTokenFromAdmin(com2Admin, user1, 100);
     waitUntilTransactionCompleted(community2, user1, 100);
     checkBalance(user1, community2, 100);
 
@@ -187,8 +186,21 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     return community;
   }
 
-  private void transferTokenFromAdmin(Community community, User to, int amount) {
-    blockchainService.transferTokensFromCommunity(community, MAIN, to, BigDecimal.valueOf(amount));
+  private void transferTokenFromAdmin(Admin admin, User to, int amount) {
+    sessionId = loginAdmin(admin.getEmailAddress(), "passpass");
+
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", admin.getCommunity().getId());
+    requestParam.put("wallet", "MAIN");
+    requestParam.put("beneficiaryUserId", to.getId());
+    requestParam.put("amount", amount);
+
+    // send token from main wallet
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/transactions/coin")
+      .then().statusCode(200);
   }
 
   private void transferToken(User from, User to, Community community, int amount, float expectAmount) {
