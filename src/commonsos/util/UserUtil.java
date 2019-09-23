@@ -18,6 +18,12 @@ public class UserUtil {
   private UserUtil() {}
 
   public static UserView publicViewForApp(User user) {
+    if (user.getId().equals(MessageUtil.getSystemMessageCreatorId())) {
+      return new UserView()
+          .setId(MessageUtil.getSystemMessageCreatorId())
+          .setUsername(MessageUtil.getSystemMessageCreatorUsername());
+    }
+    
     return new UserView()
         .setId(user.getId())
         .setFullName(fullName(user))

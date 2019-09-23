@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 public class MessageUtil {
 
   private static final Long SYSTEM_MESSAGE_CREATOR_ID = -1L;
+  private static final String SYSTEM_MESSAGE_CREATOR_USERNAME = "SYSTEM";
   private static final String SYSTEM_MESSAGE_UNSUBSCRIBE = "%sがグループから退出しました";
   private static final String SYSTEM_MESSAGE_TOKEN_SEND_FROM_USER = "%sさんから%sさんへ%s %sを送信しました。";
   private static final String SYSTEM_MESSAGE_TOKEN_SEND_FROM_COMM = "%sから%sさんへ%s %sを送信しました。";
@@ -16,7 +17,11 @@ public class MessageUtil {
   public static Long getSystemMessageCreatorId() {
     return SYSTEM_MESSAGE_CREATOR_ID;
   }
-  
+
+  public static String getSystemMessageCreatorUsername() {
+    return SYSTEM_MESSAGE_CREATOR_USERNAME;
+  }
+
   public static String getSystemMessageUnsubscribe(String username) {
     return String.format(SYSTEM_MESSAGE_UNSUBSCRIBE, username);
   }

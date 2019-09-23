@@ -1,5 +1,6 @@
 package commonsos.integration.admin.transaction;
 
+import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PRIVATE;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
@@ -13,6 +14,7 @@ import static java.math.BigDecimal.TEN;
 import static java.math.BigDecimal.ZERO;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,6 +100,18 @@ public class PostCreateTokenTransactionTest extends IntegrationTest {
     // verify db transaction
     transaction = emService.get().createQuery("FROM TokenTransaction ORDER BY id DESC", TokenTransaction.class).setMaxResults(1).getSingleResult();
     assertThat(transaction.getWalletDivision()).isEqualTo(FEE);
+
+    // get message_thread of system message
+    sessionId = loginApp(user_com1.getUsername(), "pass");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/app/v{v}/message-threads?communityId={communityId}", APP_API_VERSION.getMajor(), com1.getId())
+      .then().statusCode(200)
+      .body("messageThreadList.id", contains(messageThread.getId().intValue()))
+      .body("messageThreadList.parties.id", contains(asList(MessageUtil.getSystemMessageCreatorId().intValue())))
+      .body("messageThreadList.parties.username", contains(asList("SYSTEM")))
+      .body("messageThreadList.creator.id", contains(user_com1.getId().intValue()))
+      .body("messageThreadList.counterParty.id", contains(MessageUtil.getSystemMessageCreatorId().intValue()));
   }
 
   @Test
