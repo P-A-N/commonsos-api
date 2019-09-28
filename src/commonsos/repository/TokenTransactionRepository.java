@@ -18,6 +18,7 @@ import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 
 @Singleton
 public class TokenTransactionRepository extends Repository {
@@ -32,13 +33,26 @@ public class TokenTransactionRepository extends Repository {
     return transaction;
   }
 
-  public ResultList<TokenTransaction> transactions(User user, Long communityId, PaginationCommand pagination) {
+  public ResultList<TokenTransaction> searchUserTran(User user, Long communityId, PaginationCommand pagination) {
     TypedQuery<TokenTransaction> query = em()
       .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
           "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
           "ORDER BY id", TokenTransaction.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId());
+    
+    ResultList<TokenTransaction> resultList = getResultList(query, pagination);
+    
+    return resultList;
+  }
+
+  public ResultList<TokenTransaction> searchCommunityTran(Long communityId, WalletType walletType, PaginationCommand pagination) {
+    TypedQuery<TokenTransaction> query = em()
+      .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
+          "AND walletDivision = :walletType " + 
+          "ORDER BY id", TokenTransaction.class)
+      .setParameter("communityId", communityId)
+      .setParameter("walletType", walletType);
     
     ResultList<TokenTransaction> resultList = getResultList(query, pagination);
     

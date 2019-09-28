@@ -50,7 +50,7 @@ import commonsos.controller.admin.transaction.CreateTokenTransactionController;
 import commonsos.controller.admin.transaction.GetEthBalanceController;
 import commonsos.controller.admin.transaction.GetTokenBalanceController;
 import commonsos.controller.admin.transaction.SearchEthBalanceHistoriesController;
-import commonsos.controller.admin.transaction.SearchTokenTransactionsController;
+import commonsos.controller.admin.transaction.SearchCommunityTokenTransactionsController;
 import commonsos.controller.admin.user.DeleteUserController;
 import commonsos.controller.admin.user.GetUserController;
 import commonsos.controller.admin.user.SearchUserTransactionsController;
@@ -352,7 +352,7 @@ public class Server {
 
     // transactions
     post("/admin/transactions/coin", injector.getInstance(CreateTokenTransactionController.class), toJson);
-    get("/admin/transactions/coin", injector.getInstance(SearchTokenTransactionsController.class), toJson);
+    get("/admin/transactions/coin", injector.getInstance(SearchCommunityTokenTransactionsController.class), toJson);
     get("/admin/transactions/coin/balance", injector.getInstance(GetTokenBalanceController.class), toJson);
     post("/admin/transactions/eth", injector.getInstance(CreateEthTransactionController.class), toJson);
     get("/admin/transactions/eth/balance", injector.getInstance(GetEthBalanceController.class), toJson);

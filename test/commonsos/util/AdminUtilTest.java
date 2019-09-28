@@ -265,4 +265,25 @@ public class AdminUtilTest {
     assertFalse(AdminUtil.isSeeableCommunity(teller_none, com1.getId()));
     assertFalse(AdminUtil.isSeeableCommunity(teller_none, com2.getId()));
   }
+
+  @Test
+  public void isSeeableCommunity_isTellerSeeable() {
+    // prepare
+    Community com1 = new Community().setId(id("com1"));
+    Community com2 = new Community().setId(id("com2"));
+    Admin ncl = new Admin().setId(id("ncl")).setRole(NCL);
+    Admin teller_com1 = new Admin().setId(id("teller_com1")).setRole(TELLER).setCommunity(com1);
+
+    // [ncl] execute & verify
+    assertTrue(AdminUtil.isSeeableCommunity(ncl, com1.getId(), true));
+    assertTrue(AdminUtil.isSeeableCommunity(ncl, com1.getId(), false));
+
+    // [teller_com1 seeable] execute & verify
+    assertTrue(AdminUtil.isSeeableCommunity(teller_com1, com1.getId(), true));
+    assertFalse(AdminUtil.isSeeableCommunity(teller_com1, com2.getId(), true));
+
+    // [teller_com1 not seeable] execute & verify
+    assertFalse(AdminUtil.isSeeableCommunity(teller_com1, com1.getId(), false));
+    assertFalse(AdminUtil.isSeeableCommunity(teller_com1, com2.getId(), false));
+  }
 }

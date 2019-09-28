@@ -115,4 +115,9 @@ public class AdminUtil {
 
     return false;
   }
+  
+  public static boolean isSeeableCommunity(Admin admin, Long communityId, boolean isTellerSeeable) {
+    if (!isTellerSeeable && Role.of(admin.getRole().getId()) == TELLER) return false;
+    return isSeeableCommunity(admin, communityId);
+  }
 }

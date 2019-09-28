@@ -83,20 +83,21 @@ public class TokenTransactionService {
     return transaction.isFromAdmin();
   }
 
+  @Deprecated
   public TransactionListView transactionsForAdminUser(User admin, Long communityId, Long userId, PaginationCommand pagination) {
     if (!UserUtil.isAdmin(admin, communityId)) throw new ForbiddenException(String.format("user is not a admin.[userId=%d, communityId=%d]", admin.getId(), communityId));
     
     User user = userRepository.findStrictById(userId);
-    return transactions(user, communityId, pagination);
+    return searchUserTranByUser(user, communityId, pagination);
   }
 
-  public TransactionListView transactions(User user, Long communityId, PaginationCommand pagination) {
+  public TransactionListView searchUserTranByUser(User user, Long communityId, PaginationCommand pagination) {
     communityRepository.findPublicStrictById(communityId);
-    ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
+    ResultList<TokenTransaction> result = repository.searchUserTran(user, communityId, null);
 
     List<TransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
-        .map(transaction -> view(user, transaction))
+        .map(transaction -> viewForUser(user, transaction))
         .collect(toList());
     
     TransactionListView listView = new TransactionListView();
@@ -107,10 +108,11 @@ public class TokenTransactionService {
     return listView;
   }
 
-  public TransactionListView transactionsForAdmin(Long userId, Long communityId, PaginationCommand pagination) {
-    User user = userRepository.findStrictById(userId);
+  public TransactionListView searchCommunityTranByAdmin(Admin admin, Long communityId, WalletType walletType, PaginationCommand pagination) {
     communityRepository.findStrictById(communityId);
-    ResultList<TokenTransaction> result = repository.transactions(user, communityId, null);
+    if (!AdminUtil.isSeeableCommunity(admin, communityId, false)) throw new ForbiddenException();
+    
+    ResultList<TokenTransaction> result = repository.searchCommunityTran(communityId, walletType, null);
 
     List<TransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
@@ -125,7 +127,25 @@ public class TokenTransactionService {
     return listView;
   }
 
-  public TransactionView view(User user, TokenTransaction transaction) {
+  public TransactionListView searchUserTranByAdmin(Long userId, Long communityId, PaginationCommand pagination) {
+    User user = userRepository.findStrictById(userId);
+    communityRepository.findStrictById(communityId);
+    ResultList<TokenTransaction> result = repository.searchUserTran(user, communityId, null);
+
+    List<TransactionView> transactionViews = result.getList().stream()
+        .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
+        .map(transaction -> viewForAdmin(transaction))
+        .collect(toList());
+    
+    TransactionListView listView = new TransactionListView();
+    listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
+    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    listView.setTransactionList(paginationedViews);
+    
+    return listView;
+  }
+
+  public TransactionView viewForUser(User user, TokenTransaction transaction) {
     TransactionView view = new TransactionView()
       .setCommunityId(transaction.getCommunityId())
       .setIsFromAdmin(transaction.isFromAdmin())

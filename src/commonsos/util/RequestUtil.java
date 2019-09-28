@@ -16,6 +16,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ServerErrorException;
+import commonsos.repository.entity.WalletType;
 import spark.Request;
 
 public class RequestUtil {
@@ -69,6 +70,23 @@ public class RequestUtil {
     
     if (NumberUtils.isParsable(value)) {
       return parseLong(value);
+    } else {
+      throw new BadRequestException(String.format("invalid %s", param));
+    }
+  }
+
+  public static WalletType getQueryParamWallet(Request request, String param, boolean isRequired) {
+    String value = request.queryParams(param);
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    WalletType walletType = WalletType.of(value);
+    if (walletType != null) {
+      return walletType;
     } else {
       throw new BadRequestException(String.format("invalid %s", param));
     }

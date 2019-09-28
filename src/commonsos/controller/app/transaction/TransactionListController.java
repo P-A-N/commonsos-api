@@ -21,7 +21,7 @@ public class TransactionListController extends AfterAppLoginController {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    TransactionListView view = service.transactions(user, communityId, paginationCommand);
+    TransactionListView view = service.searchUserTranByUser(user, communityId, paginationCommand);
     return view;
   }
 }
