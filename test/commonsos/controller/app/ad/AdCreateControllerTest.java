@@ -22,7 +22,7 @@ import commonsos.controller.app.ad.AdCreateController;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
-import commonsos.view.app.AdView;
+import commonsos.view.AdView;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

@@ -23,6 +23,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
+import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
@@ -58,6 +59,7 @@ public class TokenTransactionService {
   
   @Inject private TokenTransactionRepository repository;
   @Inject private UserRepository userRepository;
+  @Inject private AdminRepository adminRepository;
   @Inject private AdRepository adRepository;
   @Inject private CommunityRepository communityRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
@@ -76,7 +78,7 @@ public class TokenTransactionService {
   }
   
   private boolean isDebit(User user, TokenTransaction transaction) {
-    return transaction.getRemitterId() != null && transaction.getRemitterId().equals(user.getId());
+    return transaction.getRemitterUserId() != null && transaction.getRemitterUserId().equals(user.getId());
   }
 
   private boolean isDebitOfCommunity(TokenTransaction transaction) {
@@ -155,8 +157,8 @@ public class TokenTransactionService {
       .setCompleted(transaction.getBlockchainCompletedAt() != null)
       .setDebit(isDebit(user, transaction));
 
-    Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
-    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
+    Optional<User> remitter = userRepository.findById(transaction.getRemitterUserId());
+    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryUserId());
     
     if (remitter.isPresent()) view.setRemitter(UserUtil.publicViewForApp(remitter.get()));
     if (beneficiary.isPresent()) view.setBeneficiary(UserUtil.publicViewForApp(beneficiary.get()));
@@ -174,9 +176,13 @@ public class TokenTransactionService {
       .setCompleted(transaction.getBlockchainCompletedAt() != null)
       .setDebit(isDebitOfCommunity(transaction));
 
-    Optional<User> remitter = userRepository.findById(transaction.getRemitterId());
-    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryId());
-    
+    Optional<Admin> remitterAdmin = adminRepository.findById(transaction.getRemitterAdminId());
+    Optional<User> remitter = userRepository.findById(transaction.getRemitterUserId());
+    Optional<User> beneficiary = userRepository.findById(transaction.getBeneficiaryUserId());
+
+    if (remitterAdmin.isPresent()) {
+      view.setRemitterAdmin(AdminUtil.narrowView(remitterAdmin.get()));
+    }
     if (remitter.isPresent()) {
       view.setRemitter(UserUtil.narrowViewForAdmin(remitter.get()));
     }
@@ -209,10 +215,10 @@ public class TokenTransactionService {
     // create transaction
     TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())
-      .setRemitterId(user.getId())
+      .setRemitterUserId(user.getId())
       .setAmount(command.getAmount())
       .setFee(community.getFee())
-      .setBeneficiaryId(command.getBeneficiaryId())
+      .setBeneficiaryUserId(command.getBeneficiaryId())
       .setDescription(StringUtils.isBlank(command.getDescription()) ? null : command.getDescription())
       .setAdId(command.getAdId());
 
@@ -273,8 +279,9 @@ public class TokenTransactionService {
     // create transaction
     TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())
-      .setBeneficiaryId(command.getBeneficiaryUserId())
+      .setBeneficiaryUserId(command.getBeneficiaryUserId())
       .setFromAdmin(true)
+      .setRemitterAdminId(admin.getId())
       .setWalletDivision(command.getWallet())
       .setAmount(command.getAmount())
       .setFee(ZERO)

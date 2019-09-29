@@ -21,6 +21,7 @@ public class EthTransaction extends AbstractEntity {
   @Id @GeneratedValue(strategy=IDENTITY) private Long id;
   private Long communityId;
   private String blockchainTransactionHash;
+  private Long remitterAdminId;
   private BigDecimal amount;
   private String description;
   private Instant blockchainCompletedAt;

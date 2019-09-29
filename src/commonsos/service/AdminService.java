@@ -29,7 +29,7 @@ import commonsos.session.AdminSession;
 import commonsos.util.AdminUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.ValidateUtil;
-import commonsos.view.admin.AdminListView;
+import commonsos.view.AdminListView;
 
 @Singleton
 public class AdminService {
@@ -59,7 +59,7 @@ public class AdminService {
     ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
 
     AdminListView listView = new AdminListView();
-    listView.setAdminList(result.getList().stream().map(AdminUtil::toView).collect(toList()));
+    listView.setAdminList(result.getList().stream().map(AdminUtil::view).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;

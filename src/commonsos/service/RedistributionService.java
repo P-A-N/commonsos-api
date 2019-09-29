@@ -22,7 +22,7 @@ import commonsos.repository.entity.User;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RedistributionUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.admin.RedistributionListView;
+import commonsos.view.RedistributionListView;
 
 @Singleton
 public class RedistributionService {

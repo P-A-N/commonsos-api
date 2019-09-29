@@ -1,8 +1,7 @@
-package commonsos.view.admin;
+package commonsos.view;
 
 import java.math.BigDecimal;
 
-import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

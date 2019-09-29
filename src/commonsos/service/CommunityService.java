@@ -40,10 +40,9 @@ import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
-import commonsos.view.admin.CommunityForAdminView;
-import commonsos.view.admin.CommunityListForAdminView;
-import commonsos.view.app.CommunityListView;
-import commonsos.view.app.CommunityNotificationListView;
+import commonsos.view.CommunityListView;
+import commonsos.view.CommunityNotificationListView;
+import commonsos.view.CommunityView;
 
 @Singleton
 public class CommunityService {
@@ -128,19 +127,19 @@ public class CommunityService {
     ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.listPublic(pagination) : repository.listPublic(filter, pagination);
 
     CommunityListView listView = new CommunityListView();
-    listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.view(c, blockchainService.tokenSymbol(c.getTokenContractAddress()))).collect(toList()));
+    listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.viewForApp(c, blockchainService.tokenSymbol(c.getTokenContractAddress()))).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
   }
 
-  public CommunityListForAdminView searchForAdmin(Admin admin, PaginationCommand pagination) {
+  public CommunityListView searchForAdmin(Admin admin, PaginationCommand pagination) {
     // check role
     if (Role.of(admin.getRole().getId()) != Role.NCL) throw new ForbiddenException();
     
     ResultList<Community> result = repository.list(pagination);
 
-    CommunityListForAdminView listView = new CommunityListForAdminView();
+    CommunityListView listView = new CommunityListView();
     listView.setCommunityList(result.getList().stream().map(this::viewForAdmin).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
@@ -218,14 +217,14 @@ public class CommunityService {
     return listView;
   }
   
-  public CommunityForAdminView viewForAdmin(Community community) {
+  public CommunityView viewForAdmin(Community community) {
     CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
     List<Admin> adminList = adminRepository.findByCommunityId(community.getId(), null).getList();
     int totalMember = userRepository.search(community.getId(), null, null).getList().size();
     return CommunityUtil.viewForAdmin(community, communityToken, totalMember, adminList);
   }
   
-  public CommunityForAdminView viewForAdmin(Community community, List<Long> adminIdList) {
+  public CommunityView viewForAdmin(Community community, List<Long> adminIdList) {
     CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
     List<Admin> adminList = new ArrayList<>();
     if (adminIdList != null) {

@@ -8,7 +8,7 @@ import commonsos.command.app.MessagePostCommand;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageView;
+import commonsos.view.MessageView;
 import spark.Request;
 import spark.Response;
 

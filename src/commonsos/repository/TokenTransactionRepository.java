@@ -36,7 +36,7 @@ public class TokenTransactionRepository extends Repository {
   public ResultList<TokenTransaction> searchUserTran(User user, Long communityId, PaginationCommand pagination) {
     TypedQuery<TokenTransaction> query = em()
       .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
-          "AND (beneficiaryId = :userId OR remitterId = :userId) " + 
+          "AND (beneficiaryUserId = :userId OR remitterUserId = :userId) " + 
           "ORDER BY id", TokenTransaction.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId());
@@ -87,14 +87,14 @@ public class TokenTransactionRepository extends Repository {
 
   public BigDecimal getBalanceFromTransactions(User user, Long communityId) {
     BigDecimal remitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterUserId = :userId ", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getSingleResult();
     if (remitAmount == null) remitAmount = BigDecimal.ZERO;
     
     BigDecimal benefitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND beneficiaryId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND beneficiaryUserId = :userId ", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", user.getId())
       .getSingleResult();
@@ -109,7 +109,7 @@ public class TokenTransactionRepository extends Repository {
       .createQuery("SELECT SUM(amount) FROM TokenTransaction " +
           "WHERE communityId = :communityId " +
           "AND blockchainCompletedAt IS NULL " +
-          "AND remitterId = :userId", BigDecimal.class)
+          "AND remitterUserId = :userId", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", userId)
       .getSingleResult();

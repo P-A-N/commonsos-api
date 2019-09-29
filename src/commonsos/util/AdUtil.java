@@ -2,7 +2,7 @@ package commonsos.util;
 
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
-import commonsos.view.app.AdView;
+import commonsos.view.AdView;
 
 public class AdUtil {
   

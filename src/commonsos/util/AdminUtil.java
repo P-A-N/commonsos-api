@@ -8,13 +8,13 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.User;
-import commonsos.view.admin.AdminView;
+import commonsos.view.AdminView;
 
 public class AdminUtil {
   
   private AdminUtil() {}
 
-  public static AdminView toView(Admin admin) {
+  public static AdminView view(Admin admin) {
     return new AdminView()
         .setId(admin.getId())
         .setAdminname(admin.getAdminname())
@@ -27,6 +27,12 @@ public class AdminUtil {
         .setPhotoUrl(admin.getPhotoUrl())
         .setLoggedinAt(admin.getLoggedinAt())
         .setCreatedAt(admin.getCreatedAt());
+  }
+
+  public static AdminView narrowView(Admin admin) {
+    return new AdminView()
+      .setId(admin.getId())
+      .setAdminname(admin.getAdminname());
   }
   
   public static boolean isCreatableAdmin(Admin admin, Long communityId, Long roleId) {

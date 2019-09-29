@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import commonsos.controller.app.ad.AdController;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
-import commonsos.view.app.AdView;
+import commonsos.view.AdView;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

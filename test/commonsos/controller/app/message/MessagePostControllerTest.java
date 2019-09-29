@@ -15,7 +15,7 @@ import commonsos.controller.app.message.MessagePostController;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageView;
+import commonsos.view.MessageView;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

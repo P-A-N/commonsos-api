@@ -7,7 +7,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.service.AdminService;
 import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.admin.AdminView;
+import commonsos.view.AdminView;
 import spark.Request;
 import spark.Response;
 
@@ -20,6 +20,6 @@ public class GetAdminController extends AfterAdminLoginController {
     Long id = RequestUtil.getPathParamLong(request, "id");
     
     Admin targetAdmin = adminService.getAdmin(admin, id);
-    return AdminUtil.toView(targetAdmin);
+    return AdminUtil.view(targetAdmin);
   }
 }

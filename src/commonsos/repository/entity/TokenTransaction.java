@@ -22,10 +22,11 @@ import lombok.experimental.Accessors;
 public class TokenTransaction extends AbstractEntity {
   @Id @GeneratedValue(strategy=IDENTITY) private Long id;
   private Long communityId;
-  private Long remitterId;
-  private Long beneficiaryId;
+  private Long remitterUserId;
+  private Long beneficiaryUserId;
   private BigDecimal fee;
   private boolean isFromAdmin;
+  private Long remitterAdminId;
   @Enumerated(value = STRING)
   private WalletType walletDivision;
   private boolean redistributed;

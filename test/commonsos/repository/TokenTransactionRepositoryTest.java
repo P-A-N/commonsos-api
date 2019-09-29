@@ -41,8 +41,9 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   public void create() {
     Long id = inTransaction(() -> repository.create(new TokenTransaction()
       .setCommunityId(id("community id"))
-      .setRemitterId(id("remitter id"))
-      .setBeneficiaryId(id("beneficiary id"))
+      .setRemitterUserId(id("remitter user id"))
+      .setBeneficiaryUserId(id("beneficiary user id"))
+      .setRemitterAdminId(id("remitter admin id"))
       .setAdId(id("ad id"))
       .setDescription("description")
       .setAmount(TEN)
@@ -55,8 +56,9 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(result).isNotNull();
     assertThat(result.getId()).isNotNull();
     assertThat(result.getCommunityId()).isEqualTo(id("community id"));
-    assertThat(result.getRemitterId()).isEqualTo(id("remitter id"));
-    assertThat(result.getBeneficiaryId()).isEqualTo(id("beneficiary id"));
+    assertThat(result.getRemitterUserId()).isEqualTo(id("remitter user id"));
+    assertThat(result.getBeneficiaryUserId()).isEqualTo(id("beneficiary user id"));
+    assertThat(result.getRemitterAdminId()).isEqualTo(id("remitter admin id"));
     assertThat(result.getAdId()).isEqualTo(id("ad id"));
     assertThat(result.getDescription()).isEqualTo("description");
     assertThat(result.getAmount()).isEqualTo(new BigDecimal("10.00"));
@@ -177,20 +179,20 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   }
 
   private TokenTransaction tran(String communityId, String remitterId, String beneficiary) {
-    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryId(id(beneficiary)).setRemitterId(id(remitterId));
+    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setRemitterUserId(id(remitterId));
   }
 
   private TokenTransaction tran(String communityId, String remitterId, String beneficiary, boolean isFromAdmin, WalletType wallet) {
-    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryId(id(beneficiary)).setRemitterId(id(remitterId)).setFromAdmin(isFromAdmin).setWalletDivision(wallet);
+    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setRemitterUserId(id(remitterId)).setFromAdmin(isFromAdmin).setWalletDivision(wallet);
   }
 
   @Test
   public void pendingTransactionsAmount() {
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("other user")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("other community id")).setRemitterId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterUserId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterUserId(id("user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterUserId(id("other user")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterUserId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("other community id")).setRemitterUserId(id("user")).setAmount(TEN)));
 
     BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community id"));
 
@@ -217,11 +219,11 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void getBalanceFromTransactions() {
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u2")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u1")).setBeneficiaryId(id("u3")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterId(id("u3")).setBeneficiaryId(id("u1")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c2")).setRemitterId(id("admin")).setBeneficiaryId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u2")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u3")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u3")).setBeneficiaryUserId(id("u1")).setAmount(ONE)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c2")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN)));
 
     
 //    ThreadValue.setReadOnly(true);

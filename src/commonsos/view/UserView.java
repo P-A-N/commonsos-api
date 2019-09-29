@@ -3,7 +3,6 @@ package commonsos.view;
 import java.time.Instant;
 import java.util.List;
 
-import commonsos.view.app.CommunityUserView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

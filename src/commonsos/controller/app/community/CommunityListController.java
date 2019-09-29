@@ -6,7 +6,7 @@ import commonsos.command.PaginationCommand;
 import commonsos.controller.app.AbstractAppController;
 import commonsos.service.CommunityService;
 import commonsos.util.PaginationUtil;
-import commonsos.view.app.CommunityListView;
+import commonsos.view.CommunityListView;
 import spark.Request;
 import spark.Response;
 

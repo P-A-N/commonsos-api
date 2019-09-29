@@ -43,8 +43,8 @@ import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
-import commonsos.view.app.MessageThreadView;
-import commonsos.view.app.MessageView;
+import commonsos.view.MessageThreadView;
+import commonsos.view.MessageView;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

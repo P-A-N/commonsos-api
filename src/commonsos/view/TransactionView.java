@@ -13,6 +13,7 @@ public class TransactionView extends CommonView {
   private Long communityId;
   private WalletType wallet;
   private Boolean isFromAdmin;
+  private AdminView remitterAdmin;
   private UserView remitter;
   private UserView beneficiary;
   private BigDecimal amount;

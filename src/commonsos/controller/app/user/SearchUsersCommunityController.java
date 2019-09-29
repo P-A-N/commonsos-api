@@ -7,7 +7,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
 import commonsos.util.PaginationUtil;
-import commonsos.view.app.CommunityUserListView;
+import commonsos.view.CommunityUserListView;
 import spark.Request;
 import spark.Response;
 

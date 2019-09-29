@@ -9,7 +9,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.util.PaginationUtil;
-import commonsos.view.app.MessageListView;
+import commonsos.view.MessageListView;
 import spark.Request;
 import spark.Response;
 

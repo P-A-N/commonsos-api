@@ -72,8 +72,8 @@ public class PostTransactionCreateTest extends IntegrationTest {
         .setParameter("adId", giveAd.getId())
         .getSingleResult();
     assertThat(transaction.getCommunityId()).isEqualTo(community.getId());
-    assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
-    assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
+    assertThat(transaction.getRemitterUserId()).isEqualTo(user.getId());
+    assertThat(transaction.getBeneficiaryUserId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
     assertThat(transaction.getFee()).isEqualByComparingTo(BigDecimal.ONE);
@@ -151,8 +151,8 @@ public class PostTransactionCreateTest extends IntegrationTest {
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
         .setParameter("adId", wantAd.getId())
         .getSingleResult();
-    assertThat(transaction.getRemitterId()).isEqualTo(adCreator.getId());
-    assertThat(transaction.getBeneficiaryId()).isEqualTo(user.getId());
+    assertThat(transaction.getRemitterUserId()).isEqualTo(adCreator.getId());
+    assertThat(transaction.getBeneficiaryUserId()).isEqualTo(user.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
     assertThat(transaction.getDescription()).isEqualTo("description");
     
@@ -241,11 +241,11 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("balance", notNullValue());
     
     // verify db transaction
-    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryId = :userId", TokenTransaction.class)
+    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryUserId = :userId", TokenTransaction.class)
         .setParameter("userId", adCreator.getId())
         .getSingleResult();
-    assertThat(transaction.getRemitterId()).isEqualTo(user.getId());
-    assertThat(transaction.getBeneficiaryId()).isEqualTo(adCreator.getId());
+    assertThat(transaction.getRemitterUserId()).isEqualTo(user.getId());
+    assertThat(transaction.getBeneficiaryUserId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(new BigDecimal("9.9"));
     assertThat(transaction.getDescription()).isEqualTo("description");
     assertThat(transaction.getAdId()).isNull();

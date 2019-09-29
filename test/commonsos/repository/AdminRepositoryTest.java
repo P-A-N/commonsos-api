@@ -305,6 +305,7 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     
     // verify
     assertThat(result.getId()).isEqualTo(adm.getId());
+    assertThat(result.getRole()).isEqualTo(NCL);
     assertThat(result.getRole().getRolename()).isEqualTo("NCL運営者");
     assertThat(result.getCommunity().getName()).isEqualTo("com");
   }

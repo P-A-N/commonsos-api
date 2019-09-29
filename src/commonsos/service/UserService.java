@@ -60,11 +60,11 @@ import commonsos.util.PaginationUtil;
 import commonsos.util.TransactionUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
+import commonsos.view.CommunityUserListView;
+import commonsos.view.CommunityUserView;
 import commonsos.view.UserListView;
 import commonsos.view.UserTokenBalanceView;
 import commonsos.view.UserView;
-import commonsos.view.app.CommunityUserListView;
-import commonsos.view.app.CommunityUserView;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -119,7 +119,7 @@ public class UserService {
   public UserView publicUserAndCommunityView(User user) {
     List<CommunityUserView> communityList = new ArrayList<>();
     user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
-      communityList.add(CommunityUtil.view(c, blockchainService.tokenSymbol(c.getTokenContractAddress())));
+      communityList.add(CommunityUtil.viewForApp(c, blockchainService.tokenSymbol(c.getTokenContractAddress())));
     });
     
     return UserUtil.publicViewForApp(user, communityList);

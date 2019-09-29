@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import commonsos.controller.app.message.MessageThreadForAdController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageThreadView;
+import commonsos.view.MessageThreadView;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

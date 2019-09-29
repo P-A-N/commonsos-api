@@ -14,7 +14,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.util.PaginationUtil;
-import commonsos.view.app.MessageThreadListView;
+import commonsos.view.MessageThreadListView;
 import spark.Request;
 import spark.Response;
 

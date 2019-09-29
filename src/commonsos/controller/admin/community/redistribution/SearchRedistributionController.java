@@ -8,7 +8,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.service.RedistributionService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.admin.RedistributionListView;
+import commonsos.view.RedistributionListView;
 import spark.Request;
 import spark.Response;
 

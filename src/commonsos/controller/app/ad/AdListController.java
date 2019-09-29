@@ -13,7 +13,7 @@ import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
 import commonsos.util.PaginationUtil;
-import commonsos.view.app.AdListView;
+import commonsos.view.AdListView;
 import spark.Request;
 import spark.Response;
 

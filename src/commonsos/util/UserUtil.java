@@ -8,9 +8,9 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.TokenBalance;
+import commonsos.view.CommunityUserView;
 import commonsos.view.UserTokenBalanceView;
 import commonsos.view.UserView;
-import commonsos.view.app.CommunityUserView;
 import spark.utils.CollectionUtils;
 
 public class UserUtil {

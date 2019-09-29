@@ -47,11 +47,11 @@ public class GetTransactionListTest extends IntegrationTest {
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
-    create(new TokenTransaction().setCommunityId(community1.getId()).setFromAdmin(true).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(1)));
-    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)));
-    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user3.getId()).setAmount(new BigDecimal(2)));
-    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterId(user2.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(3)));
-    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterId(user3.getId()).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(4)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setFromAdmin(true).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user3.getId()).setAmount(new BigDecimal(2)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterUserId(user2.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(3)));
+    create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterUserId(user3.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(4)));
   }
   
   @Test
@@ -137,18 +137,18 @@ public class GetTransactionListTest extends IntegrationTest {
     Community community =  create(new Community().setStatus(PUBLIC).setName("page_community"));
     update(user1.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(user2.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
 
     sessionId = loginApp("user1", "pass");
 
@@ -210,18 +210,18 @@ public class GetTransactionListTest extends IntegrationTest {
 
     update(user1.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     update(user2.setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
-    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("1").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("2").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("3").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("4").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("5").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("6").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("7").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("8").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("9").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("10").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("11").setAmount(new BigDecimal("1")));
+    create(new TokenTransaction().setCommunityId(community.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setDescription("12").setAmount(new BigDecimal("1")));
 
     sessionId = loginApp("admin", "pass");
 

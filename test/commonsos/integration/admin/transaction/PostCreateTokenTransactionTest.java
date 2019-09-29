@@ -71,10 +71,11 @@ public class PostCreateTokenTransactionTest extends IntegrationTest {
     // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction ORDER BY id DESC", TokenTransaction.class).setMaxResults(1).getSingleResult();
     assertThat(transaction.getCommunityId()).isEqualTo(com1.getId());
-    assertThat(transaction.getRemitterId()).isNull();
+    assertThat(transaction.getRemitterUserId()).isNull();
     assertThat(transaction.isFromAdmin()).isTrue();
+    assertThat(transaction.getRemitterAdminId()).isEqualTo(ncl.getId());
     assertThat(transaction.getWalletDivision()).isEqualTo(MAIN);
-    assertThat(transaction.getBeneficiaryId()).isEqualTo(user_com1.getId());
+    assertThat(transaction.getBeneficiaryUserId()).isEqualTo(user_com1.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(TEN);
     assertThat(transaction.getFee()).isEqualByComparingTo(ZERO);
     assertThat(transaction.isRedistributed()).isTrue();

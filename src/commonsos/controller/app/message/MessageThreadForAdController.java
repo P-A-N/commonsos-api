@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageThreadView;
+import commonsos.view.MessageThreadView;
 import spark.Request;
 import spark.Response;
 

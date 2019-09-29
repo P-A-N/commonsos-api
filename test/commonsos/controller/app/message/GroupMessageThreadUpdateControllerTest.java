@@ -16,7 +16,7 @@ import commonsos.controller.app.message.GroupMessageThreadUpdateController;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageThreadView;
+import commonsos.view.MessageThreadView;
 import spark.Request;
 
 @ExtendWith(MockitoExtension.class)

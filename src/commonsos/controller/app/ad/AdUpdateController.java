@@ -11,7 +11,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
-import commonsos.view.app.AdView;
+import commonsos.view.AdView;
 import spark.Request;
 import spark.Response;
 

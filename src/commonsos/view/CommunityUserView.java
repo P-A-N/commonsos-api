@@ -1,4 +1,4 @@
-package commonsos.view.app;
+package commonsos.view;
 
 import java.math.BigDecimal;
 import java.time.Instant;

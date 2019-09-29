@@ -7,7 +7,7 @@ import commonsos.controller.app.AbstractAppController;
 import commonsos.service.CommunityService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.app.CommunityNotificationListView;
+import commonsos.view.CommunityNotificationListView;
 import spark.Request;
 import spark.Response;
 

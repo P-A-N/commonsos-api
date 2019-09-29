@@ -8,7 +8,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.service.AdminService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.admin.AdminListView;
+import commonsos.view.AdminListView;
 import spark.Request;
 import spark.Response;
 

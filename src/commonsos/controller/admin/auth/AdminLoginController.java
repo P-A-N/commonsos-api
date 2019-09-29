@@ -39,6 +39,6 @@ public class AdminLoginController extends AbstractController {
     MDC.put(LogFilter.ADMIN_MDC_KEY, admin.getEmailAddress());
     csrf.setToken(request, response);
     
-    return AdminUtil.toView(admin);
+    return AdminUtil.view(admin);
   }
 }

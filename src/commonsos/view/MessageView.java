@@ -1,8 +1,7 @@
-package commonsos.view.app;
+package commonsos.view;
 
 import java.time.Instant;
 
-import commonsos.view.CommonView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

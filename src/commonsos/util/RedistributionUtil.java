@@ -6,7 +6,7 @@ import static commonsos.repository.entity.Role.NCL;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.Role;
-import commonsos.view.admin.RedistributionView;
+import commonsos.view.RedistributionView;
 
 public class RedistributionUtil {
   

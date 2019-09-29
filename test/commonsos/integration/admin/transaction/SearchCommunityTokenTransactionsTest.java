@@ -60,11 +60,11 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
     user1 = create(new User().setUsername("user1").setEmailAddress("user1@a.com").setCommunityUserList(asList(new CommunityUser().setCommunity(com1), new CommunityUser().setCommunity(com2))));
     user2 = create(new User().setUsername("user2").setEmailAddress("user2@b.com").setCommunityUserList(asList(new CommunityUser().setCommunity(com1), new CommunityUser().setCommunity(com2))));
 
-    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(10)));
-    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(9)));
-    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.FEE).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(8)));
-    create(new TokenTransaction().setCommunityId(com1.getId()).setRemitterId(user1.getId()).setBeneficiaryId(user2.getId()).setAmount(new BigDecimal(1)));
-    create(new TokenTransaction().setCommunityId(com2.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(user1.getId()).setAmount(new BigDecimal(10)));
+    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setRemitterAdminId(ncl.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(10)));
+    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setRemitterAdminId(com1Admin.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(9)));
+    create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.FEE).setRemitterAdminId(com1Admin.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(8)));
+    create(new TokenTransaction().setCommunityId(com1.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(com2.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setRemitterAdminId(com2Admin.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(10)));
   }
   
   @Test
@@ -78,6 +78,8 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
       .body("transactionList.communityId",  contains(com1.getId().intValue(), com1.getId().intValue()))
       .body("transactionList.wallet",  contains("MAIN", "MAIN"))
       .body("transactionList.isFromAdmin",  contains(true, true))
+      .body("transactionList.remitterAdmin.id",  contains(com1Admin.getId().intValue(), ncl.getId().intValue()))
+      .body("transactionList.remitterAdmin.adminuser",  contains(com1Admin.getAdminname(), ncl.getAdminname()))
       .body("transactionList.remitter",  contains(nullValue(), nullValue()))
       .body("transactionList.beneficiary.id",  contains(user2.getId().intValue(), user1.getId().intValue()))
       .body("transactionList.beneficiary.username",  contains(user2.getUsername(), user1.getUsername()))
@@ -89,6 +91,7 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
       .when().get("/admin/transactions/coin?communityId={comId}&wallet={wallet}", com1.getId(), "fee")
       .then().statusCode(200)
       .body("transactionList.wallet",  contains("FEE"))
+      .body("transactionList.remitterAdmin.id",  contains(com1Admin.getId().intValue()))
       .body("transactionList.remitter",  contains(nullValue()))
       .body("transactionList.beneficiary.id",  contains(user1.getId().intValue()));
     
@@ -186,18 +189,18 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
 
     Community page_com = create(new Community().setName("page_com"));
     User page_user = create(new User().setUsername("page_user").setEmailAddress("page_user@a.com").setCommunityUserList(asList(new CommunityUser().setCommunity(page_com))));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(1)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(2)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(3)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(4)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(5)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(6)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(7)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(8)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(9)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(10)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(11)));
-    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryId(page_user.getId()).setAmount(new BigDecimal(12)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(2)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(3)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(4)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(5)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(6)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(7)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(8)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(9)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(10)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(11)));
+    create(new TokenTransaction().setCommunityId(page_com.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setBeneficiaryUserId(page_user.getId()).setAmount(new BigDecimal(12)));
 
     // page 0 size 10 asc
     given()

@@ -1,9 +1,7 @@
-package commonsos.view.app;
+package commonsos.view;
 
 import java.util.List;
 
-import commonsos.view.CommonView;
-import commonsos.view.PaginationView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

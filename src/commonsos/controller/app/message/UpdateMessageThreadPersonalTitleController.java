@@ -13,7 +13,7 @@ import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
-import commonsos.view.app.MessageThreadView;
+import commonsos.view.MessageThreadView;
 import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;

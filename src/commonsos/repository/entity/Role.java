@@ -1,9 +1,6 @@
 package commonsos.repository.entity;
 
-import static javax.persistence.GenerationType.IDENTITY;
-
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -28,6 +25,6 @@ public class Role extends AbstractEntity {
     return null;
   }
   
-  @Id @GeneratedValue(strategy = IDENTITY) private Long id;
+  @Id private Long id;
   private String rolename;
 }

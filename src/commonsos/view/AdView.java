@@ -1,11 +1,9 @@
-package commonsos.view.app;
+package commonsos.view;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
 import commonsos.repository.entity.AdType;
-import commonsos.view.CommonView;
-import commonsos.view.UserView;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
