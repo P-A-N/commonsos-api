@@ -34,6 +34,7 @@ import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
+import commonsos.service.blockchain.EthBalance;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
@@ -75,6 +76,12 @@ public class TestServer extends Server {
     when(blockchainService.getTokenBalance(any(Long.class), any(WalletType.class))).thenAnswer(new Answer<TokenBalance>() {
       @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
         return tokenBalance.setCommunityId(invocation.getArgument(0));
+      }
+    });
+    EthBalance ethBalance = new EthBalance().setBalance(TEN);
+    when(blockchainService.getEthBalance(any(Community.class))).thenAnswer(new Answer<EthBalance>() {
+      @Override public EthBalance answer(InvocationOnMock invocation) throws Throwable {
+        return ethBalance.setCommunityId(((Community) invocation.getArgument(0)).getId());
       }
     });
     when(blockchainService.getBalance(any())).thenReturn(TEN.pow(18+6));

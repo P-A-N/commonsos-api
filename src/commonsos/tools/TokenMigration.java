@@ -59,6 +59,10 @@ public class TokenMigration {
     
     for (int i = 0; i < communityList.size(); i++) {
       Community c = communityList.get(i);
+      
+      System.out.print(String.format("Next community is %s. Do you want to skip? [Y/N]: ", c.getName()));
+      String yesNo = scanner.nextLine();
+      if ("Y".equals(yesNo)) continue;
 
       emService.runInTransaction(() -> {
         communityRepository.lockForUpdate(c);
@@ -69,7 +73,7 @@ public class TokenMigration {
       
       emService.runInTransaction(() -> {
         communityRepository.lockForUpdate(c);
-        
+
         transferEtherToMainWallet(c);
         String newTokenAddress = createToken(c);
         c.setTokenContractAddress(newTokenAddress);
@@ -81,7 +85,9 @@ public class TokenMigration {
         transferToken(c);
         
         checkTokenBalance(c);
-        
+
+        communityRepository.lockForUpdate(c);
+        c.setTokenContractAddress(newTokenAddress);
         communityRepository.update(c);
         completedCommunity.add(c.getId());
         return null;

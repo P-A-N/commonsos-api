@@ -8,6 +8,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
 import commonsos.service.blockchain.CommunityToken;
+import commonsos.service.blockchain.EthBalance;
 import commonsos.view.AdminView;
 import commonsos.view.CommunityNotificationView;
 import commonsos.view.CommunityUserView;
@@ -34,6 +35,7 @@ public class CommunityUtil {
   public static CommunityView viewForAdmin(
       Community community,
       CommunityToken token,
+      EthBalance ethBalance,
       Integer totalMember,
       List<Admin> adminList
       ) {
@@ -54,6 +56,7 @@ public class CommunityUtil {
         .setTotalMember(totalMember)
         .setPhotoUrl(community.getPhotoUrl())
         .setCoverPhotoUrl(community.getCoverPhotoUrl())
+        .setEthBalance(ethBalance.getBalance())
         .setCreatedAt(community.getCreatedAt())
         .setAdminList(adminViewList);
   }

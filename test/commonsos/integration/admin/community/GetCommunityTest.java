@@ -9,6 +9,7 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.math.BigDecimal;
@@ -62,6 +63,7 @@ public class GetCommunityTest extends IntegrationTest {
       .body("status", equalTo("PUBLIC"))
       .body("adminPageUrl", startsWith("url"))
       .body("totalMember", equalTo(2))
+      .body("ethBalance", notNullValue())
       .body("adminList.adminname", contains(publicComAdmin1.getAdminname(), publicComAdmin2.getAdminname()));
   }
   

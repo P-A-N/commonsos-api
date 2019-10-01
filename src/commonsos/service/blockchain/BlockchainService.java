@@ -23,6 +23,7 @@ import org.web3j.crypto.WalletFile;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.ChainId;
 import org.web3j.tx.RawTransactionManager;
@@ -226,7 +227,7 @@ public class BlockchainService {
     catch (Exception e) {
       if (e.getMessage().contains("insufficient funds for gas"))
         throw new DisplayableException("error.outOfEther");
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
 
@@ -249,15 +250,31 @@ public class BlockchainService {
       });
       if (!token.isValid()) {
         if (token.getTransactionReceipt().isPresent()) {
-          throw new RuntimeException("Deploying token contract " + token.getTransactionReceipt().get().getTransactionHash() + " failed");
+          throw new ServerErrorException("Deploying token contract " + token.getTransactionReceipt().get().getTransactionHash() + " failed");
         } else {
-          throw new RuntimeException("Deploying token contract " + token.getContractAddress() + " failed");
+          throw new ServerErrorException("Deploying token contract " + token.getContractAddress() + " failed");
         }
       }
       
       log.info("Deploy successful, contract address: " + token.getContractAddress());
       return token.getContractAddress();
     });
+  }
+
+  public EthBalance getEthBalance(Community community) {
+    EthGetBalance ethGetBalance;
+    try {
+      ethGetBalance = web3j.ethGetBalance(community.getMainWalletAddress(), DefaultBlockParameterName.LATEST).send();
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+    
+    BigDecimal balance = toTokensWithDecimals(ethGetBalance.getBalance());
+    EthBalance ethBalance = new EthBalance()
+        .setCommunityId(community.getId())
+        .setBalance(balance);
+    
+    return ethBalance;
   }
 
   public TokenBalance getTokenBalance(Long communityId, WalletType walletType) {
@@ -317,7 +334,7 @@ public class BlockchainService {
       return toTokensWithDecimals(balance);
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
   
@@ -345,7 +362,7 @@ public class BlockchainService {
       return tokenName;
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
 
@@ -373,7 +390,7 @@ public class BlockchainService {
       return tokenSymbol;
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
 
@@ -402,7 +419,7 @@ public class BlockchainService {
       return totalSupply;
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new ServerErrorException(e);
     }
   }
   

@@ -37,6 +37,7 @@ import commonsos.repository.entity.Role;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
+import commonsos.service.blockchain.EthBalance;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
@@ -218,19 +219,23 @@ public class CommunityService {
   }
   
   public CommunityView viewForAdmin(Community community) {
-    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
     List<Admin> adminList = adminRepository.findByCommunityId(community.getId(), null).getList();
-    int totalMember = userRepository.search(community.getId(), null, null).getList().size();
-    return CommunityUtil.viewForAdmin(community, communityToken, totalMember, adminList);
+    return viewForAdminInternal(community, adminList);
   }
   
   public CommunityView viewForAdmin(Community community, List<Long> adminIdList) {
-    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
     List<Admin> adminList = new ArrayList<>();
     if (adminIdList != null) {
       adminList = adminIdList.stream().map(id -> adminRepository.findStrictById(id)).collect(Collectors.toList());
     }
+    return viewForAdminInternal(community, adminList);
+  }
+  
+  private CommunityView viewForAdminInternal(Community community, List<Admin> adminList) {
+    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
+    EthBalance ethBalance = blockchainService.getEthBalance(community);
     int totalMember = userRepository.search(community.getId(), null, null).getList().size();
-    return CommunityUtil.viewForAdmin(community, communityToken, totalMember, adminList);
+    return CommunityUtil.viewForAdmin(community, communityToken, ethBalance, totalMember, adminList);
+    
   }
 }
