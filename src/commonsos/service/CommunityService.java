@@ -39,6 +39,7 @@ import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.EthBalance;
 import commonsos.service.image.ImageUploadService;
+import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.view.CommunityListView;
@@ -151,7 +152,8 @@ public class CommunityService {
     return repository.findPublicStrictById(id);
   }
 
-  public Community findCommunityForAdmin(Long id) {
+  public Community findCommunityForAdmin(Admin admin, Long id) {
+    if (!AdminUtil.isSeeableCommunity(admin, id)) throw new ForbiddenException();
     return repository.findStrictById(id);
   }
 
@@ -236,6 +238,5 @@ public class CommunityService {
     EthBalance ethBalance = blockchainService.getEthBalance(community);
     int totalMember = userRepository.search(community.getId(), null, null).getList().size();
     return CommunityUtil.viewForAdmin(community, communityToken, ethBalance, totalMember, adminList);
-    
   }
 }

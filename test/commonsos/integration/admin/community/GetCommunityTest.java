@@ -26,11 +26,14 @@ import commonsos.repository.entity.User;
 public class GetCommunityTest extends IntegrationTest {
 
   private Admin ncl;
+  private Admin com1Admin;
+  private Admin com1Teller;
   private Community publicCom;
   private Community privateCom;
   private Community deleteCom;
-  private Admin publicComAdmin1;
-  private Admin publicComAdmin2;
+  private Community otherCom;
+  private Admin publicComAdmin;
+  private Admin publicComTeller;
   private String sessionId;
   
   @BeforeEach
@@ -39,20 +42,22 @@ public class GetCommunityTest extends IntegrationTest {
     publicCom =  create(new Community().setName("publicCom").setStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
     privateCom =  create(new Community().setName("privateCom").setStatus(PRIVATE));
     deleteCom =  create(new Community().setName("deleteCom").setStatus(PUBLIC).setDeleted(true));
+    otherCom =  create(new Community().setName("otherCom").setStatus(PUBLIC));
     
     // create admins
-    publicComAdmin1 = create(new Admin().setEmailAddress("publicComAdmin1@before.each.com").setAdminname("publicComAdmin1").setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
-    publicComAdmin2 = create(new Admin().setEmailAddress("publicComAdmin2@before.each.com").setAdminname("publicComAdmin2").setRole(TELLER).setCommunity(publicCom));
+    publicComAdmin = create(new Admin().setEmailAddress("publicComAdmin@before.each.com").setAdminname("publicComAdmin").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
+    publicComTeller = create(new Admin().setEmailAddress("publicComTeller@before.each.com").setAdminname("publicComTeller").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(publicCom));
 
     // create users
     create(new User().setUsername("publicComUser1").setCommunityUserList(asList(new CommunityUser().setCommunity(publicCom))));
     create(new User().setUsername("publicComUser2").setCommunityUserList(asList(new CommunityUser().setCommunity(publicCom))));
-    
-    sessionId = loginAdmin(ncl.getEmailAddress(), "password");
   }
   
   @Test
-  public void getCommunity_public() {
+  public void getCommunity_ncl() {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "password");
+    
+    // public
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/communities/{id}", publicCom.getId())
@@ -64,25 +69,57 @@ public class GetCommunityTest extends IntegrationTest {
       .body("adminPageUrl", startsWith("url"))
       .body("totalMember", equalTo(2))
       .body("ethBalance", notNullValue())
-      .body("adminList.adminname", contains(publicComAdmin1.getAdminname(), publicComAdmin2.getAdminname()));
-  }
-  
-  @Test
-  public void getCommunity_private() {
+      .body("adminList.adminname", contains(publicComAdmin.getAdminname(), publicComTeller.getAdminname()));
+
+    // private
     given()
-      .cookie("JSESSIONID", sessionId)
-      .when().get("/admin/communities/{id}", privateCom.getId())
-      .then().statusCode(200)
-      .body("communityName", equalTo("privateCom"))
-      .body("status", equalTo("PRIVATE"))
-      .body("totalMember", equalTo(0));
-  }
-  
-  @Test
-  public void getCommunity_deleted() {
+    .cookie("JSESSIONID", sessionId)
+    .when().get("/admin/communities/{id}", privateCom.getId())
+    .then().statusCode(200)
+    .body("communityName", equalTo("privateCom"))
+    .body("status", equalTo("PRIVATE"))
+    .body("totalMember", equalTo(0));
+    
+    // deleted
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/communities/{id}", deleteCom.getId())
       .then().statusCode(400);
+  }
+  
+  @Test
+  public void getCommunity_comAdmin() {
+    sessionId = loginAdmin(publicComAdmin.getEmailAddress(), "password");
+    
+    // my com
+    given()
+    .cookie("JSESSIONID", sessionId)
+    .when().get("/admin/communities/{id}", publicCom.getId())
+    .then().statusCode(200)
+    .body("communityName", equalTo("publicCom"));
+
+    // other com
+    given()
+    .cookie("JSESSIONID", sessionId)
+    .when().get("/admin/communities/{id}", otherCom.getId())
+    .then().statusCode(403);
+  }
+  
+  @Test
+  public void getCommunity_teller() {
+    sessionId = loginAdmin(publicComTeller.getEmailAddress(), "password");
+    
+    // my com
+    given()
+    .cookie("JSESSIONID", sessionId)
+    .when().get("/admin/communities/{id}", publicCom.getId())
+    .then().statusCode(200)
+    .body("communityName", equalTo("publicCom"));
+
+    // other com
+    given()
+    .cookie("JSESSIONID", sessionId)
+    .when().get("/admin/communities/{id}", otherCom.getId())
+    .then().statusCode(403);
   }
 }

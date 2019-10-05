@@ -5,9 +5,9 @@ import commonsos.service.blockchain.TokenBalance;
 import commonsos.view.CommunityTokenBalanceView;
 import commonsos.view.UserTokenBalanceView;
 
-public class TransactionUtil {
+public class TokenTransactionUtil {
   
-  private TransactionUtil() {}
+  private TokenTransactionUtil() {}
 
   public static UserTokenBalanceView userTokenBalanceView(TokenBalance tokenBalance) {
     return new UserTokenBalanceView()

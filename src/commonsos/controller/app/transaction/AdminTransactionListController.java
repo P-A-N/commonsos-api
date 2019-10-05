@@ -8,7 +8,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.TokenTransactionService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.TransactionListView;
+import commonsos.view.TokenTransactionListView;
 import spark.Request;
 import spark.Response;
 
@@ -17,12 +17,12 @@ public class AdminTransactionListController extends AfterAppLoginController {
   @Inject private TokenTransactionService service;
 
   @Override
-  public TransactionListView handleAfterLogin(User user, Request request, Response response) {
+  public TokenTransactionListView handleAfterLogin(User user, Request request, Response response) {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
     Long userId = RequestUtil.getQueryParamLong(request, "userId", true);
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    TransactionListView view = service.transactionsForAdminUser(user, communityId, userId, paginationCommand);
+    TokenTransactionListView view = service.transactionsForAdminUser(user, communityId, userId, paginationCommand);
     return view;
   }
 }

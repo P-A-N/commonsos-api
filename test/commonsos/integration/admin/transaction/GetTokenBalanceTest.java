@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.Redistribution;
-import commonsos.repository.entity.User;
 
 public class GetTokenBalanceTest extends IntegrationTest {
 
@@ -25,8 +23,6 @@ public class GetTokenBalanceTest extends IntegrationTest {
   private Admin ncl;
   private Admin com1Admin;
   private Admin com1Teller;
-  private User user1;
-  private Redistribution r1;
   private String sessionId;
   
   @BeforeEach

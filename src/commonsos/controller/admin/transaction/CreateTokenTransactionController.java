@@ -13,7 +13,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.service.TokenTransactionService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
-import commonsos.util.TransactionUtil;
+import commonsos.util.TokenTransactionUtil;
 import commonsos.view.CommunityTokenBalanceView;
 import spark.Request;
 import spark.Response;
@@ -31,6 +31,6 @@ public class CreateTokenTransactionController extends AfterAdminLoginController 
     tokenTransactionService.create(admin, command);
     TokenBalance tokenBalance = blockchainService.getTokenBalance(command.getCommunityId(), command.getWallet());
     
-    return TransactionUtil.communityTokenBalanceView(tokenBalance, command.getWallet());
+    return TokenTransactionUtil.communityTokenBalanceView(tokenBalance, command.getWallet());
   }
 }

@@ -57,7 +57,7 @@ import commonsos.service.image.QrCodeService;
 import commonsos.session.UserSession;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
-import commonsos.util.TransactionUtil;
+import commonsos.util.TokenTransactionUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
 import commonsos.view.CommunityUserListView;
@@ -94,7 +94,7 @@ public class UserService {
     List<CommunityUserView> communityUserList = new ArrayList<>();
     user.getCommunityUserList().forEach(cu -> {
       TokenBalance tokenBalance = blockchainService.getTokenBalance(user, cu.getCommunity().getId());
-      balanceList.add(TransactionUtil.userTokenBalanceView(tokenBalance));
+      balanceList.add(TokenTransactionUtil.userTokenBalanceView(tokenBalance));
       communityUserList.add(UserUtil.communityUserViewForApp(cu, tokenBalance));
     });
     
@@ -503,7 +503,7 @@ public class UserService {
     List<UserTokenBalanceView> list = new ArrayList<>();
     user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
       TokenBalance tokenBalance = blockchainService.getTokenBalance(user, c.getId());
-      list.add(TransactionUtil.userTokenBalanceView(tokenBalance));
+      list.add(TokenTransactionUtil.userTokenBalanceView(tokenBalance));
     });
     return list;
   }

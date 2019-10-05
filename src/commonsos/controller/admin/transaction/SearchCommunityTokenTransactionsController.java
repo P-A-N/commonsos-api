@@ -9,7 +9,7 @@ import commonsos.repository.entity.WalletType;
 import commonsos.service.TokenTransactionService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.TransactionListView;
+import commonsos.view.TokenTransactionListView;
 import spark.Request;
 import spark.Response;
 
@@ -18,12 +18,12 @@ public class SearchCommunityTokenTransactionsController extends AfterAdminLoginC
   @Inject private TokenTransactionService service;
 
   @Override
-  protected TransactionListView handleAfterLogin(Admin admin, Request request, Response response) {
+  protected TokenTransactionListView handleAfterLogin(Admin admin, Request request, Response response) {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
     WalletType walletType = RequestUtil.getQueryParamWallet(request, "wallet", true);
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    TransactionListView view = service.searchCommunityTranByAdmin(admin, communityId, walletType, paginationCommand);
+    TokenTransactionListView view = service.searchCommunityTranByAdmin(admin, communityId, walletType, paginationCommand);
     return view;
   }
 }

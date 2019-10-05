@@ -10,7 +10,7 @@ import commonsos.service.TokenTransactionService;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
-import commonsos.util.TransactionUtil;
+import commonsos.util.TokenTransactionUtil;
 import commonsos.view.CommunityTokenBalanceView;
 import spark.Request;
 import spark.Response;
@@ -27,6 +27,6 @@ public class GetTokenBalanceController extends AfterAdminLoginController {
     if (!AdminUtil.isSeeableCommunity(admin, communityId)) throw new ForbiddenException();
     
     TokenBalance tokenBalance = tokenTransactionService.getTokenBalanceForAdmin(admin, communityId, walletType);
-    return TransactionUtil.communityTokenBalanceView(tokenBalance, walletType);
+    return TokenTransactionUtil.communityTokenBalanceView(tokenBalance, walletType);
   }
 }

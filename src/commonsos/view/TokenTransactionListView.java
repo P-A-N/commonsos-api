@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class TransactionListView extends CommonView {
-  private List<TransactionView> transactionList;
+public class TokenTransactionListView extends CommonView {
+  private List<TokenTransactionView> transactionList;
   private PaginationView pagination;
 }

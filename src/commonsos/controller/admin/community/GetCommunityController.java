@@ -18,7 +18,7 @@ public class GetCommunityController extends AfterAdminLoginController {
   @Override
   public CommunityView handleAfterLogin(Admin admin, Request request, Response response) {
     Long communityId = RequestUtil.getPathParamLong(request, "id");
-    Community community = communityService.findCommunityForAdmin(communityId);
+    Community community = communityService.findCommunityForAdmin(admin, communityId);
     return communityService.viewForAdmin(community);
   }
 }

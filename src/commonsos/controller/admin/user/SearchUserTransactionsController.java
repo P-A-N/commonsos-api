@@ -10,7 +10,7 @@ import commonsos.service.TokenTransactionService;
 import commonsos.util.AdminUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
-import commonsos.view.TransactionListView;
+import commonsos.view.TokenTransactionListView;
 import spark.Request;
 import spark.Response;
 
@@ -19,7 +19,7 @@ public class SearchUserTransactionsController extends AfterAdminLoginController 
   @Inject TokenTransactionService tokenTransactionService;
   
   @Override
-  protected TransactionListView handleAfterLogin(Admin admin, Request request, Response response) {
+  protected TokenTransactionListView handleAfterLogin(Admin admin, Request request, Response response) {
     Long userId = RequestUtil.getPathParamLong(request, "id");
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
 
@@ -27,7 +27,7 @@ public class SearchUserTransactionsController extends AfterAdminLoginController 
     
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
 
-    TransactionListView view = tokenTransactionService.searchUserTranByAdmin(userId, communityId, paginationCommand);
+    TokenTransactionListView view = tokenTransactionService.searchUserTranByAdmin(userId, communityId, paginationCommand);
     return view;
   }
 }

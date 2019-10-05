@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true)
-public class TransactionView extends CommonView {
+public class TokenTransactionView extends CommonView {
   private Long communityId;
   private WalletType wallet;
   private Boolean isFromAdmin;

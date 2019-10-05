@@ -7,7 +7,7 @@ import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.util.RequestUtil;
-import commonsos.util.TransactionUtil;
+import commonsos.util.TokenTransactionUtil;
 import commonsos.view.UserTokenBalanceView;
 import spark.Request;
 import spark.Response;
@@ -21,6 +21,6 @@ public class BalanceController extends AfterAppLoginController {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
     TokenBalance tokenBalance = service.getTokenBalance(user, communityId);
     
-    return TransactionUtil.userTokenBalanceView(tokenBalance);
+    return TokenTransactionUtil.userTokenBalanceView(tokenBalance);
   }
 }

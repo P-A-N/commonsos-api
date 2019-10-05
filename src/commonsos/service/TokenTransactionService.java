@@ -48,8 +48,8 @@ import commonsos.util.AdminUtil;
 import commonsos.util.MessageUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
-import commonsos.view.TransactionListView;
-import commonsos.view.TransactionView;
+import commonsos.view.TokenTransactionListView;
+import commonsos.view.TokenTransactionView;
 import lombok.extern.slf4j.Slf4j;
 import spark.utils.StringUtils;
 
@@ -86,69 +86,69 @@ public class TokenTransactionService {
   }
 
   @Deprecated
-  public TransactionListView transactionsForAdminUser(User admin, Long communityId, Long userId, PaginationCommand pagination) {
+  public TokenTransactionListView transactionsForAdminUser(User admin, Long communityId, Long userId, PaginationCommand pagination) {
     if (!UserUtil.isAdmin(admin, communityId)) throw new ForbiddenException(String.format("user is not a admin.[userId=%d, communityId=%d]", admin.getId(), communityId));
     
     User user = userRepository.findStrictById(userId);
     return searchUserTranByUser(user, communityId, pagination);
   }
 
-  public TransactionListView searchUserTranByUser(User user, Long communityId, PaginationCommand pagination) {
+  public TokenTransactionListView searchUserTranByUser(User user, Long communityId, PaginationCommand pagination) {
     communityRepository.findPublicStrictById(communityId);
     ResultList<TokenTransaction> result = repository.searchUserTran(user, communityId, null);
 
-    List<TransactionView> transactionViews = result.getList().stream()
+    List<TokenTransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
         .map(transaction -> viewForUser(user, transaction))
         .collect(toList());
     
-    TransactionListView listView = new TransactionListView();
+    TokenTransactionListView listView = new TokenTransactionListView();
     listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
-    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    List<TokenTransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
     listView.setTransactionList(paginationedViews);
     
     return listView;
   }
 
-  public TransactionListView searchCommunityTranByAdmin(Admin admin, Long communityId, WalletType walletType, PaginationCommand pagination) {
+  public TokenTransactionListView searchCommunityTranByAdmin(Admin admin, Long communityId, WalletType walletType, PaginationCommand pagination) {
     communityRepository.findStrictById(communityId);
     if (!AdminUtil.isSeeableCommunity(admin, communityId, false)) throw new ForbiddenException();
     
     ResultList<TokenTransaction> result = repository.searchCommunityTran(communityId, walletType, null);
 
-    List<TransactionView> transactionViews = result.getList().stream()
+    List<TokenTransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
         .map(transaction -> viewForAdmin(transaction))
         .collect(toList());
     
-    TransactionListView listView = new TransactionListView();
+    TokenTransactionListView listView = new TokenTransactionListView();
     listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
-    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    List<TokenTransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
     listView.setTransactionList(paginationedViews);
     
     return listView;
   }
 
-  public TransactionListView searchUserTranByAdmin(Long userId, Long communityId, PaginationCommand pagination) {
+  public TokenTransactionListView searchUserTranByAdmin(Long userId, Long communityId, PaginationCommand pagination) {
     User user = userRepository.findStrictById(userId);
     communityRepository.findStrictById(communityId);
     ResultList<TokenTransaction> result = repository.searchUserTran(user, communityId, null);
 
-    List<TransactionView> transactionViews = result.getList().stream()
+    List<TokenTransactionView> transactionViews = result.getList().stream()
         .sorted(Comparator.comparing(TokenTransaction::getCreatedAt).reversed())
         .map(transaction -> viewForAdmin(transaction))
         .collect(toList());
     
-    TransactionListView listView = new TransactionListView();
+    TokenTransactionListView listView = new TokenTransactionListView();
     listView.setPagination(PaginationUtil.toView(transactionViews, pagination));
-    List<TransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
+    List<TokenTransactionView> paginationedViews = PaginationUtil.pagination(transactionViews, pagination);
     listView.setTransactionList(paginationedViews);
     
     return listView;
   }
 
-  public TransactionView viewForUser(User user, TokenTransaction transaction) {
-    TransactionView view = new TransactionView()
+  public TokenTransactionView viewForUser(User user, TokenTransaction transaction) {
+    TokenTransactionView view = new TokenTransactionView()
       .setCommunityId(transaction.getCommunityId())
       .setIsFromAdmin(transaction.isFromAdmin())
       .setAmount(transaction.getAmount())
@@ -166,8 +166,8 @@ public class TokenTransactionService {
     return view;
   }
 
-  public TransactionView viewForAdmin(TokenTransaction transaction) {
-    TransactionView view = new TransactionView()
+  public TokenTransactionView viewForAdmin(TokenTransaction transaction) {
+    TokenTransactionView view = new TokenTransactionView()
       .setCommunityId(transaction.getCommunityId())
       .setWallet(transaction.getWalletDivision())
       .setIsFromAdmin(transaction.isFromAdmin())
