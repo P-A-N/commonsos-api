@@ -16,6 +16,7 @@ import org.web3j.protocol.core.methods.response.Transaction;
 
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.EntityManagerService;
+import commonsos.service.EthTransactionService;
 import commonsos.service.TokenTransactionService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,7 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 public class BlockchainEventService {
 
   @Inject private Web3j web3j;
-  @Inject private TokenTransactionService transactionService;
+  @Inject private TokenTransactionService tokenTransactionService;
+  @Inject private EthTransactionService ethTransactionService;
   @Inject private EntityManagerService entityManagerService;
 
   public void listenEvents() {
@@ -54,7 +56,7 @@ public class BlockchainEventService {
       Transaction transaction = web3j.ethGetTransactionByHash(transactionHash).send().getResult();
       String blockHash = transaction.getBlockHash();
       if (StringUtils.isNotEmpty(blockHash) && !"0x0000000000000000000000000000000000000000000000000000000000000000".equals(blockHash)) {
-        transactionService.markTransactionCompleted(transactionHash);
+        tokenTransactionService.markTransactionCompleted(transactionHash);
       }
     } catch (IOException e) {
       throw new ServerErrorException();
@@ -63,7 +65,8 @@ public class BlockchainEventService {
   
   private void markTransactionCompleted(String transactionHash) {
     entityManagerService.runInTransaction(() -> {
-      transactionService.markTransactionCompleted(transactionHash);
+      tokenTransactionService.markTransactionCompleted(transactionHash);
+      ethTransactionService.markTransactionCompleted(transactionHash);
       return Void.class;
     });
   }

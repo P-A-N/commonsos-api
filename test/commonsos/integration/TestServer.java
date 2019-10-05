@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -85,7 +87,10 @@ public class TestServer extends Server {
       }
     });
     when(blockchainService.getBalance(any())).thenReturn(TEN.pow(18+6));
+    when(blockchainService.getSystemEthBalance()).thenReturn(TEN);
     when(blockchainService.transferTokens(any(), any(), any(), any())).thenReturn("0x1");
+    when(blockchainService.transferEther(any(Credentials.class), any(String.class), any(BigInteger.class), any(boolean.class))).thenReturn("0x1");
+    when(blockchainService.transferEther(any(Credentials.class), any(String.class), any(BigDecimal.class), any(boolean.class))).thenReturn("0x1");
     when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");
     when(blockchainService.isConnected()).thenReturn(true);
     when(blockchainService.createWallet(any())).thenReturn("wallet");

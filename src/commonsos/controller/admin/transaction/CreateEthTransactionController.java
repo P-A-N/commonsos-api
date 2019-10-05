@@ -1,20 +1,26 @@
 package commonsos.controller.admin.transaction;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
 
-import commonsos.controller.AbstractController;
+import com.google.gson.Gson;
+
+import commonsos.command.admin.CreateEthTransactionCommand;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
+import commonsos.service.EthTransactionService;
 import spark.Request;
 import spark.Response;
 
-public class CreateEthTransactionController extends AbstractController {
+public class CreateEthTransactionController extends AfterAdminLoginController {
 
+  @Inject private Gson gson;
+  @Inject private EthTransactionService ethTransactionService;
+  
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("balance", new BigDecimal("999"));
-    
-    return result;
+  public Object handleAfterLogin(Admin admin, Request request, Response response) {
+    CreateEthTransactionCommand command = gson.fromJson(request.body(), CreateEthTransactionCommand.class);
+    ethTransactionService.createEthTransaction(admin, command);
+
+    return "";
   }
 }

@@ -33,6 +33,7 @@ import org.web3j.tx.Transfer;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.response.NoOpProcessor;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 import org.web3j.utils.Convert.Unit;
 import org.web3j.utils.Files;
 
@@ -205,19 +206,28 @@ public class BlockchainService {
     return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
-  public void transferEther(Community community, String beneficiaryAddress, BigInteger amount) {
+  public void transferEther(Community community, String beneficiaryAddress, BigInteger amount, boolean waitUntilCompleted) {
     Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
-    transferEther(credentials, beneficiaryAddress, amount);
+    transferEther(credentials, beneficiaryAddress, amount, waitUntilCompleted);
   }
-  
-  public void transferEther(Credentials credentials, String beneficiaryAddress, BigInteger amount) {
+
+  public String transferEther(Credentials credentials, String beneficiaryAddress, BigDecimal amount, boolean waitUntilCompleted) {
+    return transferEther(credentials, beneficiaryAddress, toTokensWithoutDecimals(amount), waitUntilCompleted);
+  }
+
+  public String transferEther(Credentials credentials, String beneficiaryAddress, BigInteger amount, boolean waitUntilCompleted) {
+    TransactionReceiptProcessor trp;
+    if (waitUntilCompleted) trp = new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH );
+    else trp = new NoOpProcessor(web3j);
+    
     log.info(String.format("transferEther %d to %s", amount, beneficiaryAddress));
     TransactionReceipt receipt = handleBlockchainException(() -> {
-      TransactionManager tm = new RawTransactionManager(web3j, credentials, ChainId.NONE, new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH ));
+      TransactionManager tm = new RawTransactionManager(web3j, credentials, ChainId.NONE, trp);
       Transfer transfer = new Transfer(web3j, tm);
       return transfer.sendFunds(beneficiaryAddress, new BigDecimal(amount), Unit.WEI).send();
     });
     log.info(String.format("Ether transaction receipt received for %s", receipt.getTransactionHash()));
+    return receipt.getTransactionHash();
   }
 
   private <T> T handleBlockchainException(Callable<T> callable) {
@@ -259,6 +269,19 @@ public class BlockchainService {
       log.info("Deploy successful, contract address: " + token.getContractAddress());
       return token.getContractAddress();
     });
+  }
+
+  public BigDecimal getSystemEthBalance() {
+    Credentials credentials = systemCredentials();
+    EthGetBalance ethGetBalance;
+    try {
+      ethGetBalance = web3j.ethGetBalance(credentials.getAddress(), DefaultBlockParameterName.LATEST).send();
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+    
+    BigDecimal balance = toTokensWithDecimals(ethGetBalance.getBalance());
+    return balance;
   }
 
   public EthBalance getEthBalance(Community community) {

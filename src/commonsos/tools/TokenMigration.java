@@ -175,7 +175,7 @@ public class TokenMigration {
     if (balance.compareTo(BigDecimal.TEN.pow(4)) < 0) {
       BigInteger amount = BigInteger.TEN.pow(18 + 5);
       System.out.println(String.format("Transfer ether to main wallet [wallet address=%s, transferAmount=%d]", c.getMainWalletAddress(), amount));
-      blockchainService.transferEther(credentials, c.getMainWalletAddress(), amount);
+      blockchainService.transferEther(credentials, c.getMainWalletAddress(), amount, true);
       System.out.println(String.format("Finish transfer ether to main wallet [wallet address=%s, transferAmount=%d]", c.getMainWalletAddress(), amount));
     }
     

@@ -323,7 +323,7 @@ public class TokenTransactionService {
     TokenTransaction transaction = result.get();
 
     if (transaction.getBlockchainCompletedAt() != null) {
-      log.info(format("Transaction %s already marked completed at %s", transaction.getBlockchainTransactionHash(), transaction.getBlockchainCompletedAt()));
+      log.info(format("TokenTransaction %s already marked completed at %s", transaction.getBlockchainTransactionHash(), transaction.getBlockchainCompletedAt()));
       return;
     }
 
@@ -331,6 +331,6 @@ public class TokenTransactionService {
     transaction.setBlockchainCompletedAt(now());
     repository.update(transaction);
 
-    log.info(format("Transaction %s marked completed", transaction.getBlockchainTransactionHash()));
+    log.info(format("TokenTransaction %s marked completed", transaction.getBlockchainTransactionHash()));
   }
 }

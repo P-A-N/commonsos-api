@@ -94,7 +94,7 @@ public class CommunityService {
     Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
     
     // transfer ether to main wallet
-    blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), initialWei);
+    blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), initialWei, true);
     // create token
     String tokenAddress = blockchainService.createToken(mainCredentials, command.getTokenSymbol(), command.getTokenName());
     

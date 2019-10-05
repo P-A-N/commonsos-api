@@ -50,6 +50,12 @@ public class AdminUtil {
     return false;
   }
   
+  public static boolean isCreatableEthTransaction(Admin admin) {
+    Role adminRole = Role.of(admin.getRole().getId());
+    if (adminRole == NCL) return true;
+    return false;
+  }
+  
   public static boolean isCreatableTokenTransaction(Admin admin, Long targetCommunityId) {
     Role adminRole = Role.of(admin.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();

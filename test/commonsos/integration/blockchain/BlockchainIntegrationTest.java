@@ -11,11 +11,9 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
-import java.io.File;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +22,6 @@ import java.util.logging.Logger;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.subethamail.wiser.WiserMessage;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
@@ -54,8 +50,9 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // create community
     ncl = create(new Admin().setEmailAddress("ncl@test.com").setPasswordHash(hash("passpass")).setRole(NCL));
     community1 = createCommunity("community1", "c1", "community1");
-    checkBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
-    checkBalanceOfCommunity(community1, FEE, equalTo(0));
+    checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
+    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0));
+
     community2 = createCommunity("community2", "c2", "community2");
     com1Admin = create(new Admin().setEmailAddress("com1Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community1));
     com2Admin = create(new Admin().setEmailAddress("com2Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community2));
@@ -63,20 +60,20 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // create user
     user1 = createUser("user1_test", "passpass", "user1@test.com", true, asList(community1.getId()));
     user2 = createUser("user2_test", "passpass", "user2@test.com", true, asList(community1.getId(), community2.getId()));
-    checkBalance(user1, community1, 0);
-    checkBalance(user2, community1, 0);
-    checkBalance(user2, community2, 0);
+    checkBalanceOfUser(user1, community1, 0);
+    checkBalanceOfUser(user2, community1, 0);
+    checkBalanceOfUser(user2, community2, 0);
 
     // transfer token to user from admin
     transferTokenFromAdmin(com1Admin, user1, 100);
-    waitUntilTransactionCompleted(community1, user1, 100);
-    checkBalance(user1, community1, 100);
+    waitUntilTokenTransactionCompleted();
+    checkBalanceOfUser(user1, community1, 100);
 
     // transfer token to user from user
-    transferToken(user1, user2, community1, 10, 90);
-    waitUntilTransactionCompleted();
-    checkBalance(user1, community1, 90);
-    checkBalance(user2, community1, 10);
+    transferTokenFromUser(user1, user2, community1, 10, 90);
+    waitUntilTokenTransactionCompleted();
+    checkBalanceOfUser(user1, community1, 90);
+    checkBalanceOfUser(user2, community1, 10);
     
     // change a community of user
     changeCommunity(user1, asList(community2.getId()));
@@ -84,24 +81,54 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // transfer token to user from admin
     transferTokenFromAdmin(com2Admin, user1, 100);
-    waitUntilTransactionCompleted(community2, user1, 100);
-    checkBalance(user1, community2, 100);
+    waitUntilTokenTransactionCompleted();
+    checkBalanceOfUser(user1, community2, 100);
 
     // transfer token to user from user
-    transferToken(user1, user2, community2, 20, 80);
-    waitUntilTransactionCompleted();
-    checkBalance(user1, community2, 80);
-    checkBalance(user2, community2, 20);
+    transferTokenFromUser(user1, user2, community2, 20, 80);
+    waitUntilTokenTransactionCompleted();
+    checkBalanceOfUser(user1, community2, 80);
+    checkBalanceOfUser(user2, community2, 20);
 
     // change a community of user
     changeCommunity(user1, asList(community1.getId(), community2.getId()));
-    waitUntilTransactionCompleted();
-    checkBalance(user1, community1, 90);
-    checkBalance(user1, community2, 80);
+    waitUntilTokenTransactionCompleted();
+    checkBalanceOfUser(user1, community1, 90);
+    checkBalanceOfUser(user1, community2, 80);
+
+    // transfer ether to community
+    checkEthBalanceOfCommunity(community1, lessThanOrEqualTo(1F));
+    transferEtherToCommunity(community1, "1");
+    waitUntilEthTransactionCompleted();
+    checkEthBalanceOfCommunity(community1, greaterThan(1F));
+  }
+  
+  private Community createCommunity(
+      String communityName,
+      String tokenSymbol,
+      String tokenName) throws Exception {
+    log.info(String.format("creating community started. [communityName=%s]", communityName));
+
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
     
-    // get TokenBalance of main wallet
-    checkBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
-    checkBalanceOfCommunity(community1, FEE, equalTo(0));
+    // create community
+    int id = given()
+      .multiPart("communityName", communityName)
+      .multiPart("tokenName", tokenName)
+      .multiPart("tokenSymbol", tokenSymbol)
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/admin/communities")
+      .then().statusCode(200)
+      .body("communityName", equalTo(communityName))
+      .body("tokenName", equalTo(tokenName))
+      .body("tokenSymbol", equalTo(tokenSymbol))
+      .extract().path("communityId");
+    
+    Community community = emService.get().find(Community.class, (long) id);
+    
+    update(community.setStatus(PUBLIC));
+    log.info(String.format("creating community completed. [communityName=%s]", communityName));
+    return community;
   }
 
   private User createUser(
@@ -144,47 +171,6 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     User user = emService.get().find(User.class, (long) userId);
     return user;
   }
-  
-  private void transferEtherToMainWallet(Community community) throws Exception {
-    URL url = this.getClass().getResource("/blockchain/UTC--2018-11-08T09-10-38.833302600Z--766a1c4737970feddde6f2b8659fca05bd0339ab");
-    Credentials commonsos = WalletUtils.loadCredentials("pass1", new File(url.toURI()));
-    
-    BigInteger initialEtherAmountForAdmin = BigInteger.TEN.pow(20);
-    blockchainService.transferEther(commonsos, community.getMainWalletAddress(), initialEtherAmountForAdmin);
-  }
-  
-  private Community createCommunity(
-      String communityName,
-      String tokenSymbol,
-      String tokenName) throws Exception {
-    log.info(String.format("creating community started. [communityName=%s]", communityName));
-
-    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
-    
-    // create community
-    int id = given()
-      .multiPart("communityName", communityName)
-      .multiPart("tokenName", tokenName)
-      .multiPart("tokenSymbol", tokenSymbol)
-      .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities")
-      .then().statusCode(200)
-      .body("communityName", equalTo(communityName))
-      .body("tokenName", equalTo(tokenName))
-      .body("tokenSymbol", equalTo(tokenSymbol))
-      .extract().path("communityId");
-    
-    Community community = emService.get().find(Community.class, (long) id);
-    
-    update(community.setStatus(PUBLIC));
-    log.info(String.format("creating community completed. [communityName=%s]", communityName));
-
-    log.info(String.format("transfer ether to main wallet started. [main wallet=%s]", community.getMainWalletAddress()));
-    transferEtherToMainWallet(community);
-    log.info(String.format("transfer ether to main wallet completed. [username=%s]", community.getMainWalletAddress()));
-    
-    return community;
-  }
 
   private void transferTokenFromAdmin(Admin admin, User to, int amount) {
     sessionId = loginAdmin(admin.getEmailAddress(), "passpass");
@@ -203,12 +189,12 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .then().statusCode(200);
   }
 
-  private void transferToken(User from, User to, Community community, int amount, float expectAmount) {
+  private void transferTokenFromUser(User from, User to, Community community, int amount, float expectAmount) {
     Matcher<Float> matcher = equalTo(expectAmount);
-    transferToken(from, to, community, amount, matcher);
+    transferTokenFromUser(from, to, community, amount, matcher);
   }
 
-  private void transferToken(User from, User to, Community community, int amount, Matcher<?> expectAmount) {
+  private void transferTokenFromUser(User from, User to, Community community, int amount, Matcher<?> expectAmount) {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", to.getId());
@@ -228,12 +214,22 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("transfer token completed. [from=%s, to=%s, community=%s]", from.getUsername(), to.getUsername(), community.getName()));
   }
   
-  private void checkBalance(User user, Community community, int expected) {
-    sessionId = loginApp(user.getUsername(), "passpass");
-    given().cookie("JSESSIONID", sessionId)
-      .when().get("/app/v{v}/balance?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
-      .then().statusCode(200).body("balance", equalTo(expected));
-    log.info(String.format("check balance ok. [user=%s, community=%s, balance=%d]", user.getUsername(), community.getName(), expected));
+  private void transferEtherToCommunity(Community community, String amount) throws Exception {
+    log.info(String.format("transfer ether to main wallet started. [main wallet=%s]", community.getMainWalletAddress()));
+
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("beneficiaryCommunityId", community.getId());
+    requestParam.put("amount", amount);
+
+    // send ether to community
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/transactions/eth")
+      .then().statusCode(200);
+    
+    log.info(String.format("transfer ether to main wallet completed. [username=%s]", community.getMainWalletAddress()));
   }
   
   private void changeCommunity(User user, List<Long> communityList) {
@@ -250,50 +246,62 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
   }
   
-  private void checkBalanceOfCommunity(Community com, WalletType walletType, Matcher<?> expect) {
+  private void checkBalanceOfUser(User user, Community community, int expected) {
+    sessionId = loginApp(user.getUsername(), "passpass");
+    given().cookie("JSESSIONID", sessionId)
+      .when().get("/app/v{v}/balance?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
+      .then().statusCode(200).body("balance", equalTo(expected));
+    log.info(String.format("check balance ok. [user=%s, community=%s, balance=%d]", user.getUsername(), community.getName(), expected));
+  }
+  
+  private void checkTokenBalanceOfCommunity(Community com, WalletType walletType, Matcher<?> expect) {
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
 
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin/balance?communityId={id}&wallet={wallet}", com.getId(), walletType.name())
       .then().statusCode(200)
-      .body("balance", expect)
-      .extract().path("balance");
+      .body("balance", expect);
+  }
+  
+  private void checkEthBalanceOfCommunity(Community com, Matcher<?> expect) {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/transactions/eth/balance?communityId={id}", com.getId())
+      .then().statusCode(200)
+      .body("balance", expect);
   }
 
-  private void waitUntilTransactionCompleted() throws Exception {
-    log.info(String.format("waiting for transaction."));
+  private void waitUntilTokenTransactionCompleted() throws Exception {
+    log.info(String.format("waiting for token transaction."));
     for (int i = 0; i < 60; i++) {
       long count = emService.get().createQuery(
           "SELECT count(t) FROM TokenTransaction t WHERE blockchainCompletedAt is null", Long.class)
           .getSingleResult();
       if(count == 0) {
-        log.info(String.format("transaction completed."));
+        log.info(String.format("token transaction completed."));
         return;
       }
       Thread.sleep(1000);
     }
-    throw new RuntimeException("transaction didn't finish in 60 seconds.");
+    throw new RuntimeException("token transaction didn't finish in 60 seconds.");
   }
-  
-  private void waitUntilTransactionCompleted(Community community, User user, int expected) throws Exception {
-    log.info(String.format("waiting for transaction."));
-    sessionId = loginApp(user.getUsername(), "passpass");
 
+  private void waitUntilEthTransactionCompleted() throws Exception {
+    log.info(String.format("waiting for eth transaction."));
     for (int i = 0; i < 60; i++) {
-      int balanceInt = given()
-        .cookie("JSESSIONID", sessionId)
-        .when().get("/app/v{v}/balance?communityId={id}", APP_API_VERSION.getMajor(), community.getId())
-        .then().statusCode(200)
-        .extract().path("balance");
-      BigDecimal balance = BigDecimal.valueOf(balanceInt);
-      if(balance.compareTo(BigDecimal.valueOf(expected)) == 0) {
-        log.info(String.format("transaction completed."));
+      long count = emService.get().createQuery(
+          "SELECT count(t) FROM EthTransaction t WHERE blockchainCompletedAt is null", Long.class)
+          .getSingleResult();
+      if(count == 0) {
+        log.info(String.format("eth transaction completed."));
         return;
       }
       Thread.sleep(1000);
     }
-    throw new RuntimeException("transaction didn't finish in 60 seconds.");
+    throw new RuntimeException("eth transaction didn't finish in 60 seconds.");
   }
   
   private void waitUntilAllowed(User user, Community community) throws Exception {
