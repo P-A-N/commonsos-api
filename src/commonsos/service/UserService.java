@@ -21,6 +21,7 @@ import commonsos.Configuration;
 import commonsos.JobService;
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.SearchUserForAdminCommand;
+import commonsos.command.admin.UpdateUserNameByAdminCommand;
 import commonsos.command.app.CreateUserTemporaryCommand;
 import commonsos.command.app.LastViewTimeUpdateCommand;
 import commonsos.command.app.MobileDeviceUpdateCommand;
@@ -55,6 +56,7 @@ import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.image.QrCodeService;
 import commonsos.session.UserSession;
+import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.TokenTransactionUtil;
@@ -392,6 +394,18 @@ public class UserService {
   }
 
   public User updateUserName(User user, UserNameUpdateCommand command) {
+    ValidateUtil.validateUsername(command.getUsername());
+    if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
+    
+    userRepository.lockForUpdate(user);
+    user.setUsername(command.getUsername());
+    return userRepository.update(user);
+  }
+
+  public User updateUserNameByAdmin(Admin admin, UpdateUserNameByAdminCommand command) {
+    User user = userRepository.findStrictById(command.getId());
+    if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
+    
     ValidateUtil.validateUsername(command.getUsername());
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
     

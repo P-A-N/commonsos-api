@@ -117,6 +117,10 @@ public class AdminUtil {
     return false;
   }
   
+  public static boolean isUpdatableUser(Admin admin, User target) {
+    return isSeeableUser(admin, target);
+  }
+  
   public static boolean isSeeableCommunity(Admin admin, Long communityId) {
     Role adminRole = Role.of(admin.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
