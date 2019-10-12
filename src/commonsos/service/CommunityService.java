@@ -1,5 +1,7 @@
 package commonsos.service;
 
+import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
+import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
@@ -95,6 +97,7 @@ public class CommunityService {
     
     // transfer ether to main wallet
     blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), initialWei, true);
+    
     // create token
     String tokenAddress = blockchainService.createToken(mainCredentials, command.getTokenSymbol(), command.getTokenName());
     
@@ -112,6 +115,10 @@ public class CommunityService {
         .setFeeWalletAddress(feeCredentials.getAddress())
         .setFee(fee);
     community = repository.create(community);
+    
+    // approve main wallet from fee wallet
+    blockchainService.transferEther(systemCredentials, feeCredentials.getAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE), true);
+    blockchainService.approveFromFeeWallet(community);
     
     // set adminPageUrl
     repository.lockForUpdate(community);

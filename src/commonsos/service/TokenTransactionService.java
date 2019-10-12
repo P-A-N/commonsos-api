@@ -6,6 +6,7 @@ import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -211,7 +212,12 @@ public class TokenTransactionService {
     }
     TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());
     if (tokenBalance.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
-
+    
+    BigDecimal feeAmount = command.getAmount().multiply(community.getFee().divide(BigDecimal.valueOf(100)));
+    if (community.getFee().compareTo(ZERO) > 0) {
+      if (tokenBalance.getBalance().compareTo(command.getAmount().add(feeAmount)) < 0) throw new DisplayableException("error.notEnoughFundsForFee");
+    }
+    
     // create transaction
     TokenTransaction transaction = new TokenTransaction()
       .setCommunityId(command.getCommunityId())
@@ -224,14 +230,35 @@ public class TokenTransactionService {
 
     repository.create(transaction);
 
-    String blockchainTransactionHash = blockchainService.transferTokens(user, beneficiary, command.getCommunityId(), transaction.getAmount());
+    String blockchainTransactionHash = blockchainService.transferTokensFromUserToUser(user, beneficiary, command.getCommunityId(), transaction.getAmount());
     
     repository.lockForUpdate(transaction);
     transaction.setBlockchainTransactionHash(blockchainTransactionHash);
     repository.update(transaction);
     
     blockchainEventService.checkTransaction(blockchainTransactionHash);
+    
+    // create transaction for fee
+    if (community.getFee().compareTo(ZERO) > 0) {
+      TokenTransaction feeTransaction = new TokenTransaction()
+        .setCommunityId(command.getCommunityId())
+        .setRemitterUserId(user.getId())
+        .setAmount(feeAmount)
+        .setFee(community.getFee())
+        .setFeeTransaction(true)
+        .setWalletDivision(WalletType.FEE);
 
+      repository.create(feeTransaction);
+
+      String blockchainTransactionHashOfFee = blockchainService.transferTokensFee(user, command.getCommunityId(), feeTransaction.getAmount());
+      
+      repository.lockForUpdate(feeTransaction);
+      feeTransaction.setBlockchainTransactionHash(blockchainTransactionHashOfFee);
+      repository.update(feeTransaction);
+      
+      blockchainEventService.checkTransaction(blockchainTransactionHashOfFee);
+    }
+    
     // create message
     MessageThread thread = null;
     if (command.getAdId() != null) {

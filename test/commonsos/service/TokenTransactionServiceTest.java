@@ -84,7 +84,7 @@ public class TokenTransactionServiceTest {
     User user = new User().setId(id("user")).setUsername("user").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     User beneficiary = new User().setId(id("beneficiary")).setUsername("beneficiary").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     Ad ad = new Ad().setPoints(new BigDecimal("10")).setCommunityId(id("community")).setCreatedUserId(id("user")).setType(WANT);
-    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenSymbol("sys"));
+    TokenBalance tokenBalance = new TokenBalance().setBalance(new BigDecimal("10.1")).setToken(new CommunityToken().setTokenSymbol("sys"));
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);
     when(adRepository.findStrict(any())).thenReturn(ad);
@@ -123,9 +123,14 @@ public class TokenTransactionServiceTest {
     beneficiary.setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     
     // not enough funds
-    tokenBalance.setBalance(new BigDecimal("9"));
-    assertThrows(DisplayableException.class, () -> service.create(user, command));
-    tokenBalance.setBalance(new BigDecimal("10"));
+    command.setAmount(new BigDecimal("20"));
+    assertThrows(DisplayableException.class, () -> service.create(user, command), "error.notEnoughFunds");
+    command.setAmount(new BigDecimal("10"));
+
+    // not enough funds for fee
+    command.setAmount(new BigDecimal("10.1"));
+    assertThrows(DisplayableException.class, () -> service.create(user, command), "error.notEnoughFundsForFee");
+    command.setAmount(new BigDecimal("10"));
     
     // nothing to throw
     service.create(user, command);

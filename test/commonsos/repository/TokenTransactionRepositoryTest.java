@@ -65,6 +65,8 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getFee().stripTrailingZeros()).isEqualTo(new BigDecimal("1.5"));
     assertThat(result.getWalletDivision()).isEqualTo(MAIN);
     assertThat(result.getBlockchainTransactionHash()).isEqualTo("blockchain id");
+    assertThat(result.isFromAdmin()).isFalse();
+    assertThat(result.isFeeTransaction()).isFalse();
   }
 
   @Test

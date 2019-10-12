@@ -2,9 +2,11 @@ package commonsos.integration.app.transaction;
 
 import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -18,11 +20,13 @@ import org.junit.jupiter.api.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 
 public class PostTransactionCreateTest extends IntegrationTest {
 
@@ -33,6 +37,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
   private User otherCommunityUser;
   private Ad giveAd;
   private Ad wantAd;
+  private Admin ncl;
   private String sessionId;
   
   @BeforeEach
@@ -45,20 +50,23 @@ public class PostTransactionCreateTest extends IntegrationTest {
     giveAd =  create(new Ad().setCreatedUserId(adCreator.getId()).setType(AdType.GIVE).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
     wantAd =  create(new Ad().setCreatedUserId(adCreator.getId()).setType(AdType.WANT).setCommunityId(community.getId()).setPoints(BigDecimal.TEN).setTitle("title"));
 
+    ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("pass")).setRole(NCL));
+
     sessionId = loginApp("user", "pass");
   }
   
   @Test
-  public void transactionForAd_give() {
+  public void transactionForAd_give() throws Exception {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId()); // from user to adCreator
     requestParam.put("description", "description");
-    requestParam.put("transactionFee", "1.0");
-    requestParam.put("amount", "10");
+    requestParam.put("transactionFee", "0");
+    requestParam.put("amount", "9");
     requestParam.put("adId", giveAd.getId());
     
-    // call api
+    // create token with no fee
+    update(community.setFee(BigDecimal.ZERO));
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
@@ -68,22 +76,62 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .body("balance", notNullValue());
     
     // verify db transaction
-    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId", TokenTransaction.class)
+    TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId ORDER BY id DESC", TokenTransaction.class)
         .setParameter("adId", giveAd.getId())
-        .getSingleResult();
+        .setMaxResults(1).getSingleResult();
     assertThat(transaction.getCommunityId()).isEqualTo(community.getId());
     assertThat(transaction.getRemitterUserId()).isEqualTo(user.getId());
     assertThat(transaction.getBeneficiaryUserId()).isEqualTo(adCreator.getId());
-    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
+    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(9));
     assertThat(transaction.getDescription()).isEqualTo("description");
-    assertThat(transaction.getFee()).isEqualByComparingTo(BigDecimal.ONE);
+    assertThat(transaction.getFee()).isEqualByComparingTo(BigDecimal.ZERO);
     assertThat(transaction.isRedistributed()).isFalse();
+
+    // verify db transaction of fee
+    Long countFeeTransaction = emService.get().createQuery("SELECT count(*) FROM TokenTransaction WHERE isFeeTransaction is true", Long.class).getSingleResult();
+    assertThat(countFeeTransaction).isEqualTo(0);
     
     // verify db message
     Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
-    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ10 symbolを送信しました。\n【コメント】\ndescription");
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ9 symbolを送信しました。\n【コメント】\ndescription");
+
+    // create token with fee
+    update(community.setFee(BigDecimal.ONE));
+    requestParam.put("transactionFee", "1.0");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
+      .then().statusCode(200)
+      .body("communityId", equalTo(community.getId().intValue()))
+      .body("balance", notNullValue());
+
+    // verify db transaction
+    transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId ORDER BY id DESC", TokenTransaction.class)
+        .setParameter("adId", giveAd.getId())
+        .setMaxResults(1).getSingleResult();
+    assertThat(transaction.getFee()).isEqualByComparingTo(BigDecimal.ONE);
     
-    // call api
+    // verify db transaction of fee
+    TokenTransaction feeTransaction = emService.get().createQuery("FROM TokenTransaction WHERE isFeeTransaction is true ORDER BY id DESC", TokenTransaction.class)
+        .setMaxResults(1).getSingleResult();
+    assertThat(feeTransaction.getCommunityId()).isEqualTo(community.getId());
+    assertThat(feeTransaction.getRemitterUserId()).isEqualTo(user.getId());
+    assertThat(feeTransaction.getBeneficiaryUserId()).isNull();
+    assertThat(feeTransaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(0.09));
+    assertThat(feeTransaction.getFee()).isEqualByComparingTo(BigDecimal.ONE);
+    assertThat(feeTransaction.getWalletDivision()).isEqualTo(WalletType.FEE);
+    assertThat(feeTransaction.isRedistributed()).isFalse();
+    
+    // get transaction with admin
+    sessionId = loginAdmin(ncl.getEmailAddress(), "pass");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/transactions/coin?communityId={comId}&wallet={wallet}", community.getId(), "fee")
+      .then().statusCode(200)
+      .body("transactionList.amount",  contains(0.09F));
+    
+    // create transaction from adCreator
     sessionId = loginApp("adCreator", "pass");
     requestParam.put("beneficiaryId", user.getId()); // from adCreator to user
     given()
@@ -123,7 +171,6 @@ public class PostTransactionCreateTest extends IntegrationTest {
       .when().post("/app/v{v}/transactions", APP_API_VERSION.getMajor())
       .then().statusCode(468)
       .body("key", equalTo("error.userIsNotCommunityMember"));
-
   }
 
   @Test
@@ -135,7 +182,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("beneficiaryId", user.getId()); // from adCreator to user
     requestParam.put("description", "description");
     requestParam.put("transactionFee", "1");
-    requestParam.put("amount", "10");
+    requestParam.put("amount", "9");
     requestParam.put("adId", wantAd.getId());
     
     // call api
@@ -153,7 +200,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
         .getSingleResult();
     assertThat(transaction.getRemitterUserId()).isEqualTo(adCreator.getId());
     assertThat(transaction.getBeneficiaryUserId()).isEqualTo(user.getId());
-    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.TEN);
+    assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(9));
     assertThat(transaction.getDescription()).isEqualTo("description");
     
     // call api
@@ -179,7 +226,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("transactionFee", "1");
-    requestParam.put("amount", "10");
+    requestParam.put("amount", "9");
     requestParam.put("adId", giveAd.getId());
     
     // call api
@@ -228,7 +275,7 @@ public class PostTransactionCreateTest extends IntegrationTest {
     requestParam.put("beneficiaryId", adCreator.getId());
     requestParam.put("description", "description");
     requestParam.put("transactionFee", "1");
-    requestParam.put("amount", "9.9");
+    requestParam.put("amount", "8.9");
     requestParam.put("adId", null);
     
     // call api
@@ -246,13 +293,13 @@ public class PostTransactionCreateTest extends IntegrationTest {
         .getSingleResult();
     assertThat(transaction.getRemitterUserId()).isEqualTo(user.getId());
     assertThat(transaction.getBeneficiaryUserId()).isEqualTo(adCreator.getId());
-    assertThat(transaction.getAmount()).isEqualByComparingTo(new BigDecimal("9.9"));
+    assertThat(transaction.getAmount()).isEqualByComparingTo(new BigDecimal("8.9"));
     assertThat(transaction.getDescription()).isEqualTo("description");
     assertThat(transaction.getAdId()).isNull();
 
     // verify db message
     Message message = emService.get().createQuery("FROM Message", Message.class).getSingleResult();
-    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ9.9 symbolを送信しました。\n【コメント】\ndescription");
+    assertThat(message.getText()).isEqualTo("userさんからadCreatorさんへ8.9 symbolを送信しました。\n【コメント】\ndescription");
   }
 
   @Test

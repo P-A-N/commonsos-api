@@ -26,6 +26,7 @@ public class TokenTransaction extends AbstractEntity {
   private Long beneficiaryUserId;
   private BigDecimal fee;
   private boolean isFromAdmin;
+  private boolean isFeeTransaction;
   private Long remitterAdminId;
   @Enumerated(value = STRING)
   private WalletType walletDivision;
