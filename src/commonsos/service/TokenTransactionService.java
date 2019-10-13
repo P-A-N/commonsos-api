@@ -7,19 +7,25 @@ import static java.time.Instant.now;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableMap;
 
+import commonsos.Configuration;
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
-import commonsos.command.app.TransactionCreateCommand;
+import commonsos.command.app.CreateTokenTransactionFromUserCommand;
+import commonsos.command.batch.CreateTokenTransactionForRedistributionCommand;
+import commonsos.command.batch.RedistributionBatchCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -69,6 +75,7 @@ public class TokenTransactionService {
   @Inject private BlockchainEventService blockchainEventService;
   @Inject private SyncService syncService;
   @Inject private PushNotificationService pushNotificationService;
+  @Inject private Configuration config;
 
   public TokenBalance getTokenBalanceForAdmin(Admin admin, Long communityId, WalletType walletType) {
     if (!AdminUtil.isSeeableCommunity(admin, communityId)) throw new ForbiddenException();
@@ -152,6 +159,7 @@ public class TokenTransactionService {
     TokenTransactionView view = new TokenTransactionView()
       .setCommunityId(transaction.getCommunityId())
       .setIsFromAdmin(transaction.isFromAdmin())
+      .setIsFeeTransaction(transaction.isFeeTransaction())
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
       .setCreatedAt(transaction.getCreatedAt())
@@ -172,6 +180,7 @@ public class TokenTransactionService {
       .setCommunityId(transaction.getCommunityId())
       .setWallet(transaction.getWalletDivision())
       .setIsFromAdmin(transaction.isFromAdmin())
+      .setIsFeeTransaction(transaction.isFeeTransaction())
       .setAmount(transaction.getAmount())
       .setCreatedAt(transaction.getCreatedAt())
       .setCompleted(transaction.getBlockchainCompletedAt() != null)
@@ -194,7 +203,7 @@ public class TokenTransactionService {
     return view;
   }
 
-  public TokenTransaction create(User user, TransactionCreateCommand command) {
+  public TokenTransaction create(User user, CreateTokenTransactionFromUserCommand command) {
     // validation
     if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
     if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
@@ -310,9 +319,7 @@ public class TokenTransactionService {
       .setFromAdmin(true)
       .setRemitterAdminId(admin.getId())
       .setWalletDivision(command.getWallet())
-      .setAmount(command.getAmount())
-      .setFee(ZERO)
-      .setRedistributed(true);
+      .setAmount(command.getAmount());
 
     repository.create(transaction);
 
@@ -339,6 +346,60 @@ public class TokenTransactionService {
     pushNotificationService.send(beneficiary, messageText, params);
 
     return transaction;
+  }
+
+  public void create(RedistributionBatchCommand batchCommand) {
+    Map<Community, List<CreateTokenTransactionForRedistributionCommand>> commandMap = batchCommand.getCommandMap();
+    commandMap.forEach((com, commandList) -> {
+      // get sum of fees
+      List<TokenTransaction> feeTranList = repository.searchUnredistributedFeeTransaction(com.getId());
+      BigDecimal feeSum = feeTranList.stream().map(TokenTransaction::getAmount).reduce(ZERO, BigDecimal::add);
+      
+      // mark transaction as redistributed
+      feeTranList.forEach(feeTran -> {
+        repository.lockForUpdate(feeTran);
+        feeTran.setRedistributed(true);
+        repository.update(feeTran);
+      });
+      
+      // create token transaction of redistribution
+      List<TokenTransaction> tranList = new ArrayList<>();
+      commandList.forEach(tranCommand -> {
+        String minimumNumberOfDecimalsForRedistribution = config.minimumNumberOfDecimalsForRedistribution();
+        int scale = Integer.parseInt(minimumNumberOfDecimalsForRedistribution);
+        
+        BigDecimal amount = feeSum.multiply(tranCommand.getRate().divide(BigDecimal.valueOf(100L))).setScale(scale, BigDecimal.ROUND_DOWN);
+        if (amount.compareTo(ZERO) <= 0) return;
+        
+        TokenTransaction transaction = new TokenTransaction()
+          .setCommunityId(com.getId())
+          .setBeneficiaryUserId(tranCommand.getUser().getId())
+          .setFromAdmin(true)
+          .setRedistributionTransaction(true)
+          .setWalletDivision(WalletType.FEE)
+          .setAmount(amount);
+        repository.create(transaction);
+        
+        tranList.add(transaction);
+      });
+      
+      // TODO commit and start new transaction
+      
+      // create transaction to blockchain
+      Map<Long, User> userMap = commandList.stream().map(CreateTokenTransactionForRedistributionCommand::getUser)
+          .collect(Collectors.toMap(User::getId, Function.identity()));
+      tranList.forEach(tran -> {
+        String blockchainTransactionHash = blockchainService.transferTokensFromCommunity(com, WalletType.FEE, userMap.get(tran.getBeneficiaryUserId()), tran.getAmount());
+
+        repository.lockForUpdate(tran);
+        tran.setBlockchainTransactionHash(blockchainTransactionHash);
+        repository.update(tran);
+        
+        blockchainEventService.checkTransaction(blockchainTransactionHash);
+        
+        // TODO commit and start new transaction
+      });
+    });
   }
 
   public void markTransactionCompleted(String blockChainTransactionHash) {

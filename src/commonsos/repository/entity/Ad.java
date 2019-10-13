@@ -11,13 +11,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name="ads")
-@Getter @Setter @Accessors(chain=true) @ToString
+@Getter @Setter @Accessors(chain=true) @ToString @EqualsAndHashCode(callSuper=false, of= {"id"})
 public class Ad extends AbstractEntity {
   @Id @GeneratedValue(strategy = IDENTITY) private Long id;
   private Long createdUserId;

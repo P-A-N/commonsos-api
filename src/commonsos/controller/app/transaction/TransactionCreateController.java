@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.command.app.TransactionCreateCommand;
+import commonsos.command.app.CreateTokenTransactionFromUserCommand;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.TokenTransactionService;
@@ -27,7 +27,7 @@ public class TransactionCreateController extends AfterAppLoginController {
 
   @Override
   protected UserTokenBalanceView handleAfterLogin(User user, Request request, Response response) {
-    TransactionCreateCommand command = gson.fromJson(request.body(), TransactionCreateCommand.class);
+    CreateTokenTransactionFromUserCommand command = gson.fromJson(request.body(), CreateTokenTransactionFromUserCommand.class);
     tokenTransactionService.create(user, command);
     TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());
     

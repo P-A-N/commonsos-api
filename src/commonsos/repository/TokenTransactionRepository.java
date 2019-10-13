@@ -59,6 +59,17 @@ public class TokenTransactionRepository extends Repository {
     return resultList;
   }
 
+  public List<TokenTransaction> searchUnredistributedFeeTransaction(Long communityId) {
+    List<TokenTransaction> resultList = em()
+      .createQuery("FROM TokenTransaction WHERE communityId = :communityId " +
+          "AND isFeeTransaction is true " +
+          "AND redistributed is false " +
+          "ORDER BY id", TokenTransaction.class)
+      .setParameter("communityId", communityId)
+      .getResultList();
+    return resultList;
+  }
+
   public TokenTransaction update(TokenTransaction transaction) {
     checkLocked(transaction);
     return em().merge(transaction);
@@ -102,7 +113,6 @@ public class TokenTransactionRepository extends Repository {
     
     return benefitAmount.subtract(remitAmount);
   }
-
 
   public BigDecimal pendingTransactionsAmount(Long userId, Long communityId) {
     BigDecimal amount = em()

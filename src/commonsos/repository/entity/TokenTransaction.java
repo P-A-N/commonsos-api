@@ -12,13 +12,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name="token_transactions")
-@Getter @Setter @Accessors(chain=true) @ToString
+@Getter @Setter @Accessors(chain=true) @ToString @EqualsAndHashCode(callSuper=false, of= {"id"})
 public class TokenTransaction extends AbstractEntity {
   @Id @GeneratedValue(strategy=IDENTITY) private Long id;
   private Long communityId;
@@ -27,6 +28,7 @@ public class TokenTransaction extends AbstractEntity {
   private BigDecimal fee;
   private boolean isFromAdmin;
   private boolean isFeeTransaction;
+  private boolean isRedistributionTransaction;
   private Long remitterAdminId;
   @Enumerated(value = STRING)
   private WalletType walletDivision;

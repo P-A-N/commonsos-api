@@ -61,7 +61,7 @@ public class BlockchainService {
   public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("4700000");
   public static final BigInteger GAS_PRICE = new BigInteger("18000000000");
 
-  private static final int NUMBER_OF_DECIMALS = 18;
+  public static final int NUMBER_OF_DECIMALS = 18;
   private static final BigInteger MAX_UINT_256 = new BigInteger("2").pow(256);
   public static final BigInteger INITIAL_TOKEN_AMOUNT = MAX_UINT_256.divide(TEN.pow(NUMBER_OF_DECIMALS)).subtract(ONE);
 

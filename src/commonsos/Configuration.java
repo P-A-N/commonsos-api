@@ -97,6 +97,10 @@ public class Configuration {
     return environmentVariable("INITIAL_WEI", "1000000000000000000");
   }
 
+  public String minimumNumberOfDecimalsForRedistribution() {
+    return environmentVariable("MINIMUM_NUMBER_OF_DECIMALS_FOR_REDISTRIBUTION", "2");
+  }
+
   public String aesKey() {
     return environmentVariable("AES_KEY", "commonsos_aes_256bid_key_uSwVjWP");
   }

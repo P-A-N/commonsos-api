@@ -234,6 +234,10 @@ public class UserRepository extends Repository {
     
     return resultList;
   }
+  
+  public ResultList<User> searchAll(PaginationCommand pagination) {
+    return search(null, null, null, pagination);
+  }
 
   public User update(User user) {
     checkLocked(user);

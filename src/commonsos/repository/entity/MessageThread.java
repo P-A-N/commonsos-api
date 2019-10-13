@@ -13,13 +13,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Entity @Table(name="message_threads")
-@Getter @Setter @Accessors(chain=true) @ToString
+@Getter @Setter @Accessors(chain=true) @ToString @EqualsAndHashCode(callSuper=false, of= {"id"})
 public class MessageThread extends AbstractEntity {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) Long id;
   private Long adId;

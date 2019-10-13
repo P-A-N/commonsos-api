@@ -8,7 +8,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 @Getter @Setter @Accessors(chain=true) @ToString
-public class TransactionCreateCommand {
+public class CreateTokenTransactionFromUserCommand {
   private Long communityId;
   private Long beneficiaryId;
   private String description;

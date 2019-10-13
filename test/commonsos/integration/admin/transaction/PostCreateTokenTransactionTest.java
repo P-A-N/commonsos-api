@@ -11,7 +11,6 @@ import static commonsos.repository.entity.WalletType.MAIN;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.ONE;
 import static java.math.BigDecimal.TEN;
-import static java.math.BigDecimal.ZERO;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -77,8 +76,7 @@ public class PostCreateTokenTransactionTest extends IntegrationTest {
     assertThat(transaction.getWalletDivision()).isEqualTo(MAIN);
     assertThat(transaction.getBeneficiaryUserId()).isEqualTo(user_com1.getId());
     assertThat(transaction.getAmount()).isEqualByComparingTo(TEN);
-    assertThat(transaction.getFee()).isEqualByComparingTo(ZERO);
-    assertThat(transaction.isRedistributed()).isTrue();
+    assertThat(transaction.isRedistributed()).isFalse();
 
     // verify db message
     Message message = emService.get().createQuery("FROM Message ORDER BY id DESC", Message.class).setMaxResults(1).getSingleResult();

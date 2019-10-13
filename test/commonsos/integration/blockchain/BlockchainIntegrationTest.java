@@ -68,50 +68,64 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalanceOfUser(user2, community2, equalTo(0));
 
     // transfer token to user from admin (main)
-    transferTokenFromAdmin(com1Admin, user1, MAIN, 100);
+    transferTokenFromAdmin(com1Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(100));
+    checkBalanceOfUser(user1, community1, equalTo(1000));
 
     // transfer token to user from user
-    transferTokenFromUser(user1, user2, community1, 10, equalTo(89.9F));
+    transferTokenFromUser(user1, user2, community1, 100, equalTo(899F));
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(89.9F));
-    checkBalanceOfUser(user2, community1, equalTo(10));
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.1F));
+    checkBalanceOfUser(user1, community1, equalTo(899));
+    checkBalanceOfUser(user2, community1, equalTo(100));
+    checkTokenBalanceOfCommunity(community1, FEE, equalTo(1));
     
     // change a community of user
     changeCommunity(user1, asList(community2.getId()));
     waitUntilAllowed(user1, community2);
     
     // transfer token to user from admin (main)
-    transferTokenFromAdmin(com2Admin, user1, MAIN, 100);
+    transferTokenFromAdmin(com2Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(100));
+    checkBalanceOfUser(user1, community2, equalTo(1000));
 
     // transfer token to user from user
-    transferTokenFromUser(user1, user2, community2, 20, equalTo(79.8F));
+    transferTokenFromUser(user1, user2, community2, 200, equalTo(798F));
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(79.8F));
-    checkBalanceOfUser(user2, community2, equalTo(20));
-    checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.2F));
+    checkBalanceOfUser(user1, community2, equalTo(798));
+    checkBalanceOfUser(user2, community2, equalTo(200));
+    checkTokenBalanceOfCommunity(community2, FEE, equalTo(2));
 
     // change a community of user
     changeCommunity(user1, asList(community1.getId(), community2.getId()));
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(89.9F));
-    checkBalanceOfUser(user1, community2, equalTo(79.8F));
+    checkBalanceOfUser(user1, community1, equalTo(899));
+    checkBalanceOfUser(user1, community2, equalTo(798));
 
     // transfer token to user from admin (fee)
-    transferTokenFromAdmin(com1Admin, user1, FEE, 0.1);
+    transferTokenFromAdmin(com1Admin, user1, FEE, 0.1F);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(90));
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0));
+    checkBalanceOfUser(user1, community1, equalTo(899.1F));
+    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.9F));
     
     // transfer ether to community
     checkEthBalanceOfCommunity(community1, lessThanOrEqualTo(1F));
     transferEtherToCommunity(community1, "1");
     waitUntilEthTransactionCompleted();
     checkEthBalanceOfCommunity(community1, greaterThan(1F));
+    
+    // redistribution
+    createRedistribution(community1, true, null, "20");
+    createRedistribution(community1, false, user1, "20");
+    createRedistribution(community2, true, null, "30");
+    createRedistribution(community2, false, user1, "30");
+    redistribution();
+    waitUntilEthTransactionCompleted();
+    checkBalanceOfUser(user1, community1, equalTo(899.4F)); // +0.3
+    checkBalanceOfUser(user1, community2, equalTo(798.9F)); // +0.9
+    checkBalanceOfUser(user2, community1, equalTo(100.1F)); // +0.1
+    checkBalanceOfUser(user2, community2, equalTo(200.3F)); // +0.3
+    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.5F)); // -0.4
+    checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.8F)); // -1.2
   }
   
   private Community createCommunity(
@@ -182,6 +196,45 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     User user = emService.get().find(User.class, (long) userId);
     return user;
+  }
+
+  private void createRedistribution(
+      Community com,
+      boolean isAll,
+      User user,
+      String redistributionRate
+      ) throws Exception {
+    log.info(String.format("creating redistribution started. [communityId=%d]", com.getId()));
+
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("communityId", com.getId());
+    requestParam.put("isAll", isAll);
+    requestParam.put("redistributionRate", redistributionRate);
+    if (user != null) {
+      requestParam.put("userId", user.getId());
+    }
+
+    // create redistribution
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/communities/{id}/redistributions", com.getId())
+      .then().statusCode(200);
+    
+    log.info(String.format("creating redistribution completed. [communityId=%d]", com.getId()));
+  }
+
+  private void redistribution() throws Exception {
+    log.info(String.format("redistribution started."));
+
+    // create redistribution
+    given()
+      .when().post("/batch/redistribution")
+      .then().statusCode(200);
+    
+    log.info(String.format("redistribution completed."));
   }
 
   private void transferTokenFromAdmin(Admin admin, User to, WalletType walletType, double amount) {

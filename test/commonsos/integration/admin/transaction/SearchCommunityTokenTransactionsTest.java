@@ -64,6 +64,7 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
     create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setRemitterAdminId(com1Admin.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(9)));
     create(new TokenTransaction().setCommunityId(com1.getId()).setFromAdmin(true).setWalletDivision(WalletType.FEE).setRemitterAdminId(com1Admin.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(8)));
     create(new TokenTransaction().setCommunityId(com1.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(com1.getId()).setRemitterUserId(user1.getId()).setFeeTransaction(true).setWalletDivision(WalletType.FEE).setAmount(new BigDecimal("0.01")));
     create(new TokenTransaction().setCommunityId(com2.getId()).setFromAdmin(true).setWalletDivision(WalletType.MAIN).setRemitterAdminId(com2Admin.getId()).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(10)));
   }
   
@@ -78,6 +79,7 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
       .body("transactionList.communityId",  contains(com1.getId().intValue(), com1.getId().intValue()))
       .body("transactionList.wallet",  contains("MAIN", "MAIN"))
       .body("transactionList.isFromAdmin",  contains(true, true))
+      .body("transactionList.isFeeTransaction",  contains(false, false))
       .body("transactionList.remitterAdmin.id",  contains(com1Admin.getId().intValue(), ncl.getId().intValue()))
       .body("transactionList.remitterAdmin.adminuser",  contains(com1Admin.getAdminname(), ncl.getAdminname()))
       .body("transactionList.remitter",  contains(nullValue(), nullValue()))
@@ -90,9 +92,10 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin?communityId={comId}&wallet={wallet}", com1.getId(), "fee")
       .then().statusCode(200)
-      .body("transactionList.wallet",  contains("FEE"))
+      .body("transactionList.wallet",  contains("FEE", "FEE"))
+      .body("transactionList.isFeeTransaction",  contains(true, false))
       .body("transactionList.remitterAdmin.id",  contains(com1Admin.getId().intValue()))
-      .body("transactionList.remitter",  contains(nullValue()))
+      .body("transactionList.remitter.id",  contains(user1.getId().intValue()))
       .body("transactionList.beneficiary.id",  contains(user1.getId().intValue()));
     
     given()

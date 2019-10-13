@@ -67,6 +67,7 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getBlockchainTransactionHash()).isEqualTo("blockchain id");
     assertThat(result.isFromAdmin()).isFalse();
     assertThat(result.isFeeTransaction()).isFalse();
+    assertThat(result.isRedistributionTransaction()).isFalse();
   }
 
   @Test
@@ -88,10 +89,10 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   public void searchUserTran() {
     User user = new User().setId(id("user1"));
 
-    Long id1 = inTransaction(() -> repository.create(tran("com1", "user1", "user2"))).getId();
-    Long id2 = inTransaction(() -> repository.create(tran("com1", "user2", "user1"))).getId();
-    Long id3 = inTransaction(() -> repository.create(tran("com2", "user1", "user2"))).getId();
-    Long id4 = inTransaction(() -> repository.create(tran("com2", "user2", "user1"))).getId();
+    Long id1 = inTransaction(() -> repository.create(userTran("com1", "user1", "user2"))).getId();
+    Long id2 = inTransaction(() -> repository.create(userTran("com1", "user2", "user1"))).getId();
+    Long id3 = inTransaction(() -> repository.create(userTran("com2", "user1", "user2"))).getId();
+    Long id4 = inTransaction(() -> repository.create(userTran("com2", "user2", "user1"))).getId();
 
     assertThat(repository.searchUserTran(user, id("com1"), null).getList()).extracting("id").containsExactly(id1, id2);
   }
@@ -101,11 +102,11 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     // prepare
     User user = new User().setId(id("user1"));
 
-    inTransaction(() -> repository.create(tran("com1", "user1", "user2")));
-    inTransaction(() -> repository.create(tran("com1", "user2", "user1")));
-    inTransaction(() -> repository.create(tran("com1", "user1", "user2")));
-    inTransaction(() -> repository.create(tran("com1", "user2", "user1")));
-    inTransaction(() -> repository.create(tran("com1", "user2", "user1")));
+    inTransaction(() -> repository.create(userTran("com1", "user1", "user2")));
+    inTransaction(() -> repository.create(userTran("com1", "user2", "user1")));
+    inTransaction(() -> repository.create(userTran("com1", "user1", "user2")));
+    inTransaction(() -> repository.create(userTran("com1", "user2", "user1")));
+    inTransaction(() -> repository.create(userTran("com1", "user2", "user1")));
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
@@ -125,11 +126,11 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void searchCommunityTran() {
     // prepare
-    Long id1 = inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    Long id2 = inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    Long id3 = inTransaction(() -> repository.create(tran("com1", null, "user1", true, FEE))).getId();
-    Long id4 = inTransaction(() -> repository.create(tran("com1", "user2", "user1", false, null))).getId();
-    Long id5 = inTransaction(() -> repository.create(tran("com2", null, "user1", true, MAIN))).getId();
+    Long id1 = inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    Long id2 = inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    Long id3 = inTransaction(() -> repository.create(adminTran("com1", "user1", FEE))).getId();
+    Long id4 = inTransaction(() -> repository.create(userTran("com1", "user2", "user1"))).getId();
+    Long id5 = inTransaction(() -> repository.create(adminTran("com2", "user1", MAIN))).getId();
 
     // execute & verify
     List<TokenTransaction> result = repository.searchCommunityTran(id("com1"), MAIN, null).getList();
@@ -147,11 +148,11 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void searchCommunityTran_pagination() {
     // prepare
-    inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
-    inTransaction(() -> repository.create(tran("com1", null, "user1", true, MAIN))).getId();
+    inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
@@ -162,6 +163,25 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     pagination.setPage(1);
     result = repository.searchCommunityTran(id("com1"), MAIN, pagination).getList();
     assertThat(result).size().isEqualTo(2);
+  }
+
+  @Test
+  public void searchUnredistributedFeeTransaction() {
+    // prepare
+    Long id1 = inTransaction(() -> repository.create(userTran("com1", "user1", "user2"))).getId();
+    Long id2 = inTransaction(() -> repository.create(feeTran("com1", "user1", false))).getId();
+    Long id3 = inTransaction(() -> repository.create(feeTran("com1", "user1", true))).getId();
+    Long id4 = inTransaction(() -> repository.create(adminTran("com1", "user1", MAIN))).getId();
+    Long id5 = inTransaction(() -> repository.create(adminTran("com1", "user1", FEE))).getId();
+    Long id6 = inTransaction(() -> repository.create(feeTran("com1", "user1", false))).getId();
+
+    // execute & verify
+    List<TokenTransaction> result = repository.searchUnredistributedFeeTransaction(id("com1"));
+    assertThat(result).extracting("id").containsExactly(id2, id6);
+
+    // execute & verify
+    result = repository.searchUnredistributedFeeTransaction(id("com2"));
+    assertThat(result.size()).isEqualTo(0);
   }
 
   @Test
@@ -180,12 +200,16 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     assertThat(repository.findByBlockchainTransactionHash("hash value")).isEmpty();
   }
 
-  private TokenTransaction tran(String communityId, String remitterId, String beneficiary) {
-    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setRemitterUserId(id(remitterId));
+  private TokenTransaction userTran(String communityId, String remitter, String beneficiary) {
+    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setRemitterUserId(id(remitter));
   }
 
-  private TokenTransaction tran(String communityId, String remitterId, String beneficiary, boolean isFromAdmin, WalletType wallet) {
-    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setRemitterUserId(id(remitterId)).setFromAdmin(isFromAdmin).setWalletDivision(wallet);
+  private TokenTransaction adminTran(String communityId, String beneficiary, WalletType wallet) {
+    return new TokenTransaction().setCommunityId(id(communityId)).setBeneficiaryUserId(id(beneficiary)).setFromAdmin(true).setWalletDivision(wallet);
+  }
+
+  private TokenTransaction feeTran(String communityId, String remitter, boolean redistributed) {
+    return new TokenTransaction().setCommunityId(id(communityId)).setRemitterUserId(id(remitter)).setFeeTransaction(true).setWalletDivision(FEE).setRedistributed(redistributed);
   }
 
   @Test

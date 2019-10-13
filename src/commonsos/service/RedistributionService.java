@@ -3,12 +3,18 @@ package commonsos.service;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.CreateRedistributionCommand;
+import commonsos.command.batch.CreateTokenTransactionForRedistributionCommand;
+import commonsos.command.batch.RedistributionBatchCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
@@ -19,6 +25,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RedistributionUtil;
 import commonsos.util.UserUtil;
@@ -81,5 +88,43 @@ public class RedistributionService {
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
+  }
+  
+  public RedistributionBatchCommand createRedistributionCommand() {
+    Map<Community, List<CreateTokenTransactionForRedistributionCommand>> commandMap = new HashMap<>();
+    
+    List<Community> communityList = communityRepository.listPublic(null).getList();
+    communityList.forEach(c -> {
+      List<CreateTokenTransactionForRedistributionCommand> commandList = new ArrayList<>();
+      
+      List<User> userList = userRepository.search(c.getId(), null, null).getList();
+      userList.forEach(u -> {
+        CreateTokenTransactionForRedistributionCommand command = new CreateTokenTransactionForRedistributionCommand()
+            .setCommunity(c)
+            .setUser(u)
+            .setRate(BigDecimal.ZERO);
+        commandList.add(command);
+      });
+      
+      List<Redistribution> redistributionList = repository.findByCommunityId(c.getId(), null).getList();
+      redistributionList.forEach(r -> {
+        commandList.forEach(command -> {
+          BigDecimal currentRate = command.getRate();
+          BigDecimal addRate = BigDecimal.ZERO;
+          if (r.isAll()) {
+            addRate = r.getRate().divide(BigDecimal.valueOf(userList.size()), BlockchainService.NUMBER_OF_DECIMALS, BigDecimal.ROUND_DOWN);
+          } else if (command.getUser().getId().equals(r.getUser().getId())) {
+            addRate = r.getRate();
+          }
+          command.setRate(currentRate.add(addRate));
+        });
+      });
+      
+      commandMap.put(c, commandList);
+    });
+    
+    RedistributionBatchCommand command = new RedistributionBatchCommand()
+        .setCommandMap(commandMap);
+    return command;
   }
 }

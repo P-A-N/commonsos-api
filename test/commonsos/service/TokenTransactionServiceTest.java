@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
-import commonsos.command.app.TransactionCreateCommand;
+import commonsos.command.app.CreateTokenTransactionFromUserCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -92,7 +92,7 @@ public class TokenTransactionServiceTest {
     when(messageThreadRepository.byCreaterAndAdId(any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
     
     // community is null
-    TransactionCreateCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);
+    CreateTokenTransactionFromUserCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);
     command.setCommunityId(null);
     assertThrows(BadRequestException.class, () -> service.create(user, command));
     command.setCommunityId(id("community"));
@@ -198,8 +198,8 @@ public class TokenTransactionServiceTest {
     service.create(admin, command);
   }
 
-  private TransactionCreateCommand command(String communityId, String beneficiary, String amount, String description, String adId) {
-    return new TransactionCreateCommand()
+  private CreateTokenTransactionFromUserCommand command(String communityId, String beneficiary, String amount, String description, String adId) {
+    return new CreateTokenTransactionFromUserCommand()
       .setCommunityId(id(communityId))
       .setBeneficiaryId(id(beneficiary))
       .setAmount(new BigDecimal(amount))

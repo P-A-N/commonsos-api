@@ -113,6 +113,7 @@ import commonsos.controller.app.user.UserSearchController;
 import commonsos.controller.app.user.UserStatusUpdateController;
 import commonsos.controller.app.user.UserUpdateCommunitiesController;
 import commonsos.controller.app.user.UserUpdateController;
+import commonsos.controller.batch.redistribution.RedistributionBatchController;
 import commonsos.controller.wordpress.community.WPCommunityListController;
 import commonsos.controller.wordpress.community.WPCommunityNotificationController;
 import commonsos.controller.wordpress.community.WPCommunityNotificationListController;
@@ -185,6 +186,7 @@ public class Server {
     initAppRoutes();
     initWordPressRoutes();
     initAdminPageRoutes();
+    initBatchRoutes();
     
     exception(BadRequestException.class, (exception, request, response) -> {
       log.error("Bad request", exception);
@@ -378,6 +380,10 @@ public class Server {
     
     // system
     post("/admin/system/maintenance-mode", injector.getInstance(UpdateMaintenanceModeController.class), toJson);
+  }
+
+  private void initBatchRoutes() {
+    post("/batch/redistribution", injector.getInstance(RedistributionBatchController.class), toJson);
   }
   
   private String requestInfo(Request request) {
