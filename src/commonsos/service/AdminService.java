@@ -11,6 +11,7 @@ import javax.inject.Singleton;
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.AdminLoginCommand;
 import commonsos.command.admin.CreateAdminTemporaryCommand;
+import commonsos.command.admin.UpdateAdminCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -49,6 +50,21 @@ public class AdminService extends AbstractService {
     Admin target = adminRepository.findStrictById(id);
     if (!AdminUtil.isSeeableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", id));
     
+    return target;
+  }
+
+  public Admin updateAdmin(Admin admin, UpdateAdminCommand command) {
+    Admin target = adminRepository.findStrictById(command.getAdminId());
+    if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getAdminId()));
+    validate(command);
+
+    adminRepository.lockForUpdate(target);
+    target
+      .setAdminname(command.getAdminname())
+      .setTelNo(command.getTelNo())
+      .setDepartment(command.getDepartment());
+    adminRepository.update(target);
+
     return target;
   }
 
@@ -138,5 +154,9 @@ public class AdminService extends AbstractService {
     ValidateUtil.validateEmailAddress(command.getEmailAddress());
     ValidateUtil.validateTelNo(command.getTelNo());
     ValidateUtil.validateRole(command.getRoleId());
+  }
+
+  private void validate(UpdateAdminCommand command) {
+    ValidateUtil.validateTelNo(command.getTelNo());
   }
 }

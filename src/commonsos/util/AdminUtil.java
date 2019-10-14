@@ -36,81 +36,115 @@ public class AdminUtil {
   }
   
   public static boolean isCreatableAdmin(Admin admin, Long communityId, Long roleId) {
-    Role adminRole = Role.of(admin.getRole().getId());
+    Role adminRole = admin.getRole();
     Role targetRole = Role.of(roleId);
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     if (adminCommunityId == null || !adminCommunityId.equals(communityId)) return false;
     
-    if (adminRole == COMMUNITY_ADMIN) {
-      if (targetRole == COMMUNITY_ADMIN || targetRole == TELLER) return true;
+    if (adminRole.equals(COMMUNITY_ADMIN)) {
+      if (targetRole.equals(COMMUNITY_ADMIN) || targetRole.equals(TELLER)) return true;
     }
     
     return false;
   }
   
   public static boolean isCreatableEthTransaction(Admin admin) {
-    Role adminRole = Role.of(admin.getRole().getId());
-    if (adminRole == NCL) return true;
+    Role adminRole = admin.getRole();
+    if (adminRole.equals(NCL)) return true;
     return false;
   }
   
   public static boolean isCreatableTokenTransaction(Admin admin, Long targetCommunityId) {
-    Role adminRole = Role.of(admin.getRole().getId());
+    Role adminRole = admin.getRole();
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
     
-    if (adminRole == COMMUNITY_ADMIN) return true;
+    if (adminRole.equals(COMMUNITY_ADMIN)) return true;
+    
+    return false;
+  }
+  
+  public static boolean isUpdatableAdmin(Admin admin, Admin targetAdmin) {
+    Role adminRole = admin.getRole();
+    Role targetRole = targetAdmin.getRole();
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    Long targetCommunityId = targetAdmin.getCommunity() == null ? null : targetAdmin.getCommunity().getId();
+
+    if (admin.equals(targetAdmin)) return true;
+    
+    if (adminRole.equals(NCL)) {
+      return targetRole.equals(COMMUNITY_ADMIN) || targetRole.equals(TELLER);
+    }
+
+    if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
+    
+    if (adminRole.equals(COMMUNITY_ADMIN)) {
+      return targetRole.equals(TELLER);
+    }
+    
+    return false;
+  }
+  
+  public static boolean isUpdatableCommunity(Admin admin, Long targetCommunityId) {
+    Role adminRole = admin.getRole();
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+
+    if (adminRole.equals(NCL)) return true;
+
+    if (adminRole.equals(COMMUNITY_ADMIN)) {
+      if (adminCommunityId != null && adminCommunityId.equals(targetCommunityId)) return true;
+    }
     
     return false;
   }
   
   public static boolean isSeeableAdmin(Admin admin, Admin target) {
-    Role adminRole = Role.of(admin.getRole().getId());
-    Role targetRole = Role.of(target.getRole().getId());
+    Role adminRole = admin.getRole();
+    Role targetRole = target.getRole();
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     Long targetCommunityId = target.getCommunity() == null ? null : target.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     if (admin.getId().equals(target.getId())) return true;
     if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
     
-    if (adminRole == COMMUNITY_ADMIN) {
-      if (targetRole == COMMUNITY_ADMIN || targetRole == TELLER) return true;
+    if (adminRole.equals(COMMUNITY_ADMIN)) {
+      if (targetRole.equals(COMMUNITY_ADMIN) || targetRole.equals(TELLER)) return true;
     }
-    if (adminRole == TELLER) {
-      if (targetRole == TELLER) return true;
+    if (adminRole.equals(TELLER)) {
+      if (targetRole.equals(TELLER)) return true;
     }
     return false;
   }
   
   public static boolean isSeeableAdmin(Admin admin, Long targetCommunityId, Long targetRoleId) {
-    Role adminRole = Role.of(admin.getRole().getId());
+    Role adminRole = admin.getRole();
     Role targetRole = Role.of(targetRoleId);
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     if (adminCommunityId == null || !adminCommunityId.equals(targetCommunityId)) return false;
     
-    if (adminRole == COMMUNITY_ADMIN) {
-      if (targetRole == COMMUNITY_ADMIN || targetRole == TELLER) return true;
+    if (adminRole.equals(COMMUNITY_ADMIN)) {
+      if (targetRole.equals(COMMUNITY_ADMIN) || targetRole.equals(TELLER)) return true;
     }
 
-    if (adminRole == TELLER) {
-      if (targetRole == TELLER) return true;
+    if (adminRole.equals(TELLER)) {
+      if (targetRole.equals(TELLER)) return true;
     }
     
     return false;
   }
   
   public static boolean isSeeableUser(Admin admin, User target) {
-    Role adminRole = Role.of(admin.getRole().getId());
+    Role adminRole = admin.getRole();
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     
     if (target.getCommunityUserList().stream().map(CommunityUser::getCommunity).anyMatch(c -> c.getId().equals(adminCommunityId))) return true;
 
@@ -122,10 +156,10 @@ public class AdminUtil {
   }
   
   public static boolean isSeeableCommunity(Admin admin, Long communityId) {
-    Role adminRole = Role.of(admin.getRole().getId());
+    Role adminRole = admin.getRole();
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
+    if (adminRole.equals(NCL)) return true;
     
     if (communityId != null && communityId.equals(adminCommunityId)) return true;
 
@@ -133,7 +167,7 @@ public class AdminUtil {
   }
   
   public static boolean isSeeableCommunity(Admin admin, Long communityId, boolean isTellerSeeable) {
-    if (!isTellerSeeable && Role.of(admin.getRole().getId()) == TELLER) return false;
+    if (!isTellerSeeable && admin.getRole().equals(TELLER)) return false;
     return isSeeableCommunity(admin, communityId);
   }
 }

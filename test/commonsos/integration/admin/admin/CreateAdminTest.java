@@ -23,7 +23,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import io.restassured.builder.MultiPartSpecBuilder;
 
-public class PostCreateAdminTest extends IntegrationTest {
+public class CreateAdminTest extends IntegrationTest {
 
   private Community com1;
   private Community com2;

@@ -69,7 +69,7 @@ public class GetCommunityTest extends IntegrationTest {
       .body("adminPageUrl", startsWith("url"))
       .body("totalMember", equalTo(2))
       .body("ethBalance", notNullValue())
-      .body("adminList.adminname", contains(publicComAdmin.getAdminname(), publicComTeller.getAdminname()));
+      .body("adminList.adminname", contains(publicComAdmin.getAdminname()));
 
     // private
     given()

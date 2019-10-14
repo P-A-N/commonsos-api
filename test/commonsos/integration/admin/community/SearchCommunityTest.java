@@ -29,7 +29,7 @@ public class SearchCommunityTest extends IntegrationTest {
   private Community privateCom;
   private Community deleteCom;
   private Admin publicComAdmin1;
-  private Admin publicComAdmin2;
+  private Admin publicComTeller;
   private String sessionId;
   
   @BeforeEach
@@ -41,7 +41,7 @@ public class SearchCommunityTest extends IntegrationTest {
     
     // create admins
     publicComAdmin1 = create(new Admin().setEmailAddress("publicComAdmin1@before.each.com").setAdminname("publicComAdmin1").setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
-    publicComAdmin2 = create(new Admin().setEmailAddress("publicComAdmin2@before.each.com").setAdminname("publicComAdmin2").setRole(TELLER).setCommunity(publicCom));
+    publicComTeller = create(new Admin().setEmailAddress("publicComTeller@before.each.com").setAdminname("publicComTeller").setRole(TELLER).setCommunity(publicCom));
 
     // create users
     create(new User().setUsername("publicComUser1").setCommunityUserList(asList(new CommunityUser().setCommunity(publicCom))));
@@ -61,7 +61,7 @@ public class SearchCommunityTest extends IntegrationTest {
       .body("communityList.totalMember", contains(2, 0))
       .body("communityList.ethBalance", contains(notNullValue(), notNullValue()))
       .body("communityList.adminList.adminname", contains(
-          asList(publicComAdmin1.getAdminname(), publicComAdmin2.getAdminname()),
+          asList(publicComAdmin1.getAdminname()),
           asList()));
   }
   

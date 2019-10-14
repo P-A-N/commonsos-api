@@ -23,7 +23,7 @@ import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.User;
 
-public class PostCreateRedistributionTest extends IntegrationTest {
+public class CreateRedistributionTest extends IntegrationTest {
 
   private Community com1;
   private Community com2;

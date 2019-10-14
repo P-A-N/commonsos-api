@@ -98,6 +98,92 @@ public class AdminUtilTest {
   }
   
   @Test
+  public void isUpdatableAdmin() {
+    // prepare
+    Community com1 = new Community().setId(id("com1"));
+    Community com2 = new Community().setId(id("com2"));
+    Admin ncl1 = new Admin().setId(id("ncl1")).setRole(NCL);
+    Admin ncl2 = new Admin().setId(id("ncl2")).setRole(NCL);
+    Admin admin_com1_1 = new Admin().setId(id("admin_com1_1")).setRole(COMMUNITY_ADMIN).setCommunity(com1);
+    Admin admin_com1_2 = new Admin().setId(id("admin_com1_2")).setRole(COMMUNITY_ADMIN).setCommunity(com1);
+    Admin teller_com1_1 = new Admin().setId(id("teller_com1_1")).setRole(TELLER).setCommunity(com1);
+    Admin teller_com1_2 = new Admin().setId(id("teller_com1_2")).setRole(TELLER).setCommunity(com1);
+    Admin admin_com2_1 = new Admin().setId(id("admin_com2_1")).setRole(COMMUNITY_ADMIN).setCommunity(com2);
+    Admin teller_com2_1 = new Admin().setId(id("teller_com2_1")).setRole(TELLER).setCommunity(com2);
+    Admin admin_none_1 = new Admin().setId(id("admin_none_1")).setRole(COMMUNITY_ADMIN);
+    Admin admin_none_2 = new Admin().setId(id("admin_none_2")).setRole(COMMUNITY_ADMIN);
+    Admin teller_none_1 = new Admin().setId(id("teller_none_1")).setRole(TELLER);
+    Admin teller_none_2 = new Admin().setId(id("teller_none_2")).setRole(TELLER);
+    
+    // [ncl] execute & verify
+    assertTrue(AdminUtil.isUpdatableAdmin(ncl1, ncl1));
+    assertFalse(AdminUtil.isUpdatableAdmin(ncl1, ncl2));
+    assertTrue(AdminUtil.isUpdatableAdmin(ncl1, admin_com1_1));
+    assertTrue(AdminUtil.isUpdatableAdmin(ncl1, teller_com1_1));
+
+    // [admin_com1] execute & verify
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, ncl1));
+    assertTrue(AdminUtil.isUpdatableAdmin(admin_com1_1, admin_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, admin_com1_2));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, admin_com2_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, admin_none_1));
+    assertTrue(AdminUtil.isUpdatableAdmin(admin_com1_1, teller_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, teller_com2_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_com1_1, teller_none_1));
+
+    // [admin_none] execute & verify
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_none_1, ncl1));
+    assertTrue(AdminUtil.isUpdatableAdmin(admin_none_1, admin_none_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_none_1, admin_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_none_1, admin_none_2));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_none_1, teller_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(admin_none_1, teller_none_1));
+
+    // [teller_com1] execute & verify
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, ncl1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, admin_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, admin_none_1));
+    assertTrue(AdminUtil.isUpdatableAdmin(teller_com1_1, teller_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, teller_com1_2));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, teller_com2_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_com1_1, teller_none_1));
+
+    // [teller_none] execute & verify
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_none_1, ncl1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_none_1, admin_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_none_1, admin_none_1));
+    assertTrue(AdminUtil.isUpdatableAdmin(teller_none_1, teller_none_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_none_1, teller_com1_1));
+    assertFalse(AdminUtil.isUpdatableAdmin(teller_none_1, teller_none_2));
+  }
+  
+  @Test
+  public void isUpdatableCommunity() {
+    // prepare
+    Community com1 = new Community().setId(id("com1"));
+    Community com2 = new Community().setId(id("com2"));
+    Admin ncl = new Admin().setId(id("ncl")).setRole(NCL);
+    Admin admin_com1 = new Admin().setId(id("admin_com1")).setRole(COMMUNITY_ADMIN).setCommunity(com1);
+    Admin admin_none = new Admin().setId(id("admin_none")).setRole(COMMUNITY_ADMIN);
+    Admin teller_com1 = new Admin().setId(id("teller_com1")).setRole(TELLER).setCommunity(com1);
+    
+    // [ncl] execute & verify
+    assertTrue(AdminUtil.isUpdatableCommunity(ncl, com1.getId()));
+
+    // [admin_com1] execute & verify
+    assertTrue(AdminUtil.isUpdatableCommunity(admin_com1, com1.getId()));
+    assertFalse(AdminUtil.isUpdatableCommunity(admin_com1, com2.getId()));
+
+    // [admin_none] execute & verify
+    assertFalse(AdminUtil.isUpdatableCommunity(admin_none, com1.getId()));
+    assertFalse(AdminUtil.isUpdatableCommunity(admin_none, com2.getId()));
+
+    // [teller_com1] execute & verify
+    assertFalse(AdminUtil.isUpdatableCommunity(teller_com1, com1.getId()));
+    assertFalse(AdminUtil.isUpdatableCommunity(teller_com1, com2.getId()));
+  }
+  
+  @Test
   public void isSeeableAdmin_forGet() {
     // prepare
     Community com1 = new Community().setId(id("com1"));

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 
-public class PostLogoutTest extends IntegrationTest {
+public class LogoutTest extends IntegrationTest {
   
   private Admin admin;
   private String sessionId;

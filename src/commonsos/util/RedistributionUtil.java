@@ -25,8 +25,8 @@ public class RedistributionUtil {
     Role adminRole = Role.of(admin.getRole().getId());
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
     
-    if (adminRole == NCL) return true;
-    if (adminRole == COMMUNITY_ADMIN && communityId.equals(adminCommunityId)) return true;
+    if (adminRole.equals(NCL)) return true;
+    if (adminRole.equals(COMMUNITY_ADMIN) && communityId.equals(adminCommunityId)) return true;
     
     return false;
   }

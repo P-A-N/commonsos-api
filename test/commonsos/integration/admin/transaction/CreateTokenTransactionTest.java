@@ -31,7 +31,7 @@ import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
 import commonsos.util.MessageUtil;
 
-public class PostCreateTokenTransactionTest extends IntegrationTest {
+public class CreateTokenTransactionTest extends IntegrationTest {
 
   private Community com1;
   private Community com2;

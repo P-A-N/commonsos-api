@@ -20,7 +20,7 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 
-public class PostCreateCommunityTest extends IntegrationTest {
+public class CreateCommunityTest extends IntegrationTest {
 
   private Admin ncl;
   private Admin tmp1;

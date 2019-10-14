@@ -1,5 +1,9 @@
 package commonsos.service;
 
+import static commonsos.repository.entity.CommunityStatus.PRIVATE;
+import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
+import static commonsos.repository.entity.Role.NCL;
 import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
 import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
 import static java.util.stream.Collectors.toList;
@@ -21,6 +25,7 @@ import org.web3j.crypto.Credentials;
 import commonsos.Configuration;
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.CreateCommunityCommand;
+import commonsos.command.admin.UpdateCommunityCommand;
 import commonsos.command.app.CommunityNotificationCommand;
 import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
@@ -35,7 +40,6 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
 import commonsos.repository.entity.CommunityStatus;
 import commonsos.repository.entity.ResultList;
-import commonsos.repository.entity.Role;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
@@ -62,14 +66,14 @@ public class CommunityService extends AbstractService {
 
   public Community createCommunity(Admin admin, CreateCommunityCommand command) {
     // check role
-    if (Role.of(admin.getRole().getId()) != Role.NCL) throw new ForbiddenException();
+    if (!admin.getRole().equals(NCL)) throw new ForbiddenException();
     // check adminList
     List<Admin> adminList = new ArrayList<>();
     if (command.getAdminIdList() != null) {
       command.getAdminIdList().forEach(id -> {
         Admin a = adminRepository.findStrictById(id);
         if (a.getCommunity() != null) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
-        if (!a.getRole().getId().equals(Role.COMMUNITY_ADMIN.getId())) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+        if (!a.getRole().equals(COMMUNITY_ADMIN)) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
         adminRepository.lockForUpdate(a);
         adminList.add(a);
       });
@@ -132,6 +136,57 @@ public class CommunityService extends AbstractService {
     return community;
   }
   
+  public Community updateCommunity(Admin admin, UpdateCommunityCommand command) {
+    // check exists
+    Community community = repository.findStrictById(command.getCommunityId());
+    
+    // check role
+    if (!AdminUtil.isUpdatableCommunity(admin, command.getCommunityId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", command.getCommunityId()));
+    
+    // check fee
+    BigDecimal fee = command.getTransactionFee() == null ? BigDecimal.ZERO : command.getTransactionFee().setScale(2, RoundingMode.DOWN);
+    if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
+    if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
+    
+    // check status
+    if (command.getStatus() == PRIVATE && community.getStatus() == PUBLIC) throw new DisplayableException("error.invalid_update_status_puplic_to_private");
+
+    // check admin
+    List<Admin> oldAdminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    List<Admin> newAdminList = new ArrayList<>();
+    if (command.getAdminIdList() != null) {
+      command.getAdminIdList().forEach(id -> {
+        Admin a = adminRepository.findStrictById(id);
+        if (a.getCommunity() != null && !a.getCommunity().equals(community)) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
+        if (!a.getRole().equals(COMMUNITY_ADMIN)) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+        adminRepository.lockForUpdate(a);
+        newAdminList.add(a);
+      });
+    }
+    
+    List<Admin> deleteAdminList = new ArrayList<>();
+    oldAdminList.forEach(a -> {
+      if (!newAdminList.contains(a)) {
+        adminRepository.lockForUpdate(a);
+        deleteAdminList.add(a);
+      }
+    });
+
+    repository.lockForUpdate(community);
+    community
+      .setName(command.getCommunityName())
+      .setFee(command.getTransactionFee())
+      .setDescription(command.getDescription())
+      .setStatus(command.getStatus());
+    repository.update(community);
+
+    // update admin's communityId
+    newAdminList.forEach(a -> adminRepository.update(a.setCommunity(community)));
+    deleteAdminList.forEach(a -> adminRepository.update(a.setCommunity(null)));
+    
+    return community;
+  }
+  
   public CommunityListView list(String filter, PaginationCommand pagination) {
     ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.listPublic(pagination) : repository.listPublic(filter, pagination);
 
@@ -144,7 +199,7 @@ public class CommunityService extends AbstractService {
 
   public CommunityListView searchForAdmin(Admin admin, PaginationCommand pagination) {
     // check role
-    if (Role.of(admin.getRole().getId()) != Role.NCL) throw new ForbiddenException();
+    if (!admin.getRole().equals(NCL)) throw new ForbiddenException();
     
     ResultList<Community> result = repository.list(pagination);
 
@@ -171,7 +226,19 @@ public class CommunityService extends AbstractService {
   public String updatePhoto(User user, UploadPhotoCommand command, Long communityId) {
     Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
+
+    return updatePhoto(command, community);
+  }
+
+  public Community updatePhoto(Admin admin, UploadPhotoCommand command, Long communityId) {
+    Community community = repository.findStrictById(communityId);
+    if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
+    updatePhoto(command, community);
+    return community;
+  }
+  
+  private String updatePhoto(UploadPhotoCommand command, Community community) {
     String url = imageService.create(command, "");
     imageService.delete(community.getPhotoUrl());
     
@@ -228,7 +295,7 @@ public class CommunityService extends AbstractService {
   }
   
   public CommunityView viewForAdmin(Community community) {
-    List<Admin> adminList = adminRepository.findByCommunityId(community.getId(), null).getList();
+    List<Admin> adminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     return viewForAdminInternal(community, adminList);
   }
   

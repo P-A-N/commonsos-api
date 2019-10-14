@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 
-public class PostLoginTest extends IntegrationTest {
+public class LoginTest extends IntegrationTest {
   
   @BeforeEach
   public void createUser() throws Exception {

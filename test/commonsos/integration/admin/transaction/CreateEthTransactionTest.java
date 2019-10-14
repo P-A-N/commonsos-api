@@ -22,7 +22,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.EthTransaction;
 
-public class PostCreateEthTransactionTest extends IntegrationTest {
+public class CreateEthTransactionTest extends IntegrationTest {
 
   private Community com1;
   private Community com2;
