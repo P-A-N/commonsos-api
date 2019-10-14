@@ -48,11 +48,12 @@ import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.repository.entity.WalletType;
+import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class BlockchainService {
+public class BlockchainService extends AbstractService {
 
   public static final BigInteger ETHER_TRANSFER_GAS_LIMIT = new BigInteger("21000");
   public static final BigInteger TOKEN_TRANSFER_GAS_LIMIT = new BigInteger("90000");

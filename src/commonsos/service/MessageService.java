@@ -52,7 +52,7 @@ import commonsos.view.MessageView;
 import commonsos.view.UserView;
 
 @Singleton
-public class MessageService {
+public class MessageService extends AbstractService {
 
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;

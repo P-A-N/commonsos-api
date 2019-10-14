@@ -20,9 +20,10 @@ import javax.inject.Singleton;
 
 import commonsos.Configuration;
 import commonsos.exception.ServerErrorException;
+import commonsos.service.AbstractService;
 
 @Singleton
-public class CryptoService {
+public class CryptoService extends AbstractService {
 
   private static final int KEY_LENGTH = 256;
   private static final String HASH_ALGORITHM = "SHA-256";

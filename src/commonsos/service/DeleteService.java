@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class DeleteService {
+public class DeleteService extends AbstractService {
 
   @Inject private AdRepository adRepository;
   @Inject private UserRepository userRepository;

@@ -26,11 +26,12 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 import commonsos.Configuration;
 import commonsos.exception.ServerErrorException;
+import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class QrCodeService {
+public class QrCodeService extends AbstractService {
   
   private static final String ENCODING = "UTF-8";
   

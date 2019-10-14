@@ -35,12 +35,13 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import commonsos.Configuration;
 import commonsos.exception.ServerErrorException;
+import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 import spark.utils.StringUtils;
 
 @Singleton
 @Slf4j
-public class EmailService {
+public class EmailService extends AbstractService {
   
   private static String PROPERTY_FILE_PATH = "/mail.properties";
   private static String TEMPLATE_FILE_DIR = "/mail/template";

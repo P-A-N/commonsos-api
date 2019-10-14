@@ -23,9 +23,10 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import commonsos.Configuration;
 import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.ServerErrorException;
+import commonsos.service.AbstractService;
 
 @Singleton
-public class ImageUploadService {
+public class ImageUploadService extends AbstractService {
 
   private AWSCredentials credentials;
   private AmazonS3 s3client;

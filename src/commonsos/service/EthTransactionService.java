@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class EthTransactionService {
+public class EthTransactionService extends AbstractService {
 
   @Inject private EthTransactionRepository repository;
   @Inject private CommunityRepository communityRepository;

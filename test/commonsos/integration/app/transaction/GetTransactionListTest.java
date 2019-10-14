@@ -47,7 +47,7 @@ public class GetTransactionListTest extends IntegrationTest {
     user1 = create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1), new CommunityUser().setCommunity(community2))));
     user2 = create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     user3 = create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community2))));
-    create(new TokenTransaction().setCommunityId(community1.getId()).setFromAdmin(true).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(1)));
+    create(new TokenTransaction().setCommunityId(community1.getId()).setFromAdmin(true).setRedistributionTransaction(true).setBeneficiaryUserId(user1.getId()).setAmount(new BigDecimal(1)));
     create(new TokenTransaction().setCommunityId(community1.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user2.getId()).setAmount(new BigDecimal(1)));
     create(new TokenTransaction().setCommunityId(community1.getId()).setFeeTransaction(true).setRemitterUserId(user1.getId()).setAmount(new BigDecimal("0.01")));
     create(new TokenTransaction().setCommunityId(community2.getId()).setRemitterUserId(user1.getId()).setBeneficiaryUserId(user3.getId()).setAmount(new BigDecimal(2)));
@@ -66,6 +66,7 @@ public class GetTransactionListTest extends IntegrationTest {
       .then().statusCode(200)
       .body("transactionList.isFromAdmin",    contains(false, false, false, true))
       .body("transactionList.isFeeTransaction",    contains(false, true, false, false))
+      .body("transactionList.isRedistributionTransaction",    contains(false, false, false, true))
       .body("transactionList.remitter.username",    contains("user2", "user1", "user1"))
       .body("transactionList.beneficiary.username", contains("user1", "user2", "user1"));
 

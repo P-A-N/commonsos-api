@@ -90,6 +90,7 @@ public class TestServer extends Server {
     when(blockchainService.getSystemEthBalance()).thenReturn(TEN);
     when(blockchainService.transferTokensFromUserToUser(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.transferTokensFee(any(), any(), any())).thenReturn("0x1");
+    when(blockchainService.transferTokensFromCommunity(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.transferEther(any(Credentials.class), any(String.class), any(BigInteger.class), any(boolean.class))).thenReturn("0x1");
     when(blockchainService.transferEther(any(Credentials.class), any(String.class), any(BigDecimal.class), any(boolean.class))).thenReturn("0x1");
     when(blockchainService.createToken(any(Credentials.class), any(), any())).thenReturn("0x1");

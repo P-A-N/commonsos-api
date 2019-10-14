@@ -14,6 +14,7 @@ public class TokenTransactionView extends CommonView {
   private WalletType wallet;
   private Boolean isFromAdmin;
   private Boolean isFeeTransaction;
+  private Boolean isRedistributionTransaction;
   private AdminView remitterAdmin;
   private UserView remitter;
   private UserView beneficiary;

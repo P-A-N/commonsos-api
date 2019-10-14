@@ -25,7 +25,7 @@ import commonsos.view.AdListView;
 import commonsos.view.AdView;
 
 @Singleton
-public class AdService {
+public class AdService extends AbstractService {
   @Inject private AdRepository adRepository;
   @Inject private UserRepository userRepository;
   @Inject private TokenTransactionRepository transactionRepository;

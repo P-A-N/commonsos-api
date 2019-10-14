@@ -49,7 +49,7 @@ import commonsos.view.CommunityNotificationListView;
 import commonsos.view.CommunityView;
 
 @Singleton
-public class CommunityService {
+public class CommunityService extends AbstractService {
   public static final String WALLET_PASSWORD = "test";
 
   @Inject private CommunityRepository repository;

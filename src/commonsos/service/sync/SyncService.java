@@ -18,11 +18,12 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
+import commonsos.service.AbstractService;
 import commonsos.util.MessageUtil;
 import commonsos.util.UserUtil;
 
 @Singleton
-public class SyncService {
+public class SyncService extends AbstractService {
 
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private UserRepository userRepository;

@@ -25,11 +25,12 @@ import com.google.firebase.messaging.Notification;
 
 import commonsos.Configuration;
 import commonsos.repository.entity.User;
+import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class PushNotificationService {
+public class PushNotificationService extends AbstractService {
 
   @Inject Configuration configuration;
 

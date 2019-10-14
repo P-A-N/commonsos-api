@@ -34,6 +34,7 @@ import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
+import commonsos.repository.RedistributionRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
@@ -41,6 +42,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
+import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.TokenTransaction;
@@ -62,8 +64,8 @@ import spark.utils.StringUtils;
 
 @Singleton
 @Slf4j
-public class TokenTransactionService {
-  
+public class TokenTransactionService extends AbstractService {
+
   @Inject private TokenTransactionRepository repository;
   @Inject private UserRepository userRepository;
   @Inject private AdminRepository adminRepository;
@@ -71,6 +73,7 @@ public class TokenTransactionService {
   @Inject private CommunityRepository communityRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
+  @Inject private RedistributionRepository redistributionRepository;
   @Inject private BlockchainService blockchainService;
   @Inject private BlockchainEventService blockchainEventService;
   @Inject private SyncService syncService;
@@ -160,6 +163,7 @@ public class TokenTransactionService {
       .setCommunityId(transaction.getCommunityId())
       .setIsFromAdmin(transaction.isFromAdmin())
       .setIsFeeTransaction(transaction.isFeeTransaction())
+      .setIsRedistributionTransaction(transaction.isRedistributionTransaction())
       .setAmount(transaction.getAmount())
       .setDescription(transaction.getDescription())
       .setCreatedAt(transaction.getCreatedAt())
@@ -181,6 +185,7 @@ public class TokenTransactionService {
       .setWallet(transaction.getWalletDivision())
       .setIsFromAdmin(transaction.isFromAdmin())
       .setIsFeeTransaction(transaction.isFeeTransaction())
+      .setIsRedistributionTransaction(transaction.isRedistributionTransaction())
       .setAmount(transaction.getAmount())
       .setCreatedAt(transaction.getCreatedAt())
       .setCompleted(transaction.getBlockchainCompletedAt() != null)
@@ -355,6 +360,17 @@ public class TokenTransactionService {
       List<TokenTransaction> feeTranList = repository.searchUnredistributedFeeTransaction(com.getId());
       BigDecimal feeSum = feeTranList.stream().map(TokenTransaction::getAmount).reduce(ZERO, BigDecimal::add);
       
+      // get sum of rate
+      List<Redistribution> redList = redistributionRepository.findByCommunityId(com.getId(), null).getList();
+      BigDecimal rateSum = redList.stream().map(Redistribution::getRate).reduce(ZERO, BigDecimal::add);
+      
+      // verify communities token balance
+      BigDecimal tokenBalance = blockchainService.getTokenBalance(com, WalletType.FEE).getBalance();
+      if (tokenBalance.compareTo(feeSum.multiply(rateSum.divide(BigDecimal.valueOf(100L)))) < 0) {
+        log.error("not enough token for redistribution. [communityId=%d, balanceOfFeeWallet=%f, rate=%f%%]", com.getId(), feeSum, rateSum);
+        return;
+      }
+      
       // mark transaction as redistributed
       feeTranList.forEach(feeTran -> {
         repository.lockForUpdate(feeTran);
@@ -383,7 +399,8 @@ public class TokenTransactionService {
         tranList.add(transaction);
       });
       
-      // TODO commit and start new transaction
+      // commit create of transaction
+      commitAndStartNewTran();
       
       // create transaction to blockchain
       Map<Long, User> userMap = commandList.stream().map(CreateTokenTransactionForRedistributionCommand::getUser)
@@ -397,7 +414,8 @@ public class TokenTransactionService {
         
         blockchainEventService.checkTransaction(blockchainTransactionHash);
         
-        // TODO commit and start new transaction
+        // commit update of transaction
+        commitAndStartNewTran();
       });
     });
   }

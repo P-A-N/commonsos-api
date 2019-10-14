@@ -80,6 +80,7 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
       .body("transactionList.wallet",  contains("MAIN", "MAIN"))
       .body("transactionList.isFromAdmin",  contains(true, true))
       .body("transactionList.isFeeTransaction",  contains(false, false))
+      .body("transactionList.isRedistributionTransaction",  contains(false, false))
       .body("transactionList.remitterAdmin.id",  contains(com1Admin.getId().intValue(), ncl.getId().intValue()))
       .body("transactionList.remitterAdmin.adminuser",  contains(com1Admin.getAdminname(), ncl.getAdminname()))
       .body("transactionList.remitter",  contains(nullValue(), nullValue()))

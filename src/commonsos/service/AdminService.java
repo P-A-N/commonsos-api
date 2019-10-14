@@ -32,7 +32,7 @@ import commonsos.util.ValidateUtil;
 import commonsos.view.AdminListView;
 
 @Singleton
-public class AdminService {
+public class AdminService extends AbstractService {
 
   @Inject private AdminRepository adminRepository;
   @Inject private CommunityRepository communityRepository;

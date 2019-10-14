@@ -16,14 +16,21 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,8 +42,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import commonsos.Configuration;
 import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
 import commonsos.command.app.CreateTokenTransactionFromUserCommand;
+import commonsos.command.batch.CreateTokenTransactionForRedistributionCommand;
+import commonsos.command.batch.RedistributionBatchCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -44,6 +54,7 @@ import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
+import commonsos.repository.RedistributionRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
@@ -51,8 +62,11 @@ import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.MessageThread;
+import commonsos.repository.entity.Redistribution;
+import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
@@ -70,13 +84,20 @@ public class TokenTransactionServiceTest {
   @Mock CommunityRepository communityRepository;
   @Mock MessageThreadRepository messageThreadRepository;
   @Mock MessageRepository messageRepository;
+  @Mock RedistributionRepository redistributionRepository;
   @Mock BlockchainService blockchainService;
   @Mock BlockchainEventService blockchainEventService;
   @Mock SyncService syncService;
   @Mock PushNotificationService pushNotificationService;
+  @Spy Configuration config;
   @Captor ArgumentCaptor<TokenTransaction> captor;
   @InjectMocks @Spy TokenTransactionService service;
 
+  @BeforeEach
+  public void ignoreAbstractMethod() {
+    doNothing().when(service).commitAndStartNewTran();
+  }
+  
   @Test
   public void createTransaction_app() {
     // prepare
@@ -135,7 +156,6 @@ public class TokenTransactionServiceTest {
     // nothing to throw
     service.create(user, command);
   }
-
 
   @Test
   public void createTransaction_admin() {
@@ -205,6 +225,40 @@ public class TokenTransactionServiceTest {
       .setAmount(new BigDecimal(amount))
       .setDescription(description)
       .setAdId(id(adId));
+  }
+
+  @Test
+  public void createTransaction_batch() {
+    // prepare command
+    Community com1 = new Community().setId(id("com1"));
+    User user1 = new User().setId(id("user1"));
+    CreateTokenTransactionForRedistributionCommand tranCommand1 = new CreateTokenTransactionForRedistributionCommand()
+        .setCommunity(com1).setUser(user1).setRate(ONE);
+    Map<Community, List<CreateTokenTransactionForRedistributionCommand>> commandMap = new HashMap<>();
+    commandMap.put(com1, asList(tranCommand1));
+    RedistributionBatchCommand batchCommand = new RedistributionBatchCommand().setCommandMap(commandMap);
+    
+    // prepare return from repository, service
+    TokenTransaction feeTran1 = new TokenTransaction().setAmount(TEN);
+    List<TokenTransaction> feeTranList = asList(feeTran1);
+    when(repository.searchUnredistributedFeeTransaction(any())).thenReturn(feeTranList);
+    
+    Redistribution red1 = new Redistribution().setRate(ONE);
+    ResultList<Redistribution> redResultList = new ResultList<Redistribution>().setList(asList(red1));
+    when(redistributionRepository.findByCommunityId(any(), any())).thenReturn(redResultList);
+    
+    TokenBalance tokenBalance = new TokenBalance().setBalance(TEN);
+    when(blockchainService.getTokenBalance(any(Community.class), any(WalletType.class))).thenReturn(tokenBalance);
+    
+    // not enough token balance
+    tokenBalance.setBalance(new BigDecimal("0.01"));
+    service.create(batchCommand);
+    verify(repository, never()).create(any());
+    tokenBalance.setBalance(TEN);
+    
+    // normal case
+    service.create(batchCommand);
+    verify(repository, times(1)).create(any());
   }
 
   @Test

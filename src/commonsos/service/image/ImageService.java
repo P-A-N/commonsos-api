@@ -16,11 +16,12 @@ import org.im4java.core.ImageCommand;
 import org.im4java.process.OutputConsumer;
 
 import commonsos.exception.ServerErrorException;
+import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class ImageService {
+public class ImageService extends AbstractService {
 
   public ImageType getImageType(File image) {
     // prepare

@@ -32,7 +32,7 @@ import commonsos.util.UserUtil;
 import commonsos.view.RedistributionListView;
 
 @Singleton
-public class RedistributionService {
+public class RedistributionService extends AbstractService {
 
   @Inject private RedistributionRepository repository;
   @Inject private CommunityRepository communityRepository;

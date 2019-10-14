@@ -16,13 +16,14 @@ import org.web3j.protocol.core.methods.response.Transaction;
 
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.EntityManagerService;
+import commonsos.service.AbstractService;
 import commonsos.service.EthTransactionService;
 import commonsos.service.TokenTransactionService;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
 @Slf4j
-public class BlockchainEventService {
+public class BlockchainEventService extends AbstractService {
 
   @Inject private Web3j web3j;
   @Inject private TokenTransactionService tokenTransactionService;
