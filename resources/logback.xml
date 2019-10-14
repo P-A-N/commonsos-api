@@ -14,6 +14,25 @@
     <encoder>
       <pattern>${defaultPattern}</pattern>
     </encoder>
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <appender name="app_debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>../logs/app_debug.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>../logs/app_debug.%d{yyyy-MM-dd}.zip</fileNamePattern>
+      <maxHistory>1</maxHistory>
+    </rollingPolicy>
+    <encoder>
+      <pattern>${defaultPattern}</pattern>
+    </encoder>
+    <filter class="ch.qos.logback.classic.filter.LevelFilter">
+      <level>DEBUG</level>
+      <onMatch>ACCEPT</onMatch>
+      <onMismatch>DENY</onMismatch>
+    </filter>
   </appender>
 
   <appender name="eth" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -27,11 +46,14 @@
     </encoder>
   </appender>
 
-  <logger name="com.google.inject.internal.ProxyFactory" level="error"/>
-  <logger name="commonsos.service.blockchain.BlockchainEventService" level="${commonsos.log.level}" additivity="false">
-    <appender-ref ref="eth"/>
-  </logger>
-  <root level="${commonsos.log.level}">
+  <root level="info">
     <appender-ref ref="app"/>
   </root>
+  <logger name="commonsos" level="${commonsos.log.level}">
+    <appender-ref ref="app_debug"/>
+  </logger>
+  <logger name="commonsos.service.blockchain.BlockchainEventService" level="info" additivity="false">
+    <appender-ref ref="eth"/>
+  </logger>
+  <logger name="com.google.inject.internal.ProxyFactory" level="error"/>
 </configuration>
