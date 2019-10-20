@@ -1,25 +1,24 @@
 #!/bin/bash
-set -e
 set -x
 
-DISTRIBUTION_FILE='commonsos-api.zip'
-BUILD_NUMBER=$1
-GIT_COMMIT=$2
+DISTRIBUTION_FILE=~/commonsos-api.zip
+REVISION_NO=`cat ~/revision.txt`
+DEPLOY_DIR=~/commonsos-api-$REVISION_NO
+APP_DIR=~/commonsos-api
 
-VERSIONED_FOLDER="$HOME/commonsos-api-$BUILD_NUMBER-$GIT_COMMIT"
+echo "Unpacking to $DEPLOY_DIR"
+[ -d $DEPLOY_DIR ] && rm -rf $DEPLOY_DIR
 
-echo "Unpacking to $VERSIONED_FOLDER"
-unzip "$DISTRIBUTION_FILE" -d /tmp/
-chmod 755 /tmp/commonsos-api/*.sh
-mv /tmp/commonsos-api "$VERSIONED_FOLDER"
+unzip "$DISTRIBUTION_FILE" -d $DEPLOY_DIR
+chmod 755 $DEPLOY_DIR/shell/*.sh
 
-echo "Linking current installation to $VERSIONED_FOLDER"
-rm commonsos-api || true
-ln -sfv "${VERSIONED_FOLDER}" commonsos-api
+echo "Linking current installation to $DEPLOY_DIR"
+rm $APP_DIR
+ln -sfv $DEPLOY_DIR $APP_DIR
 
-pushd ~/commonsos-api
-./stop.sh || true
-./start.sh
+pushd $APP_DIR
+./shell/stop.sh
+./shell/start.sh
 popd
 
 echo "Done"

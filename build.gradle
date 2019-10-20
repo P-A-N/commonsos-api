@@ -74,7 +74,7 @@ jar {
   archiveName "$buildDir/package/commonsos-api.jar"
   manifest {
     attributes 'Main-Class': 'commonsos.Server'
-    attributes 'Class-Path': configurations.compile.collect {it.getName()}.join(' ')
+    attributes 'Class-Path': 'libs/*'
   }
 }
 
@@ -83,21 +83,19 @@ task copyCompileDependencies(type: Sync) {
   into "build/libs"
 }
 
-task createScripts() {
-  new File("$projectDir/shell/token_migration.sh").text =
-    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.TokenMigration \$1"""
-  new File("$projectDir/shell/create_ncl_account.sh").text =
-    """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
-}
-
-task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createScripts]) {
+task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies]) {
   archiveName "commonsos-api.zip"
-  from new File(buildDir, "libs")
-  into "commonsos-api/libs"
-  
-  from new File(projectDir, 'shell')
-  into "commonsos-api/shell"
-  
-  from new File(projectDir, 'batch')
-  into "commonsos-api/batch"
+  from new File(buildDir, "package")
+  into("libs") {
+    from new File(buildDir, "libs")
+  }
+  into("shell") {
+    from new File(projectDir, "shell")
+  }
+  into("batch") {
+    from new File(projectDir, "batch")
+  }
+  into("cron") {
+    from new File(projectDir, "cron")
+  }
 }
