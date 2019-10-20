@@ -61,7 +61,7 @@ public class AdServiceTest {
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     when(transactionRepository.hasPaid(any())).thenReturn(true);
 
-    assertThrows(BadRequestException.class, () -> service.updateAd(user, new UpdateAdCommand()));
+    assertThrows(BadRequestException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
   }
 
   @Test
