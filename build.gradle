@@ -85,7 +85,9 @@ task copyCompileDependencies(type: Sync) {
 
 task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies]) {
   archiveName "commonsos-api.zip"
-  from new File(buildDir, "libs")
+  into("libs") {
+    from new File(buildDir, "libs")
+  }
   into("shell") {
     from new File(projectDir, "shell")
   }

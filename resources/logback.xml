@@ -6,9 +6,9 @@
             value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{100} - [%X{ip}][%X{username}][%X{adminEmailAddress}][%X{sessionId}][%X{requestId}] %msg%n"/>
 
   <appender name="app" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>../logs/app.log</file>
+    <file>~/logs/app.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>../logs/app.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
+      <fileNamePattern>~/logs/app.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
       <maxHistory>${commonsos.log.max.history}</maxHistory>
     </rollingPolicy>
     <encoder>
@@ -20,9 +20,9 @@
   </appender>
 
   <appender name="app_debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>../logs/app_debug.log</file>
+    <file>~/logs/app_debug.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>../logs/app_debug.%d{yyyy-MM-dd}.zip</fileNamePattern>
+      <fileNamePattern>~/logs/app_debug.%d{yyyy-MM-dd}.zip</fileNamePattern>
       <maxHistory>1</maxHistory>
     </rollingPolicy>
     <encoder>
@@ -36,9 +36,9 @@
   </appender>
 
   <appender name="eth" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>../logs/eth.log</file>
+    <file>~/logs/eth.log</file>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>../logs/eth.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
+      <fileNamePattern>~/logs/eth.log.%d{yyyy-MM-dd}.zip</fileNamePattern>
       <maxHistory>${commonsos.log.max.history}</maxHistory>
     </rollingPolicy>
     <encoder>
