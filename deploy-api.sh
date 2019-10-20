@@ -21,4 +21,6 @@ pushd $APP_DIR
 ./shell/start.sh
 popd
 
+crontab $APP_DIR/cron/cron.txt
+
 echo "Done"
