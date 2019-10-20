@@ -1,6 +1,7 @@
 package commonsos.service;
 
 import static commonsos.TestId.id;
+import static java.math.BigDecimal.ONE;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -23,6 +24,7 @@ import commonsos.repository.CommunityRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 
@@ -42,7 +44,7 @@ public class AdServiceTest {
     User user = new User().setId(id("creator"));
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     when(transactionRepository.hasPaid(any())).thenReturn(false);
-    service.updateAd(user, new UpdateAdCommand());
+    service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE));
   }
 
   @Test
@@ -50,7 +52,7 @@ public class AdServiceTest {
     User user = new User().setId(id("user"));
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     
-    assertThrows(ForbiddenException.class, () -> service.updateAd(user, new UpdateAdCommand()));
+    assertThrows(ForbiddenException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
   }
 
   @Test

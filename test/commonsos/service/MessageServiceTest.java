@@ -29,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import commonsos.command.app.UpdateGroupMessageThreadCommand;
-import commonsos.command.app.CreateMessageCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.exception.UserNotFoundException;
@@ -39,7 +38,6 @@ import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
-import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.User;
@@ -139,26 +137,6 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void postMessage() {
-    User user = new User().setId(id("user id"));
-    when(messageThreadRepository.findById(id("thread id"))).thenReturn(Optional.of(new MessageThread().setParties(asList(party(user)))));
-    Message createdMessage = new Message();
-    when(messageRepository.create(any())).thenReturn(createdMessage);
-    MessageView messageView = new MessageView();
-    doReturn(messageView).when(service).view(createdMessage);
-
-    MessageView result = service.postMessage(user, new CreateMessageCommand().setThreadId(id("thread id")).setText("message text"));
-
-    assertThat(result).isSameAs(messageView);
-    ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
-    verify(messageRepository).create(messageArgument.capture());
-    Message message = messageArgument.getValue();
-    assertThat(message.getThreadId()).isEqualTo(id("thread id"));
-    assertThat(message.getCreatedUserId()).isEqualTo(id("user id"));
-    assertThat(message.getText()).isEqualTo("message text");
-  }
-
-  @Test
   public void view_group() {
     // prepare
     User user = new User().setId(id("user2_v_g"));
@@ -211,18 +189,11 @@ public class MessageServiceTest {
   }
 
   @Test
-  public void updateGroup_messagethread_not_found() {
-    when(messageThreadRepository.findById(any())).thenReturn(Optional.empty());
-
-    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User(), new UpdateGroupMessageThreadCommand()));
-  }
-
-  @Test
   public void updateGroup_is_not_group() {
     MessageThread messageThread = new MessageThread().setGroup(false);
-    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findStrictById(any())).thenReturn(messageThread);
 
-    assertThrows(BadRequestException.class, () -> service.updateGroup(new User(), new UpdateGroupMessageThreadCommand()));
+    assertThrows(BadRequestException.class, () -> service.updateGroup(new User(), new UpdateGroupMessageThreadCommand().setTitle("test").setMemberIds(asList(id("user2_ug")))));
   }
 
   @Test
@@ -230,8 +201,8 @@ public class MessageServiceTest {
     MessageThread messageThread = new MessageThread().setGroup(true).setParties(asList(
         new MessageThreadParty().setUser(new User().setId(id("user1")))
         ));
-    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
-    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User().setId(id("notMember")), new UpdateGroupMessageThreadCommand()));
+    when(messageThreadRepository.findStrictById(any())).thenReturn(messageThread);
+    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User().setId(id("notMember")), new UpdateGroupMessageThreadCommand().setTitle("test").setMemberIds(asList(id("user2_ug")))));
   }
 
   @Test
@@ -241,7 +212,7 @@ public class MessageServiceTest {
         new MessageThreadParty().setUser(new User().setId(id("user1_ug"))),
         new MessageThreadParty().setUser(new User().setId(id("user2_ug")))
         )));
-    when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
+    when(messageThreadRepository.findStrictById(any())).thenReturn(messageThread);
     
     List<User> givenUsers = asList(
         new User().setId(id("user2_ug")),
@@ -251,7 +222,7 @@ public class MessageServiceTest {
     doReturn(null).when(service).view(any(), any());
     
     // execute
-    service.updateGroup(new User().setId(id("user1_ug")), new UpdateGroupMessageThreadCommand());
+    service.updateGroup(new User().setId(id("user1_ug")), new UpdateGroupMessageThreadCommand().setTitle("test").setMemberIds(asList(id("user2_ug"))));
     
     // verify
     verify(messageThreadRepository).update(messageThreadArgumentCaptor.capture());

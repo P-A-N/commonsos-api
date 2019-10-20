@@ -14,15 +14,17 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.ImmutableMap;
 
 import commonsos.command.PaginationCommand;
 import commonsos.command.UploadPhotoCommand;
 import commonsos.command.app.CreateDirectMessageThreadCommand;
 import commonsos.command.app.CreateGroupCommand;
-import commonsos.command.app.UpdateGroupMessageThreadCommand;
 import commonsos.command.app.CreateMessageCommand;
 import commonsos.command.app.SearchMessageThreadCommand;
+import commonsos.command.app.UpdateGroupMessageThreadCommand;
 import commonsos.command.app.UpdateMessageThreadPersonalTitleCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
@@ -79,6 +81,8 @@ public class MessageService extends AbstractService {
   }
 
   public MessageThreadView group(User user, CreateGroupCommand command) {
+    validateCommand(command);
+    
     communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new BadRequestException("User isn't a member of the community");
     List<User> users = validatePartiesCommunity(command.getMemberIds(), command.getCommunityId());
@@ -99,7 +103,8 @@ public class MessageService extends AbstractService {
   }
 
   public MessageThreadView updateGroup(User user, UpdateGroupMessageThreadCommand command) {
-    MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).orElseThrow(ForbiddenException::new);
+    validateCommand(command);
+    MessageThread messageThread = messageThreadRepository.findStrictById(command.getThreadId());
     if (!messageThread.isGroup()) throw new BadRequestException("Not a group message thread");
     if (!isUserAllowedToAccessMessageThread(user, messageThread)) throw new ForbiddenException("Not a thread member");
 
@@ -222,7 +227,10 @@ public class MessageService extends AbstractService {
   }
 
   public MessageView postMessage(User user, CreateMessageCommand command) {
-    MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).map(thread -> checkAccess(user, thread)).get();
+    validateCommand(command);
+    
+    MessageThread messageThread = messageThreadRepository.findStrictById(command.getThreadId());
+    checkAccess(user, messageThread);
     Message message = messageRepository.create(new Message()
       .setCreatedUserId(user.getId())
       .setThreadId(command.getThreadId())
@@ -233,7 +241,7 @@ public class MessageService extends AbstractService {
     return view(message);
   }
 
-    private void notifyThreadParties(User senderUser, MessageThread messageThread, Message message) {
+  private void notifyThreadParties(User senderUser, MessageThread messageThread, Message message) {
     messageThread.getParties().stream()
       .filter(p -> !p.getUser().getId().equals(senderUser.getId()))
       .forEach(p -> {
@@ -261,6 +269,8 @@ public class MessageService extends AbstractService {
   }
 
   public MessageThreadView updatePersonalTitle(User user, UpdateMessageThreadPersonalTitleCommand command) {
+    validateCommand(command);
+    
     // verify
     MessageThread messageThread = messageThreadRepository.findStrictById(command.getThreadId());
     Optional<MessageThreadParty> userMtp = messageThread.getParties().stream().filter(p -> p.getUser().getId().equals(user.getId())).findFirst();
@@ -316,4 +326,22 @@ public class MessageService extends AbstractService {
     communityRepository.findPublicStrictById(communityId);
     return messageThreadRepository.unreadMessageThreadIds(user, communityId).size();
   }
+
+  private void validateCommand(CreateGroupCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
+    if (command.getMemberIds() == null || command.getMemberIds().isEmpty()) throw new BadRequestException("memberIds are empty");
+  }
+
+  private void validateCommand(UpdateGroupMessageThreadCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
+    if (command.getMemberIds() == null || command.getMemberIds().isEmpty()) throw new BadRequestException("memberIds are empty");
+  }
+
+  private void validateCommand(UpdateMessageThreadPersonalTitleCommand command) {
+    if (StringUtils.isEmpty(command.getPersonalTitle())) throw new BadRequestException("title is empty");
+  }
+
+  private void validateCommand(CreateMessageCommand command) {
+    if (StringUtils.isEmpty(command.getText())) throw new BadRequestException("text is empty");
+}
 }

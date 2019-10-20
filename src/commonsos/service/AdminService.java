@@ -8,11 +8,14 @@ import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.AdminLoginCommand;
 import commonsos.command.admin.CreateAdminTemporaryCommand;
 import commonsos.command.admin.UpdateAdminCommand;
 import commonsos.exception.AuthenticationException;
+import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdminRepository;
@@ -157,6 +160,7 @@ public class AdminService extends AbstractService {
   }
 
   private void validate(UpdateAdminCommand command) {
+    if (StringUtils.isEmpty(command.getAdminname())) throw new BadRequestException("adminname is empty");
     ValidateUtil.validateTelNo(command.getTelNo());
   }
 }

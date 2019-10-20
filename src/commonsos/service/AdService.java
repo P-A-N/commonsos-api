@@ -5,6 +5,8 @@ import static java.util.stream.Collectors.toList;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import commonsos.command.PaginationCommand;
 import commonsos.command.UploadPhotoCommand;
 import commonsos.command.app.CreateAdCommand;
@@ -33,6 +35,7 @@ public class AdService extends AbstractService {
   @Inject private ImageUploadService imageService;
 
   public AdView create(User user, CreateAdCommand command) {
+    validateCommande(command);
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
 
     Ad ad = new Ad()
@@ -84,6 +87,8 @@ public class AdService extends AbstractService {
   }
 
   public Ad updateAd(User operator, UpdateAdCommand command) {
+    validateCommand(command);
+    
     Ad ad = ad(command.getId());
     if (!ad.getCreatedUserId().equals(operator.getId())) throw new ForbiddenException();
     if (transactionRepository.hasPaid(ad)) throw new BadRequestException();
@@ -116,5 +121,17 @@ public class AdService extends AbstractService {
 
   public void deleteAdLogicallyByAdmin(User user, Long adId) {
     deleteService.deleteAdByAdmin(user, ad(adId));
+  }
+
+  private void validateCommande(CreateAdCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
+    if (command.getPoints() == null) throw new BadRequestException("points is null");
+    if (command.getType() == null) throw new BadRequestException("type is null");
+  }
+
+  private void validateCommand(UpdateAdCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
+    if (command.getPoints() == null) throw new BadRequestException("points is null");
+    if (command.getType() == null) throw new BadRequestException("type is null");
   }
 }
