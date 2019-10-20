@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source set_env.sh
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
+source $SCRIPT_DIR/set_env.sh
 
 if [ ! -f  $PID_FILE ]
 then
