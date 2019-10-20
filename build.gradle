@@ -71,24 +71,21 @@ test {
 }
 
 jar {
-  archiveName "$buildDir/package/commonsos-api.jar"
+  archiveName "$buildDir/libs/commonsos-api.jar"
   manifest {
     attributes 'Main-Class': 'commonsos.Server'
-    attributes 'Class-Path': 'libs/*'
+    attributes 'Class-Path': configurations.compile.collect {it.getName()}.join(' ')
   }
 }
 
 task copyCompileDependencies(type: Sync) {
   from configurations.compile
-  into "build/libs"
+  into "$buildDir/libs"
 }
 
 task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies]) {
   archiveName "commonsos-api.zip"
-  from new File(buildDir, "package")
-  into("libs") {
-    from new File(buildDir, "libs")
-  }
+  from new File(buildDir, "libs")
   into("shell") {
     from new File(projectDir, "shell")
   }

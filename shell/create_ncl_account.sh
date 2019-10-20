@@ -3,4 +3,6 @@
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 source $SCRIPT_DIR/set_env.sh
 
-java -Xmx1024m -Dfile.encoding=UTF-8 -jar $APP_DIR/commonsos-api.jar commonsos.tools.CreateNclAccount $1
+pushd $APP_DIR/libs
+java -Xmx1024m -Dfile.encoding=UTF-8 -jar commonsos-api.jar commonsos.tools.CreateNclAccount $1
+popd
