@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.fileupload.FileItem;
 
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.controller.admin.MultipartFormdataController;
 import commonsos.exception.CommonsOSException;
 import commonsos.exception.ServerErrorException;

@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.controller.app.message.MessageThreadForAdController;
+import commonsos.controller.app.message.CreateMessageThreadForAdIfNoExistsController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.view.MessageThreadView;
@@ -18,7 +18,7 @@ import spark.Request;
 @ExtendWith(MockitoExtension.class)
 public class MessageThreadForAdControllerTest {
 
-  @InjectMocks MessageThreadForAdController controller;
+  @InjectMocks CreateMessageThreadForAdIfNoExistsController controller;
   @Mock Request request;
   @Mock MessageService service;
 

@@ -24,10 +24,10 @@ import org.web3j.crypto.Credentials;
 
 import commonsos.Configuration;
 import commonsos.command.PaginationCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.CreateCommunityCommand;
 import commonsos.command.admin.UpdateCommunityCommand;
-import commonsos.command.app.CommunityNotificationCommand;
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.app.UpdateCommunityNotificationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -261,7 +261,7 @@ public class CommunityService extends AbstractService {
     return url;
   }
   
-  public void updateNotificationUpdateAt(CommunityNotificationCommand command) {
+  public void updateNotificationUpdateAt(UpdateCommunityNotificationCommand command) {
     Optional<CommunityNotification> optionalNotification = notificationRepository.findByWordPressId(command.getWordpressId());
     if (optionalNotification.isPresent()) {
       CommunityNotification notification = optionalNotification.get();

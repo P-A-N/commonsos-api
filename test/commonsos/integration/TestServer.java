@@ -24,7 +24,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 
 import commonsos.Server;
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.interceptor.ControllerInterceptor;

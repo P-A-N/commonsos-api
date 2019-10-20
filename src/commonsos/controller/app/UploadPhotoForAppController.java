@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.fileupload.FileItem;
 
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.CommonsOSException;
 import commonsos.exception.ServerErrorException;

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import com.google.gson.Gson;
 
 import commonsos.annotation.Synchronized;
-import commonsos.command.app.UpdateEmailTemporaryCommand;
+import commonsos.command.UpdateUserEmailAddressTemporaryCommand;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.exception.BadRequestException;
 import commonsos.repository.entity.User;
@@ -25,7 +25,7 @@ public class UpdateEmailTemporaryController extends AfterAppLoginController {
 
   @Override
   protected CommonView handleAfterLogin(User user, Request request, Response response) {
-    UpdateEmailTemporaryCommand command = gson.fromJson(request.body(), UpdateEmailTemporaryCommand.class);
+    UpdateUserEmailAddressTemporaryCommand command = gson.fromJson(request.body(), UpdateUserEmailAddressTemporaryCommand.class);
     if(StringUtils.isEmpty(command.getNewEmailAddress())) throw new BadRequestException("newEmailAddress is required");
     
     command.setUserId(user.getId());

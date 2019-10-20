@@ -27,7 +27,7 @@ import org.web3j.crypto.Credentials;
 
 import commonsos.JobService;
 import commonsos.command.app.CreateUserTemporaryCommand;
-import commonsos.command.app.UserUpdateCommand;
+import commonsos.command.app.UpdateUserCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.AdRepository;
@@ -200,7 +200,7 @@ public class UserServiceTest {
     when(userRepository.update(user)).thenReturn(user);
     
     // execute
-    UserUpdateCommand command = new UserUpdateCommand()
+    UpdateUserCommand command = new UpdateUserCommand()
         .setFirstName("first")
         .setLastName("last")
         .setDescription("description")

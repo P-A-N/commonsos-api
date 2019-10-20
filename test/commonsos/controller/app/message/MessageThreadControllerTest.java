@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.controller.app.message.MessageThreadController;
+import commonsos.controller.app.message.GetMessageThreadController;
 import commonsos.repository.entity.User;
 import commonsos.service.MessageService;
 import commonsos.view.MessageThreadView;
@@ -18,7 +18,7 @@ import spark.Request;
 @ExtendWith(MockitoExtension.class)
 public class MessageThreadControllerTest {
 
-  @InjectMocks MessageThreadController controller;
+  @InjectMocks GetMessageThreadController controller;
   @Mock Request request;
   @Mock MessageService service;
 

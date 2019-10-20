@@ -3,14 +3,13 @@ package commonsos.command.admin;
 import java.math.BigDecimal;
 import java.util.List;
 
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
-@Getter
-@Setter
-@Accessors(chain=true)
+@Getter @Setter @Accessors(chain=true) @ToString
 public class CreateCommunityCommand {
   private String communityName;
   private String tokenName;

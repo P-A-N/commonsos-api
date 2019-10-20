@@ -1,1 +1,1 @@
-5 0 * * * /home/commonsos/commonsos-api/redistributionBatch.sh >> /home/commonsos/logs/redistributionBatch.log
+5 0 * * * /home/commonsos/commonsos-api/batch/redistributionBatch.sh >> /home/commonsos/logs/redistributionBatch.log

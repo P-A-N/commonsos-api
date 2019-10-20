@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.service.image.ImageService;
 import commonsos.util.ValidateUtil;

@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.command.app.UserUpdateCommand;
-import commonsos.controller.app.user.UserUpdateController;
+import commonsos.command.app.UpdateUserCommand;
+import commonsos.controller.app.user.UpdateUserController;
 import commonsos.di.GsonProvider;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
@@ -30,7 +30,7 @@ public class UserUpdateControllerTest {
   @Mock Request request;
   @Mock Response response;
   @Mock UserService userService;
-  @InjectMocks UserUpdateController controller;
+  @InjectMocks UpdateUserController controller;
 
   @BeforeEach
   public void setGson() {
@@ -58,9 +58,9 @@ public class UserUpdateControllerTest {
     UserView result = controller.handleAfterLogin(user, request, response);
 
     // verify
-    ArgumentCaptor<UserUpdateCommand> commandCaptor = ArgumentCaptor.forClass(UserUpdateCommand.class);
+    ArgumentCaptor<UpdateUserCommand> commandCaptor = ArgumentCaptor.forClass(UpdateUserCommand.class);
     verify(userService, times(1)).updateUser(eq(user), commandCaptor.capture());
-    UserUpdateCommand actualCommand = commandCaptor.getValue();
+    UpdateUserCommand actualCommand = commandCaptor.getValue();
     assertThat(actualCommand.getFirstName()).isEqualTo("John");
     assertThat(actualCommand.getLastName()).isEqualTo("Doe");
     assertThat(actualCommand.getDescription()).isEqualTo("Retired");

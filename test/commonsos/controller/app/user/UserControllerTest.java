@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.controller.app.user.UserController;
+import commonsos.controller.app.user.GetUserController;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.User;
@@ -28,7 +28,7 @@ public class UserControllerTest {
   @Mock Request request;
   @Mock Response response;
   @Mock UserService userService;
-  @InjectMocks UserController controller;
+  @InjectMocks GetUserController controller;
 
   @Test
   public void handle_noId() {

@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.controller.app.ad.AdController;
+import commonsos.controller.app.ad.GetAdController;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
 import commonsos.view.AdView;
@@ -20,7 +20,7 @@ public class AdControllerTest {
 
   @Mock Request request;
   @Mock AdService service;
-  @InjectMocks AdController controller;
+  @InjectMocks GetAdController controller;
 
   @Test
   public void handle() {

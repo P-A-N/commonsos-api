@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import commonsos.command.app.AdUpdateCommand;
+import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -42,7 +42,7 @@ public class AdServiceTest {
     User user = new User().setId(id("creator"));
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     when(transactionRepository.hasPaid(any())).thenReturn(false);
-    service.updateAd(user, new AdUpdateCommand());
+    service.updateAd(user, new UpdateAdCommand());
   }
 
   @Test
@@ -50,7 +50,7 @@ public class AdServiceTest {
     User user = new User().setId(id("user"));
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     
-    assertThrows(ForbiddenException.class, () -> service.updateAd(user, new AdUpdateCommand()));
+    assertThrows(ForbiddenException.class, () -> service.updateAd(user, new UpdateAdCommand()));
   }
 
   @Test
@@ -59,7 +59,7 @@ public class AdServiceTest {
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
     when(transactionRepository.hasPaid(any())).thenReturn(true);
 
-    assertThrows(BadRequestException.class, () -> service.updateAd(user, new AdUpdateCommand()));
+    assertThrows(BadRequestException.class, () -> service.updateAd(user, new UpdateAdCommand()));
   }
 
   @Test

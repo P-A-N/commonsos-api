@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import com.google.gson.Gson;
 
-import commonsos.command.app.LastViewTimeUpdateCommand;
+import commonsos.command.app.UpdateLastViewTimeCommand;
 import commonsos.controller.app.AfterAppLoginController;
 import commonsos.repository.entity.User;
 import commonsos.service.UserService;
@@ -19,7 +19,7 @@ public class UpdateWalletLastViewTimeController extends AfterAppLoginController 
 
   @Override
   public CommonView handleAfterLogin(User user, Request request, Response response) {
-    LastViewTimeUpdateCommand command = gson.fromJson(request.body(), LastViewTimeUpdateCommand.class);
+    UpdateLastViewTimeCommand command = gson.fromJson(request.body(), UpdateLastViewTimeCommand.class);
     service.updateWalletLastViewTime(user, command);
     return new CommonView();
   }

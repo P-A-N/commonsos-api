@@ -20,19 +20,21 @@ import org.web3j.crypto.Credentials;
 import commonsos.Configuration;
 import commonsos.JobService;
 import commonsos.command.PaginationCommand;
+import commonsos.command.UpdateUserEmailAddressTemporaryCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.SearchUserForAdminCommand;
+import commonsos.command.admin.UpdateUserByAdminCommand;
+import commonsos.command.admin.UpdateUserCommunitiesByAdminCommand;
 import commonsos.command.admin.UpdateUserNameByAdminCommand;
 import commonsos.command.app.CreateUserTemporaryCommand;
-import commonsos.command.app.LastViewTimeUpdateCommand;
-import commonsos.command.app.MobileDeviceUpdateCommand;
 import commonsos.command.app.PasswordResetRequestCommand;
-import commonsos.command.app.UpdateEmailTemporaryCommand;
-import commonsos.command.app.UploadPhotoCommand;
-import commonsos.command.app.UserNameUpdateCommand;
+import commonsos.command.app.UpdateLastViewTimeCommand;
+import commonsos.command.app.UpdateMobileDeviceCommand;
+import commonsos.command.app.UpdateUserCommand;
+import commonsos.command.app.UpdateUserCommunitiesCommand;
+import commonsos.command.app.UpdateUserNameCommand;
+import commonsos.command.app.UpdateUserStatusCommand;
 import commonsos.command.app.UserPasswordResetRequestCommand;
-import commonsos.command.app.UserStatusUpdateCommand;
-import commonsos.command.app.UserUpdateCommand;
-import commonsos.command.app.UserUpdateCommunitiesCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -219,7 +221,7 @@ public class UserService extends AbstractService {
     return user;
   }
   
-  public void updateEmailTemporary(UpdateEmailTemporaryCommand command) {
+  public void updateEmailTemporary(UpdateUserEmailAddressTemporaryCommand command) {
     ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
     User user = userRepository.findStrictById(command.getUserId());
     if (user.getEmailAddress() != null && user.getEmailAddress().equals(command.getNewEmailAddress())) throw new BadRequestException("new address is same as now");
@@ -240,6 +242,13 @@ public class UserService extends AbstractService {
     userRepository.createTemporaryEmailAddress(tmpEmailAddr);
     
     emailService.sendUpdateEmailTemporary(command.getNewEmailAddress(), user.getUsername(), user.getId(), accessId);
+  }
+  
+  public void updateEmailTemporaryByAdmin(Admin admin, UpdateUserEmailAddressTemporaryCommand command) {
+    User user = userRepository.findStrictById(command.getUserId());
+    if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
+    
+    updateEmailTemporary(command);
   }
 
   public void updateEmailComplete(Long userId, String accessId) {
@@ -352,7 +361,7 @@ public class UserService extends AbstractService {
     return new UserSession().setUserId(user.getId()).setUsername(user.getUsername());
   }
 
-  public User updateUser(User user, UserUpdateCommand command) {
+  public User updateUser(User user, UpdateUserCommand command) {
     userRepository.lockForUpdate(user);
     user.setFirstName(command.getFirstName());
     user.setLastName(command.getLastName());
@@ -362,7 +371,18 @@ public class UserService extends AbstractService {
     return userRepository.update(user);
   }
 
-  public User updateUserCommunities(User user, UserUpdateCommunitiesCommand command) {
+  public User updateUserByAdmin(Admin admin, UpdateUserByAdminCommand command) {
+    User user = userRepository.findStrictById(command.getId());
+    if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
+    
+    ValidateUtil.validateTelNo(command.getTelNo());
+    
+    userRepository.lockForUpdate(user);
+    user.setTelNo(command.getTelNo());
+    return userRepository.update(user);
+  }
+
+  public User updateUserCommunities(User user, UpdateUserCommunitiesCommand command) {
     // create new communityUserList
     List<CommunityUser> oldCommunityUserList = user.getCommunityUserList();
     List<Long> oldCommunityIdList = oldCommunityUserList.stream().map(CommunityUser::getCommunity).map(Community::getId).collect(Collectors.toList());
@@ -393,7 +413,41 @@ public class UserService extends AbstractService {
     return userRepository.update(user);
   }
 
-  public User updateUserName(User user, UserNameUpdateCommand command) {
+  public User updateUserCommunitiesByAdmin(Admin admin, UpdateUserCommunitiesByAdminCommand command) {
+    User user = userRepository.findStrictById(command.getId());
+    if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
+
+    // create new communityUserList
+    List<CommunityUser> oldCommunityUserList = user.getCommunityUserList();
+    List<Long> oldCommunityIdList = oldCommunityUserList.stream().map(CommunityUser::getCommunity).map(Community::getId).collect(Collectors.toList());
+    List<CommunityUser> newCommunityUserList = new ArrayList<>();
+    List<Long> newCommunityIdList = command.getCommunityList();
+    oldCommunityUserList.forEach(cu -> {
+      if (newCommunityIdList.contains(cu.getCommunity().getId())) {
+        newCommunityUserList.add(cu);
+      }
+    });
+    newCommunityIdList.forEach(id -> {
+      if (!oldCommunityIdList.contains(id)) {
+        newCommunityUserList.add(new CommunityUser().setCommunity(communityRepository.findPublicStrictById(id)));
+      }
+    });
+    newCommunityUserList.sort((c1, c2) -> c1.getCommunity().getId().compareTo(c2.getCommunity().getId()));
+
+    // set new communityUserList
+    userRepository.lockForUpdate(user);
+    user.setCommunityUserList(newCommunityUserList);
+
+    // update
+    user.getCommunityUserList().forEach(cu -> {
+      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
+      jobService.submit(user, task);
+    });
+
+    return userRepository.update(user);
+  }
+
+  public User updateUserName(User user, UpdateUserNameCommand command) {
     ValidateUtil.validateUsername(command.getUsername());
     if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
     
@@ -414,7 +468,7 @@ public class UserService extends AbstractService {
     return userRepository.update(user);
   }
 
-  public User updateStatus(User user, UserStatusUpdateCommand command) {
+  public User updateStatus(User user, UpdateUserStatusCommand command) {
     ValidateUtil.validateStatus(command.getStatus());
     
     userRepository.lockForUpdate(user);
@@ -447,13 +501,13 @@ public class UserService extends AbstractService {
     emailService.sendPasswordReset(user.getEmailAddress(), user.getUsername(), accessId);
   }
 
-  public void updateMobileDevice(User user, MobileDeviceUpdateCommand command) {
+  public void updateMobileDevice(User user, UpdateMobileDeviceCommand command) {
     userRepository.lockForUpdate(user);
     user.setPushNotificationToken(command.getPushNotificationToken());
     userRepository.update(user);
   }
 
-  public void updateWalletLastViewTime(User user, LastViewTimeUpdateCommand command) {
+  public void updateWalletLastViewTime(User user, UpdateLastViewTimeCommand command) {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
@@ -467,7 +521,7 @@ public class UserService extends AbstractService {
     userRepository.update(user);
   }
 
-  public void updateAdLastViewTime(User user, LastViewTimeUpdateCommand command) {
+  public void updateAdLastViewTime(User user, UpdateLastViewTimeCommand command) {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
     
@@ -481,7 +535,7 @@ public class UserService extends AbstractService {
     userRepository.update(user);
   }
 
-  public void updateNotificationLastViewTime(User user, LastViewTimeUpdateCommand command) {
+  public void updateNotificationLastViewTime(User user, UpdateLastViewTimeCommand command) {
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     if (!UserUtil.isMember(user, community)) throw new BadRequestException(String.format("User is not a member of community. communityId=%d", community.getId()));
 

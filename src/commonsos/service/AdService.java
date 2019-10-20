@@ -6,9 +6,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import commonsos.command.PaginationCommand;
-import commonsos.command.app.AdCreateCommand;
-import commonsos.command.app.AdUpdateCommand;
-import commonsos.command.app.UploadPhotoCommand;
+import commonsos.command.UploadPhotoCommand;
+import commonsos.command.app.CreateAdCommand;
+import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -32,7 +32,7 @@ public class AdService extends AbstractService {
   @Inject private DeleteService deleteService;
   @Inject private ImageUploadService imageService;
 
-  public AdView create(User user, AdCreateCommand command) {
+  public AdView create(User user, CreateAdCommand command) {
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
 
     Ad ad = new Ad()
@@ -83,7 +83,7 @@ public class AdService extends AbstractService {
     return adRepository.findStrict(id);
   }
 
-  public Ad updateAd(User operator, AdUpdateCommand command) {
+  public Ad updateAd(User operator, UpdateAdCommand command) {
     Ad ad = ad(command.getId());
     if (!ad.getCreatedUserId().equals(operator.getId())) throw new ForbiddenException();
     if (transactionRepository.hasPaid(ad)) throw new BadRequestException();

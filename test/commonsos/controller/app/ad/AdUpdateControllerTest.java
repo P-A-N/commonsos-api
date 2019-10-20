@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.gson.Gson;
 
-import commonsos.command.app.AdUpdateCommand;
-import commonsos.controller.app.ad.AdUpdateController;
+import commonsos.command.app.UpdateAdCommand;
+import commonsos.controller.app.ad.UpdateAdController;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
@@ -33,8 +33,8 @@ public class AdUpdateControllerTest {
 
   @Mock Request request;
   @Mock AdService adService;
-  @Captor ArgumentCaptor<AdUpdateCommand> commandCaptor;
-  @InjectMocks AdUpdateController controller;
+  @Captor ArgumentCaptor<UpdateAdCommand> commandCaptor;
+  @InjectMocks UpdateAdController controller;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -66,7 +66,7 @@ public class AdUpdateControllerTest {
     assertThat(result).isEqualTo(adView);
     
     verify(adService).updateAd(any(), commandCaptor.capture());
-    AdUpdateCommand actualCommand = commandCaptor.getValue();
+    UpdateAdCommand actualCommand = commandCaptor.getValue();
     assertThat(actualCommand.getId()).isEqualTo(123L);
     assertThat(actualCommand.getTitle()).isEqualTo("title");
     assertThat(actualCommand.getDescription()).isEqualTo("description");

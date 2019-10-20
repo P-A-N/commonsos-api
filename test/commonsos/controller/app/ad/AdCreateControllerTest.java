@@ -17,8 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.gson.Gson;
 
-import commonsos.command.app.AdCreateCommand;
-import commonsos.controller.app.ad.AdCreateController;
+import commonsos.command.app.CreateAdCommand;
+import commonsos.controller.app.ad.CreateAdController;
 import commonsos.repository.entity.AdType;
 import commonsos.repository.entity.User;
 import commonsos.service.AdService;
@@ -30,8 +30,8 @@ public class AdCreateControllerTest {
 
   @Mock Request request;
   @Mock AdService service;
-  @Captor ArgumentCaptor<AdCreateCommand> commandCaptor;
-  @InjectMocks AdCreateController controller;
+  @Captor ArgumentCaptor<CreateAdCommand> commandCaptor;
+  @InjectMocks CreateAdController controller;
 
   @BeforeEach
   public void setUp() throws Exception {
@@ -48,7 +48,7 @@ public class AdCreateControllerTest {
     AdView result = controller.handleAfterLogin(user, request, null);
 
     assertThat(result).isEqualTo(adView);
-    AdCreateCommand ad = commandCaptor.getValue();
+    CreateAdCommand ad = commandCaptor.getValue();
     assertThat(ad.getCommunityId()).isEqualTo(Long.valueOf(123L));
     assertThat(ad.getTitle()).isEqualTo("title");
     assertThat(ad.getDescription()).isEqualTo("description");

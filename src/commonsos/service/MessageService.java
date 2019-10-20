@@ -17,13 +17,13 @@ import javax.inject.Singleton;
 import com.google.common.collect.ImmutableMap;
 
 import commonsos.command.PaginationCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.command.app.CreateDirectMessageThreadCommand;
 import commonsos.command.app.CreateGroupCommand;
-import commonsos.command.app.GroupMessageThreadUpdateCommand;
-import commonsos.command.app.MessagePostCommand;
-import commonsos.command.app.MessageThreadListCommand;
+import commonsos.command.app.UpdateGroupMessageThreadCommand;
+import commonsos.command.app.CreateMessageCommand;
+import commonsos.command.app.SearchMessageThreadCommand;
 import commonsos.command.app.UpdateMessageThreadPersonalTitleCommand;
-import commonsos.command.app.UploadPhotoCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
@@ -98,7 +98,7 @@ public class MessageService extends AbstractService {
     return users.stream().map(u -> new MessageThreadParty().setUser(u)).collect(toList());
   }
 
-  public MessageThreadView updateGroup(User user, GroupMessageThreadUpdateCommand command) {
+  public MessageThreadView updateGroup(User user, UpdateGroupMessageThreadCommand command) {
     MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).orElseThrow(ForbiddenException::new);
     if (!messageThread.isGroup()) throw new BadRequestException("Not a group message thread");
     if (!isUserAllowedToAccessMessageThread(user, messageThread)) throw new ForbiddenException("Not a thread member");
@@ -190,7 +190,7 @@ public class MessageService extends AbstractService {
       .setText(message.getText());
   }
 
-  public MessageThreadListView searchThreads(User user, MessageThreadListCommand command, PaginationCommand pagination) {
+  public MessageThreadListView searchThreads(User user, SearchMessageThreadCommand command, PaginationCommand pagination) {
     communityRepository.findPublicStrictById(command.getCommunityId());
     
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user, command.getCommunityId());
@@ -221,7 +221,7 @@ public class MessageService extends AbstractService {
     return threadViews;
   }
 
-  public MessageView postMessage(User user, MessagePostCommand command) {
+  public MessageView postMessage(User user, CreateMessageCommand command) {
     MessageThread messageThread = messageThreadRepository.findById(command.getThreadId()).map(thread -> checkAccess(user, thread)).get();
     Message message = messageRepository.create(new Message()
       .setCreatedUserId(user.getId())

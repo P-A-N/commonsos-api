@@ -10,12 +10,9 @@ import javax.inject.Inject;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@EqualsAndHashCode @ToString
 public class DelegateWalletTask implements Runnable {
 
   @Inject BlockchainService blockchainService;

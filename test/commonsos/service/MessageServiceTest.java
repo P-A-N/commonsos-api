@@ -28,8 +28,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import commonsos.command.app.GroupMessageThreadUpdateCommand;
-import commonsos.command.app.MessagePostCommand;
+import commonsos.command.app.UpdateGroupMessageThreadCommand;
+import commonsos.command.app.CreateMessageCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.exception.UserNotFoundException;
@@ -147,7 +147,7 @@ public class MessageServiceTest {
     MessageView messageView = new MessageView();
     doReturn(messageView).when(service).view(createdMessage);
 
-    MessageView result = service.postMessage(user, new MessagePostCommand().setThreadId(id("thread id")).setText("message text"));
+    MessageView result = service.postMessage(user, new CreateMessageCommand().setThreadId(id("thread id")).setText("message text"));
 
     assertThat(result).isSameAs(messageView);
     ArgumentCaptor<Message> messageArgument = ArgumentCaptor.forClass(Message.class);
@@ -214,7 +214,7 @@ public class MessageServiceTest {
   public void updateGroup_messagethread_not_found() {
     when(messageThreadRepository.findById(any())).thenReturn(Optional.empty());
 
-    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User(), new GroupMessageThreadUpdateCommand()));
+    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User(), new UpdateGroupMessageThreadCommand()));
   }
 
   @Test
@@ -222,7 +222,7 @@ public class MessageServiceTest {
     MessageThread messageThread = new MessageThread().setGroup(false);
     when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
 
-    assertThrows(BadRequestException.class, () -> service.updateGroup(new User(), new GroupMessageThreadUpdateCommand()));
+    assertThrows(BadRequestException.class, () -> service.updateGroup(new User(), new UpdateGroupMessageThreadCommand()));
   }
 
   @Test
@@ -231,7 +231,7 @@ public class MessageServiceTest {
         new MessageThreadParty().setUser(new User().setId(id("user1")))
         ));
     when(messageThreadRepository.findById(any())).thenReturn(Optional.of(messageThread));
-    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User().setId(id("notMember")), new GroupMessageThreadUpdateCommand()));
+    assertThrows(ForbiddenException.class, () -> service.updateGroup(new User().setId(id("notMember")), new UpdateGroupMessageThreadCommand()));
   }
 
   @Test
@@ -251,7 +251,7 @@ public class MessageServiceTest {
     doReturn(null).when(service).view(any(), any());
     
     // execute
-    service.updateGroup(new User().setId(id("user1_ug")), new GroupMessageThreadUpdateCommand());
+    service.updateGroup(new User().setId(id("user1_ug")), new UpdateGroupMessageThreadCommand());
     
     // verify
     verify(messageThreadRepository).update(messageThreadArgumentCaptor.capture());
