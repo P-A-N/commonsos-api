@@ -3,6 +3,8 @@ package commonsos;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.util.thread.ThreadPool;
+
+import spark.ExceptionMapper;
 import spark.embeddedserver.EmbeddedServer;
 import spark.embeddedserver.EmbeddedServers;
 import spark.embeddedserver.jetty.EmbeddedJettyFactory;
@@ -17,8 +19,8 @@ public class CookieSecuringEmbeddedJettyFactory extends EmbeddedJettyFactory {
   public static final int MAX_SESSION_AGE_IN_SECONDS = 3600 * 24 * 31 * 12;
 
   @Override
-  public EmbeddedServer create(Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) {
-    MatcherFilter matcherFilter = new MatcherFilter(routeMatcher, staticFilesConfiguration, false, hasMultipleHandler);
+  public EmbeddedServer create(Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, ExceptionMapper exceptionMapper, boolean hasMultipleHandler) {
+    MatcherFilter matcherFilter = new MatcherFilter(routeMatcher, staticFilesConfiguration, exceptionMapper, false, hasMultipleHandler);
     matcherFilter.init(null);
 
     JettyHandler handler = new JettyHandler(matcherFilter) {{

@@ -1,15 +1,6 @@
 build
-out
-*.iws
-.shelf
-.idea/workspace.xml
+bin
+.settings
 .gradle
-dataSources
-.ideaDataSources
-/bin/
 .classpath
 .project
-.settings
-add_community.sh
-create_ncl_account.sh
-token_migration.sh

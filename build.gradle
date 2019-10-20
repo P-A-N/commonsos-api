@@ -1,4 +1,3 @@
-apply plugin: 'idea'
 apply plugin: 'java'
 
 repositories {
@@ -23,7 +22,7 @@ sourceSets {
 }
 
 dependencies {
-  compile ('com.sparkjava:spark-core:2.7.1') {
+  compile ('com.sparkjava:spark-core:2.9.1') {
     exclude group: 'org.slf4j'
   }
   
@@ -72,9 +71,10 @@ test {
 }
 
 jar {
-  archiveName "commonsos-api.jar"
+  archiveName "$buildDir/package/commonsos-api.jar"
   manifest {
-    attributes 'Main-Class': 'commonsos.Server', 'Application-Version': "$System.env.GIT_REVISION", 'Class-Path': configurations.compile.collect {it.getName()}.join(' ')
+    attributes 'Main-Class': 'commonsos.Server'
+    attributes 'Class-Path': configurations.compile.collect {it.getName()}.join(' ')
   }
 }
 
@@ -83,22 +83,21 @@ task copyCompileDependencies(type: Sync) {
   into "build/libs"
 }
 
-task createTokenMigrationScript() {
-  new File("$projectDir/token_migration.sh").text =
+task createScripts() {
+  new File("$projectDir/shell/token_migration.sh").text =
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.TokenMigration \$1"""
-}
-
-task createNclAccountScript() {
-  new File("$projectDir/create_ncl_account.sh").text =
+  new File("$projectDir/shell/create_ncl_account.sh").text =
     """java -cp ${configurations.compile.collect {it.getName()}.join(':')}:commonsos-api.jar commonsos.tools.CreateNclAccount \$1"""
 }
 
-task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createTokenMigrationScript, createNclAccountScript]) {
+task bundle(type: Zip, dependsOn: [jar, copyCompileDependencies, createScripts]) {
   archiveName "commonsos-api.zip"
   from new File(buildDir, "libs")
-  from ('start.sh')
-  from ('stop.sh')
-  from ('token_migration.sh')
-  from ('create_ncl_account.sh')
-  into "commonsos-api"
+  into "commonsos-api/libs"
+  
+  from new File(projectDir, 'shell')
+  into "commonsos-api/shell"
+  
+  from new File(projectDir, 'batch')
+  into "commonsos-api/batch"
 }
