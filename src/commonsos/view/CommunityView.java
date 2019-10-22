@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
-import commonsos.repository.entity.CommunityStatus;
+import commonsos.repository.entity.PublishStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -19,7 +19,7 @@ public class CommunityView extends CommonView {
   private String communityName;
   private BigDecimal transactionFee;
   private String description;
-  private CommunityStatus status;
+  private PublishStatus status;
   private String adminPageUrl;
   private String photoUrl;
   private String coverPhotoUrl;

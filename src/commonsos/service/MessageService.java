@@ -166,7 +166,7 @@ public class MessageService extends AbstractService {
 
     AdView adView = null;
     if (thread.getAdId() != null) {
-      Ad ad = adRepository.findStrict(thread.getAdId());
+      Ad ad = adRepository.findPublicStrictById(thread.getAdId());
       User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
       adView = AdUtil.view(ad, createdUser, user);
     }

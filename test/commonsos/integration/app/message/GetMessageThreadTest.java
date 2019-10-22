@@ -1,7 +1,7 @@
 package commonsos.integration.app.message;
 
 import static commonsos.ApiVersion.APP_API_VERSION;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.math.BigDecimal.TEN;
 import static java.util.Arrays.asList;
@@ -35,11 +35,11 @@ public class GetMessageThreadTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    community =  create(new Community().setStatus(PUBLIC).setName("community"));
+    community =  create(new Community().setPublishStatus(PUBLIC).setName("community"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
     user3 =  create(new User().setUsername("user3").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community))));
-    ad = create(new Ad().setCreatedUserId(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
+    ad = create(new Ad().setPublishStatus(PUBLIC).setCreatedUserId(user1.getId()).setCommunityId(community.getId()).setPoints(TEN));
 
     adThread = create(new MessageThread()
         .setTitle("adThread")

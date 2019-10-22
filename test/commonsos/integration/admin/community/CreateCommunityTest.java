@@ -1,6 +1,6 @@
 package commonsos.integration.admin.community;
 
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
@@ -35,7 +35,7 @@ public class CreateCommunityTest extends IntegrationTest {
     tmp1 = create(new Admin().setEmailAddress("tmp1@before.each.com").setAdminname("tmp1").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN));
     tmp2 = create(new Admin().setEmailAddress("tmp2@before.each.com").setAdminname("tmp2").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN));
 
-    com1 =  create(new Community().setName("com1").setStatus(PUBLIC));
+    com1 =  create(new Community().setName("com1").setPublishStatus(PUBLIC));
     com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
   }
   

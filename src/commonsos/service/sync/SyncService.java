@@ -34,7 +34,7 @@ public class SyncService extends AbstractService {
     Optional<MessageThread> optional = messageThreadRepository.byCreaterAndAdId(user.getId(), adId);
     if (optional.isPresent()) return optional.get();
     
-    Ad ad = adRepository.findStrict(adId);
+    Ad ad = adRepository.findPublicStrictById(adId);
     User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
 
     MessageThread messageThread = new MessageThread()

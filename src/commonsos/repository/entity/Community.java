@@ -25,7 +25,7 @@ public class Community extends AbstractEntity {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long id;
   private String name;
   @Enumerated(value = STRING)
-  private CommunityStatus status;
+  private PublishStatus publishStatus;
   private String description;
   private String tokenContractAddress;
   @OneToOne

@@ -3,6 +3,7 @@ package commonsos.integration.app;
 import static commonsos.ApiVersion.APP_API_VERSION;
 import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.containsString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,11 @@ public class MaintenanceTest extends IntegrationTest {
     
     // update to maintenance-mode=true
     sessionId = loginAdmin(ncl.getEmailAddress(), "password");
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/system/maintenance-mode")
+      .then().statusCode(200)
+      .body(containsString("false"));
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("maintenanceMode", "true");
     given()
@@ -47,6 +53,11 @@ public class MaintenanceTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/system/maintenance-mode")
       .then().statusCode(200);
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/system/maintenance-mode")
+      .then().statusCode(200)
+      .body(containsString("true"));
 
     
     given()

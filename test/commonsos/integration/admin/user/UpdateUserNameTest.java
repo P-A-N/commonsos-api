@@ -1,6 +1,6 @@
 package commonsos.integration.admin.user;
 
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -39,8 +39,8 @@ public class UpdateUserNameTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    com1 =  create(new Community().setName("com1").setStatus(PUBLIC));
-    com2 =  create(new Community().setName("com2").setStatus(PUBLIC));
+    com1 =  create(new Community().setName("com1").setPublishStatus(PUBLIC));
+    com2 =  create(new Community().setName("com2").setPublishStatus(PUBLIC));
     
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));

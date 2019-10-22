@@ -40,7 +40,7 @@ public class DeleteService extends AbstractService {
     log.info(String.format("deleting user. userId=%d", user.getId()));
     
     // delete user's ads
-    List<Ad> myAds = adRepository.myAds(user.getId(), null).getList();
+    List<Ad> myAds = adRepository.searchByCreatorId(user.getId(), null).getList();
     myAds.forEach(ad -> deleteAdByUser(user, ad));
     
     // delete user's message threads party

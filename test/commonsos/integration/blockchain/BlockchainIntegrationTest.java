@@ -1,7 +1,7 @@
 package commonsos.integration.blockchain;
 
 import static commonsos.ApiVersion.APP_API_VERSION;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.WalletType.FEE;
@@ -152,7 +152,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     Community community = emService.get().find(Community.class, (long) id);
     
-    update(community.setStatus(PUBLIC));
+    update(community.setPublishStatus(PUBLIC));
     log.info(String.format("creating community completed. [communityName=%s]", communityName));
     return community;
   }

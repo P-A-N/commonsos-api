@@ -1,7 +1,7 @@
 package commonsos.integration.admin.transaction;
 
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -33,8 +33,8 @@ public class CreateEthTransactionTest extends IntegrationTest {
 
   @BeforeEach
   public void setup() throws Exception {
-    com1 =  create(new Community().setName("com1").setStatus(PUBLIC).setFee(ONE));
-    com2 =  create(new Community().setName("com2").setStatus(PRIVATE).setFee(ONE));
+    com1 =  create(new Community().setName("com1").setPublishStatus(PUBLIC).setFee(ONE));
+    com2 =  create(new Community().setName("com2").setPublishStatus(PRIVATE).setFee(ONE));
 
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));

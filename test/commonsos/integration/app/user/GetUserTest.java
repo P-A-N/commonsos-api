@@ -1,7 +1,7 @@
 package commonsos.integration.app.user;
 
 import static commonsos.ApiVersion.APP_API_VERSION;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
@@ -27,8 +27,8 @@ public class GetUserTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    community1 =  create(new Community().setStatus(PUBLIC).setName("community1"));
-    community2 =  create(new Community().setStatus(PUBLIC).setName("community2"));
+    community1 =  create(new Community().setPublishStatus(PUBLIC).setName("community1"));
+    community2 =  create(new Community().setPublishStatus(PUBLIC).setName("community2"));
     admin = create(new User().setUsername("admin").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(community1))));
     update(community1.setAdminUser(admin));
     update(community2.setAdminUser(admin));

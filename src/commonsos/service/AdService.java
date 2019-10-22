@@ -1,5 +1,6 @@
 package commonsos.service;
 
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static java.util.stream.Collectors.toList;
 
 import javax.inject.Inject;
@@ -45,15 +46,16 @@ public class AdService extends AbstractService {
       .setDescription(command.getDescription())
       .setLocation(command.getLocation())
       .setPoints(command.getPoints())
-      .setCommunityId(command.getCommunityId());
+      .setCommunityId(command.getCommunityId())
+      .setPublishStatus(PUBLIC);
 
     return view(adRepository.create(ad), user);
   }
 
   public AdListView listFor(User user, Long communityId, String filter, PaginationCommand pagination) {
     ResultList<Ad> result = filter != null ?
-      adRepository.ads(communityId, filter, pagination) :
-      adRepository.ads(communityId, pagination);
+      adRepository.searchPublicByCommunityId(communityId, filter, pagination) :
+      adRepository.searchPublicByCommunityId(communityId, pagination);
     
     AdListView listView = new AdListView();
     listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
@@ -63,7 +65,7 @@ public class AdService extends AbstractService {
   }
 
   public AdListView myAdsView(User user, PaginationCommand pagination) {
-    ResultList<Ad> result = adRepository.myAds(user.getId(), pagination);
+    ResultList<Ad> result = adRepository.searchByCreatorId(user.getId(), pagination);
 
     AdListView listView = new AdListView();
     listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
@@ -78,18 +80,18 @@ public class AdService extends AbstractService {
     return AdUtil.view(ad, createdUser, user);
   }
 
-  public AdView view(User user, Long adId) {
-    return view(ad(adId), user);
+  public Ad getAd(Long id) {
+    return adRepository.findStrictById(id);
   }
 
-  public Ad ad(Long id) {
-    return adRepository.findStrict(id);
+  public Ad getPublicAd(Long id) {
+    return adRepository.findPublicStrictById(id);
   }
 
   public Ad updateAd(User operator, UpdateAdCommand command) {
     validateCommand(command);
     
-    Ad ad = ad(command.getId());
+    Ad ad = getAd(command.getId());
     if (!ad.getCreatedUserId().equals(operator.getId())) throw new ForbiddenException();
     if (transactionRepository.hasPaid(ad)) throw new BadRequestException();
     
@@ -103,7 +105,7 @@ public class AdService extends AbstractService {
   }
 
   public String updatePhoto(User user, UploadPhotoCommand command, Long adId) {
-    Ad ad = adRepository.findStrict(adId);
+    Ad ad = adRepository.findStrictById(adId);
     if (!ad.getCreatedUserId().equals(user.getId())) throw new ForbiddenException();
 
     String url = imageService.create(command, "");
@@ -116,11 +118,11 @@ public class AdService extends AbstractService {
   }
 
   public void deleteAdLogicallyByUser(User user, Long adId) {
-    deleteService.deleteAdByUser(user, ad(adId));
+    deleteService.deleteAdByUser(user, getAd(adId));
   }
 
   public void deleteAdLogicallyByAdmin(User user, Long adId) {
-    deleteService.deleteAdByAdmin(user, ad(adId));
+    deleteService.deleteAdByAdmin(user, getAd(adId));
   }
 
   private void validateCommande(CreateAdCommand command) {

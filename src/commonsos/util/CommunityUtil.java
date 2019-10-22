@@ -50,7 +50,7 @@ public class CommunityUtil {
         .setTokenSymbol(token.getTokenSymbol())
         .setTransactionFee(community.getFee())
         .setDescription(community.getDescription())
-        .setStatus(community.getStatus())
+        .setStatus(community.getPublishStatus())
         .setAdminPageUrl(community.getAdminPageUrl())
         .setTotalSupply(token.getTotalSupply())
         .setTotalMember(totalMember)

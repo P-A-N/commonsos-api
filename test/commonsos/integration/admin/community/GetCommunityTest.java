@@ -1,7 +1,7 @@
 package commonsos.integration.admin.community;
 
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -39,10 +39,10 @@ public class GetCommunityTest extends IntegrationTest {
   @BeforeEach
   public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
-    publicCom =  create(new Community().setName("publicCom").setStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
-    privateCom =  create(new Community().setName("privateCom").setStatus(PRIVATE));
-    deleteCom =  create(new Community().setName("deleteCom").setStatus(PUBLIC).setDeleted(true));
-    otherCom =  create(new Community().setName("otherCom").setStatus(PUBLIC));
+    publicCom =  create(new Community().setName("publicCom").setPublishStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
+    privateCom =  create(new Community().setName("privateCom").setPublishStatus(PRIVATE));
+    deleteCom =  create(new Community().setName("deleteCom").setPublishStatus(PUBLIC).setDeleted(true));
+    otherCom =  create(new Community().setName("otherCom").setPublishStatus(PUBLIC));
     
     // create admins
     publicComAdmin = create(new Admin().setEmailAddress("publicComAdmin@before.each.com").setAdminname("publicComAdmin").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(publicCom));

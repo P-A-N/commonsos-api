@@ -1,7 +1,7 @@
 package commonsos.integration.app.user;
 
 import static commonsos.ApiVersion.APP_API_VERSION;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
@@ -19,7 +19,7 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    com = create(new Community().setName("com").setStatus(PUBLIC));
+    com = create(new Community().setName("com").setPublishStatus(PUBLIC));
     create(new User().setUsername("user1").setPasswordHash(hash("pass")));
     sessionId = loginApp("user1", "pass");
   }

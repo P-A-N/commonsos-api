@@ -1,7 +1,7 @@
 package commonsos.integration.admin.community;
 
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -35,9 +35,9 @@ public class SearchCommunityTest extends IntegrationTest {
   @BeforeEach
   public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
-    publicCom =  create(new Community().setName("publicCom").setStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
-    privateCom =  create(new Community().setName("privateCom").setStatus(PRIVATE));
-    deleteCom =  create(new Community().setName("deleteCom").setStatus(PUBLIC).setDeleted(true));
+    publicCom =  create(new Community().setName("publicCom").setPublishStatus(PUBLIC).setFee(BigDecimal.TEN).setDescription("des").setAdminPageUrl("url"));
+    privateCom =  create(new Community().setName("privateCom").setPublishStatus(PRIVATE));
+    deleteCom =  create(new Community().setName("deleteCom").setPublishStatus(PUBLIC).setDeleted(true));
     
     // create admins
     publicComAdmin1 = create(new Admin().setEmailAddress("publicComAdmin1@before.each.com").setAdminname("publicComAdmin1").setRole(COMMUNITY_ADMIN).setCommunity(publicCom));
@@ -70,18 +70,18 @@ public class SearchCommunityTest extends IntegrationTest {
     update(publicCom.setDeleted(true));
     update(privateCom.setDeleted(true));
     
-    create(new Community().setName("page_com1").setStatus(PUBLIC));
-    create(new Community().setName("page_com2").setStatus(PUBLIC));
-    create(new Community().setName("page_com3").setStatus(PUBLIC));
-    create(new Community().setName("page_com4").setStatus(PUBLIC));
-    create(new Community().setName("page_com5").setStatus(PUBLIC));
-    create(new Community().setName("page_com6").setStatus(PUBLIC));
-    create(new Community().setName("page_com7").setStatus(PUBLIC));
-    create(new Community().setName("page_com8").setStatus(PUBLIC));
-    create(new Community().setName("page_com9").setStatus(PUBLIC));
-    create(new Community().setName("page_com10").setStatus(PUBLIC));
-    create(new Community().setName("page_com11").setStatus(PUBLIC));
-    create(new Community().setName("page_com12").setStatus(PUBLIC));
+    create(new Community().setName("page_com1").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com2").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com3").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com4").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com5").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com6").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com7").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com8").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com9").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com10").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com11").setPublishStatus(PUBLIC));
+    create(new Community().setName("page_com12").setPublishStatus(PUBLIC));
 
     // page 0 size 10 asc
     given()

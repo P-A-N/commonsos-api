@@ -1,7 +1,7 @@
 package commonsos.integration.admin.community;
 
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -30,8 +30,8 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    com1 =  create(new Community().setName("com1").setStatus(PRIVATE));
-    com2 =  create(new Community().setName("com2").setStatus(PUBLIC));
+    com1 =  create(new Community().setName("com1").setPublishStatus(PRIVATE));
+    com2 =  create(new Community().setName("com2").setPublishStatus(PUBLIC));
     
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));

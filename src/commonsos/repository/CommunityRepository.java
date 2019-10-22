@@ -44,7 +44,7 @@ public class CommunityRepository extends Repository {
 
   public Optional<Community> findPublicById(Long id) {
     try {
-      return Optional.of(em().createQuery("FROM Community WHERE id = :id AND status = 'PUBLIC' AND deleted IS FALSE", Community.class)
+      return Optional.of(em().createQuery("FROM Community WHERE id = :id AND publishStatus = 'PUBLIC' AND deleted IS FALSE", Community.class)
         .setParameter("id", id)
         .getSingleResult()
       );
@@ -74,7 +74,7 @@ public class CommunityRepository extends Repository {
         "FROM Community" +
         " WHERE tokenContractAddress IS NOT NULL" +
         " AND LOWER(name) LIKE LOWER(:filter)" +
-        " AND status = 'PUBLIC'" +
+        " AND publishStatus = 'PUBLIC'" +
         " AND deleted IS FALSE" +
         " ORDER BY id", Community.class)
         .setParameter("filter", "%"+filter+"%");
@@ -88,7 +88,7 @@ public class CommunityRepository extends Repository {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +
         " WHERE tokenContractAddress IS NOT NULL" +
-        " AND status = 'PUBLIC'" +
+        " AND publishStatus = 'PUBLIC'" +
         " AND deleted IS FALSE" +
         " ORDER BY id", Community.class);
     
@@ -109,7 +109,7 @@ public class CommunityRepository extends Repository {
         " WHERE community.id IN (:ids)" +
         " AND community.tokenContractAddress IS NOT NULL" +
         " AND LOWER(community.name) LIKE LOWER(:filter)" +
-        " AND community.status = 'PUBLIC'" +
+        " AND community.publishStatus = 'PUBLIC'" +
         " AND community.deleted IS FALSE" +
         " ORDER BY community.id", CommunityUser.class)
         .setParameter("ids", ids)
@@ -131,7 +131,7 @@ public class CommunityRepository extends Repository {
         "FROM CommunityUser" +
         " WHERE community.id IN (:ids)" +
         " AND community.tokenContractAddress IS NOT NULL" +
-        " AND community.status = 'PUBLIC'" +
+        " AND community.publishStatus = 'PUBLIC'" +
         " AND community.deleted IS FALSE" +
         " ORDER BY community.id", CommunityUser.class)
         .setParameter("ids", ids);

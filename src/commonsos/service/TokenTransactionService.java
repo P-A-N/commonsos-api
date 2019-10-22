@@ -1,6 +1,6 @@
 package commonsos.service;
 
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static java.lang.String.format;
 import static java.math.BigDecimal.ZERO;
 import static java.time.Instant.now;
@@ -221,7 +221,7 @@ public class TokenTransactionService extends AbstractService {
     if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 
     if (command.getAdId() != null) {
-      Ad ad = adRepository.findStrict(command.getAdId());
+      Ad ad = adRepository.findPublicStrictById(command.getAdId());
       if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
     }
     TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());
@@ -305,7 +305,7 @@ public class TokenTransactionService extends AbstractService {
     if (command.getBeneficiaryUserId() == null) throw new BadRequestException("beneficiaryUser is required");
     
     Community community = communityRepository.findStrictById(command.getCommunityId());
-    if (community.getStatus() != PUBLIC) throw new DisplayableException("error.CommunityIsNotPublic");
+    if (community.getPublishStatus() != PUBLIC) throw new DisplayableException("error.CommunityIsNotPublic");
     
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryUserId());
     if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");

@@ -1,7 +1,7 @@
 package commonsos.service;
 
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
@@ -38,7 +38,7 @@ import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityNotification;
-import commonsos.repository.entity.CommunityStatus;
+import commonsos.repository.entity.PublishStatus;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.blockchain.BlockchainService;
@@ -108,7 +108,7 @@ public class CommunityService extends AbstractService {
     // create community
     Community community = new Community()
         .setName(command.getCommunityName())
-        .setStatus(CommunityStatus.PRIVATE)
+        .setPublishStatus(PublishStatus.PRIVATE)
         .setDescription(command.getDescription())
         .setTokenContractAddress(tokenAddress)
         .setPhotoUrl(photoUrl)
@@ -149,7 +149,7 @@ public class CommunityService extends AbstractService {
     if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
     
     // check status
-    if (command.getStatus() == PRIVATE && community.getStatus() == PUBLIC) throw new DisplayableException("error.invalid_update_status_puplic_to_private");
+    if (command.getStatus() == PRIVATE && community.getPublishStatus() == PUBLIC) throw new DisplayableException("error.invalid_update_status_puplic_to_private");
 
     // check admin
     List<Admin> oldAdminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
@@ -177,7 +177,7 @@ public class CommunityService extends AbstractService {
       .setName(command.getCommunityName())
       .setFee(command.getTransactionFee())
       .setDescription(command.getDescription())
-      .setStatus(command.getStatus());
+      .setPublishStatus(command.getStatus());
     repository.update(community);
 
     // update admin's communityId

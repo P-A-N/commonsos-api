@@ -42,7 +42,7 @@ public class AdServiceTest {
   @Test
   public void updateAd() {
     User user = new User().setId(id("creator"));
-    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
+    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).getAd(any());
     when(transactionRepository.hasPaid(any())).thenReturn(false);
     service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE));
   }
@@ -50,7 +50,7 @@ public class AdServiceTest {
   @Test
   public void updateAd_otherUser() {
     User user = new User().setId(id("user"));
-    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
+    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).getAd(any());
     
     assertThrows(ForbiddenException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
   }
@@ -58,7 +58,7 @@ public class AdServiceTest {
   @Test
   public void updateAd_hasPaid() {
     User user = new User().setId(id("creator"));
-    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).ad(any());
+    doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).getAd(any());
     when(transactionRepository.hasPaid(any())).thenReturn(true);
 
     assertThrows(BadRequestException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
@@ -68,7 +68,7 @@ public class AdServiceTest {
   public void updatePhoto_requiresCreatorUser() {
     User user = new User().setId(id("other user id"));
     Ad ad = new Ad().setCreatedUserId(id("creator user id"));
-    when(adRepository.findStrict(any())).thenReturn(ad);
+    when(adRepository.findStrictById(any())).thenReturn(ad);
 
     assertThrows(ForbiddenException.class, () -> service.updatePhoto(user, null, id("ad id")));
   }

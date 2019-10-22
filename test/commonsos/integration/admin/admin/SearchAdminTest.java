@@ -1,7 +1,7 @@
 package commonsos.integration.admin.admin;
 
 import static commonsos.repository.AdminRepository.SEARCH_NON_COMMUNITY;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
@@ -31,8 +31,8 @@ public class SearchAdminTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    com1 =  create(new Community().setName("com1").setStatus(PUBLIC));
-    com2 =  create(new Community().setName("com2").setStatus(PUBLIC));
+    com1 =  create(new Community().setName("com1").setPublishStatus(PUBLIC));
+    com2 =  create(new Community().setName("com2").setPublishStatus(PUBLIC));
     
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
     com1Admin1 = create(new Admin().setEmailAddress("com1Admin1@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
@@ -173,7 +173,7 @@ public class SearchAdminTest extends IntegrationTest {
   public void searchCommunity_pagination() throws Exception {
     sessionId = loginAdmin(ncl.getEmailAddress(), "password");
 
-    Community page_com =  create(new Community().setName("page_com").setStatus(PUBLIC));
+    Community page_com =  create(new Community().setName("page_com").setPublishStatus(PUBLIC));
     create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a1").setCommunity(page_com));
     create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a2").setCommunity(page_com));
     create(new Admin().setRole(COMMUNITY_ADMIN).setEmailAddress("page_a3").setCommunity(page_com));

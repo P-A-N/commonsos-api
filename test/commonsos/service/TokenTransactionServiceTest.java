@@ -2,8 +2,8 @@ package commonsos.service;
 
 import static commonsos.TestId.id;
 import static commonsos.repository.entity.AdType.WANT;
-import static commonsos.repository.entity.CommunityStatus.PRIVATE;
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PRIVATE;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
 import static commonsos.repository.entity.WalletType.MAIN;
@@ -108,7 +108,7 @@ public class TokenTransactionServiceTest {
     TokenBalance tokenBalance = new TokenBalance().setBalance(new BigDecimal("10.1")).setToken(new CommunityToken().setTokenSymbol("sys"));
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);
-    when(adRepository.findStrict(any())).thenReturn(ad);
+    when(adRepository.findPublicStrictById(any())).thenReturn(ad);
     when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenReturn(tokenBalance);
     when(messageThreadRepository.byCreaterAndAdId(any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
     
@@ -161,7 +161,7 @@ public class TokenTransactionServiceTest {
   public void createTransaction_admin() {
     // prepare
     Admin admin = new Admin().setRole(NCL);
-    Community community = new Community().setId(id("community")).setStatus(PUBLIC);
+    Community community = new Community().setId(id("community")).setPublishStatus(PUBLIC);
     User beneficiary = new User().setId(id("beneficiary")).setUsername("beneficiary").setCommunityUserList(asList(new CommunityUser().setCommunity(community)));
     TokenBalance tokenBalance = new TokenBalance().setBalance(TEN).setToken(new CommunityToken().setTokenSymbol("sys"));
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
@@ -195,9 +195,9 @@ public class TokenTransactionServiceTest {
     command.setBeneficiaryUserId(id("beneficiaryUserId"));
     
     // community is not public
-    community.setStatus(PRIVATE);
+    community.setPublishStatus(PRIVATE);
     assertThrows(DisplayableException.class, () -> service.create(admin, command));
-    community.setStatus(PUBLIC);
+    community.setPublishStatus(PUBLIC);
     
     // admin is forbidden
     admin.setRole(TELLER);

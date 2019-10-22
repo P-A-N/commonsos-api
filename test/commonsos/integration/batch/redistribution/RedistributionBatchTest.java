@@ -1,6 +1,6 @@
 package commonsos.integration.batch.redistribution;
 
-import static commonsos.repository.entity.CommunityStatus.PUBLIC;
+import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
@@ -31,8 +31,8 @@ public class RedistributionBatchTest extends IntegrationTest {
   
   @BeforeEach
   public void setup() throws Exception {
-    com1 =  create(new Community().setFee(BigDecimal.ONE).setStatus(PUBLIC).setTokenContractAddress("0x0").setName("com1"));
-    com2 =  create(new Community().setFee(BigDecimal.ONE).setStatus(PUBLIC).setTokenContractAddress("0x0").setName("com2"));
+    com1 =  create(new Community().setFee(BigDecimal.ONE).setPublishStatus(PUBLIC).setTokenContractAddress("0x0").setName("com1"));
+    com2 =  create(new Community().setFee(BigDecimal.ONE).setPublishStatus(PUBLIC).setTokenContractAddress("0x0").setName("com2"));
     user1 =  create(new User().setUsername("user1").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(com1), new CommunityUser().setCommunity(com2))));
     user2 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(com1), new CommunityUser().setCommunity(com2))));
     user3 =  create(new User().setUsername("user2").setPasswordHash(hash("pass")).setCommunityUserList(asList(new CommunityUser().setCommunity(com1))));

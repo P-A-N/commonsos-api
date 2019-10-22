@@ -81,8 +81,8 @@ import commonsos.controller.app.community.UpdateCommunityCoverPhotoByAdminUserCo
 import commonsos.controller.app.community.UpdateCommunityPhotoByAdminUserController;
 import commonsos.controller.app.message.CreateGroupMessageThreadIfNotExistsController;
 import commonsos.controller.app.message.CreateMessageController;
-import commonsos.controller.app.message.CreateMessageThreadBetweenUserIfNotExistsController;
-import commonsos.controller.app.message.CreateMessageThreadForAdIfNoExistsController;
+import commonsos.controller.app.message.CreateDirectMessageThreadIfNotExistsController;
+import commonsos.controller.app.message.CreateAdMessageThreadIfNotExistsController;
 import commonsos.controller.app.message.GetMessageThreadController;
 import commonsos.controller.app.message.GetMessageThreadUnreadCountController;
 import commonsos.controller.app.message.SearchMessageController;
@@ -115,9 +115,9 @@ import commonsos.controller.app.user.UpdateUserStatusController;
 import commonsos.controller.app.user.UpdateWalletLastViewTimeController;
 import commonsos.controller.app.user.UserPasswordResetRequestController;
 import commonsos.controller.batch.redistribution.RedistributionBatchController;
-import commonsos.controller.wordpress.community.WPSearchCommunityController;
-import commonsos.controller.wordpress.community.WPSearchCommunityNotificationController;
-import commonsos.controller.wordpress.community.WPUpdateCommunityNotificationController;
+import commonsos.controller.wordpress.community.SearchCommunityFromWPController;
+import commonsos.controller.wordpress.community.SearchCommunityNotificationFromWPController;
+import commonsos.controller.wordpress.community.UpdateCommunityNotificationFromWPController;
 import commonsos.di.GsonProvider;
 import commonsos.di.Web3jProvider;
 import commonsos.exception.AuthenticationException;
@@ -266,8 +266,8 @@ public class Server {
     get("/app/:version/transactions", injector.getInstance(SearchTokenTransactionController.class), toJson);
     post("/app/:version/transactions", injector.getInstance(CreateTokenTransactionFromUserController.class), toJson);
 
-    post("/app/:version/message-threads/for-ad/:adId", injector.getInstance(CreateMessageThreadForAdIfNoExistsController.class), toJson);
-    post("/app/:version/message-threads/user/:userId", injector.getInstance(CreateMessageThreadBetweenUserIfNotExistsController.class), toJson);
+    post("/app/:version/message-threads/for-ad/:adId", injector.getInstance(CreateAdMessageThreadIfNotExistsController.class), toJson);
+    post("/app/:version/message-threads/user/:userId", injector.getInstance(CreateDirectMessageThreadIfNotExistsController.class), toJson);
 
     post("/app/:version/message-threads/group", injector.getInstance(CreateGroupMessageThreadIfNotExistsController.class), toJson);
     post("/app/:version/message-threads/:id/group", injector.getInstance(UpdateGroupMessageThreadController.class), toJson);
@@ -319,9 +319,9 @@ public class Server {
   }
 
   private void initWordPressRoutes() {
-    get("/wordpress/communities", injector.getInstance(WPSearchCommunityController.class), toJson);
-    post("/wordpress/communities/:id/notification/:wordpressId", injector.getInstance(WPUpdateCommunityNotificationController.class), toJson);
-    get("/wordpress/communities/:id/notification", injector.getInstance(WPSearchCommunityNotificationController.class), toJson);
+    get("/wordpress/communities", injector.getInstance(SearchCommunityFromWPController.class), toJson);
+    post("/wordpress/communities/:id/notification/:wordpressId", injector.getInstance(UpdateCommunityNotificationFromWPController.class), toJson);
+    get("/wordpress/communities/:id/notification", injector.getInstance(SearchCommunityNotificationFromWPController.class), toJson);
   }
   
   private void initAdminPageRoutes() {
