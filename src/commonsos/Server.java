@@ -7,6 +7,8 @@ import static spark.Spark.options;
 import static spark.Spark.post;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.web3j.protocol.Web3j;
 
@@ -185,7 +187,13 @@ public class Server {
   
   private void initCache() {
     List<Community> communityList = communityRepository.list(null).getList();
-    communityList.forEach(c -> new InitCommunityCacheTask(c).run());
+    ExecutorService exec = Executors.newFixedThreadPool(JobService.MAXIMUM_POOL_SIZE);
+    communityList.forEach(c -> {
+      InitCommunityCacheTask task = new InitCommunityCacheTask(c);
+      injector.injectMembers(task);
+      exec.execute(task);
+    });
+    exec.shutdown();
 
     cache.setSystemConfig(Cache.SYS_CONFIG_KEY_MAINTENANCE_MODE, config.maintenanceMode());
   }

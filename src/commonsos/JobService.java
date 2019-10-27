@@ -21,7 +21,7 @@ public class JobService {
 
   @Inject Injector injector;
 
-  private static final int MAXIMUM_POOL_SIZE = 10;
+  public static final int MAXIMUM_POOL_SIZE = 10;
   ThreadPoolExecutor executor;
 
   @Inject
