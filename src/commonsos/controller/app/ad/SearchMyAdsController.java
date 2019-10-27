@@ -18,7 +18,7 @@ public class SearchMyAdsController extends AfterAppLoginController {
   public AdListView handleAfterLogin(User user, Request request, Response response) {
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    AdListView view = service.myAdsView(user, paginationCommand);
+    AdListView view = service.searchMyAds(user, paginationCommand);
     return view;
   }
 }

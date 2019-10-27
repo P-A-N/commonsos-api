@@ -61,6 +61,12 @@ public class CommunityUtil {
         .setAdminList(adminViewList);
   }
 
+  public static CommunityView narrowViewForAdmin(Community community) {
+    return new CommunityView()
+        .setId(community.getId())
+        .setName(community.getName());
+  }
+
   public static List<CommunityNotificationView> notificationView(List<CommunityNotification> notificationList) {
     List<CommunityNotificationView> notificationViewList = new ArrayList<>();
     notificationList.forEach(n -> notificationViewList.add(notificationView(n)));

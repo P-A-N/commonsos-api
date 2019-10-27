@@ -1,4 +1,4 @@
-package commonsos.service.blockchain;
+package commonsos.runnable;
 
 import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
 import static commonsos.service.blockchain.BlockchainService.INITIAL_TOKEN_AMOUNT;
@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
+import commonsos.service.blockchain.BlockchainService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

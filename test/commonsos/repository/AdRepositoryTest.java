@@ -47,6 +47,19 @@ public class AdRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
+  public void searchByCommunityId() {
+    Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setPublishStatus(PUBLIC)).getId());
+    Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setPublishStatus(PUBLIC)).getId());
+    Long id3 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setPublishStatus(PRIVATE)).getId());
+    Long id4 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setDeleted(true).setPublishStatus(PUBLIC)).getId());
+    Long id5 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community2")).setPublishStatus(PUBLIC)).getId());
+
+    ResultList<Ad> result = repository.searchByCommunityId(id("community1"), null);
+
+    assertThat(result.getList()).extracting("id").containsExactly(id1, id2, id3);
+  }
+
+  @Test
   public void searchPublicByCommunityId() {
     Long id1 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setPublishStatus(PUBLIC)).getId());
     Long id2 = inTransaction(() -> repository.create(new Ad().setCommunityId(id("community1")).setPublishStatus(PUBLIC)).getId());

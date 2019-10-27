@@ -210,7 +210,11 @@ public class CommunityService extends AbstractService {
     return listView;
   }
 
-  public Community community(Long id) {
+  public Community getCommunity(Long id) {
+    return repository.findStrictById(id);
+  }
+
+  public Community getPublicCommunity(Long id) {
     return repository.findPublicStrictById(id);
   }
 

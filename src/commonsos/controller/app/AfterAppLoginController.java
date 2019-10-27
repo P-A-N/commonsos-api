@@ -22,7 +22,7 @@ public abstract class AfterAppLoginController extends AbstractAppController {
     if (request.session().attribute(USER_SESSION_ATTRIBUTE_NAME) == null) throw new AuthenticationException();
     
     UserSession session = request.session().attribute(USER_SESSION_ATTRIBUTE_NAME);
-    User user = userService.user(session.getUserId());
+    User user = userService.getUser(session.getUserId());
     
     ThreadValue.setRequestedBy(String.format("APP USER. [userId=%d]", user.getId()));
     

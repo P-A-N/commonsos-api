@@ -26,6 +26,6 @@ public class UpdateAdController extends AfterAppLoginController {
     command.setId(parseLong(request.params("id")));
     
     Ad updatedAd = adService.updateAd(user, command);
-    return adService.view(updatedAd, user);
+    return adService.viewForApp(updatedAd, user);
   }
 }

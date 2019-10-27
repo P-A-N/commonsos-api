@@ -19,6 +19,6 @@ public class CreateAdController extends AfterAppLoginController {
 
   @Override public AdView handleAfterLogin(User user, Request request, Response response) {
     CreateAdCommand command = gson.fromJson(request.body(), CreateAdCommand.class);
-    return service.create(user, command);
+    return service.createAd(user, command);
   }
 }

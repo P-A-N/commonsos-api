@@ -6,6 +6,8 @@ import static spark.Spark.get;
 import static spark.Spark.options;
 import static spark.Spark.post;
 
+import java.util.List;
+
 import org.web3j.protocol.Web3j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +30,8 @@ import commonsos.controller.admin.admin.UpdateAdminController;
 import commonsos.controller.admin.admin.UpdateAdminEmailCompleteController;
 import commonsos.controller.admin.admin.UpdateAdminEmailTemporaryController;
 import commonsos.controller.admin.admin.UpdateAdminPhotoController;
+import commonsos.controller.admin.ads.GetAdByAdminController;
+import commonsos.controller.admin.ads.SearchAdsByAdminController;
 import commonsos.controller.admin.auth.AdminLoginController;
 import commonsos.controller.admin.auth.AdminLogoutController;
 import commonsos.controller.admin.community.CreateCommunityController;
@@ -79,10 +83,10 @@ import commonsos.controller.app.community.SearchCommunityByUserController;
 import commonsos.controller.app.community.SearchCommunityNotificationController;
 import commonsos.controller.app.community.UpdateCommunityCoverPhotoByAdminUserController;
 import commonsos.controller.app.community.UpdateCommunityPhotoByAdminUserController;
+import commonsos.controller.app.message.CreateAdMessageThreadIfNotExistsController;
+import commonsos.controller.app.message.CreateDirectMessageThreadIfNotExistsController;
 import commonsos.controller.app.message.CreateGroupMessageThreadIfNotExistsController;
 import commonsos.controller.app.message.CreateMessageController;
-import commonsos.controller.app.message.CreateDirectMessageThreadIfNotExistsController;
-import commonsos.controller.app.message.CreateAdMessageThreadIfNotExistsController;
 import commonsos.controller.app.message.GetMessageThreadController;
 import commonsos.controller.app.message.GetMessageThreadUnreadCountController;
 import commonsos.controller.app.message.SearchMessageController;
@@ -130,7 +134,10 @@ import commonsos.filter.AddHeaderFilter;
 import commonsos.filter.LogFilter;
 import commonsos.interceptor.ControllerInterceptor;
 import commonsos.interceptor.SyncServiceInterceptor;
+import commonsos.repository.CommunityRepository;
 import commonsos.repository.DatabaseMigrator;
+import commonsos.repository.entity.Community;
+import commonsos.runnable.InitCommunityCacheTask;
 import commonsos.service.blockchain.BlockchainEventService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;
@@ -141,6 +148,7 @@ public class Server {
   @Inject private JsonTransformer toJson;
   @Inject private DatabaseMigrator databaseMigrator;
   @Inject private BlockchainEventService blockchainEventService;
+  @Inject private CommunityRepository communityRepository;
   @Inject private Configuration config;
   @Inject private Cache cache;
   private Injector injector;
@@ -176,6 +184,9 @@ public class Server {
   }
   
   private void initCache() {
+    List<Community> communityList = communityRepository.list(null).getList();
+    communityList.forEach(c -> new InitCommunityCacheTask(c).run());
+
     cache.setSystemConfig(Cache.SYS_CONFIG_KEY_MAINTENANCE_MODE, config.maintenanceMode());
   }
 
@@ -351,6 +362,10 @@ public class Server {
     post("/admin/users/:id/emailaddress", injector.getInstance(UpdateUserEmailTemporaryByAdminController.class), toJson);
     post("/admin/users/:id/delete", injector.getInstance(DeleteUserByAdminController.class), toJson);
     get("/admin/users/:id/transactions", injector.getInstance(SearchUserTransactionsByAdminController.class), toJson);
+
+    // ads
+    get("/admin/ads/:id", injector.getInstance(GetAdByAdminController.class), toJson);
+    get("/admin/ads", injector.getInstance(SearchAdsByAdminController.class), toJson);
 
     // transactions
     post("/admin/transactions/coin", injector.getInstance(CreateTokenTransactionFromAdminController.class), toJson);

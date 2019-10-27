@@ -30,8 +30,8 @@ import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
+import commonsos.runnable.DelegateWalletTask;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.blockchain.DelegateWalletTask;
 
 public class TokenMigration {
 

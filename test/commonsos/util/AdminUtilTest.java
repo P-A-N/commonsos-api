@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.CommunityUser;
@@ -318,6 +319,40 @@ public class AdminUtilTest {
     // [teller_none] execute & verify
     assertFalse(AdminUtil.isSeeableUser(teller_none, user_com1));
     assertFalse(AdminUtil.isSeeableUser(teller_none, user_com2));
+  }
+
+  @Test
+  public void isSeeableAd() {
+    // prepare
+    Community com1 = new Community().setId(id("com1"));
+    Community com2 = new Community().setId(id("com2"));
+    Admin ncl = new Admin().setId(id("ncl")).setRole(NCL);
+    Admin admin_com1 = new Admin().setId(id("admin_com1")).setRole(COMMUNITY_ADMIN).setCommunity(com1);
+    Admin teller_com1 = new Admin().setId(id("teller_com1")).setRole(TELLER).setCommunity(com1);
+    Admin admin_none = new Admin().setId(id("admin_none")).setRole(COMMUNITY_ADMIN);
+    Admin teller_none = new Admin().setId(id("teller_none")).setRole(TELLER);
+    Ad ad_com1 = new Ad().setId(id("ad_com1")).setCommunityId(com1.getId());
+    Ad ad_com2 = new Ad().setId(id("ad_com2")).setCommunityId(com2.getId());
+
+    // [ncl] execute & verify
+    assertTrue(AdminUtil.isSeeableAd(ncl, ad_com1.getCommunityId()));
+    assertTrue(AdminUtil.isSeeableAd(ncl, ad_com2.getCommunityId()));
+
+    // [admin_com1] execute & verify
+    assertTrue(AdminUtil.isSeeableAd(admin_com1, ad_com1.getCommunityId()));
+    assertFalse(AdminUtil.isSeeableAd(admin_com1, ad_com2.getCommunityId()));
+
+    // [teller_com1] execute & verify
+    assertTrue(AdminUtil.isSeeableAd(teller_com1, ad_com1.getCommunityId()));
+    assertFalse(AdminUtil.isSeeableAd(teller_com1, ad_com2.getCommunityId()));
+
+    // [admin_none] execute & verify
+    assertFalse(AdminUtil.isSeeableAd(admin_none, ad_com1.getCommunityId()));
+    assertFalse(AdminUtil.isSeeableAd(admin_none, ad_com2.getCommunityId()));
+
+    // [teller_none] execute & verify
+    assertFalse(AdminUtil.isSeeableAd(teller_none, ad_com1.getCommunityId()));
+    assertFalse(AdminUtil.isSeeableAd(teller_none, ad_com2.getCommunityId()));
   }
 
   @Test

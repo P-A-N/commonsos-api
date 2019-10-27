@@ -1,10 +1,10 @@
-package commonsos.controller.app.ad;
+package commonsos.controller.admin.ads;
 
 import javax.inject.Inject;
 
 import commonsos.command.PaginationCommand;
-import commonsos.controller.app.AfterAppLoginController;
-import commonsos.repository.entity.User;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
 import commonsos.service.AdService;
 import commonsos.util.PaginationUtil;
 import commonsos.util.RequestUtil;
@@ -12,16 +12,16 @@ import commonsos.view.AdListView;
 import spark.Request;
 import spark.Response;
 
-public class SearchAdController extends AfterAppLoginController {
-  @Inject AdService service;
+public class SearchAdsByAdminController extends AfterAdminLoginController {
+
+  @Inject AdService adService;
 
   @Override
-  public AdListView handleAfterLogin(User user, Request request, Response response) {
+  protected AdListView handleAfterLogin(Admin admin, Request request, Response response) {
     Long communityId = RequestUtil.getQueryParamLong(request, "communityId", true);
-
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
-    
-    AdListView view = service.searchAds(user, communityId, request.queryParams("filter"), paginationCommand);
+
+    AdListView view = adService.searchAdsByAdmin(admin, communityId, paginationCommand);
     return view;
   }
 }

@@ -41,7 +41,7 @@ public class UserControllerTest {
     // prepare
     User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
-    when(userService.user(any())).thenReturn(
+    when(userService.getUser(any())).thenReturn(
         new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(user)))));
 
     // execute
@@ -57,7 +57,7 @@ public class UserControllerTest {
     // prepare
     User user = new User().setId(id("user")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")))));
     when(request.params("id")).thenReturn("123");
-    when(userService.user(any())).thenReturn(
+    when(userService.getUser(any())).thenReturn(
         new User().setId(id("other")).setCommunityUserList(asList(new CommunityUser().setCommunity(new Community().setId(id("community")).setAdminUser(new User().setId(id("user2")))))));
 
     // execute

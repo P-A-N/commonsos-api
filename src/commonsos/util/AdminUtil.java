@@ -4,6 +4,7 @@ import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static commonsos.repository.entity.Role.TELLER;
 
+import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Role;
@@ -153,6 +154,20 @@ public class AdminUtil {
   
   public static boolean isUpdatableUser(Admin admin, User target) {
     return isSeeableUser(admin, target);
+  }
+  
+  public static boolean isSeeableAd(Admin admin, Long targetAdCommunityId) {
+    Role adminRole = admin.getRole();
+    Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();
+    
+    if (adminRole.equals(NCL)) return true;
+    if (adminCommunityId != null && adminCommunityId.equals(targetAdCommunityId)) return true;
+
+    return false;
+  }
+  
+  public static boolean isUpdatableAd(Admin admin, Ad target) {
+    return isSeeableAd(admin, target.getCommunityId());
   }
   
   public static boolean isSeeableCommunity(Admin admin, Long communityId) {

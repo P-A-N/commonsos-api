@@ -25,7 +25,7 @@ public class GetUserByAdminController extends AfterAdminLoginController {
   protected UserView handleAfterLogin(Admin admin, Request request, Response response) {
     Long id = RequestUtil.getPathParamLong(request, "id");
     
-    User user = userService.user(id);
+    User user = userService.getUser(id);
     if (!AdminUtil.isSeeableUser(admin, user)) throw new ForbiddenException();
     List<UserTokenBalanceView> balanceList = userService.balanceViewList(user);
     

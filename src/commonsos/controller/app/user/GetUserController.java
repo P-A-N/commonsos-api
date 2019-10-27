@@ -27,7 +27,7 @@ public class GetUserController extends AfterAppLoginController {
     String userId = request.params("id");
     if (!NumberUtils.isParsable(userId)) throw new BadRequestException("invalid userId");
     Long id = parseLong(userId);
-    User requestedUser = userService.user(id);
+    User requestedUser = userService.getUser(id);
     
     if (UserUtil.isAdminOfUser(user, requestedUser)) return userService.privateView(user, id);
     else return userService.publicUserAndCommunityView(id);

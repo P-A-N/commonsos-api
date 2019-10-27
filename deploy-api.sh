@@ -11,6 +11,7 @@ echo "Unpacking to $DEPLOY_DIR"
 
 unzip "$DISTRIBUTION_FILE" -d $DEPLOY_DIR
 chmod 755 $DEPLOY_DIR/shell/*.sh
+chmod 755 $DEPLOY_DIR/batch/*.sh
 
 echo "Linking current installation to $DEPLOY_DIR"
 rm $APP_DIR

@@ -26,6 +26,16 @@ public class AdRepository extends Repository {
     return ad;
   }
 
+  public ResultList<Ad> searchByCommunityId(Long communityId, PaginationCommand pagination) {
+    TypedQuery<Ad> query = em()
+      .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE ORDER BY id", Ad.class)
+      .setParameter("communityId", communityId);
+    
+    ResultList<Ad> resultList = getResultList(query, pagination);
+
+    return resultList;
+  }
+
   public ResultList<Ad> searchPublicByCommunityId(Long communityId, PaginationCommand pagination) {
     TypedQuery<Ad> query = em()
       .createQuery("FROM Ad WHERE communityId = :communityId AND deleted = FALSE AND publishStatus = 'PUBLIC' ORDER BY id", Ad.class)

@@ -14,6 +14,7 @@ import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.RedistributionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -21,6 +22,7 @@ import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
+import commonsos.util.AdminUtil;
 import commonsos.util.MessageUtil;
 import commonsos.util.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +64,12 @@ public class DeleteService extends AbstractService {
     redistributionList.forEach(r -> deleteRedistribution(r));
 
     log.info(String.format("deleted user. userId=%d", user.getId()));
+  }
+  
+  public void deleteUserByAdmin(Admin admin, Long userId) {
+    User user = userRepository.findStrictById(userId);
+    if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
+    deleteUser(user);
   }
   
   public void deleteAdByUser(User user, Ad ad) {

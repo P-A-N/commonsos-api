@@ -15,13 +15,17 @@ import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
+import commonsos.repository.CommunityRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
+import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
 import commonsos.service.image.ImageUploadService;
 import commonsos.util.AdUtil;
+import commonsos.util.AdminUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.view.AdListView;
@@ -31,11 +35,12 @@ import commonsos.view.AdView;
 public class AdService extends AbstractService {
   @Inject private AdRepository adRepository;
   @Inject private UserRepository userRepository;
+  @Inject private CommunityRepository communityRepository;
   @Inject private TokenTransactionRepository transactionRepository;
   @Inject private DeleteService deleteService;
   @Inject private ImageUploadService imageService;
 
-  public AdView create(User user, CreateAdCommand command) {
+  public AdView createAd(User user, CreateAdCommand command) {
     validateCommande(command);
     if (!UserUtil.isMember(user, command.getCommunityId())) throw new ForbiddenException("only a member of community is allow to create ads");
 
@@ -49,35 +54,54 @@ public class AdService extends AbstractService {
       .setCommunityId(command.getCommunityId())
       .setPublishStatus(PUBLIC);
 
-    return view(adRepository.create(ad), user);
+    return viewForApp(adRepository.create(ad), user);
   }
 
-  public AdListView listFor(User user, Long communityId, String filter, PaginationCommand pagination) {
+  public AdListView searchAds(User user, Long communityId, String filter, PaginationCommand pagination) {
     ResultList<Ad> result = filter != null ?
       adRepository.searchPublicByCommunityId(communityId, filter, pagination) :
       adRepository.searchPublicByCommunityId(communityId, pagination);
     
     AdListView listView = new AdListView();
-    listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
+    listView.setAdList(result.getList().stream().map(ad -> viewForApp(ad, user)).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
   }
 
-  public AdListView myAdsView(User user, PaginationCommand pagination) {
+  public AdListView searchMyAds(User user, PaginationCommand pagination) {
     ResultList<Ad> result = adRepository.searchByCreatorId(user.getId(), pagination);
 
     AdListView listView = new AdListView();
-    listView.setAdList(result.getList().stream().map(ad -> view(ad, user)).collect(toList()));
+    listView.setAdList(result.getList().stream().map(ad -> viewForApp(ad, user)).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
   }
 
-  public AdView view(Ad ad, User user) {
+  public AdListView searchAdsByAdmin(Admin admin, Long communityId, PaginationCommand pagination) {
+    if (!AdminUtil.isSeeableAd(admin, communityId)) throw new ForbiddenException();
+
+    ResultList<Ad> result = adRepository.searchByCommunityId(communityId, pagination);
+
+    AdListView listView = new AdListView();
+    listView.setAdList(result.getList().stream().map(this::viewForAdmin).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+
+    return listView;
+  }
+
+  public AdView viewForApp(Ad ad, User user) {
     User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
     
-    return AdUtil.view(ad, createdUser, user);
+    return AdUtil.viewForApp(ad, createdUser, user);
+  }
+
+  public AdView viewForAdmin(Ad ad) {
+    User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
+    Community community = communityRepository.findStrictById(ad.getCommunityId());
+    
+    return AdUtil.viewForAdmin(ad, createdUser, community);
   }
 
   public Ad getAd(Long id) {

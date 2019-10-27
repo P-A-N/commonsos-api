@@ -1,18 +1,22 @@
 package commonsos.controller.admin.user;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.inject.Inject;
 
-import commonsos.controller.AbstractController;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
+import commonsos.service.DeleteService;
+import commonsos.util.RequestUtil;
 import spark.Request;
 import spark.Response;
 
-public class DeleteUserByAdminController extends AbstractController {
+public class DeleteUserByAdminController extends AfterAdminLoginController {
+
+  @Inject DeleteService deleteService;
 
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    
-    return result;
+  protected Object handleAfterLogin(Admin admin, Request request, Response response) {
+    Long id = RequestUtil.getPathParamLong(request, "id");
+    deleteService.deleteUserByAdmin(admin, id);
+    return "";
   }
 }

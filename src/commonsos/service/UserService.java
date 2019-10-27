@@ -49,8 +49,8 @@ import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
+import commonsos.runnable.DelegateWalletTask;
 import commonsos.service.blockchain.BlockchainService;
-import commonsos.service.blockchain.DelegateWalletTask;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
@@ -323,7 +323,7 @@ public class UserService extends AbstractService {
     ValidateUtil.validateTelNo(command.getTelNo());
   }
 
-  public User user(Long id) {
+  public User getUser(Long id) {
     return userRepository.findStrictById(id);
   }
 

@@ -22,6 +22,6 @@ public class GetAdController extends AfterAppLoginController {
     if (!user.getId().equals(ad.getCreatedUserId())) {
       ad = service.getPublicAd(id);
     }
-    return service.view(ad, user);
+    return service.viewForApp(ad, user);
   }
 }
