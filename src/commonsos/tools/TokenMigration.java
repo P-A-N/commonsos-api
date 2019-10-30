@@ -22,7 +22,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import commonsos.JobService;
 import commonsos.di.Web3jProvider;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.EntityManagerService;
@@ -30,8 +29,9 @@ import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
-import commonsos.runnable.DelegateWalletTask;
 import commonsos.service.blockchain.BlockchainService;
+import commonsos.service.multithread.ApproveAdministratorTask;
+import commonsos.service.multithread.TaskExecutorService;
 
 public class TokenMigration {
 
@@ -41,7 +41,7 @@ public class TokenMigration {
   private static UserRepository userRepository;
   private static TokenTransactionRepository transactionRepository;
   private static Credentials credentials;
-  private static JobService jobService;
+  private static TaskExecutorService taskExecutorService;
   private static Scanner scanner = new Scanner(System.in);
 
 
@@ -120,7 +120,7 @@ public class TokenMigration {
     communityRepository = injector.getInstance(CommunityRepository.class);
     userRepository = injector.getInstance(UserRepository.class);
     transactionRepository = injector.getInstance(TokenTransactionRepository.class);
-    jobService = injector.getInstance(JobService.class);
+    taskExecutorService = injector.getInstance(TaskExecutorService.class);
   }
 
   private static void getCredentials(String[] args) throws Exception {
@@ -189,8 +189,8 @@ public class TokenMigration {
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
       System.out.println(String.format("Allowing main wallet [users=%s]", u.getUsername()));
-      DelegateWalletTask task = new DelegateWalletTask(u, c);
-      jobService.submit(u, task);
+      ApproveAdministratorTask task = new ApproveAdministratorTask(u, c);
+      taskExecutorService.execute(task);
       Thread.sleep(500);
     }
   }

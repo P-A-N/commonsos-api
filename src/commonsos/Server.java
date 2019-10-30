@@ -139,8 +139,9 @@ import commonsos.interceptor.SyncServiceInterceptor;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.DatabaseMigrator;
 import commonsos.repository.entity.Community;
-import commonsos.runnable.InitCommunityCacheTask;
 import commonsos.service.blockchain.BlockchainEventService;
+import commonsos.service.multithread.InitCommunityCacheTask;
+import commonsos.service.multithread.TaskExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import spark.Request;
 
@@ -187,7 +188,7 @@ public class Server {
   
   private void initCache() {
     List<Community> communityList = communityRepository.list(null).getList();
-    ExecutorService exec = Executors.newFixedThreadPool(JobService.MAXIMUM_POOL_SIZE);
+    ExecutorService exec = Executors.newFixedThreadPool(TaskExecutorService.MAXIMUM_POOL_SIZE);
     communityList.forEach(c -> {
       InitCommunityCacheTask task = new InitCommunityCacheTask(c);
       injector.injectMembers(task);

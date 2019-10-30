@@ -1,4 +1,4 @@
-package commonsos.runnable;
+package commonsos.service.multithread;
 
 import javax.inject.Inject;
 
@@ -7,7 +7,7 @@ import commonsos.service.blockchain.BlockchainService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class InitCommunityCacheTask implements Runnable {
+public class InitCommunityCacheTask extends AbstractTask {
 
   @Inject BlockchainService blockchainService;
 
@@ -18,9 +18,15 @@ public class InitCommunityCacheTask implements Runnable {
   }
 
   @Override
-  public void run() {
+  public void runTask() {
     log.info(String.format("Init community cache start. [communityId=%d, communityName=%s]", community.getId(), community.getName()));
     blockchainService.getCommunityToken(community.getTokenContractAddress());
     log.info(String.format("Init community cache done. [communityId=%d, communityName=%s]", community.getId(), community.getName()));
+  }
+  
+  @Override
+  public String toString() {
+    Long communityId = community == null ? null : community.getId();
+    return String.format("%s, communityId=%d", this.getClass().getSimpleName(), communityId);
   }
 }

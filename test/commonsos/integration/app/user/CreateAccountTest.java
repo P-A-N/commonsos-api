@@ -152,7 +152,6 @@ public class CreateAccountTest extends IntegrationTest {
     requestParam.put("location", "location");
     requestParam.put("emailAddress", "test@test.com");
     requestParam.put("telNo", "000-0000-0000");
-    requestParam.put("waitUntilCompleted", false);
     List<Long> communityList = new ArrayList<Long>(Arrays.asList(community1.getId(), community2.getId()));
     requestParam.put("communityList", communityList);
     

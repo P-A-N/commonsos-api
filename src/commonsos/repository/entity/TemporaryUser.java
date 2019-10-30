@@ -34,7 +34,6 @@ public class TemporaryUser extends AbstractEntity {
   private String username;
   private String telNo;
   private String emailAddress;
-  private boolean waitUntilCompleted;
 
   @ManyToMany
   @JoinTable(

@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 
 import commonsos.Configuration;
-import commonsos.JobService;
 import commonsos.command.PaginationCommand;
 import commonsos.command.UpdateUserEmailAddressTemporaryCommand;
 import commonsos.command.UploadPhotoCommand;
@@ -49,7 +48,6 @@ import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TemporaryEmailAddress;
 import commonsos.repository.entity.TemporaryUser;
 import commonsos.repository.entity.User;
-import commonsos.runnable.DelegateWalletTask;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.crypto.AccessIdService;
@@ -57,6 +55,8 @@ import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.image.QrCodeService;
+import commonsos.service.multithread.ApproveAdministratorTask;
+import commonsos.service.multithread.TaskExecutorService;
 import commonsos.session.UserSession;
 import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
@@ -84,7 +84,7 @@ public class UserService extends AbstractService {
   @Inject private EmailService emailService;
   @Inject private ImageUploadService imageUploadService;
   @Inject private QrCodeService qrCodeService;
-  @Inject private JobService jobService;
+  @Inject private TaskExecutorService taskExecutorService;
   @Inject private Configuration config;
 
   public User checkPassword(String username, String password) {
@@ -170,10 +170,10 @@ public class UserService extends AbstractService {
       .setLocation(command.getLocation())
       .setCommunityList(communityList)
       .setEmailAddress(command.getEmailAddress())
-      .setTelNo(command.getTelNo())
-      .setWaitUntilCompleted(command.isWaitUntilCompleted());
+      .setTelNo(command.getTelNo());
 
     userRepository.createTemporary(tmpUser);
+    commitAndStartNewTran();
 
     emailService.sendCreateAccountTemporary(tmpUser.getEmailAddress(), tmpUser.getUsername(), accessId);
   }
@@ -204,19 +204,20 @@ public class UserService extends AbstractService {
 
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());
-    
-    user.getCommunityUserList().forEach(cu -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
-      if (tempUser.isWaitUntilCompleted())
-        jobService.execute(task);
-      else
-        jobService.submit(user, task);
-    });
 
     // create
     userRepository.lockForUpdate(tempUser);
-    userRepository.updateTemporary(tempUser.setInvalid(true));
+    tempUser.setInvalid(true);
+    userRepository.updateTemporary(tempUser);
     userRepository.create(user);
+
+    commitAndStartNewTran();
+
+    // approve admin
+    user.getCommunityUserList().forEach(cu -> {
+      ApproveAdministratorTask task = new ApproveAdministratorTask(user, cu.getCommunity());
+      taskExecutorService.execute(task);
+    });
 
     return user;
   }
@@ -406,8 +407,8 @@ public class UserService extends AbstractService {
 
     // update
     user.getCommunityUserList().forEach(cu -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
-      jobService.submit(user, task);
+      ApproveAdministratorTask task = new ApproveAdministratorTask(user, cu.getCommunity());
+      taskExecutorService.execute(task);
     });
 
     return userRepository.update(user);
@@ -440,8 +441,8 @@ public class UserService extends AbstractService {
 
     // update
     user.getCommunityUserList().forEach(cu -> {
-      DelegateWalletTask task = new DelegateWalletTask(user, cu.getCommunity());
-      jobService.submit(user, task);
+      ApproveAdministratorTask task = new ApproveAdministratorTask(user, cu.getCommunity());
+      taskExecutorService.execute(task);
     });
 
     return userRepository.update(user);
