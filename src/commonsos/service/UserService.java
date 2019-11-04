@@ -19,7 +19,7 @@ import org.web3j.crypto.Credentials;
 
 import commonsos.Configuration;
 import commonsos.command.PaginationCommand;
-import commonsos.command.UpdateUserEmailAddressTemporaryCommand;
+import commonsos.command.UpdateEmailAddressTemporaryCommand;
 import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.SearchUserForAdminCommand;
 import commonsos.command.admin.UpdateUserByAdminCommand;
@@ -222,9 +222,9 @@ public class UserService extends AbstractService {
     return user;
   }
   
-  public void updateEmailTemporary(UpdateUserEmailAddressTemporaryCommand command) {
+  public void updateEmailTemporary(UpdateEmailAddressTemporaryCommand command) {
     ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
-    User user = userRepository.findStrictById(command.getUserId());
+    User user = userRepository.findStrictById(command.getId());
     if (user.getEmailAddress() != null && user.getEmailAddress().equals(command.getNewEmailAddress())) throw new BadRequestException("new address is same as now");
     if (userRepository.isEmailAddressTaken(command.getNewEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
 
@@ -237,16 +237,16 @@ public class UserService extends AbstractService {
       .setAccessIdHash(cryptoService.hash(accessId))
       .setExpirationTime(Instant.now().plus(1, ChronoUnit.DAYS))
       .setInvalid(false)
-      .setUserId(command.getUserId())
+      .setUserId(command.getId())
       .setEmailAddress(command.getNewEmailAddress());
     
     userRepository.createTemporaryEmailAddress(tmpEmailAddr);
     
-    emailService.sendUpdateEmailTemporary(command.getNewEmailAddress(), user.getUsername(), user.getId(), accessId);
+    emailService.sendUpdateUserEmailTemporary(command.getNewEmailAddress(), user.getUsername(), user.getId(), accessId);
   }
   
-  public void updateEmailTemporaryByAdmin(Admin admin, UpdateUserEmailAddressTemporaryCommand command) {
-    User user = userRepository.findStrictById(command.getUserId());
+  public void updateEmailTemporaryByAdmin(Admin admin, UpdateEmailAddressTemporaryCommand command) {
+    User user = userRepository.findStrictById(command.getId());
     if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
     
     updateEmailTemporary(command);

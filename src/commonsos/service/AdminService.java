@@ -11,6 +11,8 @@ import javax.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 
 import commonsos.command.PaginationCommand;
+import commonsos.command.UpdateEmailAddressTemporaryCommand;
+import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.AdminLoginCommand;
 import commonsos.command.admin.CreateAdminTemporaryCommand;
 import commonsos.command.admin.UpdateAdminCommand;
@@ -25,6 +27,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
 import commonsos.repository.entity.TemporaryAdmin;
+import commonsos.repository.entity.TemporaryAdminEmailAddress;
 import commonsos.service.crypto.AccessIdService;
 import commonsos.service.crypto.CryptoService;
 import commonsos.service.email.EmailService;
@@ -69,6 +72,60 @@ public class AdminService extends AbstractService {
     adminRepository.update(target);
 
     return target;
+  }
+
+  public Admin updateAdminPhoto(Admin admin, Long targetAdminId, UploadPhotoCommand command) {
+    Admin target = adminRepository.findStrictById(targetAdminId);
+    if (command.getPhotoFile() == null) throw new BadRequestException();
+    if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", targetAdminId));
+
+    String newPhotoUrl = command.getPhotoFile() == null ? null : imageService.create(command, "");
+    String prePhotoUrl = target.getPhotoUrl();
+    
+    adminRepository.lockForUpdate(target);
+    target
+      .setPhotoUrl(newPhotoUrl);
+    adminRepository.update(target);
+
+    imageService.delete(prePhotoUrl);
+
+    return target;
+  }
+
+  public void updateAdminEmailAddressTemporary(Admin admin, UpdateEmailAddressTemporaryCommand command) {
+    Admin target = adminRepository.findStrictById(command.getId());
+    if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getId()));
+    ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
+
+    String accessId = accessIdService.generateAccessId(id -> {
+      String accessIdHash = cryptoService.hash(id);
+      return !adminRepository.findTemporaryAdminEmailAddress(accessIdHash).isPresent();
+    });
+
+    TemporaryAdminEmailAddress tmpEmailAddress = new TemporaryAdminEmailAddress()
+        .setAccessIdHash(cryptoService.hash(accessId))
+        .setExpirationTime(Instant.now().plus(1, ChronoUnit.DAYS))
+        .setInvalid(false)
+        .setAdminId(target.getId())
+        .setEmailAddress(command.getNewEmailAddress());
+    
+    adminRepository.createTemporaryEmail(tmpEmailAddress);
+
+    emailService.sendUpdateAdminEmailTemporary(command.getNewEmailAddress(), target.getAdminname(), target.getId(), accessId);
+  }
+
+  public Admin updateAdminEmailAddressComplete(Long adminId, String accessId) {
+    TemporaryAdminEmailAddress tmpEmailAddress = adminRepository.findStrictTemporaryAdminEmailAddress(cryptoService.hash(accessId));
+    Admin admin = adminRepository.findStrictById(adminId);
+    
+    adminRepository.lockForUpdate(tmpEmailAddress);
+    adminRepository.lockForUpdate(admin);
+    tmpEmailAddress.setInvalid(true);
+    admin.setEmailAddress(tmpEmailAddress.getEmailAddress());
+    adminRepository.updateTemporaryEmail(tmpEmailAddress);
+    adminRepository.update(admin);
+    
+    return admin;
   }
 
   public AdminListView searchAdmin(Admin admin, Long communityId, Long roleId, PaginationCommand pagination) {

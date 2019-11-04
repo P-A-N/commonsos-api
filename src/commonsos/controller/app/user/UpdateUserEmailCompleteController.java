@@ -18,7 +18,7 @@ import spark.Response;
 import spark.utils.StringUtils;
 
 @Synchronized(USERNAME_AND_EMAIL_ADDRESS)
-public class UpdateEmailCompleteController extends AbstractAppController {
+public class UpdateUserEmailCompleteController extends AbstractAppController {
 
   @Inject UserService userService;
   @Inject Gson gson;

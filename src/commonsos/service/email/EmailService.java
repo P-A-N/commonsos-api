@@ -2,8 +2,9 @@ package commonsos.service.email;
 
 import static commonsos.service.email.EmailTemplate.CREATE_ACCOUNT;
 import static commonsos.service.email.EmailTemplate.CREATE_ADMIN;
-import static commonsos.service.email.EmailTemplate.EMAIL_UPDATE;
 import static commonsos.service.email.EmailTemplate.PASSWORD_RESET;
+import static commonsos.service.email.EmailTemplate.UPDATE_ADMIN_EMAIL;
+import static commonsos.service.email.EmailTemplate.UPDATE_USER_EMAIL;
 import static java.util.Arrays.asList;
 import static javax.mail.Message.RecipientType.BCC;
 import static javax.mail.Message.RecipientType.CC;
@@ -100,14 +101,24 @@ public class EmailService extends AbstractService {
     log.debug(String.format("Url for creating-admin-complate. [https://%s/admin/create-admin.html#%s]", conf.adminPageHost(), accessId));
   }
   
-  public void sendUpdateEmailTemporary(String toAddress, String username, Long userId, String accessId) {
+  public void sendUpdateUserEmailTemporary(String toAddress, String username, Long userId, String accessId) {
     VelocityContext context = new VelocityContext();
     context.put("username", username);
     context.put("id", userId);
     context.put("accessId", accessId);
     context.put("hostname", conf.commonsosHost());
-    send(toAddress, EMAIL_UPDATE.getSubject(), EMAIL_UPDATE.getFilename(), context);
+    send(toAddress, UPDATE_USER_EMAIL.getSubject(), UPDATE_USER_EMAIL.getFilename(), context);
     log.debug(String.format("Url for update-emailAddress-complate. [https://%s/users/%d/emailaddress/%s]", conf.commonsosHost(), userId, accessId));
+  }
+  
+  public void sendUpdateAdminEmailTemporary(String toAddress, String adminname, Long adminId, String accessId) {
+    VelocityContext context = new VelocityContext();
+    context.put("adminname", adminname);
+    context.put("id", adminId);
+    context.put("accessId", accessId);
+    context.put("hostname", conf.adminPageHost());
+    send(toAddress, UPDATE_ADMIN_EMAIL.getSubject(), UPDATE_ADMIN_EMAIL.getFilename(), context);
+    log.debug(String.format("Url for updating-admin-emailaddress-complate. [https://%s/admin/%d/update-emailaddress.html#%s]", conf.adminPageHost(), adminId, accessId));
   }
   
   public void sendPasswordReset(String toAddress, String username, String accessId) {

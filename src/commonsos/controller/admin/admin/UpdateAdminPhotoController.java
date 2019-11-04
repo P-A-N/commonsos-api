@@ -1,19 +1,45 @@
 package commonsos.controller.admin.admin;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import commonsos.controller.AbstractController;
+import javax.inject.Inject;
+
+import org.apache.commons.fileupload.FileItem;
+
+import commonsos.command.UploadPhotoCommand;
+import commonsos.controller.admin.MultipartFormdataController;
+import commonsos.exception.CommonsOSException;
+import commonsos.exception.ServerErrorException;
+import commonsos.repository.entity.Admin;
+import commonsos.service.AdminService;
+import commonsos.util.RequestUtil;
+import commonsos.view.UrlView;
 import spark.Request;
 import spark.Response;
 
-public class UpdateAdminPhotoController extends AbstractController {
+public class UpdateAdminPhotoController extends MultipartFormdataController {
+
+  @Inject AdminService adminService;
 
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("photoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
+  protected Object handleMultipartFormdata(Admin admin, Map<String, List<FileItem>> fileItemMap, Request request, Response response) {
+    Long adminId = RequestUtil.getPathParamLong(request, "id");
+    UploadPhotoCommand command = null;
+    Admin targetAdmin = null;
     
-    return result;
+    try {
+      command = getUploadPhotoCommand(fileItemMap, "photo");
+      targetAdmin = adminService.updateAdminPhoto(admin, adminId, command);
+    } catch (CommonsOSException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    } finally {
+      deleteTmpFiles(command);
+    }
+    
+    UrlView view = new UrlView().setUrl(targetAdmin.getPhotoUrl());
+    return view;
   }
 }

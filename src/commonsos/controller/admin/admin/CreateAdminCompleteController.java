@@ -16,6 +16,7 @@ import commonsos.repository.entity.Admin;
 import commonsos.service.AdminService;
 import commonsos.util.AdminUtil;
 import commonsos.util.RequestUtil;
+import commonsos.view.AdminView;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -27,7 +28,7 @@ public class CreateAdminCompleteController extends AbstractController {
   @Inject CSRF csrf;
 
   @Override
-  public Object handle(Request request, Response response) {
+  public AdminView handle(Request request, Response response) {
     String accessId = RequestUtil.getPathParamString(request, "accessId");
     Admin admin = adminService.createAdminComplete(accessId);
 

@@ -109,12 +109,12 @@ import commonsos.controller.app.user.GetUserController;
 import commonsos.controller.app.user.SearchUserController;
 import commonsos.controller.app.user.SearchUsersCommunityController;
 import commonsos.controller.app.user.UpdateAdLastViewTimeController;
-import commonsos.controller.app.user.UpdateEmailCompleteController;
 import commonsos.controller.app.user.UpdateEmailTemporaryController;
 import commonsos.controller.app.user.UpdateNotificationLastViewTimeController;
 import commonsos.controller.app.user.UpdateUserAvatarController;
 import commonsos.controller.app.user.UpdateUserCommunitiesController;
 import commonsos.controller.app.user.UpdateUserController;
+import commonsos.controller.app.user.UpdateUserEmailCompleteController;
 import commonsos.controller.app.user.UpdateUserMobileDeviceController;
 import commonsos.controller.app.user.UpdateUserNameController;
 import commonsos.controller.app.user.UpdateUserStatusController;
@@ -266,7 +266,7 @@ public class Server {
     get("/app/:version/users/:id/communities", injector.getInstance(SearchUsersCommunityController.class), toJson);
     post("/app/:version/users/:id/communities", injector.getInstance(UpdateUserCommunitiesController.class), toJson);
     post("/app/:version/users/:id/emailaddress", injector.getInstance(UpdateEmailTemporaryController.class), toJson);
-    post("/app/:version/users/:id/emailaddress/:accessId", injector.getInstance(UpdateEmailCompleteController.class), toJson);
+    post("/app/:version/users/:id/emailaddress/:accessId", injector.getInstance(UpdateUserEmailCompleteController.class), toJson);
     post("/app/:version/users/:id/wallet/lastViewTime", injector.getInstance(UpdateWalletLastViewTimeController.class), toJson);
     post("/app/:version/users/:id/ad/lastViewTime", injector.getInstance(UpdateAdLastViewTimeController.class), toJson);
     post("/app/:version/users/:id/notification/lastViewTime", injector.getInstance(UpdateNotificationLastViewTimeController.class), toJson);
@@ -359,7 +359,7 @@ public class Server {
     post("/admin/admins/:id", injector.getInstance(UpdateAdminController.class), toJson);
     post("/admin/admins/:id/photo", injector.getInstance(UpdateAdminPhotoController.class), toJson);
     post("/admin/admins/:id/emailaddress", injector.getInstance(UpdateAdminEmailTemporaryController.class), toJson);
-    get("/admin/admins/:id/emailaddress/:accessId", injector.getInstance(UpdateAdminEmailCompleteController.class), toJson);
+    post("/admin/admins/:id/emailaddress/:accessId", injector.getInstance(UpdateAdminEmailCompleteController.class), toJson);
     post("/admin/admins/:id/delete", injector.getInstance(DeleteAdminController.class), toJson);
 
     // app users
