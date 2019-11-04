@@ -9,7 +9,6 @@ import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
 import java.math.BigDecimal;
 
@@ -58,8 +57,6 @@ public class SearchCommunityTest extends IntegrationTest {
       .then().statusCode(200)
       .body("communityList.communityName", contains("publicCom", "privateCom"))
       .body("communityList.status", contains("PUBLIC", "PRIVATE"))
-      .body("communityList.totalMember", contains(2, 0))
-      .body("communityList.ethBalance", contains(notNullValue(), notNullValue()))
       .body("communityList.adminList.adminname", contains(
           asList(publicComAdmin1.getAdminname()),
           asList()));

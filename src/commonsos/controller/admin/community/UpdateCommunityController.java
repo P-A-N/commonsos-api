@@ -25,6 +25,6 @@ public class UpdateCommunityController extends AfterAdminLoginController {
     command.setCommunityId(RequestUtil.getPathParamLong(request, "id"));
 
     Community community = communityService.updateCommunity(admin, command);
-    return communityService.viewForAdmin(community, command.getAdminIdList());
+    return communityService.viewForAdmin(community);
   }
 }

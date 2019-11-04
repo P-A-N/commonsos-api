@@ -4,17 +4,13 @@ import static commonsos.repository.entity.PublishStatus.PRIVATE;
 import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
-import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
-import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
 import static java.util.stream.Collectors.toList;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -45,6 +41,8 @@ import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.EthBalance;
 import commonsos.service.image.ImageUploadService;
+import commonsos.service.multithread.CreateCommunityTask;
+import commonsos.service.multithread.TaskExecutorService;
 import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
@@ -62,6 +60,7 @@ public class CommunityService extends AbstractService {
   @Inject private CommunityNotificationRepository notificationRepository;
   @Inject private ImageUploadService imageService;
   @Inject private BlockchainService blockchainService;
+  @Inject private TaskExecutorService taskExecutorService;
   @Inject private Configuration config;
 
   public Community createCommunity(Admin admin, CreateCommunityCommand command) {
@@ -84,7 +83,6 @@ public class CommunityService extends AbstractService {
     if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
     // check system balance
     BigDecimal initialEther = new BigDecimal(config.initialEther());
-    BigInteger initialWei = new BigInteger(config.initialWei());
     Credentials systemCredentials = blockchainService.systemCredentials();
     BigDecimal systemBalance = blockchainService.getBalance(systemCredentials.getAddress());
     if (systemBalance.compareTo(initialEther) < 0) throw new DisplayableException("error.notEnoughFunds");
@@ -99,18 +97,11 @@ public class CommunityService extends AbstractService {
     String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
     Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
     
-    // transfer ether to main wallet
-    blockchainService.transferEther(systemCredentials, mainCredentials.getAddress(), initialWei, true);
-    
-    // create token
-    String tokenAddress = blockchainService.createToken(mainCredentials, command.getTokenSymbol(), command.getTokenName());
-    
     // create community
     Community community = new Community()
         .setName(command.getCommunityName())
         .setPublishStatus(PublishStatus.PRIVATE)
         .setDescription(command.getDescription())
-        .setTokenContractAddress(tokenAddress)
         .setPhotoUrl(photoUrl)
         .setCoverPhotoUrl(coverPhotoUrl)
         .setMainWallet(mainWallet)
@@ -120,10 +111,6 @@ public class CommunityService extends AbstractService {
         .setFee(fee);
     community = repository.create(community);
     
-    // approve main wallet from fee wallet
-    blockchainService.transferEther(systemCredentials, feeCredentials.getAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE), true);
-    blockchainService.approveFromFeeWallet(community);
-    
     // set adminPageUrl
     repository.lockForUpdate(community);
     String adminPageUrl = String.format("https://%s/%d", config.adminPageHost(), community.getId());
@@ -132,6 +119,11 @@ public class CommunityService extends AbstractService {
     // update admin's communityId
     Community c = new Community().setId(community.getId());
     adminList.forEach(a -> adminRepository.update(a.setCommunity(c)));
+    
+    commitAndStartNewTran();
+    
+    CreateCommunityTask task = new CreateCommunityTask(community.getId(), command);
+    taskExecutorService.execute(task);
     
     return community;
   }
@@ -183,7 +175,9 @@ public class CommunityService extends AbstractService {
     // update admin's communityId
     newAdminList.forEach(a -> adminRepository.update(a.setCommunity(community)));
     deleteAdminList.forEach(a -> adminRepository.update(a.setCommunity(null)));
-    
+
+    commitAndStartNewTran();
+
     return community;
   }
   
@@ -302,19 +296,16 @@ public class CommunityService extends AbstractService {
     List<Admin> adminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     return viewForAdminInternal(community, adminList);
   }
-  
-  public CommunityView viewForAdmin(Community community, List<Long> adminIdList) {
-    List<Admin> adminList = new ArrayList<>();
-    if (adminIdList != null) {
-      adminList = adminIdList.stream().map(id -> adminRepository.findStrictById(id)).collect(Collectors.toList());
-    }
-    return viewForAdminInternal(community, adminList);
-  }
-  
+
   private CommunityView viewForAdminInternal(Community community, List<Admin> adminList) {
-    CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
-    EthBalance ethBalance = blockchainService.getEthBalance(community);
-    int totalMember = userRepository.search(community.getId(), null, null).getList().size();
-    return CommunityUtil.viewForAdmin(community, communityToken, ethBalance, totalMember, adminList);
+    if (StringUtils.isEmpty(community.getTokenContractAddress())) {
+      return CommunityUtil.viewForAdmin(community, adminList);
+    } else {
+      CommunityToken communityToken = blockchainService.getCommunityToken(community.getTokenContractAddress());
+      EthBalance ethBalance = blockchainService.getEthBalance(community);
+      int totalMember = userRepository.search(community.getId(), null, null).getList().size();
+
+      return CommunityUtil.viewForAdmin(community, communityToken, ethBalance, totalMember, adminList);
+    }
   }
 }

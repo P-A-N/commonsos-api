@@ -58,7 +58,6 @@ public class CreateCommunityTest extends IntegrationTest {
       .body("transactionFee", equalTo(1.5F))
       .body("status", equalTo("PRIVATE"))
       .body("adminPageUrl", startsWith("https://admin.test.commonsos.love/"))
-      .body("totalMember", equalTo(0))
       .body("createdAt", notNullValue())
       .body("adminList.id", contains(tmp1.getId().intValue(), tmp2.getId().intValue()))
       .body("adminList.adminname", contains("tmp1", "tmp2"));

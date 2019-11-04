@@ -34,9 +34,6 @@ public class CommunityUtil {
 
   public static CommunityView viewForAdmin(
       Community community,
-      CommunityToken token,
-      EthBalance ethBalance,
-      Integer totalMember,
       List<Admin> adminList
       ) {
     List<AdminView> adminViewList = adminList
@@ -46,19 +43,30 @@ public class CommunityUtil {
     return new CommunityView()
         .setCommunityId(community.getId())
         .setCommunityName(community.getName())
-        .setTokenName(token.getTokenName())
-        .setTokenSymbol(token.getTokenSymbol())
         .setTransactionFee(community.getFee())
         .setDescription(community.getDescription())
         .setStatus(community.getPublishStatus())
         .setAdminPageUrl(community.getAdminPageUrl())
-        .setTotalSupply(token.getTotalSupply())
-        .setTotalMember(totalMember)
         .setPhotoUrl(community.getPhotoUrl())
         .setCoverPhotoUrl(community.getCoverPhotoUrl())
-        .setEthBalance(ethBalance.getBalance())
         .setCreatedAt(community.getCreatedAt())
         .setAdminList(adminViewList);
+  }
+
+  public static CommunityView viewForAdmin(
+      Community community,
+      CommunityToken token,
+      EthBalance ethBalance,
+      Integer totalMember,
+      List<Admin> adminList
+      ) {
+    CommunityView view = viewForAdmin(community, adminList)
+        .setTokenName(token.getTokenName())
+        .setTokenSymbol(token.getTokenSymbol())
+        .setTotalSupply(token.getTotalSupply())
+        .setTotalMember(totalMember)
+        .setEthBalance(ethBalance.getBalance());
+    return view;
   }
 
   public static CommunityView narrowViewForAdmin(Community community) {

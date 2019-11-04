@@ -7,8 +7,6 @@ import static spark.Spark.options;
 import static spark.Spark.post;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.web3j.protocol.Web3j;
 
@@ -152,6 +150,7 @@ public class Server {
   @Inject private DatabaseMigrator databaseMigrator;
   @Inject private BlockchainEventService blockchainEventService;
   @Inject private CommunityRepository communityRepository;
+  @Inject private TaskExecutorService taskExecutorService;
   @Inject private Configuration config;
   @Inject private Cache cache;
   private Injector injector;
@@ -188,13 +187,10 @@ public class Server {
   
   private void initCache() {
     List<Community> communityList = communityRepository.list(null).getList();
-    ExecutorService exec = Executors.newFixedThreadPool(TaskExecutorService.MAXIMUM_POOL_SIZE);
     communityList.forEach(c -> {
       InitCommunityCacheTask task = new InitCommunityCacheTask(c);
-      injector.injectMembers(task);
-      exec.execute(task);
+      taskExecutorService.execute(task);
     });
-    exec.shutdown();
 
     cache.setSystemConfig(Cache.SYS_CONFIG_KEY_MAINTENANCE_MODE, config.maintenanceMode());
   }

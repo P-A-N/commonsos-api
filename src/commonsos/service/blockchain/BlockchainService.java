@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Wallet;
@@ -273,11 +274,15 @@ public class BlockchainService extends AbstractService {
   }
 
   Token loadToken(Credentials remitterCredentials, String tokenContractAddress, BigInteger gasPrice, BigInteger gasLimit) {
+    if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
+    
     TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new NoOpProcessor(web3j));
     return Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
   Token loadTokenReadOnly(String tokenContractAddress) {
+    if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
+    
     String walletAddress = systemCredentials().getAddress();
     return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }

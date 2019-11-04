@@ -50,10 +50,12 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // create community
     ncl = create(new Admin().setEmailAddress("ncl@test.com").setPasswordHash(hash("passpass")).setRole(NCL));
     community1 = createCommunity("community1", "c1", "community1");
+    community2 = createCommunity("community2", "c2", "community2");
+    waitUntilCommunityCreated();
+    waitUntilAllowedFromFeeWallet(community1);
+    waitUntilAllowedFromFeeWallet(community2);
     checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(0));
-
-    community2 = createCommunity("community2", "c2", "community2");
     checkTokenBalanceOfCommunity(community2, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(0));
     
@@ -130,7 +132,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.5F)); // -0.4
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.8F)); // -1.2
   }
-  
+
   private Community createCommunity(
       String communityName,
       String tokenSymbol,
@@ -148,9 +150,6 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
       .then().statusCode(200)
-      .body("communityName", equalTo(communityName))
-      .body("tokenName", equalTo(tokenName))
-      .body("tokenSymbol", equalTo(tokenSymbol))
       .extract().path("communityId");
     
     Community community = emService.get().find(Community.class, (long) id);
@@ -334,6 +333,25 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .then().statusCode(200)
       .body("balance", expect);
   }
+  
+  private void waitUntilCommunityCreated() throws Exception {
+    log.info(String.format("waiting for community created."));
+    for (int i = 0; i < 60*10; i++) {
+      long count = emService.get().createQuery(
+          "SELECT count(c) FROM Community c WHERE tokenContractAddress is null", Long.class)
+          .getSingleResult();
+      if(count == 0) {
+        log.info(String.format("community created."));
+        
+        community1 = emService.get().find(Community.class, (long) community1.getId());
+        community2 = emService.get().find(Community.class, (long) community2.getId());
+        
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("community creation didn't finish in 10 minute.");
+  }
 
   private void waitUntilTokenTransactionCompleted() throws Exception {
     log.info(String.format("waiting for token transaction."));
@@ -363,6 +381,18 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       Thread.sleep(1000);
     }
     throw new RuntimeException("eth transaction didn't finish in 10 minute.");
+  }
+  
+  private void waitUntilAllowedFromFeeWallet(Community community) throws Exception {
+    log.info(String.format("waiting for allowing."));
+    for (int i = 0; i < (60*30); i++) {
+      if (blockchainService.isAllowed(community.getFeeWalletAddress(), community, BigInteger.ONE)) {
+        log.info(String.format("allowing completed."));
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("allowence didn't finish in 30 minutes.");
   }
   
   private void waitUntilAllowed(User user, Community community) throws Exception {
