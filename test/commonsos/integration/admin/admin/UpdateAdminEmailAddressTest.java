@@ -61,7 +61,9 @@ public class UpdateAdminEmailAddressTest extends IntegrationTest {
     List<WiserMessage> messages = wiser.getMessages();
     assertThat(messages.size()).isEqualTo(1);
     assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo("updated@test.com");
-    String accessId = extractAccessId(messages.get(0), "#");
+    String[] tmp = extractAccessId(messages.get(0), "#").split("-");
+    String adminId = tmp[0];
+    String accessId = tmp[1];
 
     // email address is taken
     requestParam = getRequestParam("updated@test.com");
@@ -75,7 +77,7 @@ public class UpdateAdminEmailAddressTest extends IntegrationTest {
 
     // update ncl1 email address temporary
     given()
-      .when().post("/admin/admins/{id}/emailaddress/{accessId}", ncl1.getId(), accessId)
+      .when().post("/admin/admins/{id}/emailaddress/{accessId}", adminId, accessId)
       .then().statusCode(200);
 
     // login success

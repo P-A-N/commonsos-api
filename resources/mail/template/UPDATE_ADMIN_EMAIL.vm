@@ -6,7 +6,7 @@
 </p>
 
 <p>
-https://${hostname}/admin/${id}/update-emailaddress.html#${accessId}
+https://${hostname}/admin/update-emailaddress.html#${id}-${accessId}
 </p>
 
 <p>
