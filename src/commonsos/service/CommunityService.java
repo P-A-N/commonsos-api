@@ -23,6 +23,7 @@ import commonsos.command.PaginationCommand;
 import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.CreateCommunityCommand;
 import commonsos.command.admin.UpdateCommunityCommand;
+import commonsos.command.admin.UpdateCommunityTokenNameCommand;
 import commonsos.command.app.UpdateCommunityNotificationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -43,6 +44,7 @@ import commonsos.service.blockchain.EthBalance;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.multithread.CreateCommunityTask;
 import commonsos.service.multithread.TaskExecutorService;
+import commonsos.service.multithread.UpdateCommunityTokenNameTask;
 import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
@@ -249,7 +251,19 @@ public class CommunityService extends AbstractService {
   public String updateCoverPhoto(User user, UploadPhotoCommand command, Long communityId) {
     Community community = repository.findPublicStrictById(communityId);
     if (!repository.isAdmin(user.getId(), communityId)) throw new ForbiddenException("User is not admin");
+
+    return updateCoverPhoto(command, community);
+  }
+
+  public Community updateCoverPhoto(Admin admin, UploadPhotoCommand command, Long communityId) {
+    Community community = repository.findStrictById(communityId);
+    if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
+    updateCoverPhoto(command, community);
+    return community;
+  }
+  
+  private String updateCoverPhoto(UploadPhotoCommand command, Community community) {
     String url = imageService.create(command, "");
     imageService.delete(community.getCoverPhotoUrl());
     
@@ -257,6 +271,16 @@ public class CommunityService extends AbstractService {
     community.setCoverPhotoUrl(url);
     repository.update(community);
     return url;
+  }
+
+  public Community updateTokenName(Admin admin, UpdateCommunityTokenNameCommand command) {
+    Community community = repository.findStrictById(command.getCommunityId());
+    if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
+    
+    UpdateCommunityTokenNameTask task = new UpdateCommunityTokenNameTask(community, command.getTokenName());
+    taskExecutorService.execute(task);
+    
+    return community;
   }
   
   public void updateNotificationUpdateAt(UpdateCommunityNotificationCommand command) {

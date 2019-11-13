@@ -1,6 +1,7 @@
 package commonsos.service.blockchain;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,9 @@ public class BlockchainEventService extends AbstractService {
   @Inject private TokenTransactionService tokenTransactionService;
   @Inject private EthTransactionService ethTransactionService;
   @Inject private EntityManagerService entityManagerService;
+  
+  private List<BlockchainConsumer<Block>> blockConsumerList = new ArrayList<>();
+  private List<BlockchainConsumer<Block>> blockConsumerRemoveList = new ArrayList<>();
 
   public void listenEvents() {
     web3j.transactionFlowable().subscribe(tx -> {
@@ -49,6 +53,19 @@ public class BlockchainEventService extends AbstractService {
       for (String transaction : transactions) {
         markTransactionCompleted(transaction);
       }
+      
+      blockConsumerList.forEach(c -> {
+        try {
+          c.accept(block);
+          if (c.isDone()) {
+            blockConsumerRemoveList.add(c);
+          }
+        } catch (Exception e) {
+          log.error("error occurs while consuming block.", e);
+        }
+      });
+      blockConsumerRemoveList.forEach(c -> blockConsumerList.remove(c));
+      blockConsumerRemoveList.clear();
     });
   }
   
@@ -62,6 +79,10 @@ public class BlockchainEventService extends AbstractService {
     } catch (IOException e) {
       throw new ServerErrorException();
     }
+  }
+  
+  public void addBlockConsumer(BlockchainConsumer<Block> consumer) {
+    blockConsumerList.add(consumer);
   }
   
   private void markTransactionCompleted(String transactionHash) {

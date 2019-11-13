@@ -43,6 +43,7 @@ public class AdminService extends AbstractService {
 
   @Inject private AdminRepository adminRepository;
   @Inject private CommunityRepository communityRepository;
+  @Inject private DeleteService deleteService;
   @Inject private CryptoService cryptoService;
   @Inject private AccessIdService accessIdService;
   @Inject private ImageUploadService imageService;
@@ -57,6 +58,19 @@ public class AdminService extends AbstractService {
     if (!AdminUtil.isSeeableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", id));
     
     return target;
+  }
+
+  public AdminListView searchAdmin(Admin admin, Long communityId, Long roleId, PaginationCommand pagination) {
+    // validate role
+    if (!AdminUtil.isSeeableAdmin(admin, communityId, roleId)) throw new ForbiddenException();
+    
+    ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
+
+    AdminListView listView = new AdminListView();
+    listView.setAdminList(result.getList().stream().map(AdminUtil::view).collect(toList()));
+    listView.setPagination(PaginationUtil.toView(result));
+    
+    return listView;
   }
 
   public Admin updateAdmin(Admin admin, UpdateAdminCommand command) {
@@ -128,17 +142,18 @@ public class AdminService extends AbstractService {
     return admin;
   }
 
-  public AdminListView searchAdmin(Admin admin, Long communityId, Long roleId, PaginationCommand pagination) {
-    // validate role
-    if (!AdminUtil.isSeeableAdmin(admin, communityId, roleId)) throw new ForbiddenException();
+  public Admin updateLoggedinAt(Admin admin) {
+    adminRepository.lockForUpdate(admin);
     
-    ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
+    admin.setLoggedinAt(Instant.now());
+    return adminRepository.update(admin);
+  }
 
-    AdminListView listView = new AdminListView();
-    listView.setAdminList(result.getList().stream().map(AdminUtil::view).collect(toList()));
-    listView.setPagination(PaginationUtil.toView(result));
-    
-    return listView;
+  public void deleteAdmin(Admin admin, Long targetAdminId) {
+    Admin target = adminRepository.findStrictById(targetAdminId);
+    if (!AdminUtil.isDeletableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", targetAdminId));
+
+    deleteService.deleteAdmin(target);
   }
 
   public void createAdminTemporary(Admin admin, CreateAdminTemporaryCommand command) {
@@ -196,13 +211,6 @@ public class AdminService extends AbstractService {
     Admin admin = adminRepository.findByEmailAddress(command.getEmailAddress()).orElseThrow(AuthenticationException::new);
     if (!cryptoService.checkPassword(command.getPassword(), admin.getPasswordHash())) throw new AuthenticationException();
     return admin;
-  }
-
-  public Admin updateLoggedinAt(Admin admin) {
-    adminRepository.lockForUpdate(admin);
-    
-    admin.setLoggedinAt(Instant.now());
-    return adminRepository.update(admin);
   }
 
   public AdminSession session(Admin admin) {

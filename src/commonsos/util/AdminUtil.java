@@ -90,6 +90,10 @@ public class AdminUtil {
     return false;
   }
   
+  public static boolean isDeletableAdmin(Admin admin, Admin targetAdmin) {
+    return isUpdatableAdmin(admin, targetAdmin);
+  }
+  
   public static boolean isUpdatableCommunity(Admin admin, Long targetCommunityId) {
     Role adminRole = admin.getRole();
     Long adminCommunityId = admin.getCommunity() == null ? null : admin.getCommunity().getId();

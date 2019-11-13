@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
+import commonsos.repository.AdminRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.RedistributionRepository;
@@ -35,6 +36,7 @@ public class DeleteService extends AbstractService {
   @Inject private UserRepository userRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
+  @Inject private AdminRepository adminRepository;
   @Inject private RedistributionRepository redistributionRepository;
   @Inject private ImageUploadService imageService;
 
@@ -146,6 +148,17 @@ public class DeleteService extends AbstractService {
     messageRepository.create(systemMessage);
 
     log.info(String.format("deleted message-thread-party. threadId=%d, userId=%d", threadId, user.getId()));
+  }
+  
+  public void deleteAdmin(Admin admin) {
+    log.info(String.format("deleting admin. adminId=%d", admin.getId()));
+    
+    // delete admin
+    adminRepository.lockForUpdate(admin);
+    admin.setDeleted(true);
+    adminRepository.update(admin);
+
+    log.info(String.format("deleted admin. adminId=%d", admin.getId()));
   }
   
   public void deleteRedistribution(Redistribution redistribution) {

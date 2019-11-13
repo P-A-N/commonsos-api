@@ -1,42 +1,45 @@
 package commonsos.controller.admin.community;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import commonsos.controller.AbstractController;
+import javax.inject.Inject;
+
+import org.apache.commons.fileupload.FileItem;
+
+import commonsos.command.UploadPhotoCommand;
+import commonsos.controller.admin.MultipartFormdataController;
+import commonsos.exception.CommonsOSException;
+import commonsos.exception.ServerErrorException;
+import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.Community;
+import commonsos.service.CommunityService;
+import commonsos.util.RequestUtil;
+import commonsos.view.CommunityView;
 import spark.Request;
 import spark.Response;
 
-public class UpdateCommunityCoverPhotoController extends AbstractController {
+public class UpdateCommunityCoverPhotoController extends MultipartFormdataController {
 
+  @Inject CommunityService communityService;
+  
   @Override
-  public Object handle(Request request, Response response) {
-    Map<String, Object> result = new HashMap<>();
-    result.put("communityId", 1);
-    result.put("communityName", "テストコミュニティ");
-    result.put("tokenName", "テストコイン");
-    result.put("tokenSymbol", "ts");
-    result.put("transactionFee", new BigDecimal("1.5"));
-    result.put("description", "コミュニティの説明");
-    result.put("status", "PUBLIC");
-    result.put("adminPageUrl", "https://hogehoge.com/path/to/login");
-    result.put("totalSupply", new BigDecimal("1000000000000"));
-    result.put("totalMember", new BigDecimal("10"));
-    result.put("photoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
-    result.put("coverPhotoUrl", "https://commonsos-test.s3.amazonaws.com/2f63ed4c-3ff0-46cf-8358-eb91efcbe9c0");
+  protected CommunityView handleMultipartFormdata(Admin admin, Map<String, List<FileItem>> fileItemMap, Request request, Response response) {
+    Long communityId = RequestUtil.getPathParamLong(request, "id");
     
-    List<Object> adminList = new ArrayList<>();
-    Map<String, Object> admin = new HashMap<>();
-    admin.put("adminId", 1);
-    admin.put("adminname", "AKIRA");
-    adminList.add(admin);
-    adminList.add(admin);
+    UploadPhotoCommand command = null;
+    Community community;
+    try {
+      command = getUploadPhotoCommand(fileItemMap, "photo");
+      community = communityService.updateCoverPhoto(admin, command, communityId);
+    } catch (CommonsOSException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ServerErrorException(e);
+    } finally {
+      deleteTmpFiles(command);
+    }
     
-    result.put("adminList", adminList);
-    
-    return result;
+    return communityService.viewForAdmin(community);
   }
 }

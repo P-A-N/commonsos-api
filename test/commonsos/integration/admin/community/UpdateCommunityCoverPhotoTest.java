@@ -21,7 +21,7 @@ import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 
-public class UpdateCommunityPhotoTest extends IntegrationTest {
+public class UpdateCommunityCoverPhotoTest extends IntegrationTest {
 
   private Admin ncl;
   private Admin com1Admin;
@@ -41,7 +41,7 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
   }
   
   @Test
-  public void updateCommunityPhoto_ncl() throws Exception {
+  public void updateCommunityCoverPhoto_ncl() throws Exception {
     sessionId = loginAdmin(ncl.getEmailAddress(), "password");
 
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -52,11 +52,11 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com1.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com1.getId())
       .then().statusCode(200)
       .body("communityName", equalTo("com1"))
-      .body("photoUrl", notNullValue())
-      .body("coverPhotoUrl", nullValue());
+      .body("photoUrl", nullValue())
+      .body("coverPhotoUrl", notNullValue());
     
     // update community photo [crop]
     given()
@@ -66,13 +66,13 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
       .multiPart("photo[x]", 100)
       .multiPart("photo[y]", 150)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com2.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com2.getId())
       .then().statusCode(200)
       .body("communityName", equalTo("com2"));
   }
   
   @Test
-  public void updateCommunityPhoto_com1Admin() throws Exception {
+  public void updateCommunityCoverPhoto_com1Admin() throws Exception {
     sessionId = loginAdmin(com1Admin.getEmailAddress(), "password");
 
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -83,18 +83,18 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com1.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com1.getId())
       .then().statusCode(200);
     
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com2.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com2.getId())
       .then().statusCode(403);
   }
   
   @Test
-  public void updateCommunityPhoto_com1Teller() throws Exception {
+  public void updateCommunityCoverPhoto_com1Teller() throws Exception {
     sessionId = loginAdmin(com1Teller.getEmailAddress(), "password");
 
     URL url = this.getClass().getResource("/images/testImage.jpg");
@@ -105,13 +105,13 @@ public class UpdateCommunityPhotoTest extends IntegrationTest {
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com1.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com1.getId())
       .then().statusCode(403);
     
     given()
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
-      .when().post("/admin/communities/{id}/photo", com2.getId())
+      .when().post("/admin/communities/{id}/coverPhoto", com2.getId())
       .then().statusCode(403);
   }
 }

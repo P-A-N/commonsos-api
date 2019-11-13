@@ -41,6 +41,10 @@ public class Cache {
     tokenNameCache.put(tokenAddress, tokenName);
   }
   
+  public void removeTokenName(String tokenAddress) {
+    tokenNameCache.remove(tokenAddress);
+  }
+  
   public String getTokenSymbol(String tokenAddress) {
     return tokenSymbolCache.get(tokenAddress);
   }
@@ -49,12 +53,20 @@ public class Cache {
     tokenSymbolCache.put(tokenAddress, tokenSymbol);
   }
   
+  public void removeTokenSymbol(String tokenAddress) {
+    tokenSymbolCache.remove(tokenAddress);
+  }
+  
   public BigDecimal getTotalSupply(String tokenAddress) {
     return totalSupplyCache.get(tokenAddress);
   }
   
   public void setTotalSupply(String tokenAddress, BigDecimal totalSupply) {
     totalSupplyCache.put(tokenAddress, totalSupply);
+  }
+  
+  public void removeTotalSupply(String tokenAddress) {
+    totalSupplyCache.remove(tokenAddress);
   }
   
   public String getSystemConfig(String configKey) {

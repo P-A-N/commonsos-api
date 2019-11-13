@@ -52,6 +52,10 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     community1 = createCommunity("community1", "c1", "community1");
     community2 = createCommunity("community2", "c2", "community2");
     waitUntilCommunityCreated();
+    // TODO
+    updateTokenName(community1, "hogehoge");
+    waitUntilUpdateTokenName(community1, "hogehoge");
+    
     waitUntilAllowedFromFeeWallet(community1);
     waitUntilAllowedFromFeeWallet(community2);
     checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
@@ -226,6 +230,24 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("creating redistribution completed. [communityId=%d]", com.getId()));
   }
 
+  private void updateTokenName(Community com, String newTokenName) {
+    log.info(String.format("updating community token name started. [communityId=%d, newTokenName=%s]", com.getId(), newTokenName));
+
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("tokenName", newTokenName);
+
+    // update token name
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/communities/{id}/tokenName", com.getId())
+      .then().statusCode(200);
+
+    log.info(String.format("updating community token name completed. [communityId=%d, newTokenName=%s]", com.getId(), newTokenName));
+  }
+
   private void redistribution() throws Exception {
     log.info(String.format("redistribution started."));
 
@@ -385,25 +407,46 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   
   private void waitUntilAllowedFromFeeWallet(Community community) throws Exception {
     log.info(String.format("waiting for allowing."));
-    for (int i = 0; i < (60*30); i++) {
+    for (int i = 0; i < (60*10); i++) {
       if (blockchainService.isAllowed(community.getFeeWalletAddress(), community, BigInteger.ONE)) {
         log.info(String.format("allowing completed."));
         return;
       }
       Thread.sleep(1000);
     }
-    throw new RuntimeException("allowence didn't finish in 30 minutes.");
+    throw new RuntimeException("allowence didn't finish in 10 minutes.");
   }
   
   private void waitUntilAllowed(User user, Community community) throws Exception {
     log.info(String.format("waiting for allowing."));
-    for (int i = 0; i < (60*30); i++) {
+    for (int i = 0; i < (60*10); i++) {
       if (blockchainService.isAllowed(user, community, BigInteger.ONE)) {
         log.info(String.format("allowing completed."));
         return;
       }
       Thread.sleep(1000);
     }
-    throw new RuntimeException("allowence didn't finish in 30 minutes.");
+    throw new RuntimeException("allowence didn't finish in 10 minutes.");
+  }
+
+  private void waitUntilUpdateTokenName(Community com, String newTokenName) throws Exception {
+    log.info(String.format("waiting for token name update to complete."));
+    
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    for (int i = 0; i < (60*10); i++) {
+      String currentTokenName = given()
+            .cookie("JSESSIONID", sessionId)
+            .when().get("/admin/communities/{id}", com.getId())
+            .then().statusCode(200)
+            .extract().path("tokenName");
+      if (newTokenName.equals(currentTokenName)) {
+        log.info(String.format("token name update completed."));
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("token name update didn't finish in 10 minutes.");
+    
   }
 }

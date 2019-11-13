@@ -60,6 +60,7 @@ public class BlockchainService extends AbstractService {
   public static final BigInteger TOKEN_TRANSFER_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_TRANSFER_FROM_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_APPROVE_GAS_LIMIT = new BigInteger("90000");
+  public static final BigInteger TOKEN_SET_NAME_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("4700000");
   public static final BigInteger GAS_PRICE = new BigInteger("18000000000");
 
@@ -525,6 +526,27 @@ public class BlockchainService extends AbstractService {
     catch (Exception e) {
       throw new ServerErrorException(e);
     }
+  }
+  
+  public String updateTokenName(Community community, String newTokenName) {
+    String currentTokenName = tokenName(community.getTokenContractAddress());
+    log.info(format("Updating token name. [communityId=%d, currentTokenName=%s, newTokenName=%s]", community.getId(), currentTokenName, newTokenName));
+
+    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Token token = loadToken(
+        credentials,
+        community.getTokenContractAddress(),
+        GAS_PRICE,
+        TOKEN_SET_NAME_GAS_LIMIT);
+    
+    TransactionReceipt receipt = handleBlockchainException(() -> {
+      return token.setName(newTokenName).send();
+    });
+    
+    String hash = receipt.getTransactionHash();
+    log.info(format("Update token name done. [hash=%s]", hash));
+    
+    return hash;
   }
   
   public void approveFromUser(User user, Community community) {
