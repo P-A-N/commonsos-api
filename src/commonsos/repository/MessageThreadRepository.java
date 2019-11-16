@@ -160,6 +160,7 @@ public class MessageThreadRepository extends Repository {
       "SELECT mt.id " +
         "FROM MessageThread mt JOIN mt.parties p " +
         "WHERE mt.communityId = :communityId " +
+        "AND mt.deleted IS FALSE " +
         "AND p.user.id = :userId " +
         "AND EXISTS (SELECT 1 FROM Message WHERE threadId = mt.id) "+
         "AND (p.visitedAt IS NULL OR p.visitedAt < (SELECT MAX(createdAt) FROM Message WHERE threadId = mt.id)) " +
