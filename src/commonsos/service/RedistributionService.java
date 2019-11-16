@@ -81,7 +81,7 @@ public class RedistributionService extends AbstractService {
     // validate role
     if (!RedistributionUtil.isEditable(admin, communityId)) throw new ForbiddenException();
     
-    ResultList<Redistribution> result = repository.findByCommunityId(communityId, pagination);
+    ResultList<Redistribution> result = repository.searchByCommunityId(communityId, pagination);
 
     RedistributionListView listView = new RedistributionListView();
     listView.setRedistributionList(result.getList().stream().map(RedistributionUtil::toView).collect(toList()));
@@ -93,7 +93,7 @@ public class RedistributionService extends AbstractService {
   public RedistributionBatchCommand createRedistributionCommand() {
     Map<Community, List<CreateTokenTransactionForRedistributionCommand>> commandMap = new HashMap<>();
     
-    List<Community> communityList = communityRepository.listPublic(null).getList();
+    List<Community> communityList = communityRepository.searchPublic(null).getList();
     communityList.forEach(c -> {
       List<CreateTokenTransactionForRedistributionCommand> commandList = new ArrayList<>();
       
@@ -106,7 +106,7 @@ public class RedistributionService extends AbstractService {
         commandList.add(command);
       });
       
-      List<Redistribution> redistributionList = repository.findByCommunityId(c.getId(), null).getList();
+      List<Redistribution> redistributionList = repository.searchByCommunityId(c.getId(), null).getList();
       redistributionList.forEach(r -> {
         commandList.forEach(command -> {
           BigDecimal currentRate = command.getRate();

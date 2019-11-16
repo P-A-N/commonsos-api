@@ -49,7 +49,7 @@ public class DeleteService extends AbstractService {
     
     // delete user's message threads party
     user.getCommunityUserList().forEach(cu -> {
-      List<MessageThread> myThreads = messageThreadRepository.listByUser(user, cu.getCommunity().getId() ,null, null, null).getList();
+      List<MessageThread> myThreads = messageThreadRepository.searchByUser(user, cu.getCommunity().getId() ,null, null, null).getList();
       myThreads.forEach(thread -> deleteMessageThreadParty(user, thread.getId()));
     });
     
@@ -62,7 +62,7 @@ public class DeleteService extends AbstractService {
     userRepository.update(user);
     
     // delete redistribution
-    List<Redistribution> redistributionList = redistributionRepository.findByUserId(user.getId(), null).getList();
+    List<Redistribution> redistributionList = redistributionRepository.searchByUserId(user.getId(), null).getList();
     redistributionList.forEach(r -> deleteRedistribution(r));
 
     log.info(String.format("deleted user. userId=%d", user.getId()));
@@ -103,7 +103,7 @@ public class DeleteService extends AbstractService {
     deletePhoto(ad.getPhotoUrl());
     
     // delete ad's message-thread
-    ResultList<MessageThread> messageThreadResult = messageThreadRepository.byAdId(ad.getId(), null);
+    ResultList<MessageThread> messageThreadResult = messageThreadRepository.searchByAdId(ad.getId(), null);
     for (MessageThread messageThread : messageThreadResult.getList()) {
       deleteMessageThread(messageThread);
     }

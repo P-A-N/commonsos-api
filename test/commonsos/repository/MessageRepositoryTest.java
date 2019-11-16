@@ -51,7 +51,7 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
     Long id3 = inTransaction(() -> repository.create(new Message().setThreadId(id("thread id"))).getId());
     inTransaction(() -> repository.create(new Message().setThreadId(id("other thread"))));
 
-    ResultList<Message> result = repository.listByThread(id("thread id"), null);
+    ResultList<Message> result = repository.searchByThreadId(id("thread id"), null);
 
     assertThat(result.getList()).extracting("id").containsExactly(id1, id2, id3);
   }
@@ -67,13 +67,13 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Message> result = repository.listByThread(id("thread id"), pagination);
+    ResultList<Message> result = repository.searchByThreadId(id("thread id"), pagination);
 
     assertThat(result.getList()).extracting("id").containsExactly(id1, id2, id3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listByThread(id("thread id"), pagination);
+    result = repository.searchByThreadId(id("thread id"), pagination);
 
     assertThat(result.getList()).extracting("id").containsExactly(id4, id5);
   }
@@ -89,13 +89,13 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.DESC);
-    ResultList<Message> result = repository.listByThread(id("thread id"), pagination);
+    ResultList<Message> result = repository.searchByThreadId(id("thread id"), pagination);
 
     assertThat(result.getList()).extracting("id").containsExactly(id5, id4, id3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listByThread(id("thread id"), pagination);
+    result = repository.searchByThreadId(id("thread id"), pagination);
 
     assertThat(result.getList()).extracting("id").containsExactly(id2, id1);
   }
@@ -111,7 +111,7 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
     Message newestMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(id("user3"))));
 
     // verify
-    Optional<Message> result = repository.lastMessage(id("thread"));
+    Optional<Message> result = repository.findLastMessage(id("thread"));
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(newestMessage.getId());
 
@@ -119,13 +119,13 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
     // systemMessage
     Message systemMessage = inTransaction(() -> repository.create(new Message().setThreadId(id("thread")).setCreatedUserId(MessageUtil.getSystemMessageCreatorId())));
     // verify
-    result = repository.lastMessage(id("thread"));
+    result = repository.findLastMessage(id("thread"));
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(systemMessage.getId());
   }
 
   @Test
   public void lastThreadMessage_noMessagesYet() {
-    assertThat(repository.lastMessage(id("thread id"))).isEmpty();
+    assertThat(repository.findLastMessage(id("thread id"))).isEmpty();
   }
 }

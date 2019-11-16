@@ -53,7 +53,7 @@ public class TokenMigration {
 
     System.out.println("Token migration started.\n");
     
-    List<Community> communityList = emService.runInTransaction(() -> communityRepository.listPublic(null).getList());
+    List<Community> communityList = emService.runInTransaction(() -> communityRepository.searchPublic(null).getList());
     Set<Long> completedCommunity = new HashSet<>();
     showProgress(communityList, completedCommunity);
     
@@ -130,7 +130,7 @@ public class TokenMigration {
   }
 
   private static void checkTXDone() {
-    long count = transactionRepository.pendingTransactionsCount();
+    long count = transactionRepository.getPendingTransactionsCount();
     if (count != 0) {
       System.out.println(String.format("Transaction isn't done yet. [pendingTransactionCount=%d]", count));
       System.exit(0);
@@ -170,7 +170,7 @@ public class TokenMigration {
   }
 
   private static void transferEtherToMainWallet(Community c) {
-    BigDecimal balance = blockchainService.getBalance(c.getMainWalletAddress());
+    BigDecimal balance = blockchainService.getEthBalance(c.getMainWalletAddress());
     System.out.println(String.format("Balance of main wallet=%f [wallet address=%s]", balance, c.getMainWalletAddress()));
     if (balance.compareTo(BigDecimal.TEN.pow(4)) < 0) {
       BigInteger amount = BigInteger.TEN.pow(18 + 5);
@@ -229,12 +229,12 @@ public class TokenMigration {
   }
   
   private static void waitUntilTransferredEther(String address) throws Exception {
-    BigDecimal balance = blockchainService.getBalance(address);
+    BigDecimal balance = blockchainService.getEthBalance(address);
     
     while (balance.compareTo(BigDecimal.valueOf(1000)) < 0) {
       System.out.println(String.format("Waiting for transferred ether [address=%s, balance=%f]", address, balance));
       Thread.sleep(10000);
-      balance = blockchainService.getBalance(address);
+      balance = blockchainService.getEthBalance(address);
       if (balance.compareTo(BigDecimal.valueOf(1000)) >= 0) {
         System.out.println(String.format("Transferred ether [address=%s, balance=%f]", address, balance));
       }

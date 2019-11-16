@@ -1,4 +1,4 @@
-package commonsos.integration.batch.redistribution;
+package commonsos.integration.batch.community.redistribution;
 
 import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.NCL;

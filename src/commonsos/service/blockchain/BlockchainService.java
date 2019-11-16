@@ -382,6 +382,18 @@ public class BlockchainService extends AbstractService {
     return ethBalance;
   }
 
+  public BigDecimal getEthBalance(String address) {
+    try {
+      log.info("balance request for " + address);
+      BigInteger balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
+      log.info("balance request for " + address + " complete, balance=" + balance.toString());
+      return toTokensWithDecimals(balance);
+    }
+    catch (Exception e) {
+      throw new ServerErrorException(e);
+    }
+  }
+
   public TokenBalance getTokenBalance(Long communityId, WalletType walletType) {
     Community community = communityRepository.findStrictById(communityId);
     return getTokenBalance(community, walletType);
@@ -410,7 +422,7 @@ public class BlockchainService extends AbstractService {
   public TokenBalance getTokenBalance(User user, Long communityId) {
     Community community = communityRepository.findPublicStrictById(communityId);
     BigDecimal balance = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress());
-    BigDecimal pendingAmount = tokenTransactionRepository.pendingTransactionsAmount(user.getId(), communityId);
+    BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId);
     TokenBalance tokenBalance = new TokenBalance()
         .setBalance(balance.subtract(pendingAmount)) // TODO
         .setCommunityId(communityId)
@@ -424,18 +436,6 @@ public class BlockchainService extends AbstractService {
       Token token = loadTokenReadOnly(tokenContractAddress);
       BigInteger balance = token.balanceOf(walletAddress).send();
       log.info("Token balance request complete, balance " + balance.toString());
-      return toTokensWithDecimals(balance);
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
-  }
-
-  public BigDecimal getBalance(String address) {
-    try {
-      log.info("balance request for " + address);
-      BigInteger balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
-      log.info("balance request for " + address + " complete, balance=" + balance.toString());
       return toTokensWithDecimals(balance);
     }
     catch (Exception e) {

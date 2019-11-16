@@ -1,4 +1,4 @@
-package commonsos.controller.batch.redistribution;
+package commonsos.controller.batch.community.redistribution;
 
 import static commonsos.annotation.SyncObject.REDISTRIBUTION;
 

@@ -63,18 +63,18 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
     Redistribution r4 = inTransaction(() -> repository.create(new Redistribution().setCommunity(com2)));
 
     // execute & verify
-    List<Redistribution> result = repository.findByCommunityId(com1.getId(), null).getList();
+    List<Redistribution> result = repository.searchByCommunityId(com1.getId(), null).getList();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getId()).isEqualTo(r1.getId());
     assertThat(result.get(1).getId()).isEqualTo(r2.getId());
 
     // execute & verify
-    result = repository.findByCommunityId(com2.getId(), null).getList();
+    result = repository.searchByCommunityId(com2.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(r4.getId());
 
     // execute & verify
-    result = repository.findByCommunityId(com3.getId(), null).getList();
+    result = repository.searchByCommunityId(com3.getId(), null).getList();
     assertThat(result.size()).isEqualTo(0);
   }
 
@@ -97,12 +97,12 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
-    List<Redistribution> result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    List<Redistribution> result = repository.searchByCommunityId(com1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(10);
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    result = repository.searchByCommunityId(com1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(2);
   }
 
@@ -116,13 +116,13 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
     Redistribution r3 = inTransaction(() -> repository.create(new Redistribution().setUser(user1).setDeleted(true)));
 
     // execute & verify
-    List<Redistribution> result = repository.findByUserId(user1.getId(), null).getList();
+    List<Redistribution> result = repository.searchByUserId(user1.getId(), null).getList();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getId()).isEqualTo(r1.getId());
     assertThat(result.get(1).getId()).isEqualTo(r2.getId());
 
     // execute & verify
-    result = repository.findByCommunityId(user2.getId(), null).getList();
+    result = repository.searchByCommunityId(user2.getId(), null).getList();
     assertThat(result.size()).isEqualTo(0);
   }
 
@@ -139,12 +139,12 @@ public class RedistributionRepositoryTest extends AbstractRepositoryTest {
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.DESC);
-    List<Redistribution> result = repository.findByUserId(user1.getId(), pagination).getList();
+    List<Redistribution> result = repository.searchByUserId(user1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(3);
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.findByUserId(user1.getId(), pagination).getList();
+    result = repository.searchByUserId(user1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(2);
   }
 

@@ -114,7 +114,7 @@ public class TokenTransactionRepository extends Repository {
     return benefitAmount.subtract(remitAmount);
   }
 
-  public BigDecimal pendingTransactionsAmount(Long userId, Long communityId) {
+  public BigDecimal getPendingTransactionsAmount(Long userId, Long communityId) {
     BigDecimal amount = em()
       .createQuery("SELECT SUM(amount) FROM TokenTransaction " +
           "WHERE communityId = :communityId " +
@@ -126,7 +126,7 @@ public class TokenTransactionRepository extends Repository {
     return amount != null ? amount :  ZERO;
   }
   
-  public Long pendingTransactionsCount() {
+  public Long getPendingTransactionsCount() {
     Long count = em()
       .createQuery("SELECT COUNT(*) FROM TokenTransaction " +
           "WHERE blockchainCompletedAt IS NULL ", Long.class)

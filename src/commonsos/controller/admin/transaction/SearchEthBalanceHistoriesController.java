@@ -1,37 +1,32 @@
 package commonsos.controller.admin.transaction;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.inject.Inject;
 
-import commonsos.controller.AbstractController;
+import commonsos.command.PaginationCommand;
+import commonsos.command.admin.SearchEthBalanceHistoriesCommand;
+import commonsos.controller.admin.AfterAdminLoginController;
+import commonsos.repository.entity.Admin;
+import commonsos.service.EthBalanceHistoryService;
+import commonsos.util.PaginationUtil;
+import commonsos.util.RequestUtil;
+import commonsos.view.EthBalanceListView;
 import spark.Request;
 import spark.Response;
 
-public class SearchEthBalanceHistoriesController extends AbstractController {
+public class SearchEthBalanceHistoriesController extends AfterAdminLoginController {
 
+  @Inject private EthBalanceHistoryService service;
+  
   @Override
-  public Object handle(Request request, Response response) {
-    List<Object> balanceList = new ArrayList<>();
+  protected EthBalanceListView handleAfterLogin(Admin admin, Request request, Response response) {
+    SearchEthBalanceHistoriesCommand command = new SearchEthBalanceHistoriesCommand();
+    command.setCommunityId(RequestUtil.getQueryParamLong(request, "communityId", true));
+    command.setFrom(RequestUtil.getQueryParamLocalDate(request, "from", false));
+    command.setTo(RequestUtil.getQueryParamLocalDate(request, "to", false));
 
-    for (int i = 1; i < 10; i++) {
-      Map<String, Object> balance = new HashMap<>();
-      balance.put("date", "2019070" + i);
-      balance.put("balance", new BigDecimal("1000").subtract(new BigDecimal(i)));
-      balanceList.add(balance);
-    }
-    for (int i = 10; i <= 31; i++) {
-      Map<String, Object> balance = new HashMap<>();
-      balance.put("date", "201907" + i);
-      balance.put("balance", new BigDecimal("1000").subtract(new BigDecimal(i)));
-      balanceList.add(balance);
-    }
+    PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    Map<String, Object> result = new HashMap<>();
-    result.put("balanceList", balanceList);
-
-    return result;
+    EthBalanceListView view = service.searchEthBalanceHistory(admin, command, paginationCommand);
+    return view;
   }
 }

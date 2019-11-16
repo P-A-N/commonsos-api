@@ -4,6 +4,8 @@ import static java.lang.Long.parseLong;
 import static spark.utils.StringUtils.isEmpty;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +74,22 @@ public class RequestUtil {
       return parseLong(value);
     } else {
       throw new BadRequestException(String.format("invalid %s", param));
+    }
+  }
+
+  public static LocalDate getQueryParamLocalDate(Request request, String param, boolean isRequired) {
+    String value = request.queryParams(param);
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return null;
+    }
+    
+    try {
+      return LocalDate.parse(value);
+    } catch (DateTimeParseException e) {
+      throw new BadRequestException(String.format("invalid %s", param), e);
     }
   }
 

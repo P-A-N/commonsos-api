@@ -220,7 +220,7 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id")).setRemitterUserId(id("user")).setAmount(ONE).setBlockchainCompletedAt(now())));
     inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("other community id")).setRemitterUserId(id("user")).setAmount(TEN)));
 
-    BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community id"));
+    BigDecimal amount = repository.getPendingTransactionsAmount(id("user"), id("community id"));
 
     assertThat(amount).isEqualByComparingTo(new BigDecimal(20));
   }
@@ -271,22 +271,22 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void pendingTransactionsAmount_none() {
-    BigDecimal amount = repository.pendingTransactionsAmount(id("user"), id("community"));
+    BigDecimal amount = repository.getPendingTransactionsAmount(id("user"), id("community"));
 
     assertThat(amount).isEqualByComparingTo(ZERO);
   }
 
   @Test
   public void pendingTransactionsCount() {
-    long count = repository.pendingTransactionsCount();
+    long count = repository.getPendingTransactionsCount();
     assertThat(count).isEqualTo(0L);
     
     inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id 1"))));
-    count = repository.pendingTransactionsCount();
+    count = repository.getPendingTransactionsCount();
     assertThat(count).isEqualTo(1L);
     
     inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("community id 2")).setBlockchainCompletedAt(Instant.now())));
-    count = repository.pendingTransactionsCount();
+    count = repository.getPendingTransactionsCount();
     assertThat(count).isEqualTo(1L);
   }
 }

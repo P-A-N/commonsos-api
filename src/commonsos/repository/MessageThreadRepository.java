@@ -27,7 +27,7 @@ public class MessageThreadRepository extends Repository {
     super(entityManagerService);
   }
 
-  public Optional<MessageThread> byCreaterAndAdId(Long createdUserId, Long adId) {
+  public Optional<MessageThread> findByCreaterAndAdId(Long createdUserId, Long adId) {
     try {
       return Optional.of(em().createQuery("FROM MessageThread WHERE adId = :adId AND createdUserId = :createdUserId AND deleted IS FALSE", MessageThread.class)
         .setParameter("adId", adId)
@@ -39,7 +39,7 @@ public class MessageThreadRepository extends Repository {
     }
   }
 
-  public ResultList<MessageThread> byAdId(Long adId, PaginationCommand pagination) {
+  public ResultList<MessageThread> searchByAdId(Long adId, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
     sql.append("FROM MessageThread WHERE adId = :adId AND deleted IS false ORDER BY id");
 
@@ -50,7 +50,7 @@ public class MessageThreadRepository extends Repository {
     return resultList;
   }
 
-  public Optional<MessageThread> betweenUsers(Long userId1, Long userId2, Long communityId) {
+  public Optional<MessageThread> findDirectThread(Long userId1, Long userId2, Long communityId) {
     String sql = "SELECT mt FROM MessageThread mt " +
       "WHERE mt.communityId = :communityId " +
       "AND mt.adId IS NULL " +
@@ -77,7 +77,7 @@ public class MessageThreadRepository extends Repository {
     return messageThread;
   }
 
-  public ResultList<MessageThread> listByUser(User user, Long communityId, String memberFilter, String messageFilter, PaginationCommand pagination) {
+  public ResultList<MessageThread> searchByUser(User user, Long communityId, String memberFilter, String messageFilter, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
     sql.append(
         "SELECT " +

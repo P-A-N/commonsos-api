@@ -131,8 +131,8 @@ public class UserService extends AbstractService {
 
   public CommunityUserListView searchUsersCommunity(User user, String filter, PaginationCommand pagination) {
     ResultList<CommunityUser> result = StringUtils.isEmpty(filter) ?
-        communityRepository.listPublic(user.getCommunityUserList(), pagination) :
-        communityRepository.listPublic(filter, user.getCommunityUserList(), pagination);
+        communityRepository.searchPublic(user.getCommunityUserList(), pagination) :
+        communityRepository.searchPublic(filter, user.getCommunityUserList(), pagination);
     
     CommunityUserListView listView = new CommunityUserListView();
     listView.setCommunityList(result.getList().stream().map(cu -> {

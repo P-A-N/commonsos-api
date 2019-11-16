@@ -110,7 +110,7 @@ public class TokenTransactionServiceTest {
     when(communityRepository.findPublicStrictById(any())).thenReturn(community);
     when(adRepository.findPublicStrictById(any())).thenReturn(ad);
     when(blockchainService.getTokenBalance(any(User.class), any(Long.class))).thenReturn(tokenBalance);
-    when(messageThreadRepository.byCreaterAndAdId(any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
+    when(messageThreadRepository.findByCreaterAndAdId(any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
     
     // community is null
     CreateTokenTransactionFromUserCommand command = command("community", "beneficiary", "10", "description", "ad id").setTransactionFee(BigDecimal.ONE);
@@ -167,7 +167,7 @@ public class TokenTransactionServiceTest {
     when(userRepository.findStrictById(any())).thenReturn(beneficiary);
     when(communityRepository.findStrictById(any())).thenReturn(community);
     doReturn(tokenBalance).when(service).getTokenBalanceForAdmin(any(), any(), any());
-    when(messageThreadRepository.betweenUsers(any(), any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
+    when(messageThreadRepository.findDirectThread(any(), any(), any())).thenReturn(Optional.of(new MessageThread().setId(id("messageThread"))));
 
     // community is null
     CreateTokenTransactionFromAdminCommand command = new CreateTokenTransactionFromAdminCommand()
@@ -245,7 +245,7 @@ public class TokenTransactionServiceTest {
     
     Redistribution red1 = new Redistribution().setRate(ONE);
     ResultList<Redistribution> redResultList = new ResultList<Redistribution>().setList(asList(red1));
-    when(redistributionRepository.findByCommunityId(any(), any())).thenReturn(redResultList);
+    when(redistributionRepository.searchByCommunityId(any(), any())).thenReturn(redResultList);
     
     TokenBalance tokenBalance = new TokenBalance().setBalance(TEN);
     when(blockchainService.getTokenBalance(any(Community.class), any(WalletType.class))).thenReturn(tokenBalance);

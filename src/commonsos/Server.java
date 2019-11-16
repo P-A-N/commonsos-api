@@ -118,7 +118,8 @@ import commonsos.controller.app.user.UpdateUserNameController;
 import commonsos.controller.app.user.UpdateUserStatusController;
 import commonsos.controller.app.user.UpdateWalletLastViewTimeController;
 import commonsos.controller.app.user.UserPasswordResetRequestController;
-import commonsos.controller.batch.redistribution.RedistributionBatchController;
+import commonsos.controller.batch.community.CreateEthBalanceHistoryBatchController;
+import commonsos.controller.batch.community.redistribution.RedistributionBatchController;
 import commonsos.controller.wordpress.community.SearchCommunityFromWPController;
 import commonsos.controller.wordpress.community.SearchCommunityNotificationFromWPController;
 import commonsos.controller.wordpress.community.UpdateCommunityNotificationFromWPController;
@@ -186,7 +187,7 @@ public class Server {
   }
   
   private void initCache() {
-    List<Community> communityList = communityRepository.list(null).getList();
+    List<Community> communityList = communityRepository.searchAll(null).getList();
     communityList.forEach(c -> {
       InitCommunityCacheTask task = new InitCommunityCacheTask(c);
       taskExecutorService.execute(task);
@@ -405,6 +406,7 @@ public class Server {
 
   private void initBatchRoutes() {
     post("/batch/redistribution", injector.getInstance(RedistributionBatchController.class), toJson);
+    post("/batch/createEthBalanceHistory", injector.getInstance(CreateEthBalanceHistoryBatchController.class), toJson);
   }
   
   private String requestInfo(Request request) {

@@ -46,7 +46,7 @@ public class DeleteServiceTest {
   public void setup() {
     ResultList<MessageThread> mtResult = new ResultList<>();
     mtResult.setList(asList(new MessageThread()));
-    when(messageThreadRepository.byAdId(any(), any())).thenReturn(mtResult);
+    when(messageThreadRepository.searchByAdId(any(), any())).thenReturn(mtResult);
   }
   
   @Test

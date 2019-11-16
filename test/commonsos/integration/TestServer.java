@@ -86,7 +86,7 @@ public class TestServer extends Server {
         return ethBalance.setCommunityId(((Community) invocation.getArgument(0)).getId());
       }
     });
-    when(blockchainService.getBalance(any())).thenReturn(TEN.pow(18+6));
+    when(blockchainService.getEthBalance(any(String.class))).thenReturn(TEN.pow(18+6));
     when(blockchainService.getSystemEthBalance()).thenReturn(TEN);
     when(blockchainService.transferTokensFromUserToUser(any(), any(), any(), any())).thenReturn("0x1");
     when(blockchainService.transferTokensFee(any(), any(), any())).thenReturn("0x1");

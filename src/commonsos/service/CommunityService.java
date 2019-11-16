@@ -86,7 +86,7 @@ public class CommunityService extends AbstractService {
     // check system balance
     BigDecimal initialEther = new BigDecimal(config.initialEther());
     Credentials systemCredentials = blockchainService.systemCredentials();
-    BigDecimal systemBalance = blockchainService.getBalance(systemCredentials.getAddress());
+    BigDecimal systemBalance = blockchainService.getEthBalance(systemCredentials.getAddress());
     if (systemBalance.compareTo(initialEther) < 0) throw new DisplayableException("error.notEnoughFunds");
     
     // create upload photo
@@ -146,7 +146,7 @@ public class CommunityService extends AbstractService {
     if (command.getStatus() == PRIVATE && community.getPublishStatus() == PUBLIC) throw new DisplayableException("error.invalid_update_status_puplic_to_private");
 
     // check admin
-    List<Admin> oldAdminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    List<Admin> oldAdminList = adminRepository.searchByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     List<Admin> newAdminList = new ArrayList<>();
     if (command.getAdminIdList() != null) {
       command.getAdminIdList().forEach(id -> {
@@ -184,7 +184,7 @@ public class CommunityService extends AbstractService {
   }
   
   public CommunityListView list(String filter, PaginationCommand pagination) {
-    ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.listPublic(pagination) : repository.listPublic(filter, pagination);
+    ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.searchPublic(pagination) : repository.searchPublic(filter, pagination);
 
     CommunityListView listView = new CommunityListView();
     listView.setCommunityList(result.getList().stream().map(c -> CommunityUtil.viewForApp(c, blockchainService.tokenSymbol(c.getTokenContractAddress()))).collect(toList()));
@@ -197,7 +197,7 @@ public class CommunityService extends AbstractService {
     // check role
     if (!admin.getRole().equals(NCL)) throw new ForbiddenException();
     
-    ResultList<Community> result = repository.list(pagination);
+    ResultList<Community> result = repository.searchAll(pagination);
 
     CommunityListView listView = new CommunityListView();
     listView.setCommunityList(result.getList().stream().map(this::viewForAdmin).collect(toList()));
@@ -307,7 +307,7 @@ public class CommunityService extends AbstractService {
   public CommunityNotificationListView notificationList(Long communityId, PaginationCommand pagination) {
     repository.findPublicStrictById(communityId);
     
-    ResultList<CommunityNotification> result = notificationRepository.findByCommunityId(communityId, pagination);
+    ResultList<CommunityNotification> result = notificationRepository.searchByCommunityId(communityId, pagination);
 
     CommunityNotificationListView listView = new CommunityNotificationListView();
     listView.setNotificationList(CommunityUtil.notificationView(result.getList()));
@@ -317,7 +317,7 @@ public class CommunityService extends AbstractService {
   }
   
   public CommunityView viewForAdmin(Community community) {
-    List<Admin> adminList = adminRepository.findByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    List<Admin> adminList = adminRepository.searchByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     return viewForAdminInternal(community, adminList);
   }
 

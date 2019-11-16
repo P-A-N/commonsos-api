@@ -52,26 +52,26 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     MessageThread mt2 = inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt2")));
 
     // execute & verify
-    Optional<MessageThread> result = repository.byCreaterAndAdId(user1.getId(), id("ad1"));
+    Optional<MessageThread> result = repository.findByCreaterAndAdId(user1.getId(), id("ad1"));
     assertThat(result.get().getTitle()).isEqualTo("mt1");
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user2.getId(), id("ad1"));
+    result = repository.findByCreaterAndAdId(user2.getId(), id("ad1"));
     assertThat(result.get().getTitle()).isEqualTo("mt2");
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user3.getId(), id("ad1"));
+    result = repository.findByCreaterAndAdId(user3.getId(), id("ad1"));
     assertThat(result).isEmpty();
     
     // prepare
     inTransaction(() -> repository.update(mt1.setDeleted(true)));
 
     // execute & verify
-    result = repository.byCreaterAndAdId(user1.getId(), id("ad1"));
+    result = repository.findByCreaterAndAdId(user1.getId(), id("ad1"));
     assertThat(result).isEmpty();
     
     // execute & verify
-    result = repository.byCreaterAndAdId(user2.getId(), id("ad2"));
+    result = repository.findByCreaterAndAdId(user2.getId(), id("ad2"));
     assertThat(result).isEmpty();
   }
 
@@ -84,7 +84,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad2")).setCreatedUserId(id("user1")).setTitle("mt2_1")));
 
     // execute & verify
-    ResultList<MessageThread> result = repository.byAdId(id("ad1"), null);
+    ResultList<MessageThread> result = repository.searchByAdId(id("ad1"), null);
     assertThat(result.getList().size()).isEqualTo(2);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_1");
     assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_2");
@@ -108,28 +108,28 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
-    ResultList<MessageThread> result = repository.byAdId(id("ad1"), pagination);
+    ResultList<MessageThread> result = repository.searchByAdId(id("ad1"), pagination);
     assertThat(result.getList().size()).isEqualTo(10);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_1");
     assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_10");
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.byAdId(id("ad1"), pagination);
+    result = repository.searchByAdId(id("ad1"), pagination);
     assertThat(result.getList().size()).isEqualTo(2);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_11");
     assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_12");
     
     // execute & verify
     pagination.setPage(0).setSort(SortType.DESC);
-    result = repository.byAdId(id("ad1"), pagination);
+    result = repository.searchByAdId(id("ad1"), pagination);
     assertThat(result.getList().size()).isEqualTo(10);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_12");
     assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_3");
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.byAdId(id("ad1"), pagination);
+    result = repository.searchByAdId(id("ad1"), pagination);
     assertThat(result.getList().size()).isEqualTo(2);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_2");
     assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_1");
@@ -159,14 +159,14 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> repository.create(thread5));
 
     // execute
-    Optional<MessageThread> result = repository.betweenUsers(user.getId(), otherUser1.getId(), community1.getId());
+    Optional<MessageThread> result = repository.findDirectThread(user.getId(), otherUser1.getId(), community1.getId());
 
     // verity
     assertThat(result).isNotEmpty();
     assertThat(result.get().getId()).isEqualTo(thread1Id);
 
     // execute
-    result = repository.betweenUsers(user.getId(), otherUser1.getId(), community2.getId());
+    result = repository.findDirectThread(user.getId(), otherUser1.getId(), community2.getId());
 
     // verity
     assertThat(result).isEmpty();
@@ -232,16 +232,16 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     MessageThread thread5 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(communityId2).setParties(asList(party(user), party(otherUser1), party(otherUser2)))));
 
     // [execute and verify] search by member
-    ResultList<MessageThread> result = repository.listByUser(user, communityId1, "user1", null, null);
+    ResultList<MessageThread> result = repository.searchByUser(user, communityId1, "user1", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId());
 
-    result = repository.listByUser(user, communityId1, "user2", null, null);
+    result = repository.searchByUser(user, communityId1, "user2", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread3.getId());
 
-    result = repository.listByUser(user, communityId1, "her", null, null);
+    result = repository.searchByUser(user, communityId1, "her", null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
-    result = repository.listByUser(user, communityId1, "not_exists", null, null);
+    result = repository.searchByUser(user, communityId1, "not_exists", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
 
     // prepare
@@ -251,17 +251,17 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread4.getId()).setText("foobar")));
     
     // [execute and verify] search by message
-    result = repository.listByUser(user, communityId1, null, "oob", null);
+    result = repository.searchByUser(user, communityId1, null, "oob", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
     // prepare
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread1.getId()).setText("HOGE")));
 
     // [execute and verify] search by message
-    result = repository.listByUser(user, communityId1, null, "OG", null);
+    result = repository.searchByUser(user, communityId1, null, "OG", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
     
-    result = repository.listByUser(user, communityId1, null, "og", null);
+    result = repository.searchByUser(user, communityId1, null, "og", null);
     assertThat(result.getList()).extracting("id").containsExactly();
 
     // prepare multiple byte code
@@ -269,33 +269,33 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     inTransaction(() -> messageRepository.create(new Message().setThreadId(thread2.getId()).setText("こんにちわ。昨日はいい天気でしたね。")));
     
     // [execute and verify] search by message
-    result = repository.listByUser(user, communityId1, null, "今日", null);
+    result = repository.searchByUser(user, communityId1, null, "今日", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
 
-    result = repository.listByUser(user, communityId1, null, "こんにちわ", null);
+    result = repository.searchByUser(user, communityId1, null, "こんにちわ", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId());
 
     // [execute and verify] search by member and message
-    result = repository.listByUser(user, communityId1, "user2", "こんにちわ", null);
+    result = repository.searchByUser(user, communityId1, "user2", "こんにちわ", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId());
 
     // [execute and verify] not specified member or message
-    result = repository.listByUser(user, communityId1, "", "", null);
+    result = repository.searchByUser(user, communityId1, "", "", null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
-    result = repository.listByUser(user, communityId1, null, null, null);
+    result = repository.searchByUser(user, communityId1, null, null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread1.getId(), thread2.getId(), thread3.getId());
 
     // [execute and verify] sql injection
-    result = repository.listByUser(user, communityId1, "' OR TRUE", null, null);
+    result = repository.searchByUser(user, communityId1, "' OR TRUE", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
-    result = repository.listByUser(user, communityId1, "; select * from message_threads", null, null);
+    result = repository.searchByUser(user, communityId1, "; select * from message_threads", null, null);
     assertThat(result.getList()).extracting("id").containsExactly();
 
     // prepare deleted threads
     inTransaction(() -> repository.update(thread1.setDeleted(true)));
     
     // [execute and verify] not specified member or message
-    result = repository.listByUser(user, communityId1, null, null, null);
+    result = repository.searchByUser(user, communityId1, null, null, null);
     assertThat(result.getList()).extracting("id").containsExactly(thread2.getId(), thread3.getId());
   }
 
@@ -317,14 +317,14 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<MessageThread> result = repository.listByUser(user, communityId, "user", "message", pagination);
+    ResultList<MessageThread> result = repository.searchByUser(user, communityId, "user", "message", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listByUser(user, communityId, "user", "message", pagination);
+    result = repository.searchByUser(user, communityId, "user", "message", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);

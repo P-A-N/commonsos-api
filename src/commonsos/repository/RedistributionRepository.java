@@ -39,7 +39,7 @@ public class RedistributionRepository extends Repository {
     return findById(id).orElseThrow(RedistributionNotFoundException::new);
   }
 
-  public ResultList<Redistribution> findByCommunityId(Long communityId, PaginationCommand pagination) {
+  public ResultList<Redistribution> searchByCommunityId(Long communityId, PaginationCommand pagination) {
     String sql = "FROM Redistribution WHERE community.id = :communityId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Redistribution> query = em().createQuery(sql, Redistribution.class)
         .setParameter("communityId", communityId);
@@ -49,7 +49,7 @@ public class RedistributionRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<Redistribution> findByUserId(Long userId, PaginationCommand pagination) {
+  public ResultList<Redistribution> searchByUserId(Long userId, PaginationCommand pagination) {
     String sql = "FROM Redistribution WHERE user.id = :userId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Redistribution> query = em().createQuery(sql, Redistribution.class)
         .setParameter("userId", userId);

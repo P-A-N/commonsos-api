@@ -24,7 +24,7 @@ public class MessageRepository extends Repository {
     return message;
   }
 
-  public ResultList<Message> listByThread(Long threadId, PaginationCommand pagination) {
+  public ResultList<Message> searchByThreadId(Long threadId, PaginationCommand pagination) {
     TypedQuery<Message> query = em()
       .createQuery("FROM Message WHERE threadId = :threadId ORDER BY createdAt, id", Message.class)
       .setParameter("threadId", threadId);
@@ -34,7 +34,7 @@ public class MessageRepository extends Repository {
     return resultList;
   }
 
-  public Optional<Message> lastMessage(Long threadId) {
+  public Optional<Message> findLastMessage(Long threadId) {
     List<Message> messages = em().createQuery(
         "FROM Message " +
         "WHERE threadId = :threadId " +

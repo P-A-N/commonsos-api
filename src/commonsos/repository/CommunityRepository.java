@@ -58,7 +58,7 @@ public class CommunityRepository extends Repository {
     return findPublicById(id).orElseThrow(CommunityNotFoundException::new);
   }
 
-  public ResultList<Community> list(PaginationCommand pagination) {
+  public ResultList<Community> searchAll(PaginationCommand pagination) {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +
         " WHERE deleted IS FALSE" +
@@ -69,7 +69,7 @@ public class CommunityRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<Community> listPublic(String filter, PaginationCommand pagination) {
+  public ResultList<Community> searchPublic(String filter, PaginationCommand pagination) {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +
         " WHERE tokenContractAddress IS NOT NULL" +
@@ -84,7 +84,7 @@ public class CommunityRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<Community> listPublic(PaginationCommand pagination) {
+  public ResultList<Community> searchPublic(PaginationCommand pagination) {
     TypedQuery<Community> query = em().createQuery(
         "FROM Community" +
         " WHERE tokenContractAddress IS NOT NULL" +
@@ -97,7 +97,7 @@ public class CommunityRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<CommunityUser> listPublic(String filter, List<CommunityUser> communityUsers, PaginationCommand pagination) {
+  public ResultList<CommunityUser> searchPublic(String filter, List<CommunityUser> communityUsers, PaginationCommand pagination) {
     if (communityUsers == null || communityUsers.isEmpty()) {
       return new ResultList<CommunityUser>().setList(Collections.emptyList());
     }
@@ -120,7 +120,7 @@ public class CommunityRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<CommunityUser> listPublic(List<CommunityUser> communityUsers, PaginationCommand pagination) {
+  public ResultList<CommunityUser> searchPublic(List<CommunityUser> communityUsers, PaginationCommand pagination) {
     if (communityUsers == null || communityUsers.isEmpty()) {
       return new ResultList<CommunityUser>().setList(Collections.emptyList());
     }

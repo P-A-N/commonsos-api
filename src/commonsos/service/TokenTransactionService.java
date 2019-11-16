@@ -276,10 +276,10 @@ public class TokenTransactionService extends AbstractService {
     // create message
     MessageThread thread = null;
     if (command.getAdId() != null) {
-      Optional<MessageThread> threadForAd = messageThreadRepository.byCreaterAndAdId(user.getId(), command.getAdId());
+      Optional<MessageThread> threadForAd = messageThreadRepository.findByCreaterAndAdId(user.getId(), command.getAdId());
       thread = threadForAd.orElseGet(() -> syncService.createMessageThreadForAd(user, command.getAdId()));
     } else {
-      Optional<MessageThread> threadBetweenUser = messageThreadRepository.betweenUsers(user.getId(), beneficiary.getId(), community.getId());
+      Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(user.getId(), beneficiary.getId(), community.getId());
       thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
     }
     
@@ -337,7 +337,7 @@ public class TokenTransactionService extends AbstractService {
     blockchainEventService.checkTransaction(blockchainTransactionHash);
 
     // create message
-    Optional<MessageThread> threadBetweenUser = messageThreadRepository.betweenUsers(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
+    Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
     MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
 
     String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol());
@@ -361,7 +361,7 @@ public class TokenTransactionService extends AbstractService {
       BigDecimal feeSum = feeTranList.stream().map(TokenTransaction::getAmount).reduce(ZERO, BigDecimal::add);
       
       // get sum of rate
-      List<Redistribution> redList = redistributionRepository.findByCommunityId(com.getId(), null).getList();
+      List<Redistribution> redList = redistributionRepository.searchByCommunityId(com.getId(), null).getList();
       BigDecimal rateSum = redList.stream().map(Redistribution::getRate).reduce(ZERO, BigDecimal::add);
       
       // verify communities token balance

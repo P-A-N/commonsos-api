@@ -31,7 +31,7 @@ public class SyncService extends AbstractService {
 
   @Synchronized(SyncObject.MESSAGE_THRED_FOR_AD)
   public MessageThread createMessageThreadForAd(User user, Long adId) {
-    Optional<MessageThread> optional = messageThreadRepository.byCreaterAndAdId(user.getId(), adId);
+    Optional<MessageThread> optional = messageThreadRepository.findByCreaterAndAdId(user.getId(), adId);
     if (optional.isPresent()) return optional.get();
     
     Ad ad = adRepository.findPublicStrictById(adId);
@@ -50,7 +50,7 @@ public class SyncService extends AbstractService {
   public MessageThread createMessageThreadWithUser(User user, User otherUser, Community community) {
     if (!UserUtil.isMember(user, community.getId()) || !UserUtil.isMember(otherUser, community.getId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", community.getId()));
   
-    Optional<MessageThread> optional = messageThreadRepository.betweenUsers(user.getId(), otherUser.getId(), community.getId());
+    Optional<MessageThread> optional = messageThreadRepository.findDirectThread(user.getId(), otherUser.getId(), community.getId());
     if (optional.isPresent()) return optional.get();
     
     MessageThread messageThread = new MessageThread()
@@ -65,7 +65,7 @@ public class SyncService extends AbstractService {
   public MessageThread createMessageThreadWithSystem(User user, Community community) {
     if (!UserUtil.isMember(user, community.getId())) throw new BadRequestException(String.format("User isn't a member of the community. [communityId=%d]", community.getId()));
   
-    Optional<MessageThread> optional = messageThreadRepository.betweenUsers(user.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
+    Optional<MessageThread> optional = messageThreadRepository.findDirectThread(user.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
     if (optional.isPresent()) return optional.get();
     
     MessageThread messageThread = new MessageThread()

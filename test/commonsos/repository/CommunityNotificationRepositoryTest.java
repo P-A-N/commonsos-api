@@ -76,7 +76,7 @@ public class CommunityNotificationRepositoryTest extends AbstractRepositoryTest 
         .setCommunityId(id("community2"))));
 
     // execute
-    ResultList<CommunityNotification> result = repository.findByCommunityId(id("community1"), null);
+    ResultList<CommunityNotification> result = repository.searchByCommunityId(id("community1"), null);
     
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -95,14 +95,14 @@ public class CommunityNotificationRepositoryTest extends AbstractRepositoryTest 
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<CommunityNotification> result = repository.findByCommunityId(id("community1"), pagination);
+    ResultList<CommunityNotification> result = repository.searchByCommunityId(id("community1"), pagination);
     
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.findByCommunityId(id("community1"), pagination);
+    result = repository.searchByCommunityId(id("community1"), pagination);
     
     // verify
     assertThat(result.getList().size()).isEqualTo(2);

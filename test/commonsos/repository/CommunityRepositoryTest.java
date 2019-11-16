@@ -164,7 +164,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     });
 
     // execute
-    ResultList<Community> result = repository.list(null);
+    ResultList<Community> result = repository.searchAll(null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
@@ -187,7 +187,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.DESC);
-    ResultList<Community> result = repository.list(pagination);
+    ResultList<Community> result = repository.searchAll(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
@@ -197,7 +197,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     pagination.setPage(1);
-    result = repository.list(pagination);
+    result = repository.searchAll(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -218,7 +218,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     });
 
     // execute
-    ResultList<Community> result = repository.listPublic(null);
+    ResultList<Community> result = repository.searchPublic(null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -241,14 +241,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Community> result = repository.listPublic(pagination);
+    ResultList<Community> result = repository.searchPublic(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listPublic(pagination);
+    result = repository.searchPublic(pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -267,7 +267,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     });
 
     // execute
-    ResultList<Community> result = repository.listPublic("foo", null);
+    ResultList<Community> result = repository.searchPublic("foo", null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -286,7 +286,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     });
 
     // execute
-    ResultList<Community> result = repository.listPublic("フー", null);
+    ResultList<Community> result = repository.searchPublic("フー", null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -294,7 +294,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getName()).isEqualTo("コミュニティ　フー　バー");
     
     // execute
-    result = repository.listPublic("🍺", null); // 4 byte code
+    result = repository.searchPublic("🍺", null); // 4 byte code
 
     // verify
     assertThat(result.getList().size()).isEqualTo(1);
@@ -312,14 +312,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     //execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<Community> result = repository.listPublic("community", pagination);
+    ResultList<Community> result = repository.searchPublic("community", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listPublic("community", pagination);
+    result = repository.searchPublic("community", pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -342,7 +342,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     // execute
-    ResultList<CommunityUser> result = repository.listPublic(user1.getCommunityUserList(), null);
+    ResultList<CommunityUser> result = repository.searchPublic(user1.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -350,7 +350,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getCommunity().getName()).isEqualTo("community2");
 
     // execute
-    result = repository.listPublic(user2.getCommunityUserList(), null);
+    result = repository.searchPublic(user2.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
@@ -373,14 +373,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<CommunityUser> result = repository.listPublic(user1.getCommunityUserList(), pagination);
+    ResultList<CommunityUser> result = repository.searchPublic(user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listPublic(user1.getCommunityUserList(), pagination);
+    result = repository.searchPublic(user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -405,7 +405,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
 
     // execute
-    ResultList<CommunityUser> result = repository.listPublic("com", user1.getCommunityUserList(), null);
+    ResultList<CommunityUser> result = repository.searchPublic("com", user1.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);
@@ -413,7 +413,7 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().get(1).getCommunity().getName()).isEqualTo("community2");
 
     // execute
-    result = repository.listPublic("com", user2.getCommunityUserList(), null);
+    result = repository.searchPublic("com", user2.getCommunityUserList(), null);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(0);
@@ -438,14 +438,14 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
 
     // execute
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(3).setSort(SortType.ASC);
-    ResultList<CommunityUser> result = repository.listPublic("com", user1.getCommunityUserList(), pagination);
+    ResultList<CommunityUser> result = repository.searchPublic("com", user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(3);
 
     // execute
     pagination.setPage(1);
-    result = repository.listPublic("com", user1.getCommunityUserList(), pagination);
+    result = repository.searchPublic("com", user1.getCommunityUserList(), pagination);
 
     // verify
     assertThat(result.getList().size()).isEqualTo(2);

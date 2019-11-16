@@ -35,7 +35,7 @@ public class CommunityNotificationRepository extends Repository {
     return Optional.of(result.get(0));
   }
 
-  public ResultList<CommunityNotification> findByCommunityId(Long communityId, PaginationCommand pagination) {
+  public ResultList<CommunityNotification> searchByCommunityId(Long communityId, PaginationCommand pagination) {
     TypedQuery<CommunityNotification> query = em().createQuery(
         "FROM CommunityNotification" +
         " WHERE communityId = :communityId" +

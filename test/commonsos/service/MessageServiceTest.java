@@ -146,7 +146,7 @@ public class MessageServiceTest {
         new MessageThreadParty().setUser(new User().setId(id("user3_v_g")))
         ));
 
-    when(messageRepository.lastMessage(any())).thenReturn(Optional.empty());
+    when(messageRepository.findLastMessage(any())).thenReturn(Optional.empty());
 
     // execute
     MessageThreadView result = service.view(user, thread);
@@ -172,7 +172,7 @@ public class MessageServiceTest {
         new MessageThreadParty().setUser(new User().setId(id("user2_v_b_u")))
         ));
 
-    when(messageRepository.lastMessage(any())).thenReturn(Optional.empty());
+    when(messageRepository.findLastMessage(any())).thenReturn(Optional.empty());
 
     // execute
     MessageThreadView result = service.view(user, thread);

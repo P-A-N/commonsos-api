@@ -45,7 +45,7 @@ public class AdminRepository extends Repository {
     return findById(id).orElseThrow(AdminNotFoundException::new);
   }
 
-  public ResultList<Admin> findByCommunityId(Long communityId, PaginationCommand pagination) {
+  public ResultList<Admin> searchByCommunityId(Long communityId, PaginationCommand pagination) {
     String sql = "FROM Admin WHERE community.id = :communityId AND deleted IS FALSE ORDER BY id";
     TypedQuery<Admin> query = em().createQuery(sql, Admin.class)
         .setParameter("communityId", communityId);
@@ -55,7 +55,7 @@ public class AdminRepository extends Repository {
     return resultList;
   }
 
-  public ResultList<Admin> findByCommunityIdAndRoleId(Long communityId, Long roleId, PaginationCommand pagination) {
+  public ResultList<Admin> searchByCommunityIdAndRoleId(Long communityId, Long roleId, PaginationCommand pagination) {
     StringBuilder sql = new StringBuilder();
     sql.append("FROM Admin WHERE role.id = :roleId AND deleted IS FALSE ");
     if (SEARCH_NON_COMMUNITY.equals(communityId)) {

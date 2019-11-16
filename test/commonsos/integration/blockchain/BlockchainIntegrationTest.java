@@ -9,11 +9,14 @@ import static commonsos.repository.entity.WalletType.MAIN;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +55,6 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     community1 = createCommunity("community1", "c1", "community1");
     community2 = createCommunity("community2", "c2", "community2");
     waitUntilCommunityCreated();
-    // TODO
-    updateTokenName(community1, "hogehoge");
-    waitUntilUpdateTokenName(community1, "hogehoge");
-    
     waitUntilAllowedFromFeeWallet(community1);
     waitUntilAllowedFromFeeWallet(community2);
     checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
@@ -122,7 +121,11 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilEthTransactionCompleted();
     checkEthBalanceOfCommunity(community1, greaterThan(1F));
     
-    // redistribution
+    // update token name
+    updateTokenName(community1, "communit1_updated");
+    waitUntilUpdateTokenName(community1, "communit1_updated");
+    
+    // redistribution batch
     createRedistribution(community1, true, null, "20");
     createRedistribution(community1, false, user1, "20");
     createRedistribution(community2, true, null, "30");
@@ -135,6 +138,11 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalanceOfUser(user2, community2, equalTo(200.3F)); // +0.3
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.5F)); // -0.4
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.8F)); // -1.2
+
+    // create eth balance history batch
+    createEthBalanceHistory();
+    checkEthBalanceHistoryOfCommunity(community1, greaterThan(0.5F));
+    checkEthBalanceHistoryOfCommunity(community2, greaterThan(0.5F));
   }
 
   private Community createCommunity(
@@ -259,6 +267,17 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("redistribution completed."));
   }
 
+  private void createEthBalanceHistory() {
+    log.info(String.format("createEthBalanceHistory started."));
+
+    // create EthBalanceHistory
+    given()
+      .when().post("/batch/createEthBalanceHistory")
+      .then().statusCode(200);
+    
+    log.info(String.format("createEthBalanceHistory completed."));
+  }
+
   private void transferTokenFromAdmin(Admin admin, User to, WalletType walletType, double amount) {
     sessionId = loginAdmin(admin.getEmailAddress(), "passpass");
 
@@ -354,6 +373,19 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .when().get("/admin/transactions/eth/balance?communityId={id}", com.getId())
       .then().statusCode(200)
       .body("balance", expect);
+  }
+
+  private void checkEthBalanceHistoryOfCommunity(Community com, Matcher<?> expect) {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/transactions/eth/balance/histories?communityId={comId}", com.getId())
+      .then().statusCode(200)
+      .body("balanceList.baseDate", contains(today))
+      .body("balanceList.balance", contains(expect));
   }
   
   private void waitUntilCommunityCreated() throws Exception {

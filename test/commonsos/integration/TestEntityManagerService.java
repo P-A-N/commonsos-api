@@ -34,6 +34,7 @@ public class TestEntityManagerService extends EntityManagerService {
       "community_users",
       "community_notifications",
       "redistributions",
+      "eth_balance_history",
       "temporary_community_users",
       "temporary_users",
       "temporary_email_address",
@@ -51,6 +52,7 @@ public class TestEntityManagerService extends EntityManagerService {
       + "community_users, "
       + "community_notifications, "
       + "redistributions, "
+      + "eth_balance_history, "
       + "ads, "
       + "messages, "
       + "message_threads, "

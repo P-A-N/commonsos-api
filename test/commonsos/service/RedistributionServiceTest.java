@@ -47,9 +47,9 @@ public class RedistributionServiceTest {
     User com1User3 = new User().setId(id("com1User3")).setCommunityUserList(asList(new CommunityUser().setCommunity(com1)));
     Redistribution com1Red1 = new Redistribution().setAll(true).setUser(null).setRate(new BigDecimal("1"));
     Redistribution com1Red2 = new Redistribution().setAll(false).setUser(com1User1).setRate(new BigDecimal("1"));
-    when(communityRepository.listPublic(any())).thenReturn(new ResultList<Community>().setList(asList(com1)));
+    when(communityRepository.searchPublic(any())).thenReturn(new ResultList<Community>().setList(asList(com1)));
     when(userRepository.search(any(), any(), any())).thenReturn(new ResultList<User>().setList(asList(com1User1, com1User2, com1User3)));
-    when(repository.findByCommunityId(any(), any())).thenReturn(new ResultList<Redistribution>().setList(asList(com1Red1, com1Red2)));
+    when(repository.searchByCommunityId(any(), any())).thenReturn(new ResultList<Redistribution>().setList(asList(com1Red1, com1Red2)));
     
     // execute
     RedistributionBatchCommand command = service.createRedistributionCommand();

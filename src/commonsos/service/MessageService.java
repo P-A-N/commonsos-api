@@ -67,7 +67,7 @@ public class MessageService extends AbstractService {
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.byCreaterAndAdId(user.getId(), adId).orElseGet(() -> syncService.createMessageThreadForAd(user, adId));
+    MessageThread thread = messageThreadRepository.findByCreaterAndAdId(user.getId(), adId).orElseGet(() -> syncService.createMessageThreadForAd(user, adId));
     return view(user, thread);
   }
 
@@ -75,7 +75,7 @@ public class MessageService extends AbstractService {
     User otherUser = userRepository.findStrictById(command.getOtherUserId());
     Community community = communityRepository.findPublicStrictById(command.getCommunityId());
     
-    MessageThread thread = messageThreadRepository.betweenUsers(user.getId(), command.getOtherUserId(), command.getCommunityId())
+    MessageThread thread = messageThreadRepository.findDirectThread(user.getId(), command.getOtherUserId(), command.getCommunityId())
       .orElseGet(() -> syncService.createMessageThreadWithUser(user, otherUser, community));
     return view(user, thread);
   }
@@ -170,7 +170,7 @@ public class MessageService extends AbstractService {
       User createdUser = userRepository.findStrictById(ad.getCreatedUserId());
       adView = AdUtil.viewForApp(ad, createdUser, user);
     }
-    MessageView lastMessage = messageRepository.lastMessage(thread.getId()).map(this::view).orElse(null);
+    MessageView lastMessage = messageRepository.findLastMessage(thread.getId()).map(this::view).orElse(null);
 
     return new MessageThreadView()
       .setId(thread.getId())
@@ -200,7 +200,7 @@ public class MessageService extends AbstractService {
     
     List<Long> unreadMessageThreadIds = messageThreadRepository.unreadMessageThreadIds(user, command.getCommunityId());
     
-    ResultList<MessageThread> result = messageThreadRepository.listByUser(user, command.getCommunityId(), command.getMemberFilter(), command.getMessageFilter(), null);
+    ResultList<MessageThread> result = messageThreadRepository.searchByUser(user, command.getCommunityId(), command.getMemberFilter(), command.getMessageFilter(), null);
     
     List<MessageThreadView> threadViews = result.getList().stream()
       .map(thread -> view(user, thread))
@@ -259,7 +259,7 @@ public class MessageService extends AbstractService {
 
     markVisited(user, thread);
 
-    ResultList<Message> result = messageRepository.listByThread(threadId, pagination);
+    ResultList<Message> result = messageRepository.searchByThreadId(threadId, pagination);
 
     MessageListView listView = new MessageListView();
     listView.setMessageList(result.getList().stream().map(this::view).collect(toList()));

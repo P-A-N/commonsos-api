@@ -64,7 +64,7 @@ public class AdminService extends AbstractService {
     // validate role
     if (!AdminUtil.isSeeableAdmin(admin, communityId, roleId)) throw new ForbiddenException();
     
-    ResultList<Admin> result = adminRepository.findByCommunityIdAndRoleId(communityId, roleId, pagination);
+    ResultList<Admin> result = adminRepository.searchByCommunityIdAndRoleId(communityId, roleId, pagination);
 
     AdminListView listView = new AdminListView();
     listView.setAdminList(result.getList().stream().map(AdminUtil::view).collect(toList()));

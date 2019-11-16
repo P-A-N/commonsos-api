@@ -67,18 +67,18 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     Admin adm4 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm4").setCommunity(com2)));
 
     // execute & verify
-    List<Admin> result = repository.findByCommunityId(com1.getId(), null).getList();
+    List<Admin> result = repository.searchByCommunityId(com1.getId(), null).getList();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getId()).isEqualTo(adm1.getId());
     assertThat(result.get(1).getId()).isEqualTo(adm2.getId());
 
     // execute & verify
-    result = repository.findByCommunityId(com2.getId(), null).getList();
+    result = repository.searchByCommunityId(com2.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(adm4.getId());
 
     // execute & verify
-    result = repository.findByCommunityId(com3.getId(), null).getList();
+    result = repository.searchByCommunityId(com3.getId(), null).getList();
     assertThat(result.size()).isEqualTo(0);
   }
 
@@ -101,12 +101,12 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
-    List<Admin> result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    List<Admin> result = repository.searchByCommunityId(com1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(10);
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.findByCommunityId(com1.getId(), pagination).getList();
+    result = repository.searchByCommunityId(com1.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(2);
   }
 
@@ -126,54 +126,54 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     Admin teller4 = inTransaction(() -> repository.create(new Admin().setRole(TELLER).setEmailAddress("teller4")));
 
     // execute & verify
-    List<Admin> result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, NCL.getId(), null).getList();
+    List<Admin> result = repository.searchByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, NCL.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(ncl.getId());
 
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(null, NCL.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(null, NCL.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(ncl.getId());
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getId()).isEqualTo(comAd1.getId());
     assertThat(result.get(1).getId()).isEqualTo(comAd2.getId());
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(com2.getId(), COMMUNITY_ADMIN.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(com2.getId(), COMMUNITY_ADMIN.getId(), null).getList();
     assertThat(result.size()).isEqualTo(0);
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, COMMUNITY_ADMIN.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, COMMUNITY_ADMIN.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(comAd4.getId());
 
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(null, COMMUNITY_ADMIN.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(null, COMMUNITY_ADMIN.getId(), null).getList();
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get(0).getId()).isEqualTo(comAd1.getId());
     assertThat(result.get(1).getId()).isEqualTo(comAd2.getId());
     assertThat(result.get(2).getId()).isEqualTo(comAd4.getId());
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(com1.getId(), TELLER.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(com1.getId(), TELLER.getId(), null).getList();
     assertThat(result.size()).isEqualTo(2);
     assertThat(result.get(0).getId()).isEqualTo(teller1.getId());
     assertThat(result.get(1).getId()).isEqualTo(teller2.getId());
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(com2.getId(), TELLER.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(com2.getId(), TELLER.getId(), null).getList();
     assertThat(result.size()).isEqualTo(0);
     
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, TELLER.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(SEARCH_NON_COMMUNITY, TELLER.getId(), null).getList();
     assertThat(result.size()).isEqualTo(1);
     assertThat(result.get(0).getId()).isEqualTo(teller4.getId());
 
     // execute & verify
-    result = repository.findByCommunityIdAndRoleId(null, TELLER.getId(), null).getList();
+    result = repository.searchByCommunityIdAndRoleId(null, TELLER.getId(), null).getList();
     assertThat(result.size()).isEqualTo(3);
     assertThat(result.get(0).getId()).isEqualTo(teller1.getId());
     assertThat(result.get(1).getId()).isEqualTo(teller2.getId());
@@ -199,12 +199,12 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
 
     // execute & verify
     PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
-    List<Admin> result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
+    List<Admin> result = repository.searchByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(10);
 
     // execute & verify
     pagination.setPage(1);
-    result = repository.findByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
+    result = repository.searchByCommunityIdAndRoleId(com1.getId(), COMMUNITY_ADMIN.getId(), pagination).getList();
     assertThat(result.size()).isEqualTo(2);
   }
 
