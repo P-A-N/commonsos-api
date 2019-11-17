@@ -375,7 +375,7 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .body("balance", expect);
   }
 
-  private void checkEthBalanceHistoryOfCommunity(Community com, Matcher<?> expect) {
+  private void checkEthBalanceHistoryOfCommunity(Community com, Matcher<Float> expect) {
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
     
     String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));

@@ -1,2 +1,2 @@
 5 0 * * * /home/commonsos/commonsos-api/batch/redistributionBatch.sh >> /home/commonsos/logs/redistributionBatch.log
-5 0 * * * /home/commonsos/commonsos-api/batch/createEthBalanceHistoryBatch.sh >> /home/commonsos/logs/createEthBalanceHistoryBatch.log
+50 23 * * * /home/commonsos/commonsos-api/batch/createEthBalanceHistoryBatch.sh >> /home/commonsos/logs/createEthBalanceHistoryBatch.log
