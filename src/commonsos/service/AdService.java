@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import commonsos.command.PaginationCommand;
 import commonsos.command.UploadPhotoCommand;
+import commonsos.command.admin.UpdateAdByAdminCommand;
+import commonsos.command.admin.UpdateAdPublishStatusByAdminCommand;
 import commonsos.command.app.CreateAdCommand;
 import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.BadRequestException;
@@ -128,6 +130,35 @@ public class AdService extends AbstractService {
     return adRepository.update(ad);
   }
 
+  public Ad updateAdByAdmin(Admin admin, UpdateAdByAdminCommand command) {
+    validateCommand(command);
+    Ad targetAd = adRepository.findStrictById(command.getId());
+    
+    if (!AdminUtil.isUpdatableAd(admin, targetAd)) throw new ForbiddenException();
+    if (transactionRepository.hasPaid(targetAd)) throw new BadRequestException();
+    
+    adRepository.lockForUpdate(targetAd);
+    targetAd.setTitle(command.getTitle())
+      .setStatus(command.getStatus())
+      .setDescription(command.getDescription())
+      .setPoints(command.getPoints())
+      .setLocation(command.getLocation())
+      .setType(command.getType());
+    return adRepository.update(targetAd);
+  }
+
+  public Ad updateAdPublishStatusByAdmin(Admin admin, UpdateAdPublishStatusByAdminCommand command) {
+    validateCommand(command);
+    Ad targetAd = adRepository.findStrictById(command.getId());
+    
+    if (!AdminUtil.isUpdatableAd(admin, targetAd)) throw new ForbiddenException();
+    if (transactionRepository.hasPaid(targetAd)) throw new BadRequestException();
+    
+    adRepository.lockForUpdate(targetAd);
+    targetAd.setPublishStatus(command.getPublishStatus());
+    return adRepository.update(targetAd);
+  }
+
   public String updatePhoto(User user, UploadPhotoCommand command, Long adId) {
     Ad ad = adRepository.findStrictById(adId);
     if (!ad.getCreatedUserId().equals(user.getId())) throw new ForbiddenException();
@@ -159,5 +190,15 @@ public class AdService extends AbstractService {
     if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
     if (command.getPoints() == null) throw new BadRequestException("points is null");
     if (command.getType() == null) throw new BadRequestException("type is null");
+  }
+
+  private void validateCommand(UpdateAdByAdminCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw new BadRequestException("title is empty");
+    if (command.getPoints() == null) throw new BadRequestException("points is null");
+    if (command.getType() == null) throw new BadRequestException("type is null");
+  }
+
+  private void validateCommand(UpdateAdPublishStatusByAdminCommand command) {
+    if (command.getPublishStatus() == null) throw new BadRequestException("publishStatus is null");
   }
 }
