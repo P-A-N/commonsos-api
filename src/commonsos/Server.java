@@ -29,6 +29,7 @@ import commonsos.controller.admin.admin.SearchAdminsController;
 import commonsos.controller.admin.admin.UpdateAdminController;
 import commonsos.controller.admin.admin.UpdateAdminEmailCompleteController;
 import commonsos.controller.admin.admin.UpdateAdminEmailTemporaryController;
+import commonsos.controller.admin.admin.UpdateAdminPasswordController;
 import commonsos.controller.admin.admin.UpdateAdminPhotoController;
 import commonsos.controller.admin.ads.GetAdByAdminController;
 import commonsos.controller.admin.ads.SearchAdsByAdminController;
@@ -359,6 +360,7 @@ public class Server {
     post("/admin/admins/:id/photo", injector.getInstance(UpdateAdminPhotoController.class), toJson);
     post("/admin/admins/:id/emailaddress", injector.getInstance(UpdateAdminEmailTemporaryController.class), toJson);
     post("/admin/admins/:id/emailaddress/:accessId", injector.getInstance(UpdateAdminEmailCompleteController.class), toJson);
+    post("/admin/admins/:id/password", injector.getInstance(UpdateAdminPasswordController.class), toJson);
     post("/admin/admins/:id/delete", injector.getInstance(DeleteAdminController.class), toJson);
 
     // app users

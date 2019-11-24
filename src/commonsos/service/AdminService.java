@@ -16,6 +16,7 @@ import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.AdminLoginCommand;
 import commonsos.command.admin.CreateAdminTemporaryCommand;
 import commonsos.command.admin.UpdateAdminCommand;
+import commonsos.command.admin.UpdateAdminPasswordCommand;
 import commonsos.exception.AuthenticationException;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -140,6 +141,19 @@ public class AdminService extends AbstractService {
     adminRepository.update(admin);
     
     return admin;
+  }
+
+  public Admin updateAdminPassword(Admin admin, UpdateAdminPasswordCommand command) {
+    Admin target = adminRepository.findStrictById(command.getAdminId());
+    if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getAdminId()));
+    ValidateUtil.validatePassword(command.getNewPassword());
+
+    adminRepository.lockForUpdate(target);
+    target
+      .setPasswordHash(cryptoService.encryptoPassword(command.getNewPassword()));
+    adminRepository.update(target);
+
+    return target;
   }
 
   public Admin updateLoggedinAt(Admin admin) {

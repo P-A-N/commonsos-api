@@ -83,7 +83,7 @@ public class UpdateAdTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/ads/{id}", ad1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
     
     // update private ad
     given()

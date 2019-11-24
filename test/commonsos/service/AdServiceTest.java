@@ -17,7 +17,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import commonsos.command.app.UpdateAdCommand;
-import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
@@ -61,7 +61,7 @@ public class AdServiceTest {
     doReturn(new Ad().setCreatedUserId(id("creator"))).when(service).getAd(any());
     when(transactionRepository.hasPaid(any())).thenReturn(true);
 
-    assertThrows(BadRequestException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
+    assertThrows(DisplayableException.class, () -> service.updateAd(user, new UpdateAdCommand().setTitle("test").setPoints(ONE).setType(AdType.GIVE)));
   }
 
   @Test

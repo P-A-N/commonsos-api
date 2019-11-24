@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.CreateRedistributionCommand;
+import commonsos.command.admin.UpdateRedistributionCommand;
 import commonsos.command.batch.CreateTokenTransactionForRedistributionCommand;
 import commonsos.command.batch.RedistributionBatchCommand;
 import commonsos.exception.BadRequestException;
@@ -37,34 +38,67 @@ public class RedistributionService extends AbstractService {
   @Inject private RedistributionRepository repository;
   @Inject private CommunityRepository communityRepository;
   @Inject private UserRepository userRepository;
+  @Inject private DeleteService deleteService;
 
   public Redistribution createRedistribution(Admin admin, CreateRedistributionCommand command) {
     // validate community
     Community community = communityRepository.findStrictById(command.getCommunityId());
     // validate role
     if (!RedistributionUtil.isEditable(admin, community.getId())) throw new ForbiddenException();
+    
     // validate user
     User user = null;
     if (command.getUserId() != null) {
       user = userRepository.findStrictById(command.getUserId());
     }
-    if (user == null && !command.isAll()) throw new BadRequestException("user is not specified");
-    if (user != null && !UserUtil.isMember(user, community)) throw new BadRequestException("user is not a member of community");
-    // validate rate
-    if (command.getRedistributionRate() == null) throw new BadRequestException("redistritution rate is required");
-    BigDecimal rate = command.getRedistributionRate();
-    BigDecimal currentRate = repository.sumByCommunityId(command.getCommunityId());
-    if (rate.compareTo(BigDecimal.ZERO) <= 0) throw new BadRequestException(String.format("Rate is less or equal to 0 [rate=%f]", rate));
-    if (currentRate.add(rate).compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Sum of rate is begger than 100 [rate=%f]", rate));
+
+    validateRedistribution(community, command.isAll(), user, command.getRedistributionRate(), null);
     
     // create redistribution
     Redistribution redistribution = new Redistribution()
         .setCommunity(community)
         .setAll(command.isAll())
         .setUser(command.isAll() ? null : user)
-        .setRate(rate);
+        .setRate(command.getRedistributionRate());
     
     return repository.create(redistribution);
+  }
+  
+  public Redistribution updateRedistribution(Admin admin, UpdateRedistributionCommand command) {
+    // validate role
+    Community community = communityRepository.findStrictById(command.getCommunityId());
+    if (!RedistributionUtil.isEditable(admin, community.getId())) throw new ForbiddenException();
+    
+    Redistribution redistribution = repository.findStrictById(command.getRedistributionId());
+    if (!community.equals(redistribution.getCommunity())) throw new BadRequestException("community doesn't match");
+
+    User user = null;
+    if (command.getUserId() != null) {
+      user = userRepository.findStrictById(command.getUserId());
+    }
+    
+    validateRedistribution(community, command.isAll(), user, command.getRedistributionRate(), redistribution.getRate());
+    
+    // update redistribution
+    repository.lockForUpdate(redistribution);
+    redistribution
+        .setAll(command.isAll())
+        .setUser(command.isAll() ? null : user)
+        .setRate(command.getRedistributionRate());
+    repository.update(redistribution);
+    
+    return redistribution;
+  }
+  
+  public void deleteRedistribution(Admin admin, Long communityId, Long redistributionId) {
+    // validate role
+    Community community = communityRepository.findStrictById(communityId);
+    if (!RedistributionUtil.isEditable(admin, community.getId())) throw new ForbiddenException();
+    
+    Redistribution redistribution = repository.findStrictById(redistributionId);
+    if (!community.equals(redistribution.getCommunity())) throw new BadRequestException("community doesn't match");
+    
+    deleteService.deleteRedistribution(redistribution);
   }
   
   public Redistribution getRedistribution(Admin admin, Long redistributionId, Long communityId) {
@@ -126,5 +160,19 @@ public class RedistributionService extends AbstractService {
     RedistributionBatchCommand command = new RedistributionBatchCommand()
         .setCommandMap(commandMap);
     return command;
+  }
+  
+  private void validateRedistribution(Community community, boolean isAll, User user, BigDecimal newRate, BigDecimal currentRate) {
+    // validate user
+    if (user == null && !isAll) throw new BadRequestException("user is not specified");
+    if (user != null && !UserUtil.isMember(user, community)) throw new BadRequestException("user is not a member of community");
+    // validate rate
+    if (newRate == null) throw new BadRequestException("redistritution rate is required");
+    
+    BigDecimal totalRate = repository.sumByCommunityId(community.getId());
+    if (currentRate != null) totalRate = totalRate.subtract(currentRate);
+    
+    if (newRate.compareTo(BigDecimal.ZERO) <= 0) throw new BadRequestException(String.format("Rate is less or equal to 0 [rate=%f]", newRate));
+    if (totalRate.add(newRate).compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Sum of rate is begger than 100 [rate=%f]", newRate));
   }
 }

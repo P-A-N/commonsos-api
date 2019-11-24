@@ -15,6 +15,7 @@ import commonsos.command.admin.UpdateAdPublishStatusByAdminCommand;
 import commonsos.command.app.CreateAdCommand;
 import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.CommunityRepository;
@@ -119,7 +120,7 @@ public class AdService extends AbstractService {
     
     Ad ad = getAd(command.getId());
     if (!ad.getCreatedUserId().equals(operator.getId())) throw new ForbiddenException();
-    if (transactionRepository.hasPaid(ad)) throw new BadRequestException();
+    if (transactionRepository.hasPaid(ad)) throw new DisplayableException("error.hasPaid");
     
     adRepository.lockForUpdate(ad);
     ad.setTitle(command.getTitle())
@@ -135,7 +136,7 @@ public class AdService extends AbstractService {
     Ad targetAd = adRepository.findStrictById(command.getId());
     
     if (!AdminUtil.isUpdatableAd(admin, targetAd)) throw new ForbiddenException();
-    if (transactionRepository.hasPaid(targetAd)) throw new BadRequestException();
+    if (transactionRepository.hasPaid(targetAd)) throw new DisplayableException("error.hasPaid");
     
     adRepository.lockForUpdate(targetAd);
     targetAd.setTitle(command.getTitle())
@@ -152,7 +153,7 @@ public class AdService extends AbstractService {
     Ad targetAd = adRepository.findStrictById(command.getId());
     
     if (!AdminUtil.isUpdatableAd(admin, targetAd)) throw new ForbiddenException();
-    if (transactionRepository.hasPaid(targetAd)) throw new BadRequestException();
+    if (transactionRepository.hasPaid(targetAd)) throw new DisplayableException("error.hasPaid");
     
     adRepository.lockForUpdate(targetAd);
     targetAd.setPublishStatus(command.getPublishStatus());

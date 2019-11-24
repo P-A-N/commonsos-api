@@ -75,7 +75,7 @@ public class UpdateAdPublishStatusTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/ads/{id}/publishStatus", ad1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
     
     // update private ad
     requestParam = getRequestParam("PUBLIC");
