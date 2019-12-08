@@ -20,7 +20,7 @@ public class SearchCommunityFromWPController extends AbstractWordpressController
     
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    CommunityListView view = service.list(filter, paginationCommand);
+    CommunityListView view = service.search(filter, paginationCommand);
     return view;
   }
 }

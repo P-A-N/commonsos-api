@@ -29,6 +29,7 @@ public class UpdateAdByAdminController extends AfterAdminLoginController {
   @Override
   protected AdView handleAfterLogin(Admin admin, Request request, Response response) {
     UpdateAdByAdminCommand command = gson.fromJson(request.body(), UpdateAdByAdminCommand.class);
+    if (command == null) command = new UpdateAdByAdminCommand();
     command.setId(RequestUtil.getPathParamLong(request, "id"));
     
     Ad ad = adService.updateAdByAdmin(admin, command);

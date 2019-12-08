@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -57,10 +58,15 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilCommunityCreated();
     waitUntilAllowedFromFeeWallet(community1);
     waitUntilAllowedFromFeeWallet(community2);
-    checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
+    checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(0));
-    checkTokenBalanceOfCommunity(community2, MAIN, greaterThan(BigInteger.valueOf(10 * 6)));
+    checkTokenBalanceOfCommunity(community2, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(0));
+    
+    // update total supply
+    updateTotalSupply(community1, Math.pow(10, 6));
+    waitUntilUpdateTotalSupply(community1, Math.pow(10, 6));
+    checkTokenBalanceOfCommunity(community1, MAIN, equalTo((int) Math.pow(10, 6)));
     
     com1Admin = create(new Admin().setEmailAddress("com1Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community1));
     com2Admin = create(new Admin().setEmailAddress("com2Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community2));
@@ -139,6 +145,11 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.5F)); // -0.4
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.8F)); // -1.2
 
+    // update total supply
+    updateTotalSupply(community1, Math.pow(10, 7));
+    waitUntilUpdateTotalSupply(community1, Math.pow(10, 7));
+    checkTokenBalanceOfCommunity(community1, MAIN, equalTo((int) (Math.pow(10, 7) - 899.4d - 100.1d - 0.5d)));
+    
     // create eth balance history batch
     createEthBalanceHistory();
     checkEthBalanceHistoryOfCommunity(community1, greaterThan(0.5F));
@@ -236,6 +247,24 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .then().statusCode(200);
     
     log.info(String.format("creating redistribution completed. [communityId=%d]", com.getId()));
+  }
+
+  private void updateTotalSupply(Community com, Double newTotalSupply) {
+    log.info(String.format("updating community total supply started. [communityId=%d, newTokenName=%f]", com.getId(), newTotalSupply));
+
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    Map<String, Object> requestParam = new HashMap<>();
+    requestParam.put("totalSupply", newTotalSupply);
+
+    // update total supply
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/communities/{id}/totalSupply", com.getId())
+      .then().statusCode(200);
+
+    log.info(String.format("updating community total supply completed. [communityId=%d, newTokenName=%f]", com.getId(), newTotalSupply));
   }
 
   private void updateTokenName(Community com, String newTokenName) {
@@ -459,6 +488,27 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       Thread.sleep(1000);
     }
     throw new RuntimeException("allowence didn't finish in 10 minutes.");
+  }
+
+  private void waitUntilUpdateTotalSupply(Community com, Double newTotalSupply) throws Exception {
+    log.info(String.format("waiting for total supply update to complete."));
+    
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    for (int i = 0; i < (60*10); i++) {
+      String currentTotalSupply = given()
+            .cookie("JSESSIONID", sessionId)
+            .when().get("/admin/communities/{id}", com.getId())
+            .then().statusCode(200)
+            .extract().path("totalSupply").toString();
+      if (BigDecimal.valueOf(newTotalSupply).compareTo(new BigDecimal(currentTotalSupply)) == 0) {
+        log.info(String.format("total supply update completed. total suppry=%s", currentTotalSupply));
+        return;
+      }
+      Thread.sleep(1000);
+    }
+    throw new RuntimeException("total supply update didn't finish in 10 minutes.");
+    
   }
 
   private void waitUntilUpdateTokenName(Community com, String newTokenName) throws Exception {

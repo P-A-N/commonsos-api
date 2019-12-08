@@ -31,6 +31,7 @@ import commonsos.controller.admin.admin.UpdateAdminEmailCompleteController;
 import commonsos.controller.admin.admin.UpdateAdminEmailTemporaryController;
 import commonsos.controller.admin.admin.UpdateAdminPasswordController;
 import commonsos.controller.admin.admin.UpdateAdminPhotoController;
+import commonsos.controller.admin.ads.DeleteAdByAdminController;
 import commonsos.controller.admin.ads.GetAdByAdminController;
 import commonsos.controller.admin.ads.SearchAdsByAdminController;
 import commonsos.controller.admin.ads.UpdateAdByAdminController;
@@ -377,6 +378,7 @@ public class Server {
     get("/admin/ads/:id", injector.getInstance(GetAdByAdminController.class), toJson);
     post("/admin/ads/:id", injector.getInstance(UpdateAdByAdminController.class), toJson);
     post("/admin/ads/:id/publishStatus", injector.getInstance(UpdateAdPublishStatusByAdminController.class), toJson);
+    post("/admin/ads/:id/delete", injector.getInstance(DeleteAdByAdminController.class), toJson);
     get("/admin/ads", injector.getInstance(SearchAdsByAdminController.class), toJson);
 
     // transactions

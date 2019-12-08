@@ -61,6 +61,7 @@ public class BlockchainService extends AbstractService {
   public static final BigInteger TOKEN_TRANSFER_FROM_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_APPROVE_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_SET_NAME_GAS_LIMIT = new BigInteger("90000");
+  public static final BigInteger TOKEN_MINT_BURN_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("4700000");
   public static final BigInteger GAS_PRICE = new BigInteger("18000000000");
 
@@ -545,6 +546,27 @@ public class BlockchainService extends AbstractService {
     
     String hash = receipt.getTransactionHash();
     log.info(format("Update token name done. [hash=%s]", hash));
+    
+    return hash;
+  }
+  
+  public String updateTotalSupply(Community community, BigDecimal absAmount, boolean isBurn) {
+    BigDecimal currentTotalSupply = totalSupply(community.getTokenContractAddress());
+    log.info(format("Updating total supply. [communityId=%d, currentTotalSupply=%f, absAmount=%f, isBurn=%b]", community.getId(), currentTotalSupply, absAmount, isBurn));
+
+    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Token token = loadToken(
+        credentials,
+        community.getTokenContractAddress(),
+        GAS_PRICE,
+        TOKEN_MINT_BURN_GAS_LIMIT);
+    
+    TransactionReceipt receipt = handleBlockchainException(() -> {
+      return isBurn ? token.burn(toTokensWithoutDecimals(absAmount)).send() : token.mint(toTokensWithoutDecimals(absAmount)).send();
+    });
+    
+    String hash = receipt.getTransactionHash();
+    log.info(format("Update total supply done. [hash=%s]", hash));
     
     return hash;
   }

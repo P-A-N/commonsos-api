@@ -85,8 +85,10 @@ contract Token is ERC20, Ownable {
     
     function mint(uint256 _value) public onlyOwner returns (bool _success) {
         require(balanceOf[msg.sender] + _value >= balanceOf[msg.sender]);
+        require(totalSupply + _value >= totalSupply);
         
         balanceOf[msg.sender] += _value;
+        totalSupply += _value;
         
         emit Mint(msg.sender, _value);
         
@@ -95,8 +97,10 @@ contract Token is ERC20, Ownable {
     
     function burn(uint256 _value) public onlyOwner returns (bool _success) {
         require(balanceOf[msg.sender] >= _value);
+        require(totalSupply >= _value);
         
         balanceOf[msg.sender] -= _value;
+        totalSupply -= _value;
         
         emit Burn(msg.sender, _value);
         

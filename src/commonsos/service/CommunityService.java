@@ -24,6 +24,7 @@ import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.CreateCommunityCommand;
 import commonsos.command.admin.UpdateCommunityCommand;
 import commonsos.command.admin.UpdateCommunityTokenNameCommand;
+import commonsos.command.admin.UpdateCommunityTotalSupplyCommand;
 import commonsos.command.app.UpdateCommunityNotificationCommand;
 import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
@@ -38,6 +39,7 @@ import commonsos.repository.entity.CommunityNotification;
 import commonsos.repository.entity.PublishStatus;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.User;
+import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.EthBalance;
@@ -45,13 +47,16 @@ import commonsos.service.image.ImageUploadService;
 import commonsos.service.multithread.CreateCommunityTask;
 import commonsos.service.multithread.TaskExecutorService;
 import commonsos.service.multithread.UpdateCommunityTokenNameTask;
+import commonsos.service.multithread.UpdateCommunityTotalSupplyTask;
 import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.view.CommunityListView;
 import commonsos.view.CommunityNotificationListView;
 import commonsos.view.CommunityView;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Singleton
 public class CommunityService extends AbstractService {
   public static final String WALLET_PASSWORD = "test";
@@ -63,6 +68,7 @@ public class CommunityService extends AbstractService {
   @Inject private ImageUploadService imageService;
   @Inject private BlockchainService blockchainService;
   @Inject private TaskExecutorService taskExecutorService;
+  @Inject private DeleteService deleteService;
   @Inject private Configuration config;
 
   public Community createCommunity(Admin admin, CreateCommunityCommand command) {
@@ -183,7 +189,7 @@ public class CommunityService extends AbstractService {
     return community;
   }
   
-  public CommunityListView list(String filter, PaginationCommand pagination) {
+  public CommunityListView search(String filter, PaginationCommand pagination) {
     ResultList<Community> result = StringUtils.isEmpty(filter) ? repository.searchPublic(pagination) : repository.searchPublic(filter, pagination);
 
     CommunityListView listView = new CommunityListView();
@@ -282,6 +288,32 @@ public class CommunityService extends AbstractService {
     
     return community;
   }
+
+  public Community updateTotalSupply(Admin admin, UpdateCommunityTotalSupplyCommand command) {
+    Community community = repository.findStrictById(command.getCommunityId());
+    if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
+    
+    // check executable
+    BigDecimal currentTotalSupply = blockchainService.totalSupply(community.getTokenContractAddress());
+    BigDecimal newTotalSupply = command.getTotalSupply();
+    boolean isBurn = newTotalSupply.compareTo(currentTotalSupply) < 0;
+    BigDecimal absAmount = newTotalSupply.subtract(currentTotalSupply).abs();
+    
+    if (absAmount.compareTo(BigDecimal.ZERO) == 0) {
+      log.info("there is no difference between current totalSupply and new TotalSupply. stopping the proccess.");
+      return community;
+    }
+    
+    if (isBurn) {
+      BigDecimal balanceOfMainWallet = blockchainService.getTokenBalance(community, WalletType.MAIN).getBalance();
+      if (balanceOfMainWallet.compareTo(absAmount) < 0) throw new DisplayableException("error.notEnoughFunds");
+    }
+    
+    UpdateCommunityTotalSupplyTask task = new UpdateCommunityTotalSupplyTask(community, absAmount, isBurn);
+    taskExecutorService.execute(task);
+    
+    return community;
+  }
   
   public void updateNotificationUpdateAt(UpdateCommunityNotificationCommand command) {
     Optional<CommunityNotification> optionalNotification = notificationRepository.findByWordPressId(command.getWordpressId());
@@ -302,6 +334,12 @@ public class CommunityService extends AbstractService {
 
       notificationRepository.create(notification);
     }
+  }
+  
+  public void deleteCommunity(Admin admin, Long communityId) {
+    Community community = repository.findStrictById(communityId);
+    if (!AdminUtil.isDeletableCommunity(admin)) throw new ForbiddenException();
+    deleteService.deleteCommunity(community);
   }
   
   public CommunityNotificationListView notificationList(Long communityId, PaginationCommand pagination) {

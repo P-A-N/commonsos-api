@@ -27,6 +27,8 @@ import commonsos.service.AbstractService;
 
 @Singleton
 public class ImageUploadService extends AbstractService {
+  
+  private static String DOMAIN = ".s3.amazonaws.com/";
 
   private AWSCredentials credentials;
   private AmazonS3 s3client;
@@ -50,7 +52,7 @@ public class ImageUploadService extends AbstractService {
     s3client.putObject(new PutObjectRequest(bucketName, filename, inputStream, null)
       .withMetadata(metadata())
       .withCannedAcl(CannedAccessControlList.PublicRead));
-    return "https://" + bucketName + ".s3.amazonaws.com/" + filename;
+    return "https://" + bucketName + DOMAIN + filename;
   }
   
   public String create(File file, String prefix) {
@@ -78,7 +80,7 @@ public class ImageUploadService extends AbstractService {
 
   public void delete(String url) {
     if (StringUtils.isNotBlank(url)) {
-      s3client.deleteObject(bucketName, url.substring(url.lastIndexOf('/') + 1));
+      s3client.deleteObject(bucketName, url.substring(url.lastIndexOf(DOMAIN) + DOMAIN.length()));
     }
   }
 }

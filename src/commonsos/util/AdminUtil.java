@@ -107,6 +107,12 @@ public class AdminUtil {
     return false;
   }
   
+  public static boolean isDeletableCommunity(Admin admin) {
+    Role adminRole = admin.getRole();
+    if (adminRole.equals(NCL)) return true;
+    return false;
+  }
+  
   public static boolean isSeeableAdmin(Admin admin, Admin target) {
     Role adminRole = admin.getRole();
     Role targetRole = target.getRole();
@@ -172,6 +178,10 @@ public class AdminUtil {
   
   public static boolean isUpdatableAd(Admin admin, Ad target) {
     return isSeeableAd(admin, target.getCommunityId());
+  }
+  
+  public static boolean isDeletableAd(Admin admin, Ad target) {
+    return isUpdatableAd(admin, target);
   }
   
   public static boolean isSeeableCommunity(Admin admin, Long communityId) {

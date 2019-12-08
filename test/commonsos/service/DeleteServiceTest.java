@@ -71,8 +71,8 @@ public class DeleteServiceTest {
     Ad ad = new Ad().setCreatedUserId(id("othreUser")).setCommunityId(id("community"));
     
     // execute (checking error)
-    service.deleteAdByAdmin(admin, ad);
-    assertThrows(ForbiddenException.class, () -> service.deleteAdByAdmin(user, ad));
+    service.deleteAdByAdminUser(admin, ad);
+    assertThrows(ForbiddenException.class, () -> service.deleteAdByAdminUser(user, ad));
   }
 
   @Test

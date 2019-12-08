@@ -76,7 +76,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void byAdId() {
+  public void searchByAdId() {
     // prepare
     inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user1")).setTitle("mt1_1")));
     inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt1_2")));
@@ -91,7 +91,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void byAdId_pagination() {
+  public void searchByAdId_pagination() {
     // prepare
     inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user1")).setTitle("mt1_1")));
     inTransaction(() -> repository.create(new MessageThread().setAdId(id("ad1")).setCreatedUserId(id("user2")).setTitle("mt1_2")));
@@ -133,6 +133,73 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.getList().size()).isEqualTo(2);
     assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_2");
     assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_1");
+  }
+
+  @Test
+  public void searchByCommunityId_pagination() {
+    // prepare
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_1")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_2")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_3")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_4")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_5")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_6")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_7")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_8")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_9")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_10")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_11")));
+    inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_12")));
+
+    // execute & verify
+    PaginationCommand pagination = new PaginationCommand().setPage(0).setSize(10).setSort(SortType.ASC);
+    ResultList<MessageThread> result = repository.searchByCommunityId(id("com1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(10);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_1");
+    assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_10");
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.searchByCommunityId(id("com1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_11");
+    assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_12");
+    
+    // execute & verify
+    pagination.setPage(0).setSort(SortType.DESC);
+    result = repository.searchByCommunityId(id("com1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(10);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_12");
+    assertThat(result.getList().get(9).getTitle()).isEqualTo("mt1_3");
+
+    // execute & verify
+    pagination.setPage(1);
+    result = repository.searchByCommunityId(id("com1"), pagination);
+    assertThat(result.getList().size()).isEqualTo(2);
+    assertThat(result.getList().get(0).getTitle()).isEqualTo("mt1_2");
+    assertThat(result.getList().get(1).getTitle()).isEqualTo("mt1_1");
+  }
+
+  @Test
+  public void searchByCommunityId() {
+    // prepare
+    MessageThread mt1_1 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_1")));
+    MessageThread mt1_2 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_2")));
+    MessageThread mt1_3 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_3")));
+    MessageThread mt1_4 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com1")).setTitle("mt1_4").setDeleted(true)));
+    MessageThread mt2_1 = inTransaction(() -> repository.create(new MessageThread().setCommunityId(id("com2")).setTitle("mt2_1")));
+
+    // execute & verify
+    ResultList<MessageThread> result = repository.searchByCommunityId(id("com1"), null);
+    assertThat(result.getList()).containsExactly(mt1_1, mt1_2, mt1_3);
+    
+    // execute & verify
+    result = repository.searchByCommunityId(id("com2"), null);
+    assertThat(result.getList()).containsExactly(mt2_1);
+    
+    // execute & verify
+    result = repository.searchByCommunityId(id("com3"), null);
+    assertThat(result.getList()).isEmpty();
   }
 
   @Test
@@ -217,7 +284,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void listByUserAndMemberAndMessage() {
+  public void searchByUser() {
     // prepare
     Long communityId1 = inTransaction(() -> communityRepository.create(new Community().setName("community1")).getId());
     Long communityId2 = inTransaction(() -> communityRepository.create(new Community().setName("community2")).getId());
@@ -300,7 +367,7 @@ public class MessageThreadRepositoryTest extends AbstractRepositoryTest {
   }
 
   @Test
-  public void listByUserAndMemberAndMessage_pagination() {
+  public void searchByUser_pagination() {
     // prepare
     Long communityId = inTransaction(() -> communityRepository.create(new Community().setName("community")).getId());
     User user = inTransaction(() -> userRepository.create(new User().setUsername("user")));

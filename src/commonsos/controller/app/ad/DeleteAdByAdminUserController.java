@@ -24,7 +24,7 @@ public class DeleteAdByAdminUserController extends AfterAppLoginController {
     String id = request.params("id");
     if (isEmpty(id)) throw new BadRequestException("id is required");
     if (!NumberUtils.isParsable(id)) throw new BadRequestException("invalid id");
-    adService.deleteAdLogicallyByAdmin(user, parseLong(id));
+    adService.deleteAdLogicallyByAdminUser(user, parseLong(id));
     return new CommonView();
   }
 }

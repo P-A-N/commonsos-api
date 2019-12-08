@@ -82,7 +82,7 @@ public class Configuration {
   }
 
   public String systemWallet() {
-    return environmentVariable("COMMONSOS_WALLET_FILE", "C:\\Ethereum\\localnet\\keystore\\UTC--2018-11-08T09-10-38.833302600Z--766a1c4737970feddde6f2b8659fca05bd0339ab");
+    return environmentVariable("COMMONSOS_WALLET_FILE", "C:\\Ethereum\\localnet\\keystore\\UTC--2019-12-08T02-56-18.247787000Z--c32b42b4b9f42fb47b02105e06a5dc4af0b405f5");
   }
 
   public String systemWalletPassword() {

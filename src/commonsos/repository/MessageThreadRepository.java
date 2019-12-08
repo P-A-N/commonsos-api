@@ -50,6 +50,17 @@ public class MessageThreadRepository extends Repository {
     return resultList;
   }
 
+  public ResultList<MessageThread> searchByCommunityId(Long communityId, PaginationCommand pagination) {
+    StringBuilder sql = new StringBuilder();
+    sql.append("FROM MessageThread WHERE communityId = :communityId AND deleted IS false ORDER BY id");
+
+    TypedQuery<MessageThread> query = em().createQuery(sql.toString(), MessageThread.class)
+      .setParameter("communityId", communityId);
+
+    ResultList<MessageThread> resultList = getResultList(query, pagination);
+    return resultList;
+  }
+
   public Optional<MessageThread> findDirectThread(Long userId1, Long userId2, Long communityId) {
     String sql = "SELECT mt FROM MessageThread mt " +
       "WHERE mt.communityId = :communityId " +

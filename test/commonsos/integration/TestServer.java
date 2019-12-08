@@ -101,6 +101,7 @@ public class TestServer extends Server {
     when(credentials.getAddress()).thenReturn("wallet address");
     when(blockchainService.credentials(any(), any())).thenReturn(credentials);
     when(blockchainService.systemCredentials()).thenReturn(credentials);
+    when(blockchainService.totalSupply(any())).thenReturn(TEN);
     
     // s3
     ImageUploadService imageUploadService = mock(ImageUploadService.class);

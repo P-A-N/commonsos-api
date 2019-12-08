@@ -10,12 +10,15 @@ import commonsos.exception.BadRequestException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.AdminRepository;
+import commonsos.repository.CommunityRepository;
 import commonsos.repository.MessageRepository;
 import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.RedistributionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Admin;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.CommunityUser;
 import commonsos.repository.entity.Message;
 import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.MessageThreadParty;
@@ -34,11 +37,70 @@ public class DeleteService extends AbstractService {
 
   @Inject private AdRepository adRepository;
   @Inject private UserRepository userRepository;
+  @Inject private CommunityRepository communityRepository;
   @Inject private MessageThreadRepository messageThreadRepository;
   @Inject private MessageRepository messageRepository;
   @Inject private AdminRepository adminRepository;
   @Inject private RedistributionRepository redistributionRepository;
   @Inject private ImageUploadService imageService;
+  
+  public void deleteCommunity(Community community) {
+    log.info(String.format("deleting community. communityId=%d", community.getId()));
+    
+    // deleting userCommunities
+    List<User> userList = userRepository.search(community.getId(), null, null).getList();
+    for (User user : userList) {
+      log.info(String.format("deleting userCommunity. userId=%d, communityId=%d", user.getId(), community.getId()));
+      CommunityUser communityUser = user.getCommunityUserList().stream().filter(cu -> cu.getCommunity().equals(community)).findFirst().get();
+      
+      userRepository.lockForUpdate(user);
+      user.getCommunityUserList().remove(communityUser);
+      userRepository.update(user);
+      log.info(String.format("deleted userCommunity. userId=%d, communityId=%d", user.getId(), community.getId()));
+    }
+    
+    // deleting ads
+    List<Ad> adList = adRepository.searchByCommunityId(community.getId(), null).getList();
+    for (Ad ad : adList) {
+      deleteAd(ad);
+    }
+
+    // deleting message threads
+    List<MessageThread> messageThreadList = messageThreadRepository.searchByCommunityId(community.getId(), null).getList();
+    for (MessageThread messageThread : messageThreadList) {
+      deleteMessageThread(messageThread);
+    }
+    
+    // deleting redistributions
+    List<Redistribution> redistributionList = redistributionRepository.searchByCommunityId(community.getId(), null).getList();
+    for (Redistribution redistribution : redistributionList) {
+      deleteRedistribution(redistribution);
+    }
+    
+    // removing admin's affiliation community
+    List<Admin> adminList = adminRepository.searchByCommunityId(community.getId(), null).getList();
+    for (Admin admin : adminList) {
+      log.info(String.format("removing admin's affiliation community. adminId=%d, communityId=%d", admin.getId(), community.getId()));
+      adminRepository.lockForUpdate(admin);
+      admin.setCommunity(null);
+      adminRepository.update(admin);
+      log.info(String.format("removed admin's affiliation community. adminId=%d, communityId=%d", admin.getId(), community.getId()));
+    }
+    
+    // commit before deleting photos
+    commitAndStartNewTran();
+    
+    // deleting communities photos
+    deletePhoto(community.getPhotoUrl());
+    deletePhoto(community.getCoverPhotoUrl());
+    
+    // deleting community
+    communityRepository.lockForUpdate(community);
+    community.setDeleted(true);
+    communityRepository.update(community);
+
+    log.info(String.format("deleted community. communityId=%d", community.getId()));
+  }
 
   public void deleteUser(User user) {
     log.info(String.format("deleting user. userId=%d", user.getId()));
@@ -86,11 +148,22 @@ public class DeleteService extends AbstractService {
     log.info(String.format("deleted ad by user. adId=%d, userId=%d", ad.getId(), user.getId()));
   }
   
-  public void deleteAdByAdmin(User admin, Ad ad) {
-    log.info(String.format("deleting ad by admin. adId=%d, adminId=%d", ad.getId(), admin.getId()));
+  public void deleteAdByAdminUser(User admin, Ad ad) {
+    log.info(String.format("deleting ad by admin user. adId=%d, userId=%d", ad.getId(), admin.getId()));
     
     // only admin is allowed to delete ad
     if (!UserUtil.isAdmin(admin, ad.getCommunityId())) throw new ForbiddenException();
+
+    // delete ad's photo
+    deleteAd(ad);
+    
+    log.info(String.format("deleted ad by admin user. adId=%d, userId=%d", ad.getId(), admin.getId()));
+  }
+  
+  public void deleteAdByAdmin(Admin admin, Ad ad) {
+    log.info(String.format("deleting ad by admin. adId=%d, adminId=%d", ad.getId(), admin.getId()));
+    
+    if (!AdminUtil.isDeletableAd(admin, ad)) throw new ForbiddenException();
 
     // delete ad's photo
     deleteAd(ad);

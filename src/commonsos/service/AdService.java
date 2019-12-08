@@ -177,8 +177,12 @@ public class AdService extends AbstractService {
     deleteService.deleteAdByUser(user, getAd(adId));
   }
 
-  public void deleteAdLogicallyByAdmin(User user, Long adId) {
-    deleteService.deleteAdByAdmin(user, getAd(adId));
+  public void deleteAdLogicallyByAdminUser(User user, Long adId) {
+    deleteService.deleteAdByAdminUser(user, getAd(adId));
+  }
+
+  public void deleteAdLogicallyByAdmin(Admin admin, Long adId) {
+    deleteService.deleteAdByAdmin(admin, getAd(adId));
   }
 
   private void validateCommande(CreateAdCommand command) {

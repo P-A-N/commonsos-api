@@ -20,7 +20,7 @@ public class SearchCommunityByUserController extends AbstractAppController {
     
     PaginationCommand paginationCommand = PaginationUtil.getCommand(request);
     
-    CommunityListView view = service.list(filter, paginationCommand);
+    CommunityListView view = service.search(filter, paginationCommand);
     return view;
   }
 }
