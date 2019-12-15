@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.google.common.collect.ImmutableMap;
-
 import commonsos.Configuration;
 import commonsos.command.PaginationCommand;
 import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
@@ -220,8 +218,9 @@ public class TokenTransactionService extends AbstractService {
     if (!UserUtil.isMember(user, community)) throw new DisplayableException("error.userIsNotCommunityMember");
     if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
 
+    Ad ad = null;
     if (command.getAdId() != null) {
-      Ad ad = adRepository.findPublicStrictById(command.getAdId());
+      ad = adRepository.findPublicStrictById(command.getAdId());
       if (!ad.getCommunityId().equals(community.getId())) throw new BadRequestException("communityId does not match with ad");
     }
     TokenBalance tokenBalance = blockchainService.getTokenBalance(user, command.getCommunityId());
@@ -251,6 +250,7 @@ public class TokenTransactionService extends AbstractService {
     repository.update(transaction);
     
     blockchainEventService.checkTransaction(blockchainTransactionHash);
+    commitAndStartNewTran();
     
     // create transaction for fee
     if (community.getFee().compareTo(ZERO) > 0) {
@@ -276,23 +276,23 @@ public class TokenTransactionService extends AbstractService {
     // create message
     MessageThread thread = null;
     if (command.getAdId() != null) {
-      Optional<MessageThread> threadForAd = messageThreadRepository.findByCreaterAndAdId(user.getId(), command.getAdId());
-      thread = threadForAd.orElseGet(() -> syncService.createMessageThreadForAd(user, command.getAdId()));
+      User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
+      User notAdCreator = adCreator.equals(user) ? beneficiary : user;
+      Optional<MessageThread> threadForAd = messageThreadRepository.findByCreaterAndAdId(notAdCreator.getId(), command.getAdId());
+      thread = threadForAd.orElseGet(() -> syncService.createMessageThreadForAd(adCreator, notAdCreator, command.getAdId()));
     } else {
       Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(user.getId(), beneficiary.getId(), community.getId());
       thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
     }
+    commitAndStartNewTran();
     
     String messageText = MessageUtil.getSystemMessageTokenSend1(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
-    Map<String, String> params = ImmutableMap.of(
-        "type", "new_message",
-        "threadId", Long.toString(thread.getId()));
     messageRepository.create(new Message()
         .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
-    pushNotificationService.send(user, messageText, params);
-    pushNotificationService.send(beneficiary, messageText, params);
+    pushNotificationService.send(user, user, messageText, thread, messageRepository.unreadMessageCount(user.getId(), thread.getId()));
+    pushNotificationService.send(user, beneficiary, messageText, thread, messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId()));
 
     return transaction;
   }
@@ -341,14 +341,12 @@ public class TokenTransactionService extends AbstractService {
     MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
 
     String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol());
-    Map<String, String> params = ImmutableMap.of(
-        "type", "new_message",
-        "threadId", Long.toString(thread.getId()));
     messageRepository.create(new Message()
         .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
-    pushNotificationService.send(beneficiary, messageText, params);
+    Integer unreadCount = messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId());
+    pushNotificationService.send(community, beneficiary, messageText, thread, unreadCount);
 
     return transaction;
   }

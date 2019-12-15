@@ -61,6 +61,7 @@ import commonsos.controller.admin.transaction.GetTokenBalanceController;
 import commonsos.controller.admin.transaction.SearchCommunityTokenTransactionsController;
 import commonsos.controller.admin.transaction.SearchEthBalanceHistoriesController;
 import commonsos.controller.admin.user.DeleteUserByAdminController;
+import commonsos.controller.admin.user.GetTransactionQrCodeByAdminController;
 import commonsos.controller.admin.user.GetUserByAdminController;
 import commonsos.controller.admin.user.SearchUserTransactionsByAdminController;
 import commonsos.controller.admin.user.SearchUsersByAdminController;
@@ -371,6 +372,7 @@ public class Server {
     post("/admin/users/:id/username", injector.getInstance(UpdateUserNameByAdminController.class), toJson);
     post("/admin/users/:id/communities", injector.getInstance(UpdateUserCommunitiesByAdminController.class), toJson);
     post("/admin/users/:id/emailaddress", injector.getInstance(UpdateUserEmailTemporaryByAdminController.class), toJson);
+    get("/admin/users/:id/qr", injector.getInstance(GetTransactionQrCodeByAdminController.class), toJson);
     post("/admin/users/:id/delete", injector.getInstance(DeleteUserByAdminController.class), toJson);
     get("/admin/users/:id/transactions", injector.getInstance(SearchUserTransactionsByAdminController.class), toJson);
 

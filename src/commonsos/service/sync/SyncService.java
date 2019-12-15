@@ -30,18 +30,17 @@ public class SyncService extends AbstractService {
   @Inject private AdRepository adRepository;
 
   @Synchronized(SyncObject.MESSAGE_THRED_FOR_AD)
-  public MessageThread createMessageThreadForAd(User user, Long adId) {
-    Optional<MessageThread> optional = messageThreadRepository.findByCreaterAndAdId(user.getId(), adId);
+  public MessageThread createMessageThreadForAd(User adCreator, User notAdCreator, Long adId) {
+    Optional<MessageThread> optional = messageThreadRepository.findByCreaterAndAdId(notAdCreator.getId(), adId);
     if (optional.isPresent()) return optional.get();
     
     Ad ad = adRepository.findPublicStrictById(adId);
-    User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
 
     MessageThread messageThread = new MessageThread()
       .setCommunityId(ad.getCommunityId())
-      .setCreatedUserId(user.getId())
+      .setCreatedUserId(notAdCreator.getId())
       .setTitle(ad.getTitle()).setAdId(adId)
-      .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(user)));
+      .setParties(asList(new MessageThreadParty().setUser(adCreator), new MessageThreadParty().setUser(notAdCreator)));
 
     return messageThreadRepository.create(messageThread);
   }

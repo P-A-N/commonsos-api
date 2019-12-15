@@ -8,15 +8,12 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.google.common.collect.ImmutableMap;
 
 import commonsos.command.PaginationCommand;
 import commonsos.command.UploadPhotoCommand;
@@ -67,7 +64,9 @@ public class MessageService extends AbstractService {
   @Inject private ImageUploadService imageService;
 
   public MessageThreadView threadForAd(User user, Long adId) {
-    MessageThread thread = messageThreadRepository.findByCreaterAndAdId(user.getId(), adId).orElseGet(() -> syncService.createMessageThreadForAd(user, adId));
+    Ad ad = adRepository.findPublicStrictById(adId);
+    User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
+    MessageThread thread = messageThreadRepository.findByCreaterAndAdId(user.getId(), adId).orElseGet(() -> syncService.createMessageThreadForAd(adCreator, user, adId));
     return view(user, thread);
   }
 
@@ -246,10 +245,8 @@ public class MessageService extends AbstractService {
       .filter(p -> !p.getUser().getId().equals(senderUser.getId()))
       .forEach(p -> {
         String messageText = format("%s:\n\n%s", senderUser.getUsername(), message.getText());
-        Map<String, String> params = ImmutableMap.of(
-          "type", "new_message",
-          "threadId", Long.toString(messageThread.getId()));
-        pushNotificationService.send(p.getUser(), messageText, params);
+        Integer unreadCount = messageRepository.unreadMessageCount(p.getUser().getId(), messageThread.getId());
+        pushNotificationService.send(senderUser, p.getUser(), messageText, messageThread, unreadCount);
       });
   }
 

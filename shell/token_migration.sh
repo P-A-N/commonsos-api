@@ -4,5 +4,6 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 source $SCRIPT_DIR/set_env.sh
 
 pushd $APP_DIR/libs
-java -Xmx1024m -Dfile.encoding=UTF-8 -jar commonsos-api.jar commonsos.tools.TokenMigration $1
+export CLASSPATH=`ls -m *.jar | sed -e "s/,/:/g" | sed -z "s/\n//g"`
+java -Xmx3072m -Dfile.encoding=UTF-8 commonsos.tools.TokenMigration $1
 popd

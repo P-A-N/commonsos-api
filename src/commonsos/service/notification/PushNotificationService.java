@@ -1,9 +1,8 @@
 package commonsos.service.notification;
 
-import static java.util.Collections.emptyMap;
-
 import java.io.FileInputStream;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -24,6 +23,8 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 
 import commonsos.Configuration;
+import commonsos.repository.entity.Community;
+import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.User;
 import commonsos.service.AbstractService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,34 +49,63 @@ public class PushNotificationService extends AbstractService {
       throw new RuntimeException(e);
     }
   }
-
-  public void send(User recipient, String message) {
-    send(recipient, message, emptyMap());
-  }
-
-  public void send(User recipient, String message, Map<String, String> params) {
+  
+  public void send(User senderUser, User recipient, String message, MessageThread messageThread, Integer unreadCount) {
     if (StringUtils.isEmpty(recipient.getPushNotificationToken())) return;
-    log.info(String.format("Sending push notification to user: %s, token: %s", recipient.getUsername(), recipient.getPushNotificationToken()));
-    send(recipient.getPushNotificationToken(), message, params);
+    log.info(String.format("Sending push notification from user: %s, to user: %s, token: %s", senderUser.getUsername(), recipient.getUsername(), recipient.getPushNotificationToken()));
+    send(senderUser.getUsername(), message, messageThread.getId(), unreadCount, recipient.getPushNotificationToken());
+  }
+  
+  public void send(Community senderCommunity, User recipient, String message, MessageThread messageThread, Integer unreadCount) {
+    if (StringUtils.isEmpty(recipient.getPushNotificationToken())) return;
+    log.info(String.format("Sending push notification from user: %s, to user: %s, token: %s", senderCommunity.getName(), recipient.getUsername(), recipient.getPushNotificationToken()));
+    send(senderCommunity.getName(), message, messageThread.getId(), unreadCount, recipient.getPushNotificationToken());
   }
 
-  private void send(String clientToken, String messageBody, Map<String, String> params) {
+  // see https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages#AndroidConfig
+  private void send(String title, String messageBody, Long messageThreadId, Integer unreadCount, String clientToken ) {
+    // notification
+    Notification notification = new Notification(title, messageBody);
+    
+    // data
+    Map<String, String> data = new HashMap<>();
+    data.put("type", "new_message");
+    data.put("threadId", Long.toString(messageThreadId));
+    
+    // android
     AndroidConfig androidConfig = AndroidConfig.builder()
-      .setTtl(Duration.ofMinutes(2).toMillis()).setCollapseKey("personal")
+      .setCollapseKey("personal")
+      .setTtl(Duration.ofMinutes(2).toMillis())
       .setPriority(AndroidConfig.Priority.HIGH)
-      .setNotification(AndroidNotification.builder().setTag("personal").build())
+      .setNotification(
+          AndroidNotification.builder()
+            .setColor("#000000")
+            // TODO notification_count
+            .setTag("personal")
+            .build())
       .build();
 
+    // apns
     ApnsConfig apnsConfig = ApnsConfig.builder()
-      .setAps(Aps.builder().setCategory("personal").setThreadId("personal").build())
+      .setAps(
+          Aps.builder()
+            .setSound("default")
+            .setBadge(unreadCount)
+            .setCategory("personal")
+            .setThreadId("personal")
+            .build())
       .build();
 
-    com.google.firebase.messaging.Message message = messageBuilder().setToken(clientToken)
-      .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig)
-      .setNotification(new Notification("", messageBody))
-      .putAllData(params)
+    // create message
+    com.google.firebase.messaging.Message message = messageBuilder()
+      .setNotification(notification)
+      .putAllData(data)
+      .setAndroidConfig(androidConfig)
+      .setApnsConfig(apnsConfig)
+      .setToken(clientToken)
       .build();
 
+    // send message
     try {
       String response = getInstance().send(message);
       log.info("Successfully sent message: " + response);

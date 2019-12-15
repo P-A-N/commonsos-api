@@ -550,6 +550,13 @@ public class UserService extends AbstractService {
     userRepository.update(user);
   }
   
+  public String getQrCodeUrlByAdmin(Admin admin, Long userId, Long communityId, BigDecimal amount) {
+    User user = userRepository.findStrictById(userId);
+    if (!AdminUtil.isSeeableUser(admin, user)) throw new ForbiddenException();
+    
+    return getQrCodeUrl(user, communityId, amount);
+  }
+  
   public String getQrCodeUrl(User user, Long communityId, BigDecimal amount) {
     communityRepository.findPublicStrictById(communityId);
     String cryptoUserId = cryptoService.encryptoWithAES(String.valueOf(user.getId()));

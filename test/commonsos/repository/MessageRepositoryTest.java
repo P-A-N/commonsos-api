@@ -1,6 +1,7 @@
 package commonsos.repository;
 
 import static commonsos.TestId.id;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -13,17 +14,24 @@ import org.junit.jupiter.api.Test;
 
 import commonsos.command.PaginationCommand;
 import commonsos.repository.entity.Message;
+import commonsos.repository.entity.MessageThread;
+import commonsos.repository.entity.MessageThreadParty;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
+import commonsos.repository.entity.User;
 import commonsos.util.MessageUtil;
 
 public class MessageRepositoryTest extends AbstractRepositoryTest {
 
   private MessageRepository repository = spy(new MessageRepository(emService));
+  private MessageThreadRepository messageThreadRepository = spy(new MessageThreadRepository(emService));
+  private UserRepository userRepository = spy(new UserRepository(emService));
 
   @BeforeEach
   public void ignoreCheckLocked() {
     doNothing().when(repository).checkLocked(any());
+    doNothing().when(messageThreadRepository).checkLocked(any());
+    doNothing().when(userRepository).checkLocked(any());
   }
   
   @Test
@@ -127,5 +135,38 @@ public class MessageRepositoryTest extends AbstractRepositoryTest {
   @Test
   public void lastThreadMessage_noMessagesYet() {
     assertThat(repository.findLastMessage(id("thread id"))).isEmpty();
+  }
+
+  @Test
+  public void unreadMessageCount() throws Exception {
+    // prepare
+    User user1 = inTransaction(() -> userRepository.create(new User().setUsername("user1")));
+    User user2 = inTransaction(() -> userRepository.create(new User().setUsername("user2")));
+    MessageThread mt = inTransaction(() -> messageThreadRepository.create(new MessageThread().setParties(asList(
+        new MessageThreadParty().setUser(user1),
+        new MessageThreadParty().setUser(user2)))));
+    MessageThreadParty p1 = messageThreadRepository.findStrictById(mt.getId()).getParties().stream().filter(p -> p.getUser().equals(user1)).findFirst().get();
+    MessageThreadParty p2 = messageThreadRepository.findStrictById(mt.getId()).getParties().stream().filter(p -> p.getUser().equals(user2)).findFirst().get();
+    Message m1 = inTransaction(() -> repository.create(new Message().setThreadId(mt.getId()))); Thread.sleep(1000);
+    Message m2 = inTransaction(() -> repository.create(new Message().setThreadId(mt.getId()))); Thread.sleep(1000);
+    Message m3 = inTransaction(() -> repository.create(new Message().setThreadId(mt.getId()))); Thread.sleep(1000);
+    Message m4 = inTransaction(() -> repository.create(new Message().setThreadId(mt.getId()))); Thread.sleep(1000);
+    Message m5 = inTransaction(() -> repository.create(new Message().setThreadId(mt.getId()))); Thread.sleep(1000);
+
+    // execute & verify user1
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(5);
+    inTransaction(() -> messageThreadRepository.update(p1.setVisitedAt(m1.getCreatedAt().plusMillis(10))));
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(4);
+    inTransaction(() -> messageThreadRepository.update(p1.setVisitedAt(m2.getCreatedAt().plusMillis(10))));
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(3);
+    inTransaction(() -> messageThreadRepository.update(p1.setVisitedAt(m3.getCreatedAt().plusMillis(10))));
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(2);
+    inTransaction(() -> messageThreadRepository.update(p1.setVisitedAt(m4.getCreatedAt().plusMillis(10))));
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(1);
+    inTransaction(() -> messageThreadRepository.update(p1.setVisitedAt(m5.getCreatedAt().plusMillis(10))));
+    assertThat(repository.unreadMessageCount(user1.getId(), mt.getId())).isEqualTo(0);
+
+    // execute & verify user2
+    assertThat(repository.unreadMessageCount(user2.getId(), mt.getId())).isEqualTo(5);
   }
 }
