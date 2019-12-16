@@ -65,7 +65,10 @@ public class PushNotificationService extends AbstractService {
   // see https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages#AndroidConfig
   private void send(String title, String messageBody, Long messageThreadId, Integer unreadCount, String clientToken ) {
     // notification
-    Notification notification = new Notification(title, messageBody);
+    Notification notification = Notification.builder()
+        .setTitle(title)
+        .setBody(messageBody)
+        .build();
     
     // data
     Map<String, String> data = new HashMap<>();
@@ -80,7 +83,7 @@ public class PushNotificationService extends AbstractService {
       .setNotification(
           AndroidNotification.builder()
             .setColor("#000000")
-            // TODO notification_count
+            .setNotificationCount(unreadCount)
             .setTag("personal")
             .build())
       .build();
