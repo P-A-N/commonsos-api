@@ -253,19 +253,19 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
     
 //    ThreadValue.setReadOnly(true);
-    BigDecimal balance = repository.getBalanceFromTransactions(new User().setId(id("u1")), id("c1"));
+    BigDecimal balance = repository.getSettleBalanceFromTransactions(id("u1"), id("c1"));
     assertThat(balance).isEqualByComparingTo(new BigDecimal(9));
 
-    balance = repository.getBalanceFromTransactions(new User().setId(id("u2")), id("c1"));
+    balance = repository.getSettleBalanceFromTransactions(id("u2"), id("c1"));
     assertThat(balance).isEqualByComparingTo(new BigDecimal(1));
 
-    balance = repository.getBalanceFromTransactions(new User().setId(id("u3")), id("c1"));
+    balance = repository.getSettleBalanceFromTransactions(id("u3"), id("c1"));
     assertThat(balance).isEqualByComparingTo(new BigDecimal(0));
 
-    balance = repository.getBalanceFromTransactions(new User().setId(id("u1")), id("c2"));
+    balance = repository.getSettleBalanceFromTransactions(id("u1"), id("c2"));
     assertThat(balance).isEqualByComparingTo(new BigDecimal(10));
 
-    balance = repository.getBalanceFromTransactions(new User().setId(id("u2")), id("c2"));
+    balance = repository.getSettleBalanceFromTransactions(id("u2"), id("c2"));
     assertThat(balance).isEqualByComparingTo(new BigDecimal(0));
   }
 

@@ -96,18 +96,18 @@ public class TokenTransactionRepository extends Repository {
     return !resultList.isEmpty();
   }
 
-  public BigDecimal getBalanceFromTransactions(User user, Long communityId) {
+  public BigDecimal getSettleBalanceFromTransactions(Long userId, Long communityId) {
     BigDecimal remitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterUserId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterUserId = :userId AND blockchainCompletedAt IS NOT NULL", BigDecimal.class)
       .setParameter("communityId", communityId)
-      .setParameter("userId", user.getId())
+      .setParameter("userId", userId)
       .getSingleResult();
     if (remitAmount == null) remitAmount = BigDecimal.ZERO;
     
     BigDecimal benefitAmount = em()
-      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND beneficiaryUserId = :userId ", BigDecimal.class)
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND beneficiaryUserId = :userId AND blockchainCompletedAt IS NOT NULL", BigDecimal.class)
       .setParameter("communityId", communityId)
-      .setParameter("userId", user.getId())
+      .setParameter("userId", userId)
       .getSingleResult();
     if (benefitAmount == null) benefitAmount = BigDecimal.ZERO;
     
@@ -115,15 +115,12 @@ public class TokenTransactionRepository extends Repository {
   }
 
   public BigDecimal getPendingTransactionsAmount(Long userId, Long communityId) {
-    BigDecimal amount = em()
-      .createQuery("SELECT SUM(amount) FROM TokenTransaction " +
-          "WHERE communityId = :communityId " +
-          "AND blockchainCompletedAt IS NULL " +
-          "AND remitterUserId = :userId", BigDecimal.class)
+    BigDecimal pendingAmount = em()
+      .createQuery("SELECT SUM(amount) FROM TokenTransaction WHERE communityId = :communityId AND remitterUserId = :userId AND blockchainCompletedAt IS NULL", BigDecimal.class)
       .setParameter("communityId", communityId)
       .setParameter("userId", userId)
       .getSingleResult();
-    return amount != null ? amount :  ZERO;
+    return pendingAmount != null ? pendingAmount :  ZERO;
   }
   
   public Long getPendingTransactionsCount() {

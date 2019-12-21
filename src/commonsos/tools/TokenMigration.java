@@ -204,7 +204,7 @@ public class TokenMigration {
       if (c.getAdminUser() != null && c.getAdminUser().getId().equals(u.getId())) continue;
       waitUntilAllowed(u, c);
 
-      BigDecimal balance = transactionRepository.getBalanceFromTransactions(u, c.getId());
+      BigDecimal balance = transactionRepository.getSettleBalanceFromTransactions(u.getId(), c.getId());
       System.out.println(String.format("Transfering token [users=%s, community=%s, amount=%f]", u.getUsername(), c.getName(), balance));
       blockchainService.transferTokensFromCommunity(c, MAIN, u, balance);
       Thread.sleep(500);
@@ -218,7 +218,7 @@ public class TokenMigration {
       if (c.getAdminUser() != null && c.getAdminUser().getId().equals(u.getId())) continue;
       
       waitUntilTransferredToken(u, c);
-      BigDecimal balanceFromTransactions = transactionRepository.getBalanceFromTransactions(u, c.getId());
+      BigDecimal balanceFromTransactions = transactionRepository.getSettleBalanceFromTransactions(u.getId(), c.getId());
       BigDecimal balanceFromBlockchain = blockchainService.getTokenBalance(u, c.getId()).getBalance();
       if (balanceFromTransactions.compareTo(balanceFromBlockchain) == 0) {
         System.out.println(String.format("Token balance is OK. [users=%s, community=%s, balance=%f]", u.getUsername(), c.getName(), balanceFromBlockchain));
@@ -252,7 +252,7 @@ public class TokenMigration {
   }
   
   private static void waitUntilTransferredToken(User u, Community c) throws Exception {
-    BigDecimal balanceFromTransactions = transactionRepository.getBalanceFromTransactions(u, c.getId());
+    BigDecimal balanceFromTransactions = transactionRepository.getSettleBalanceFromTransactions(u.getId(), c.getId());
     if (balanceFromTransactions.compareTo(BigDecimal.ZERO) == 0) {
       return;
     }

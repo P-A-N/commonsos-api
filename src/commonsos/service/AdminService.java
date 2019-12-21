@@ -176,7 +176,7 @@ public class AdminService extends AbstractService {
     validate(command);
     if (adminRepository.isEmailAddressTaken(command.getEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
     
-    Community community = command.getCommunityId() == null ? null : communityRepository.findPublicStrictById(command.getCommunityId());
+    Community community = command.getCommunityId() == null ? null : communityRepository.findStrictById(command.getCommunityId());
     Role role = Role.of(command.getRoleId());
     String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand(), "");
 

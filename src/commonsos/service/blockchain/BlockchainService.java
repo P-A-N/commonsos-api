@@ -141,7 +141,7 @@ public class BlockchainService extends AbstractService {
   }
 
   public String transferTokensFromUserToUser(User remitter, User beneficiary, Long communityId, BigDecimal amount) {
-    Community community = communityRepository.findPublicStrictById(communityId);
+    Community community = communityRepository.findStrictById(communityId);
     
     if (!isAllowed(remitter, community, toTokensWithoutDecimals(amount))) {
       String message = String.format(
@@ -174,7 +174,7 @@ public class BlockchainService extends AbstractService {
   }
 
   public String transferTokensFee(User remitter, Long communityId, BigDecimal feeAmount) {
-    Community community = communityRepository.findPublicStrictById(communityId);
+    Community community = communityRepository.findStrictById(communityId);
     
     if (!isAllowed(remitter, community, toTokensWithoutDecimals(feeAmount))) {
       String message = String.format(
@@ -412,20 +412,35 @@ public class BlockchainService extends AbstractService {
     default:
       throw new ServerErrorException();
     }
+    
     BigDecimal balance = getTokenBalanceFromBlockchain(community.getId(), walletAddress, community.getTokenContractAddress());
     TokenBalance tokenBalance = new TokenBalance()
-        .setBalance(balance) // TODO
+        .setBalance(balance)
         .setCommunityId(community.getId())
         .setToken(getCommunityToken(community.getTokenContractAddress()));
     return tokenBalance;
   }
 
   public TokenBalance getTokenBalance(User user, Long communityId) {
-    Community community = communityRepository.findPublicStrictById(communityId);
-    BigDecimal balance = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress());
-    BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId);
+    Community community = communityRepository.findStrictById(communityId);
+    
+    BigDecimal balance = null;
+    for (int i = 0; i < 5; i++) {
+      BigDecimal balanceOnBlockchain = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress());
+      BigDecimal settleAmount = tokenTransactionRepository.getSettleBalanceFromTransactions(user.getId(), communityId);
+      BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId);
+      
+      if (balanceOnBlockchain.compareTo(settleAmount) == 0) {
+        balance = settleAmount.subtract(pendingAmount);
+      } else {
+        log.info(String.format("balance mismatched. [balanceOnBlockchain=%f, settleAmount=%f, pendingAmount=%f]", balanceOnBlockchain, settleAmount, pendingAmount));
+      }
+    }
+    
+    if (balance == null) throw new ServerErrorException("failed to obtain user balance.");
+    
     TokenBalance tokenBalance = new TokenBalance()
-        .setBalance(balance.subtract(pendingAmount)) // TODO
+        .setBalance(balance)
         .setCommunityId(communityId)
         .setToken(getCommunityToken(community.getTokenContractAddress()));
     return tokenBalance;

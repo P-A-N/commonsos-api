@@ -147,7 +147,7 @@ public class CommunityRepository extends Repository {
   }
 
   public boolean isAdmin(Long userId, Long communityId) {
-    Optional<Community> community = findPublicById(communityId);
+    Optional<Community> community = findById(communityId);
     return community.isPresent()
         && community.get().getAdminUser() != null
         && community.get().getAdminUser().getId().equals(userId);
