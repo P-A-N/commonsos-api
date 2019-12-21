@@ -245,11 +245,12 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
 
   @Test
   public void getBalanceFromTransactions() {
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u2")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u3")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u3")).setBeneficiaryUserId(id("u1")).setAmount(ONE)));
-    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c2")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN).setBlockchainCompletedAt(Instant.now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN).setBlockchainCompletedAt(null)));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u2")).setAmount(ONE).setBlockchainCompletedAt(Instant.now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u1")).setBeneficiaryUserId(id("u3")).setAmount(ONE).setBlockchainCompletedAt(Instant.now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c1")).setRemitterUserId(id("u3")).setBeneficiaryUserId(id("u1")).setAmount(ONE).setBlockchainCompletedAt(Instant.now())));
+    inTransaction(() -> repository.create(new TokenTransaction().setCommunityId(id("c2")).setRemitterUserId(id("admin")).setBeneficiaryUserId(id("u1")).setAmount(TEN).setBlockchainCompletedAt(Instant.now())));
 
     
 //    ThreadValue.setReadOnly(true);
