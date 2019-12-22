@@ -244,6 +244,7 @@ public class TokenTransactionService extends AbstractService {
     repository.create(transaction);
 
     String blockchainTransactionHash = blockchainService.transferTokensFromUserToUser(user, beneficiary, command.getCommunityId(), transaction.getAmount());
+    commitAndStartNewTran();
     
     repository.lockForUpdate(transaction);
     transaction.setBlockchainTransactionHash(blockchainTransactionHash);
@@ -265,12 +266,14 @@ public class TokenTransactionService extends AbstractService {
       repository.create(feeTransaction);
 
       String blockchainTransactionHashOfFee = blockchainService.transferTokensFee(user, command.getCommunityId(), feeTransaction.getAmount());
+      commitAndStartNewTran();
       
       repository.lockForUpdate(feeTransaction);
       feeTransaction.setBlockchainTransactionHash(blockchainTransactionHashOfFee);
       repository.update(feeTransaction);
       
       blockchainEventService.checkTransaction(blockchainTransactionHashOfFee);
+      commitAndStartNewTran();
     }
     
     // create message
@@ -284,13 +287,13 @@ public class TokenTransactionService extends AbstractService {
       Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(user.getId(), beneficiary.getId(), community.getId());
       thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
     }
-    commitAndStartNewTran();
-    
     String messageText = MessageUtil.getSystemMessageTokenSend1(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
     messageRepository.create(new Message()
         .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
+    commitAndStartNewTran();
+    
     pushNotificationService.send(user, user, messageText, thread, messageRepository.unreadMessageCount(user.getId(), thread.getId()));
     pushNotificationService.send(user, beneficiary, messageText, thread, messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId()));
 
@@ -329,22 +332,25 @@ public class TokenTransactionService extends AbstractService {
     repository.create(transaction);
 
     String blockchainTransactionHash = blockchainService.transferTokensFromCommunity(community, command.getWallet(), beneficiary, command.getAmount());
+    commitAndStartNewTran();
 
     repository.lockForUpdate(transaction);
     transaction.setBlockchainTransactionHash(blockchainTransactionHash);
     repository.update(transaction);
     
     blockchainEventService.checkTransaction(blockchainTransactionHash);
+    commitAndStartNewTran();
 
     // create message
     Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
     MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
-
     String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol());
     messageRepository.create(new Message()
         .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())
         .setText(messageText));
+    commitAndStartNewTran();
+    
     Integer unreadCount = messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId());
     pushNotificationService.send(community, beneficiary, messageText, thread, unreadCount);
 

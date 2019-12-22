@@ -84,13 +84,13 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com1Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(1000));
+    checkBalanceOfUser(user1, community1, equalTo(1000F));
 
     // transfer token to user from user
     transferTokenFromUser(user1, user2, community1, 100);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899));
-    checkBalanceOfUser(user2, community1, equalTo(100));
+    checkBalanceOfUser(user1, community1, equalTo(899F));
+    checkBalanceOfUser(user2, community1, equalTo(100F));
     checkTokenBalanceOfCommunity(community1, FEE, equalTo(1));
     
     // change a community of user
@@ -100,20 +100,20 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com2Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(1000));
+    checkBalanceOfUser(user1, community2, equalTo(1000F));
 
     // transfer token to user from user
     transferTokenFromUser(user1, user2, community2, 200);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(798));
-    checkBalanceOfUser(user2, community2, equalTo(200));
+    checkBalanceOfUser(user1, community2, equalTo(798F));
+    checkBalanceOfUser(user2, community2, equalTo(200F));
     checkTokenBalanceOfCommunity(community2, FEE, equalTo(2));
 
     // change a community of user
     changeCommunity(user1, asList(community1.getId(), community2.getId()));
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899));
-    checkBalanceOfUser(user1, community2, equalTo(798));
+    checkBalanceOfUser(user1, community1, equalTo(899F));
+    checkBalanceOfUser(user1, community2, equalTo(798F));
 
     // transfer token to user from admin (fee)
     transferTokenFromAdmin(com1Admin, user1, FEE, 0.1F);

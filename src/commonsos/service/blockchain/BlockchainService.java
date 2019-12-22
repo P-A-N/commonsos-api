@@ -278,7 +278,7 @@ public class BlockchainService extends AbstractService {
   Token loadToken(Credentials remitterCredentials, String tokenContractAddress, BigInteger gasPrice, BigInteger gasLimit) {
     if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
     
-    TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new NoOpProcessor(web3j));
+    TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH)); // 15s * 40 = 10m
     return Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
   }
 
@@ -300,7 +300,7 @@ public class BlockchainService extends AbstractService {
 
   public String transferEther(Credentials credentials, String beneficiaryAddress, BigInteger amount, boolean waitUntilCompleted) {
     TransactionReceiptProcessor trp;
-    if (waitUntilCompleted) trp = new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH );
+    if (waitUntilCompleted) trp = new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH ); // 15s * 40 = 10m
     else trp = new NoOpProcessor(web3j);
     
     log.info(String.format("transferEther %d to %s", amount, beneficiaryAddress));
