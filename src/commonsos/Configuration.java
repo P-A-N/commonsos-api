@@ -97,6 +97,10 @@ public class Configuration {
     return environmentVariable("INITIAL_WEI", "1000000000000000000");
   }
 
+  public String minimumNumberOfDecimalsForToken() {
+    return environmentVariable("MINIMUM_NUMBER_OF_DECIMALS_FOR_TOKEN", "2");
+  }
+
   public String minimumNumberOfDecimalsForRedistribution() {
     return environmentVariable("MINIMUM_NUMBER_OF_DECIMALS_FOR_REDISTRIBUTION", "2");
   }

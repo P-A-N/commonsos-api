@@ -423,12 +423,14 @@ public class BlockchainService extends AbstractService {
 
   public TokenBalance getTokenBalance(User user, Long communityId) {
     Community community = communityRepository.findStrictById(communityId);
+    String minimumNumberOfDecimalsForToken = config.minimumNumberOfDecimalsForToken();
+    int scale = Integer.parseInt(minimumNumberOfDecimalsForToken);
     
     BigDecimal balance = null;
     for (int i = 0; i < 5; i++) {
-      BigDecimal balanceOnBlockchain = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress());
-      BigDecimal settleAmount = tokenTransactionRepository.getSettleBalanceFromTransactions(user.getId(), communityId);
-      BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId);
+      BigDecimal balanceOnBlockchain = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress()).setScale(scale, BigDecimal.ROUND_DOWN);
+      BigDecimal settleAmount = tokenTransactionRepository.getSettleBalanceFromTransactions(user.getId(), communityId).setScale(scale, BigDecimal.ROUND_DOWN);
+      BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId).setScale(scale, BigDecimal.ROUND_DOWN);
       
       if (balanceOnBlockchain.compareTo(settleAmount) == 0) {
         balance = settleAmount.subtract(pendingAmount);
