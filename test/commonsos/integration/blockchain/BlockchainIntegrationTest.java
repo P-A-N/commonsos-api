@@ -77,9 +77,9 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilAllowed(user1, community1);
     waitUntilAllowed(user2, community1);
     waitUntilAllowed(user2, community2);
-    checkBalanceOfUser(user1, community1, equalTo(0));
-    checkBalanceOfUser(user2, community1, equalTo(0));
-    checkBalanceOfUser(user2, community2, equalTo(0));
+    checkBalanceOfUser(user1, community1, equalTo(0F));
+    checkBalanceOfUser(user2, community1, equalTo(0F));
+    checkBalanceOfUser(user2, community2, equalTo(0F));
 
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com1Admin, user1, MAIN, 1000);
