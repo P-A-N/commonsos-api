@@ -10,4 +10,5 @@ public class SearchUserForAdminCommand {
   private String username;
   private String emailAddress;
   private Long communityId;
+  private boolean isOmiteBalance;
 }

@@ -14,6 +14,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import commonsos.exception.BadRequestException;
@@ -74,6 +75,22 @@ public class RequestUtil {
       return parseLong(value);
     } else {
       throw new BadRequestException(String.format("invalid %s", param));
+    }
+  }
+
+  public static boolean getQueryParamBoolean(Request request, String param, boolean isRequired) {
+    String value = request.queryParams(param);
+    
+    if (isRequired && isEmpty(value)) {
+      throw new BadRequestException(String.format("%s is required", param));
+    } else if (isEmpty(value)) {
+      return false;
+    }
+    
+    if (NumberUtils.isParsable(value)) {
+      return BooleanUtils.toBoolean(Integer.parseInt(value));
+    } else {
+      return BooleanUtils.toBooleanObject(value);
     }
   }
 

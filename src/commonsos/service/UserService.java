@@ -342,7 +342,7 @@ public class UserService extends AbstractService {
     ResultList<User> result = userRepository.search(command.getUsername(), command.getEmailAddress(), command.getCommunityId(), pagination);
     
     UserListView listView = new UserListView();
-    listView.setUserList(result.getList().stream().map(u -> UserUtil.wideViewForAdmin(u, balanceViewList(u))).collect(toList()));
+    listView.setUserList(result.getList().stream().map(u -> UserUtil.wideViewForAdmin(u, balanceViewList(u, command.isOmiteBalance()))).collect(toList()));
     listView.setPagination(PaginationUtil.toView(result));
     
     return listView;
@@ -576,9 +576,13 @@ public class UserService extends AbstractService {
   }
 
   public List<UserTokenBalanceView> balanceViewList(User user) {
+    return balanceViewList(user, false);
+  }
+
+  private List<UserTokenBalanceView> balanceViewList(User user, boolean isOmiteBalance) {
     List<UserTokenBalanceView> list = new ArrayList<>();
     user.getCommunityUserList().stream().map(CommunityUser::getCommunity).forEach(c -> {
-      TokenBalance tokenBalance = blockchainService.getTokenBalance(user, c.getId());
+      TokenBalance tokenBalance = blockchainService.getTokenBalance(user, c.getId(), isOmiteBalance);
       list.add(TokenTransactionUtil.userTokenBalanceView(tokenBalance));
     });
     return list;

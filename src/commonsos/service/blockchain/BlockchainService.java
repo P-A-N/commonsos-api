@@ -422,13 +422,25 @@ public class BlockchainService extends AbstractService {
   }
 
   public TokenBalance getTokenBalance(User user, Long communityId) {
+    return getTokenBalance(user, communityId, false);
+  }
+  
+  public TokenBalance getTokenBalance(User user, Long communityId, boolean isOmiteBalance) {
     Community community = communityRepository.findStrictById(communityId);
+    TokenBalance tokenBalance = new TokenBalance()
+        .setCommunityId(communityId)
+        .setToken(getCommunityToken(community.getTokenContractAddress()));
+    if (isOmiteBalance) {
+      return tokenBalance;
+    }
+    
     String minimumNumberOfDecimalsForToken = config.minimumNumberOfDecimalsForToken();
     int scale = Integer.parseInt(minimumNumberOfDecimalsForToken);
     
     BigDecimal balance = null;
+    BigDecimal balanceOnBlockchain = null;
     for (int i = 0; i < 5; i++) {
-      BigDecimal balanceOnBlockchain = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress()).setScale(scale, BigDecimal.ROUND_DOWN);
+      balanceOnBlockchain = getTokenBalanceFromBlockchain(communityId, user.getWalletAddress(), community.getTokenContractAddress()).setScale(scale, BigDecimal.ROUND_DOWN);
       BigDecimal settleAmount = tokenTransactionRepository.getSettleBalanceFromTransactions(user.getId(), communityId).setScale(scale, BigDecimal.ROUND_DOWN);
       BigDecimal pendingAmount = tokenTransactionRepository.getPendingTransactionsAmount(user.getId(), communityId).setScale(scale, BigDecimal.ROUND_DOWN);
       
@@ -439,12 +451,12 @@ public class BlockchainService extends AbstractService {
       }
     }
     
-    if (balance == null) throw new ServerErrorException("failed to obtain user balance.");
+    if (balance == null) {
+      log.error("failed to obtain user balance. returning the balance from blockcain");
+      balance = balanceOnBlockchain;
+    }
     
-    TokenBalance tokenBalance = new TokenBalance()
-        .setBalance(balance)
-        .setCommunityId(communityId)
-        .setToken(getCommunityToken(community.getTokenContractAddress()));
+    tokenBalance.setBalance(balance);
     return tokenBalance;
   }
   

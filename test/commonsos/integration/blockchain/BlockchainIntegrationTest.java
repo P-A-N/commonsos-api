@@ -13,6 +13,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -80,6 +82,9 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     checkBalanceOfUser(user1, community1, equalTo(0F));
     checkBalanceOfUser(user2, community1, equalTo(0F));
     checkBalanceOfUser(user2, community2, equalTo(0F));
+    
+    // check omite balance
+    checkOmiteBalance();
 
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com1Admin, user1, MAIN, 1000);
@@ -415,6 +420,28 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .then().statusCode(200)
       .body("balanceList.baseDate", contains(today))
       .body("balanceList.balance", contains(expect));
+  }
+
+  private void checkOmiteBalance() {
+    sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
+    
+    // don't omite
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users")
+      .then().statusCode(200)
+      .body("userList.id", contains(user1.getId().intValue(), user2.getId().intValue()))
+      .body("userList.communityList.tokenSymbol", contains(contains("c1"), contains("c1", "c2")))
+      .body("userList.communityList.balance", contains(contains(notNullValue()), contains(notNullValue(), notNullValue())));
+    
+    // omite
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .when().get("/admin/users?isOmiteBalance=true")
+      .then().statusCode(200)
+      .body("userList.id", contains(user1.getId().intValue(), user2.getId().intValue()))
+      .body("userList.communityList.tokenSymbol", contains(contains("c1"), contains("c1", "c2")))
+      .body("userList.communityList.balance", contains(contains(nullValue()), contains(nullValue(), nullValue())));
   }
   
   private void waitUntilCommunityCreated() throws Exception {

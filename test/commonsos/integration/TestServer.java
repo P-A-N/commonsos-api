@@ -69,6 +69,10 @@ public class TestServer extends Server {
       @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
         return tokenBalance.setCommunityId((Long) invocation.getArgument(1));
       }
+    });when(blockchainService.getTokenBalance(any(User.class), any(Long.class), any(Boolean.class))).thenAnswer(new Answer<TokenBalance>() {
+      @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {
+        return tokenBalance.setCommunityId((Long) invocation.getArgument(1));
+      }
     });
     when(blockchainService.getTokenBalance(any(Community.class), any(WalletType.class))).thenAnswer(new Answer<TokenBalance>() {
       @Override public TokenBalance answer(InvocationOnMock invocation) throws Throwable {

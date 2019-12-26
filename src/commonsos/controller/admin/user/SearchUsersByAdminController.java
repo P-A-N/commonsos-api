@@ -24,7 +24,8 @@ public class SearchUsersByAdminController extends AfterAdminLoginController {
     SearchUserForAdminCommand command = new SearchUserForAdminCommand()
         .setUsername(RequestUtil.getQueryParamString(request, "username", false))
         .setEmailAddress(RequestUtil.getQueryParamString(request, "emailAddress", false))
-        .setCommunityId(RequestUtil.getQueryParamLong(request, "communityId", false));
+        .setCommunityId(RequestUtil.getQueryParamLong(request, "communityId", false))
+        .setOmiteBalance(RequestUtil.getQueryParamBoolean(request, "isOmiteBalance", false));
 
     if (!AdminUtil.isSeeableCommunity(admin, command.getCommunityId())) throw new ForbiddenException();
     
