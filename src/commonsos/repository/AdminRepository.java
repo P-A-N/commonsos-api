@@ -78,6 +78,16 @@ public class AdminRepository extends Repository {
     return resultList;
   }
 
+  public Optional<Admin> findByAdminname(String adminname) {
+    List<Admin> result = em().createQuery(
+        "FROM Admin WHERE adminname = :adminname AND deleted IS FALSE", Admin.class)
+        .setParameter("adminname", adminname).getResultList();
+
+    if (result.isEmpty()) return empty();
+    if (result.size() > 1) log.warn(String.format("More than 1 admin has the same email address."));
+    return Optional.of(result.get(0));
+  }
+
   public Optional<Admin> findByEmailAddress(String emailAddress) {
     List<Admin> result = em().createQuery(
         "FROM Admin WHERE emailAddress = :emailAddress AND deleted IS FALSE", Admin.class)
@@ -86,6 +96,22 @@ public class AdminRepository extends Repository {
     if (result.isEmpty()) return empty();
     if (result.size() > 1) log.warn(String.format("More than 1 admin has the same email address."));
     return Optional.of(result.get(0));
+  }
+
+  public boolean isAdminnameTaken(String adminname) {
+    boolean adminnameTaken = findByAdminname(adminname).isPresent();
+    
+    if (!adminnameTaken) {
+      Long count = em().createQuery("SELECT COUNT(ta) FROM TemporaryAdmin ta WHERE adminname = :adminname"
+          + " AND ta.invalid is FALSE"
+          + " AND ta.expirationTime > CURRENT_TIMESTAMP", Long.class)
+        .setParameter("adminname", adminname)
+        .getSingleResult();
+      
+      adminnameTaken = (count != 0);
+    }
+    
+    return adminnameTaken;
   }
 
   public boolean isEmailAddressTaken(String emailAddress) {

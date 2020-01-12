@@ -208,12 +208,35 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     assertThat(result.size()).isEqualTo(2);
   }
 
+  @Test
+  public void findByAdminname() {
+    // prepare
+    Admin adm1 = inTransaction(() -> repository.create(new Admin().setAdminname("aiueo").setEmailAddress("adm1")));
+    Admin adm2 = inTransaction(() -> repository.create(new Admin().setAdminname("あいうえお").setEmailAddress("adm2")));
+    inTransaction(() -> repository.create(new Admin().setAdminname("kakikukeko").setEmailAddress("adm3").setDeleted(true)));
+
+    // execute & verify
+    Optional<Admin> result = repository.findByAdminname("aiueo");
+    assertThat(result.get().getId()).isEqualTo(adm1.getId());
+
+    // execute & verify
+    result = repository.findByAdminname("あいうえお");
+    assertThat(result.get().getId()).isEqualTo(adm2.getId());
+
+    // execute & verify
+    result = repository.findByEmailAddress("kakikukeko");
+    assertFalse(result.isPresent());
+
+    // execute & verify
+    result = repository.findByEmailAddress("hoge");
+    assertFalse(result.isPresent());
+  }
 
   @Test
   public void findByEmailAddress() {
     // prepare
     Admin adm1 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm1")));
-    Admin adm2 = inTransaction(() -> repository.create(new Admin().setEmailAddress("adm2").setDeleted(true)));
+    inTransaction(() -> repository.create(new Admin().setEmailAddress("adm2").setDeleted(true)));
 
     // execute & verify
     Optional<Admin> result = repository.findByEmailAddress("adm1");
@@ -226,6 +249,25 @@ public class AdminRepositoryTest extends AbstractRepositoryTest {
     // execute & verify
     result = repository.findByEmailAddress("hoge");
     assertFalse(result.isPresent());
+  }
+
+  @Test
+  public void isAdminnameTaken() {
+    // prepare valid
+    inTransaction(() -> repository.create(new Admin().setAdminname("adm1").setEmailAddress("1")));
+    inTransaction(() -> repository.createTemporary(new TemporaryAdmin().setAdminname("adm2").setEmailAddress("2").setAccessIdHash("").setInvalid(false).setExpirationTime(Instant.now().plusSeconds(600))));
+    // prepare invalid
+    inTransaction(() -> repository.create(new Admin().setAdminname("i_adm1").setEmailAddress("11").setDeleted(true)));
+    inTransaction(() -> repository.createTemporary(new TemporaryAdmin().setAdminname("i_adm2").setEmailAddress("12").setAccessIdHash("").setInvalid(true).setExpirationTime(Instant.now().plusSeconds(600))));
+    inTransaction(() -> repository.createTemporary(new TemporaryAdmin().setAdminname("i_adm3").setEmailAddress("13").setAccessIdHash("").setInvalid(false).setExpirationTime(Instant.now().minusSeconds(600))));
+
+    // execute & verify
+    assertTrue(repository.isAdminnameTaken("adm1"));
+    assertTrue(repository.isAdminnameTaken("adm2"));
+    assertFalse(repository.isAdminnameTaken("i_adm1"));
+    assertFalse(repository.isAdminnameTaken("i_adm2"));
+    assertFalse(repository.isAdminnameTaken("i_adm3"));
+    assertFalse(repository.isAdminnameTaken(null));
   }
 
   @Test

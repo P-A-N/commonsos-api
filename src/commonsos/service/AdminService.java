@@ -175,6 +175,7 @@ public class AdminService extends AbstractService {
     
     validate(command);
     if (adminRepository.isEmailAddressTaken(command.getEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
+    if (adminRepository.isAdminnameTaken(command.getAdminname())) throw new DisplayableException("error.adminnameTaken");
     
     Community community = command.getCommunityId() == null ? null : communityRepository.findStrictById(command.getCommunityId());
     Role role = Role.of(command.getRoleId());

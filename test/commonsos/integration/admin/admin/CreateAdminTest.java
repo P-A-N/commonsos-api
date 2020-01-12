@@ -84,6 +84,28 @@ public class CreateAdminTest extends IntegrationTest {
 
     // login should success at now
     loginAdmin("comAdmin@test.com", "password");
+    
+    // failed [email address is taken]
+    given()
+      .multiPart("emailAddress", "comAdmin@test.com")
+      .multiPart(new MultiPartSpecBuilder("テスト").controlName("adminname").charset("UTF-8").build())
+      .multiPart("password", "password")
+      .multiPart("roleId", COMMUNITY_ADMIN.getId().toString())
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/admin/create-admin")
+      .then().statusCode(468)
+      .body("key", equalTo("error.emailAddressTaken"));
+
+    // failed [adminname is taken]
+    given()
+      .multiPart("emailAddress", "test@test.com")
+      .multiPart(new MultiPartSpecBuilder("テスト　管理者").controlName("adminname").charset("UTF-8").build())
+      .multiPart("password", "password")
+      .multiPart("roleId", COMMUNITY_ADMIN.getId().toString())
+      .cookie("JSESSIONID", sessionId)
+      .when().post("/admin/create-admin")
+      .then().statusCode(468)
+      .body("key", equalTo("error.adminnameTaken"));
   }
   
   @Test
