@@ -1,6 +1,6 @@
 package commonsos.controller.admin.admin;
 
-import static commonsos.annotation.SyncObject.ADMIN_EMAIL_ADDRESS;
+import static commonsos.annotation.SyncObject.ADMINNAME_AND_EMAIL_ADDRESS;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ import commonsos.util.RequestUtil;
 import spark.Request;
 import spark.Response;
 
-@Synchronized(ADMIN_EMAIL_ADDRESS)
+@Synchronized(ADMINNAME_AND_EMAIL_ADDRESS)
 public class CreateAdminTemporaryController extends MultipartFormdataController {
 
   @Inject AdminService adminService;

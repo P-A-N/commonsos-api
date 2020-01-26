@@ -78,6 +78,9 @@ public class AdminService extends AbstractService {
     Admin target = adminRepository.findStrictById(command.getAdminId());
     if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getAdminId()));
     validate(command);
+    if (!target.getAdminname().equals(command.getAdminname())) {
+      if (adminRepository.isAdminnameTaken(command.getAdminname())) throw new DisplayableException("error.adminnameTaken");
+    }
 
     adminRepository.lockForUpdate(target);
     target

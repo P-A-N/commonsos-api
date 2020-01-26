@@ -35,12 +35,12 @@ public class UpdateAdminTest extends IntegrationTest {
     com1 =  create(new Community().setName("com1").setPublishStatus(PRIVATE));
     com2 =  create(new Community().setName("com2").setPublishStatus(PUBLIC));
     
-    ncl1 = create(new Admin().setEmailAddress("ncl1@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
-    ncl2 = create(new Admin().setEmailAddress("ncl2@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
-    com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
-    com2Admin = create(new Admin().setEmailAddress("com2Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
-    com1Teller = create(new Admin().setEmailAddress("com1Teller@before.each.com").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(com1));
-    com2Teller = create(new Admin().setEmailAddress("com2Teller@before.each.com").setPasswordHash(hash("password")).setRole(TELLER).setCommunity(com1));
+    ncl1 = create(new Admin().setEmailAddress("ncl1@before.each.com").setPasswordHash(hash("password")).setAdminname("ncl1").setRole(NCL));
+    ncl2 = create(new Admin().setEmailAddress("ncl2@before.each.com").setPasswordHash(hash("password")).setAdminname("ncl2").setRole(NCL));
+    com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setAdminname("com1Admin").setRole(COMMUNITY_ADMIN).setCommunity(com1));
+    com2Admin = create(new Admin().setEmailAddress("com2Admin@before.each.com").setPasswordHash(hash("password")).setAdminname("com2Admin").setRole(COMMUNITY_ADMIN).setCommunity(com1));
+    com1Teller = create(new Admin().setEmailAddress("com1Teller@before.each.com").setPasswordHash(hash("password")).setAdminname("com1Teller").setRole(TELLER).setCommunity(com1));
+    com2Teller = create(new Admin().setEmailAddress("com2Teller@before.each.com").setPasswordHash(hash("password")).setAdminname("com2Teller").setRole(TELLER).setCommunity(com1));
   }
   
   @Test
@@ -65,14 +65,31 @@ public class UpdateAdminTest extends IntegrationTest {
       .when().post("/admin/admins/{id}", ncl2.getId())
       .then().statusCode(403);
 
+    // update com1Admin [username taken]
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/admins/{id}", com1Admin.getId())
+      .then().statusCode(468)
+      .body("key", equalTo("error.adminnameTaken"));
+
     // update com1Admin
+    requestParam.put("adminname", "test adminname2");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/admins/{id}", com1Admin.getId())
       .then().statusCode(200);
 
+    // update com1Admin [update with same name]
+    given()
+      .cookie("JSESSIONID", sessionId)
+      .body(gson.toJson(requestParam))
+      .when().post("/admin/admins/{id}", com1Admin.getId())
+      .then().statusCode(200);
+    
     // update com1Teller
+    requestParam.put("adminname", "test adminname3");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
@@ -98,8 +115,9 @@ public class UpdateAdminTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .when().post("/admin/admins/{id}", com1Admin.getId())
       .then().statusCode(200);
-
+    
     // update com1Teller
+    requestParam.put("adminname", "test adminname2");
     given()
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))

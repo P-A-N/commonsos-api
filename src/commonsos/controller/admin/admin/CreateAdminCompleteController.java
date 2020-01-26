@@ -1,7 +1,7 @@
 package commonsos.controller.admin.admin;
 
 import static commonsos.CookieSecuringEmbeddedJettyFactory.MAX_SESSION_AGE_IN_SECONDS;
-import static commonsos.annotation.SyncObject.ADMIN_EMAIL_ADDRESS;
+import static commonsos.annotation.SyncObject.ADMINNAME_AND_EMAIL_ADDRESS;
 import static commonsos.controller.admin.auth.AdminLoginController.ADMIN_SESSION_ATTRIBUTE_NAME;
 
 import javax.inject.Inject;
@@ -21,7 +21,7 @@ import spark.Request;
 import spark.Response;
 import spark.Session;
 
-@Synchronized(ADMIN_EMAIL_ADDRESS)
+@Synchronized(ADMINNAME_AND_EMAIL_ADDRESS)
 public class CreateAdminCompleteController extends AbstractController {
 
   @Inject AdminService adminService;
