@@ -17,11 +17,13 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ServerErrorException;
 import commonsos.repository.entity.WalletType;
+import lombok.extern.slf4j.Slf4j;
 import spark.Request;
 
+@Slf4j
 public class RequestUtil {
 
   private RequestUtil() {}
@@ -30,7 +32,7 @@ public class RequestUtil {
     String value = request.params(param);
     
     if (isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     }
     
     return value;
@@ -40,13 +42,13 @@ public class RequestUtil {
     String value = request.params(param);
     
     if (isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     }
     
     if (NumberUtils.isParsable(value)) {
       return parseLong(value);
     } else {
-      throw new BadRequestException(String.format("invalid %s", param));
+      throw DisplayableException.getInvalidException(param);
     }
   }
 
@@ -54,7 +56,7 @@ public class RequestUtil {
     String value = request.queryParams(param);
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -66,7 +68,7 @@ public class RequestUtil {
     String value = request.queryParams(param);
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -74,7 +76,7 @@ public class RequestUtil {
     if (NumberUtils.isParsable(value)) {
       return parseLong(value);
     } else {
-      throw new BadRequestException(String.format("invalid %s", param));
+      throw DisplayableException.getInvalidException(param);
     }
   }
 
@@ -82,7 +84,7 @@ public class RequestUtil {
     String value = request.queryParams(param);
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return false;
     }
@@ -98,7 +100,7 @@ public class RequestUtil {
     String value = request.queryParams(param);
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -106,7 +108,7 @@ public class RequestUtil {
     try {
       return LocalDate.parse(value);
     } catch (DateTimeParseException e) {
-      throw new BadRequestException(String.format("invalid %s", param), e);
+      throw DisplayableException.getInvalidException(param);
     }
   }
 
@@ -114,7 +116,7 @@ public class RequestUtil {
     String value = request.queryParams(param);
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -123,7 +125,7 @@ public class RequestUtil {
     if (walletType != null) {
       return walletType;
     } else {
-      throw new BadRequestException(String.format("invalid %s", param));
+      throw DisplayableException.getInvalidException(param);
     }
   }
 
@@ -134,7 +136,7 @@ public class RequestUtil {
     }
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -149,7 +151,7 @@ public class RequestUtil {
     }
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -157,7 +159,7 @@ public class RequestUtil {
     if (NumberUtils.isParsable(value)) {
       return parseLong(value);
     } else {
-      throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
+      throw DisplayableException.getInvalidException(param);
     }
   }
   
@@ -168,7 +170,7 @@ public class RequestUtil {
     }
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -176,7 +178,7 @@ public class RequestUtil {
     if (NumberUtils.isParsable(value)) {
       return new BigDecimal(value);
     } else {
-      throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
+      throw DisplayableException.getInvalidException(param);
     }
   }
 
@@ -187,7 +189,7 @@ public class RequestUtil {
     }
     
     if (isRequired && isEmpty(value)) {
-      throw new BadRequestException(String.format("%s is required", param));
+      throw DisplayableException.getRequiredException(param);
     } else if (isEmpty(value)) {
       return null;
     }
@@ -199,7 +201,7 @@ public class RequestUtil {
         if (NumberUtils.isParsable(val.trim())) {
           result.add(parseLong(val.trim()));
         } else {
-          throw new BadRequestException(String.format("invalid %s [value=%s]", param, value));
+          throw DisplayableException.getInvalidException(param);
         }
       }
     }

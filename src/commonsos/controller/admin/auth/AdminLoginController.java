@@ -15,6 +15,7 @@ import commonsos.filter.LogFilter;
 import commonsos.repository.entity.Admin;
 import commonsos.service.AdminService;
 import commonsos.util.AdminUtil;
+import commonsos.util.ValidateUtil;
 import spark.Request;
 import spark.Response;
 import spark.Session;
@@ -29,6 +30,8 @@ public class AdminLoginController extends AbstractController {
   @Override
   public Object handle(Request request, Response response) {
     AdminLoginCommand command = gson.fromJson(request.body(), AdminLoginCommand.class);
+    ValidateUtil.validateCommand(command);
+    
     Admin admin = adminService.checkPassword(command);
     admin = adminService.updateLoggedinAt(admin);
 

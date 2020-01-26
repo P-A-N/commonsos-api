@@ -51,6 +51,7 @@ import commonsos.service.multithread.UpdateCommunityTotalSupplyTask;
 import commonsos.util.AdminUtil;
 import commonsos.util.CommunityUtil;
 import commonsos.util.PaginationUtil;
+import commonsos.util.ValidateUtil;
 import commonsos.view.CommunityListView;
 import commonsos.view.CommunityNotificationListView;
 import commonsos.view.CommunityView;
@@ -79,21 +80,27 @@ public class CommunityService extends AbstractService {
     if (command.getAdminIdList() != null) {
       command.getAdminIdList().forEach(id -> {
         Admin a = adminRepository.findStrictById(id);
-        if (a.getCommunity() != null) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
-        if (!a.getRole().equals(COMMUNITY_ADMIN)) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+        if (a.getCommunity() != null) {
+          log.info(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
+          throw DisplayableException.ADMIN_BELONGS_TO_OTHER_COMMUNITY;
+        }
+        if (!a.getRole().equals(COMMUNITY_ADMIN)) {
+          log.info(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+          throw DisplayableException.ADMIN_IS_NOT_COMMUNITY_ADMIN;
+        }
         adminRepository.lockForUpdate(a);
         adminList.add(a);
       });
     }
     // check fee
     BigDecimal fee = command.getTransactionFee() == null ? BigDecimal.ZERO : command.getTransactionFee().setScale(2, RoundingMode.DOWN);
-    if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
-    if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
+    ValidateUtil.validateFee(fee);
+    
     // check system balance
     BigDecimal initialEther = new BigDecimal(config.initialEther());
     Credentials systemCredentials = blockchainService.systemCredentials();
     BigDecimal systemBalance = blockchainService.getEthBalance(systemCredentials.getAddress());
-    if (systemBalance.compareTo(initialEther) < 0) throw new DisplayableException("error.notEnoughFunds");
+    if (systemBalance.compareTo(initialEther) < 0) throw DisplayableException.NOT_ENOUGH_ETHER_TO_INITIATE_COMMUNITY;
     
     // create upload photo
     String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand(), "");
@@ -145,11 +152,10 @@ public class CommunityService extends AbstractService {
     
     // check fee
     BigDecimal fee = command.getTransactionFee() == null ? BigDecimal.ZERO : command.getTransactionFee().setScale(2, RoundingMode.DOWN);
-    if (fee.compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Fee is begger than 100 [fee=%f]", fee));
-    if (fee.compareTo(BigDecimal.ZERO) < 0) throw new BadRequestException(String.format("Fee is less than 0 [fee=%f]", fee));
+    ValidateUtil.validateFee(fee);
     
     // check status
-    if (command.getStatus() == PRIVATE && community.getPublishStatus() == PUBLIC) throw new DisplayableException("error.invalid_update_status_puplic_to_private");
+    if (command.getStatus() == PRIVATE && community.getPublishStatus() == PUBLIC) throw DisplayableException.INVALID_UPDATE_STATUS_PUPLIC_TO_PRIVATE;
 
     // check admin
     List<Admin> oldAdminList = adminRepository.searchByCommunityIdAndRoleId(community.getId(), COMMUNITY_ADMIN.getId(), null).getList();
@@ -157,8 +163,14 @@ public class CommunityService extends AbstractService {
     if (command.getAdminIdList() != null) {
       command.getAdminIdList().forEach(id -> {
         Admin a = adminRepository.findStrictById(id);
-        if (a.getCommunity() != null && !a.getCommunity().equals(community)) throw new BadRequestException(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
-        if (!a.getRole().equals(COMMUNITY_ADMIN)) throw new BadRequestException(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+        if (a.getCommunity() != null && !a.getCommunity().equals(community)) {
+          log.info(String.format("Admin has alrady belongs to community [adminId=%d]", a.getId()));
+          throw DisplayableException.ADMIN_BELONGS_TO_OTHER_COMMUNITY;
+        }
+        if (!a.getRole().equals(COMMUNITY_ADMIN)) {
+          log.info(String.format("Admin is not a community admin [adminId=%d]", a.getId()));
+          throw DisplayableException.ADMIN_IS_NOT_COMMUNITY_ADMIN;
+        }
         adminRepository.lockForUpdate(a);
         newAdminList.add(a);
       });
@@ -237,6 +249,7 @@ public class CommunityService extends AbstractService {
   }
 
   public Community updatePhoto(Admin admin, UploadPhotoCommand command, Long communityId) {
+    ValidateUtil.validateCommand(command);
     Community community = repository.findStrictById(communityId);
     if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
@@ -262,6 +275,7 @@ public class CommunityService extends AbstractService {
   }
 
   public Community updateCoverPhoto(Admin admin, UploadPhotoCommand command, Long communityId) {
+    ValidateUtil.validateCommand(command);
     Community community = repository.findStrictById(communityId);
     if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
@@ -280,6 +294,7 @@ public class CommunityService extends AbstractService {
   }
 
   public Community updateTokenName(Admin admin, UpdateCommunityTokenNameCommand command) {
+    ValidateUtil.validateCommand(command);
     Community community = repository.findStrictById(command.getCommunityId());
     if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
@@ -290,6 +305,7 @@ public class CommunityService extends AbstractService {
   }
 
   public Community updateTotalSupply(Admin admin, UpdateCommunityTotalSupplyCommand command) {
+    ValidateUtil.validateCommand(command);
     Community community = repository.findStrictById(command.getCommunityId());
     if (!AdminUtil.isUpdatableCommunity(admin, community.getId())) throw new ForbiddenException(String.format("[targetCommunityId=%d]", community.getId()));
     
@@ -306,7 +322,7 @@ public class CommunityService extends AbstractService {
     
     if (isBurn) {
       BigDecimal balanceOfMainWallet = blockchainService.getTokenBalance(community, WalletType.MAIN).getBalance();
-      if (balanceOfMainWallet.compareTo(absAmount) < 0) throw new DisplayableException("error.notEnoughFunds");
+      if (balanceOfMainWallet.compareTo(absAmount) < 0) throw DisplayableException.NOT_ENOUGH_COIN_TO_BURN_FROM_COMMUNITY;
     }
     
     UpdateCommunityTotalSupplyTask task = new UpdateCommunityTotalSupplyTask(community, absAmount, isBurn);

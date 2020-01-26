@@ -8,8 +8,6 @@ import java.time.temporal.ChronoUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.StringUtils;
-
 import commonsos.command.PaginationCommand;
 import commonsos.command.UpdateEmailAddressTemporaryCommand;
 import commonsos.command.UploadPhotoCommand;
@@ -18,7 +16,6 @@ import commonsos.command.admin.CreateAdminTemporaryCommand;
 import commonsos.command.admin.UpdateAdminCommand;
 import commonsos.command.admin.UpdateAdminPasswordCommand;
 import commonsos.exception.AuthenticationException;
-import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdminRepository;
@@ -77,9 +74,9 @@ public class AdminService extends AbstractService {
   public Admin updateAdmin(Admin admin, UpdateAdminCommand command) {
     Admin target = adminRepository.findStrictById(command.getAdminId());
     if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getAdminId()));
-    validate(command);
+    ValidateUtil.validateCommand(command);
     if (!target.getAdminname().equals(command.getAdminname())) {
-      if (adminRepository.isAdminnameTaken(command.getAdminname())) throw new DisplayableException("error.adminnameTaken");
+      if (adminRepository.isAdminnameTaken(command.getAdminname())) throw DisplayableException.getTakenException("adminname");
     }
 
     adminRepository.lockForUpdate(target);
@@ -94,7 +91,7 @@ public class AdminService extends AbstractService {
 
   public Admin updateAdminPhoto(Admin admin, Long targetAdminId, UploadPhotoCommand command) {
     Admin target = adminRepository.findStrictById(targetAdminId);
-    if (command.getPhotoFile() == null) throw new BadRequestException();
+    if (command.getPhotoFile() == null) throw DisplayableException.getRequiredException("photo");
     if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", targetAdminId));
 
     String newPhotoUrl = command.getPhotoFile() == null ? null : imageService.create(command, "");
@@ -113,7 +110,7 @@ public class AdminService extends AbstractService {
   public void updateAdminEmailAddressTemporary(Admin admin, UpdateEmailAddressTemporaryCommand command) {
     Admin target = adminRepository.findStrictById(command.getId());
     if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getId()));
-    ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
+    ValidateUtil.validateCommand(command);
 
     String accessId = accessIdService.generateAccessId(id -> {
       String accessIdHash = cryptoService.hash(id);
@@ -149,7 +146,7 @@ public class AdminService extends AbstractService {
   public Admin updateAdminPassword(Admin admin, UpdateAdminPasswordCommand command) {
     Admin target = adminRepository.findStrictById(command.getAdminId());
     if (!AdminUtil.isUpdatableAdmin(admin, target)) throw new ForbiddenException(String.format("[targetAdminId=%d]", command.getAdminId()));
-    ValidateUtil.validatePassword(command.getNewPassword());
+    ValidateUtil.validateCommand(command);
 
     adminRepository.lockForUpdate(target);
     target
@@ -177,8 +174,8 @@ public class AdminService extends AbstractService {
     if (!AdminUtil.isCreatableAdmin(admin, command.getCommunityId(), command.getRoleId())) throw new ForbiddenException(String.format("[communityId=%d, roleId=%d]", command.getCommunityId(), command.getRoleId()));
     
     validate(command);
-    if (adminRepository.isEmailAddressTaken(command.getEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
-    if (adminRepository.isAdminnameTaken(command.getAdminname())) throw new DisplayableException("error.adminnameTaken");
+    if (adminRepository.isEmailAddressTaken(command.getEmailAddress())) throw DisplayableException.getTakenException("emailAddress");
+    if (adminRepository.isAdminnameTaken(command.getAdminname())) throw DisplayableException.getTakenException("adminname");
     
     Community community = command.getCommunityId() == null ? null : communityRepository.findStrictById(command.getCommunityId());
     Role role = Role.of(command.getRoleId());
@@ -240,10 +237,5 @@ public class AdminService extends AbstractService {
     ValidateUtil.validateEmailAddress(command.getEmailAddress());
     ValidateUtil.validateTelNo(command.getTelNo());
     ValidateUtil.validateRole(command.getRoleId());
-  }
-
-  private void validate(UpdateAdminCommand command) {
-    if (StringUtils.isEmpty(command.getAdminname())) throw new BadRequestException("adminname is empty");
-    ValidateUtil.validateTelNo(command.getTelNo());
   }
 }

@@ -319,7 +319,7 @@ public class BlockchainService extends AbstractService {
     }
     catch (Exception e) {
       if (e.getMessage().contains("insufficient funds for gas"))
-        throw new DisplayableException("error.outOfEther");
+        throw DisplayableException.OUT_OF_ETHER;
       throw new ServerErrorException(e);
     }
   }
