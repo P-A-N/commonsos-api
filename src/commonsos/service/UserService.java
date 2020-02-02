@@ -223,10 +223,9 @@ public class UserService extends AbstractService {
   }
   
   public void updateEmailTemporary(UpdateEmailAddressTemporaryCommand command) {
-    ValidateUtil.validateEmailAddress(command.getNewEmailAddress());
+    ValidateUtil.validateCommand(command);
     User user = userRepository.findStrictById(command.getId());
-    if (user.getEmailAddress() != null && user.getEmailAddress().equals(command.getNewEmailAddress())) throw new BadRequestException("new address is same as now");
-    if (userRepository.isEmailAddressTaken(command.getNewEmailAddress())) throw new DisplayableException("error.emailAddressTaken");
+    if (userRepository.isEmailAddressTaken(command.getNewEmailAddress())) throw DisplayableException.getTakenException("emailAddress");
 
     String accessId = accessIdService.generateAccessId(id -> {
       String accessIdHash = cryptoService.hash(id);
@@ -450,7 +449,7 @@ public class UserService extends AbstractService {
 
   public User updateUserName(User user, UpdateUserNameCommand command) {
     ValidateUtil.validateUsername(command.getUsername());
-    if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
+    if (userRepository.isUsernameTaken(command.getUsername())) throw DisplayableException.getTakenException("username");
     
     userRepository.lockForUpdate(user);
     user.setUsername(command.getUsername());
@@ -461,8 +460,8 @@ public class UserService extends AbstractService {
     User user = userRepository.findStrictById(command.getId());
     if (!AdminUtil.isUpdatableUser(admin, user)) throw new ForbiddenException();
     
-    ValidateUtil.validateUsername(command.getUsername());
-    if (userRepository.isUsernameTaken(command.getUsername())) throw new DisplayableException("error.usernameTaken");
+    ValidateUtil.validateCommand(command);
+    if (userRepository.isUsernameTaken(command.getUsername())) throw DisplayableException.getTakenException("username");
     
     userRepository.lockForUpdate(user);
     user.setUsername(command.getUsername());

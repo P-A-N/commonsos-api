@@ -11,10 +11,17 @@ import org.apache.commons.validator.routines.UrlValidator;
 import commonsos.command.UpdateEmailAddressTemporaryCommand;
 import commonsos.command.UploadPhotoCommand;
 import commonsos.command.admin.AdminLoginCommand;
+import commonsos.command.admin.CreateEthTransactionCommand;
+import commonsos.command.admin.CreateTokenTransactionFromAdminCommand;
+import commonsos.command.admin.UpdateAdByAdminCommand;
+import commonsos.command.admin.UpdateAdPublishStatusByAdminCommand;
 import commonsos.command.admin.UpdateAdminCommand;
 import commonsos.command.admin.UpdateAdminPasswordCommand;
 import commonsos.command.admin.UpdateCommunityTokenNameCommand;
 import commonsos.command.admin.UpdateCommunityTotalSupplyCommand;
+import commonsos.command.admin.UpdateUserNameByAdminCommand;
+import commonsos.command.app.CreateAdCommand;
+import commonsos.command.app.UpdateAdCommand;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.entity.Role;
 import commonsos.service.image.ImageType;
@@ -104,6 +111,45 @@ public class ValidateUtil {
   
   public static void validateCommand(UpdateCommunityTokenNameCommand command) {
     if (StringUtils.isEmpty(command.getTokenName())) throw DisplayableException.getRequiredException("tokenName");
+  }
+  
+  public static void validateCommand(UpdateUserNameByAdminCommand command) {
+    if (StringUtils.isEmpty(command.getUsername())) throw DisplayableException.getRequiredException("username");
+    validateUsername(command.getUsername());
+  }
+
+  public static void validateCommand(UpdateAdByAdminCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw DisplayableException.getRequiredException("title");
+    if (command.getPoints() == null) throw DisplayableException.getRequiredException("points");
+    if (command.getType() == null) throw DisplayableException.getRequiredException("type");
+  }
+
+  public static void validateCommand(UpdateAdPublishStatusByAdminCommand command) {
+    if (command.getPublishStatus() == null) throw DisplayableException.getRequiredException("publishStatus");
+  }
+
+  public static void validateCommande(CreateAdCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw DisplayableException.getRequiredException("title");
+    if (command.getPoints() == null) throw DisplayableException.getRequiredException("points");
+    if (command.getType() == null) throw DisplayableException.getRequiredException("type");
+  }
+
+  public static void validateCommand(UpdateAdCommand command) {
+    if (StringUtils.isEmpty(command.getTitle())) throw DisplayableException.getRequiredException("title");
+    if (command.getPoints() == null) throw DisplayableException.getRequiredException("points");
+    if (command.getType() == null) throw DisplayableException.getRequiredException("type");
+  }
+
+  public static void validateCommand(CreateTokenTransactionFromAdminCommand command) {
+    if (command.getCommunityId() == null) throw DisplayableException.getRequiredException("communityId");
+    if (command.getAmount() == null) throw DisplayableException.getRequiredException("amount");
+    if (command.getWallet() == null) throw DisplayableException.getRequiredException("wallet");
+    if (command.getBeneficiaryUserId() == null) throw DisplayableException.getRequiredException("beneficiaryUser");
+  }
+
+  public static void validateCommand(CreateEthTransactionCommand command) {
+    if (command.getBeneficiaryCommunityId() == null) throw DisplayableException.getRequiredException("beneficiaryCommunityId");
+    if (command.getAmount() == null) throw DisplayableException.getRequiredException("amount");
   }
   
   public static void validateCommand(UploadPhotoCommand command) {

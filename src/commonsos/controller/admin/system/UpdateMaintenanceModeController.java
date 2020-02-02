@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import commonsos.Cache;
 import commonsos.command.admin.UpdateMaintenanceModeCommand;
 import commonsos.controller.admin.AfterAdminLoginController;
-import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Role;
@@ -22,8 +22,11 @@ public class UpdateMaintenanceModeController extends AfterAdminLoginController {
   @Override
   protected Object handleAfterLogin(Admin admin, Request request, Response response) {
     UpdateMaintenanceModeCommand command = gson.fromJson(request.body(), UpdateMaintenanceModeCommand.class);
+    if (command == null || (
+           !command.getMaintenanceMode().toUpperCase().equals("TRUE")
+        && !command.getMaintenanceMode().toUpperCase().equals("FALSE"))
+        ) throw DisplayableException.getRequiredException("maintenanceMode");
     String value = command.getMaintenanceMode();
-    if (!value.toUpperCase().equals("TRUE") && !value.toUpperCase().equals("FALSE")) throw new BadRequestException();
     
     if (!admin.getRole().equals(Role.NCL)) throw new ForbiddenException();
     

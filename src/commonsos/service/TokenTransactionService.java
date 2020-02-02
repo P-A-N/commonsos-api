@@ -55,6 +55,7 @@ import commonsos.util.AdminUtil;
 import commonsos.util.MessageUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
+import commonsos.util.ValidateUtil;
 import commonsos.view.TokenTransactionListView;
 import commonsos.view.TokenTransactionView;
 import lombok.extern.slf4j.Slf4j;
@@ -301,24 +302,20 @@ public class TokenTransactionService extends AbstractService {
   }
 
   public TokenTransaction create(Admin admin, CreateTokenTransactionFromAdminCommand command) {
-    // validation
-    if (command.getCommunityId() == null) throw new BadRequestException("communityId is required");
-    if (command.getAmount() == null) throw new BadRequestException("amount is required");
-    if (command.getWallet() == null) throw new BadRequestException("wallet is required");
-    if (command.getBeneficiaryUserId() == null) throw new BadRequestException("beneficiaryUser is required");
+    ValidateUtil.validateCommand(command);
     
     Community community = communityRepository.findStrictById(command.getCommunityId());
-    if (community.getPublishStatus() != PUBLIC) throw new DisplayableException("error.CommunityIsNotPublic");
+    if (community.getPublishStatus() != PUBLIC) throw DisplayableException.COMMUNITY_IS_NOT_PUBLIC;
     
     User beneficiary = userRepository.findStrictById(command.getBeneficiaryUserId());
-    if (!UserUtil.isMember(beneficiary, community)) throw new DisplayableException("error.beneficiaryIsNotCommunityMember");
+    if (!UserUtil.isMember(beneficiary, community)) throw DisplayableException.getNotMemberOfCommunity("beneficiary");
     
     if (!AdminUtil.isCreatableTokenTransaction(admin, command.getCommunityId())) throw new ForbiddenException();
     
-    if (ZERO.compareTo(command.getAmount()) > -1)  throw new BadRequestException("sending negative point");
+    if (ZERO.compareTo(command.getAmount()) > -1)  throw DisplayableException.getInvalidException("amount");
 
     TokenBalance tokenBalance = getTokenBalanceForAdmin(admin, command.getCommunityId(), command.getWallet());
-    if (tokenBalance.getBalance().compareTo(command.getAmount()) < 0) throw new DisplayableException("error.notEnoughFunds");
+    if (tokenBalance.getBalance().compareTo(command.getAmount()) < 0) throw DisplayableException.NOT_ENOUGH_FUNDS;
 
     // create transaction
     TokenTransaction transaction = new TokenTransaction()

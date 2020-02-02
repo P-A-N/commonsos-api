@@ -23,6 +23,7 @@ import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.EthBalance;
 import commonsos.util.AdminUtil;
+import commonsos.util.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -42,12 +43,13 @@ public class EthTransactionService extends AbstractService {
   }
   
   public EthTransaction createEthTransaction(Admin admin, CreateEthTransactionCommand command) {
+    ValidateUtil.validateCommand(command);
     if (!AdminUtil.isCreatableEthTransaction(admin)) throw new ForbiddenException();
     Community beneficiaryCommunity = communityRepository.findStrictById(command.getBeneficiaryCommunityId());
     
     BigDecimal amount = command.getAmount();
     BigDecimal balance = blockchainService.getSystemEthBalance();
-    if (balance.compareTo(amount) < 0) throw new DisplayableException("error.notEnoughFunds");
+    if (balance.compareTo(amount) < 0) throw DisplayableException.NOT_ENOUGH_FUNDS;
 
     // create transaction
     EthTransaction transaction = new EthTransaction()

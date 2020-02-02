@@ -17,6 +17,7 @@ import commonsos.command.admin.UpdateRedistributionCommand;
 import commonsos.command.batch.CreateTokenTransactionForRedistributionCommand;
 import commonsos.command.batch.RedistributionBatchCommand;
 import commonsos.exception.BadRequestException;
+import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.RedistributionRepository;
@@ -164,15 +165,15 @@ public class RedistributionService extends AbstractService {
   
   private void validateRedistribution(Community community, boolean isAll, User user, BigDecimal newRate, BigDecimal currentRate) {
     // validate user
-    if (user == null && !isAll) throw new BadRequestException("user is not specified");
-    if (user != null && !UserUtil.isMember(user, community)) throw new BadRequestException("user is not a member of community");
+    if (user == null && !isAll) throw DisplayableException.getRequiredException("userId");
+    if (user != null && !UserUtil.isMember(user, community)) throw DisplayableException.getNotMemberOfCommunity("user");
     // validate rate
-    if (newRate == null) throw new BadRequestException("redistritution rate is required");
+    if (newRate == null) throw DisplayableException.getInvalidException("rate");
     
     BigDecimal totalRate = repository.sumByCommunityId(community.getId());
     if (currentRate != null) totalRate = totalRate.subtract(currentRate);
     
-    if (newRate.compareTo(BigDecimal.ZERO) <= 0) throw new BadRequestException(String.format("Rate is less or equal to 0 [rate=%f]", newRate));
-    if (totalRate.add(newRate).compareTo(BigDecimal.valueOf(100L)) > 0) throw new BadRequestException(String.format("Sum of rate is begger than 100 [rate=%f]", newRate));
+    if (newRate.compareTo(BigDecimal.ZERO) <= 0) throw DisplayableException.getInvalidException("rate");
+    if (totalRate.add(newRate).compareTo(BigDecimal.valueOf(100L)) > 0) throw DisplayableException.getInvalidException("rate");
   }
 }
