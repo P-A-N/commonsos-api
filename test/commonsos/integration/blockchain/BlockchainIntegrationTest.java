@@ -55,8 +55,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   public void testBlockchain() throws Exception {
     // create community
     ncl = create(new Admin().setEmailAddress("ncl@test.com").setPasswordHash(hash("passpass")).setRole(NCL));
-    community1 = createCommunity("community1", "c1", "community1");
-    community2 = createCommunity("community2", "c2", "community2");
+    community1 = createCommunity("community1", "c1", "community1", "community1", "c1@wp.com");
+    community2 = createCommunity("community2", "c2", "community2", "community2", "c2@wp.com");
     waitUntilCommunityCreated();
     waitUntilAllowedFromFeeWallet(community1);
     waitUntilAllowedFromFeeWallet(community2);
@@ -164,7 +164,9 @@ public class BlockchainIntegrationTest extends IntegrationTest {
   private Community createCommunity(
       String communityName,
       String tokenSymbol,
-      String tokenName) throws Exception {
+      String tokenName,
+      String wordpressAccountId,
+      String wordpressAccountEmailAddress) throws Exception {
     log.info(String.format("creating community started. [communityName=%s]", communityName));
 
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
@@ -174,6 +176,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
       .multiPart("communityName", communityName)
       .multiPart("tokenName", tokenName)
       .multiPart("tokenSymbol", tokenSymbol)
+      .multiPart("wordpressAccountId", wordpressAccountId)
+      .multiPart("wordpressAccountEmailAddress", wordpressAccountEmailAddress)
       .multiPart("transactionFee", "1")
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
