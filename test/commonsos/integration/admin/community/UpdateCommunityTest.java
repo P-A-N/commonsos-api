@@ -113,7 +113,7 @@ public class UpdateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/communities/{id}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // update community [negative fee]
     requestParam = getRequestParam("", "-1", "", "PUBLIC", asList());
@@ -121,7 +121,7 @@ public class UpdateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/communities/{id}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // update community [add other communities community_admin]
     requestParam = getRequestParam("", "0", "", "PUBLIC", asList(com2Admin1.getId()));
@@ -129,7 +129,7 @@ public class UpdateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/communities/{id}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // update community [add teller]
     requestParam = getRequestParam("", "0", "", "PUBLIC", asList(com1Teller.getId()));
@@ -137,7 +137,7 @@ public class UpdateCommunityTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/communities/{id}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

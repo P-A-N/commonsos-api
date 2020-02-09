@@ -30,7 +30,7 @@ public class GetTransactionQrCodeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/app/v{v}/users/1/qr", APP_API_VERSION.getMajor())
-      .then().statusCode(400);
+      .then().statusCode(468);
     
     // call api
     given()

@@ -176,22 +176,22 @@ public class TokenTransactionServiceTest {
         .setWallet(MAIN)
         .setBeneficiaryUserId(id("beneficiaryUserId"));
     command.setCommunityId(null);
-    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
     command.setCommunityId(id("communityId"));
     
     // amount is null
     command.setAmount(null);
-    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
     command.setAmount(TEN);
     
     // wallet is null
     command.setWallet(null);
-    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
     command.setWallet(MAIN);
     
     // beneficiaryUserId is null
     command.setBeneficiaryUserId(null);
-    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
     command.setBeneficiaryUserId(id("beneficiaryUserId"));
     
     // community is not public
@@ -206,7 +206,7 @@ public class TokenTransactionServiceTest {
     
     // negative amount
     command.setAmount(ZERO);
-    assertThrows(BadRequestException.class, () -> service.create(admin, command));
+    assertThrows(DisplayableException.class, () -> service.create(admin, command));
     command.setAmount(TEN);
     
     // not enough fund

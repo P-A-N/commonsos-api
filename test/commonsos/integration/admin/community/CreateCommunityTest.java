@@ -95,7 +95,7 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("adminIdList", String.format("%d", com1Admin.getId()))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test
@@ -144,7 +144,7 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test
@@ -160,7 +160,7 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import commonsos.exception.BadRequestException;
 import commonsos.exception.DisplayableException;
 import commonsos.repository.entity.Role;
 import commonsos.service.image.ImageType;
@@ -22,7 +21,7 @@ public class ValidateUtilTest {
 
   @Test
   public void validate_username_null() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUsername(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUsername(null));
   }
 
   @Test
@@ -54,7 +53,7 @@ public class ValidateUtilTest {
 
   @Test
   public void validate_password_null() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validatePassword(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validatePassword(null));
   }
   
   @Test
@@ -81,47 +80,47 @@ public class ValidateUtilTest {
 
   @Test
   public void validate_emailAddress_null() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress(null));
   }
 
   @Test
   public void validate_emailAddress_invalid1() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress(""));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress(""));
   }
   
   @Test
   public void validate_emailAddress_invalid2() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("aaa"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("aaa"));
   }
   
   @Test
   public void validate_emailAddress_invalid3() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a.@test.com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a.@test.com"));
   }
   
   @Test
   public void validate_emailAddress_invalid4() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a<b@test.com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a<b@test.com"));
   }
   
   @Test
   public void validate_emailAddress_invalid5() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a>b@test.com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a>b@test.com"));
   }
   
   @Test
   public void validate_emailAddress_invalid6() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@test<com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a@test<com"));
   }
   
   @Test
   public void validate_emailAddress_invalid7() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@test>com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a@test>com"));
   }
   
   @Test
   public void validate_emailAddress_invalid8() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateEmailAddress("a@a@a.com"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateEmailAddress("a@a@a.com"));
   }
 
   @Test
@@ -153,32 +152,32 @@ public class ValidateUtilTest {
 
   @Test
   public void validateUrl_invalid_null() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl(null));
   }
 
   @Test
   public void validateUrl_invalid_empty() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl(""));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl(""));
   }
 
   @Test
   public void validateUrl_invalid_url1() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("aaaaaaaa"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl("aaaaaaaa"));
   }
 
   @Test
   public void validateUrl_invalid_url2() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("test.com/path/index.html"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl("test.com/path/index.html"));
   }
 
   @Test
   public void validateUrl_invalid_url3() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("http://test.com//path/index.html"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl("http://test.com//path/index.html"));
   }
 
   @Test
   public void validateUrl_invalid_url4() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateUrl("http://test.com:80:80/path/index.html"));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateUrl("http://test.com:80:80/path/index.html"));
   }
 
   @Test
@@ -192,17 +191,17 @@ public class ValidateUtilTest {
 
   @Test
   public void validate_status_invalid1() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("123456789012345678901234567890123456789012345678901")); // length = 51, ascii
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateStatus("123456789012345678901234567890123456789012345678901")); // length = 51, ascii
   }
 
   @Test
   public void validate_status_invalid2() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１")); // length = 51, utf-8
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateStatus("１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１２３４５６７８９０１")); // length = 51, utf-8
   }
 
   @Test
   public void validate_status_invalid3() {
-    assertThrows(BadRequestException.class, () -> ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺")); // length = 51, 4 byte unicode
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateStatus("🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺🍺")); // length = 51, 4 byte unicode
   }
   
   @Test

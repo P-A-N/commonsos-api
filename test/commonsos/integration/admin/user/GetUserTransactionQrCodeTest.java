@@ -62,7 +62,7 @@ public class GetUserTransactionQrCodeTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/users/{id}/qr", com1User.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

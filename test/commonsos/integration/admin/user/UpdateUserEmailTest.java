@@ -108,7 +108,7 @@ public class UpdateUserEmailTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .body(gson.toJson(requestParam))
       .when().post("/admin/users/{id}/emailaddress", com1User.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // email address taken
     requestParam = getRequestParam(com1com2User.getEmailAddress());

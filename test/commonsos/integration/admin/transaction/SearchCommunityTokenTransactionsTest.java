@@ -108,17 +108,17 @@ public class SearchCommunityTokenTransactionsTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin?wallet={wallet}", "main")
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin?communityId={comId}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin?communityId={comId}&wallet={wallet}", com1.getId(), "invalid")
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     given()
       .cookie("JSESSIONID", sessionId)

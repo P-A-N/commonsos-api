@@ -93,7 +93,7 @@ public class SearchAdminTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/admins")
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

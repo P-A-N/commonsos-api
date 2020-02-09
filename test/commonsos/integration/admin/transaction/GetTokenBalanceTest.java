@@ -77,17 +77,17 @@ public class GetTokenBalanceTest extends IntegrationTest {
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin/balance?communityId={id}&wallet={wallet}", com1.getId(), "invalieWallet")
-      .then().statusCode(400);
+      .then().statusCode(468);
     
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin/balance?wallet={wallet}", "main")
-      .then().statusCode(400);
+      .then().statusCode(468);
     
     given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin/balance?communityId={id}", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

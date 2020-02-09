@@ -64,7 +64,7 @@ public class UpdateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions/{rId}", com1.getId(), com1r1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // update redistribution [success]
     requestParam = getRequestParam("true", null, "10");
@@ -84,7 +84,7 @@ public class UpdateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions/{rId}", com1.getId(), com1r1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

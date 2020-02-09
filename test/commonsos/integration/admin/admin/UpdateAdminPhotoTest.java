@@ -87,7 +87,7 @@ public class UpdateAdminPhotoTest extends IntegrationTest {
       .cookie("JSESSIONID", sessionId)
       .multiPart("hgoe", "hoge")
       .when().post("/admin/admins/{id}/photo", com1Teller.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

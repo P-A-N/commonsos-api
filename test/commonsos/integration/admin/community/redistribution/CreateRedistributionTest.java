@@ -71,7 +71,7 @@ public class CreateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(reqParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions", com2.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // create redistribution [user is not specified]
     reqParam.put("userId", null);
@@ -79,7 +79,7 @@ public class CreateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(reqParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // create redistribution [success with allUser]
     reqParam.put("isAll", true);
