@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import commonsos.command.PaginationCommand;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.PublishStatus;
 import commonsos.repository.entity.CommunityUser;
+import commonsos.repository.entity.PublishStatus;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.SortType;
 import commonsos.repository.entity.User;
@@ -460,7 +460,9 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
         .setTokenContractAddress("0x1234567")
         .setAdminUser(new User().setId(adminId))
         .setPublishStatus(PublishStatus.PUBLIC)
-        .setFee(new BigDecimal("1.5"))).getId());
+        .setFee(new BigDecimal("1.5"))
+        .setWordpressAccountId("wpId")
+        .setWordpressAccountEmailAddress("wpAddr")).getId());
 
     Community community = em().find(Community.class, id);
 
@@ -470,8 +472,9 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     assertThat(community.getAdminUser().getUsername()).isEqualTo("admin");
     assertThat(community.getPublishStatus()).isEqualTo(PublishStatus.PUBLIC);
     assertThat(community.getFee().floatValue()).isEqualTo(1.5F);
+    assertThat(community.getWordpressAccountId()).isEqualTo("wpId");
+    assertThat(community.getWordpressAccountEmailAddress()).isEqualTo("wpAddr");
   }
-
 
   @Test
   public void isAdmin() {
@@ -492,6 +495,42 @@ public class CommunityRepositoryTest extends AbstractRepositoryTest {
     
     result = repository.isAdmin(user3.getId(), community3.getId());
     
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  public void isWordpressAccountIdTaken() {
+    inTransaction(() -> repository.create(new Community().setName("community1").setWordpressAccountId("AAAAaa")));
+    inTransaction(() -> repository.create(new Community().setName("community2").setWordpressAccountId("BBBbbB")));
+    inTransaction(() -> repository.create(new Community().setName("community3").setWordpressAccountId("ccCCCC").setDeleted(true)));
+
+    boolean result = repository.isWordpressAccountIdTaken("aaaaaa");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountIdTaken("AAAAAA");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountIdTaken("bbbbbb");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountIdTaken("cccccc");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountIdTaken("dddddd");
+    assertThat(result).isFalse();
+  }
+
+  @Test
+  public void isWordpressAccountEmailAddressTaken() {
+    inTransaction(() -> repository.create(new Community().setName("community1").setWordpressAccountEmailAddress("AAAAaa")));
+    inTransaction(() -> repository.create(new Community().setName("community2").setWordpressAccountEmailAddress("BBBbbB")));
+    inTransaction(() -> repository.create(new Community().setName("community3").setWordpressAccountEmailAddress("ccCCCC").setDeleted(true)));
+
+    boolean result = repository.isWordpressAccountEmailAddressTaken("aaaaaa");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountEmailAddressTaken("AAAAAA");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountEmailAddressTaken("bbbbbb");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountEmailAddressTaken("cccccc");
+    assertThat(result).isTrue();
+    result = repository.isWordpressAccountEmailAddressTaken("dddddd");
     assertThat(result).isFalse();
   }
 }

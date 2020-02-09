@@ -105,7 +105,7 @@ public class CreateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(reqParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
 
     // create redistribution [too much rate]
     reqParam.put("redistributionRate", "1.5");
@@ -114,7 +114,7 @@ public class CreateRedistributionTest extends IntegrationTest {
       .body(gson.toJson(reqParam))
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities/{id}/redistributions", com1.getId())
-      .then().statusCode(400);
+      .then().statusCode(468);
   }
   
   @Test

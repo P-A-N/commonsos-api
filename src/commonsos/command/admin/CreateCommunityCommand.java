@@ -14,6 +14,8 @@ public class CreateCommunityCommand {
   private String communityName;
   private String tokenName;
   private String tokenSymbol;
+  private String wordpressAccountId;
+  private String wordpressAccountEmailAddress;
   private BigDecimal transactionFee;
   private String description;
   private List<Long> adminIdList;

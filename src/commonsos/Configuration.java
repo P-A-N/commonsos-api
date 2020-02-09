@@ -113,8 +113,28 @@ public class Configuration {
     return environmentVariable("AES_IV", "commonsos_aes_iv");
   }
   
+  public String allowedWordpressRequestIpList() {
+    return environmentVariable("ALLOWED_WORDPRESS_REQUEST_IP_LIST", "127.0.0.2,127.0.0.1");
+  }
+  
   public String wordpressServerIp() {
-    return environmentVariable("WORDPRESS_SERVER_IP", "127.0.0.2,127.0.0.1");
+    return environmentVariable("WORDPRESS_SERVER_IP", "127.0.0.1");
+  }
+  
+  public String wordpressAccountDefaultPassword() {
+    return environmentVariable("WORDPRESS_ACCOUNT_DEFAULT_PASSWORD", "test");
+  }
+  
+  public String wordpressAccountDefaultAuthority() {
+    return environmentVariable("WORDPRESS_ACCOUNT_DEFAULT_AUTHORITY", "nothing");
+  }
+  
+  public String wordpressBasicAuthorizationUsername() {
+    return environmentVariable("WORDPRESS_BASIC_AUTHORIZATION_USERNAME", "basic_test");
+  }
+  
+  public String wordpressBasicAuthorizationPassword() {
+    return environmentVariable("WORDPRESS_BASIC_AUTHORIZATION_PASSWORD", "basic_test_pw");
   }
 
   public String maintenanceMode() {

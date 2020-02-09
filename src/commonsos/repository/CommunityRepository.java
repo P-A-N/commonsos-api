@@ -157,4 +157,20 @@ public class CommunityRepository extends Repository {
     checkLocked(community);
     return em().merge(community);
   }
+
+  public boolean isWordpressAccountIdTaken(String accountId) {
+    Long count = em().createQuery("SELECT COUNT(c) FROM Community c" +
+        " WHERE LOWER(c.wordpressAccountId) = LOWER(:wordpressAccountId)", Long.class) // include deleted community too
+        .setParameter("wordpressAccountId", accountId)
+        .getSingleResult();
+    return count != 0;
+  }
+
+  public boolean isWordpressAccountEmailAddressTaken(String emailAddress) {
+    Long count = em().createQuery("SELECT COUNT(c) FROM Community c" +
+        " WHERE LOWER(c.wordpressAccountEmailAddress) = LOWER(:wordpressAccountEmailAddress)", Long.class) // include deleted community too
+        .setParameter("wordpressAccountEmailAddress", emailAddress)
+        .getSingleResult();
+    return count != 0;
+  }
 }

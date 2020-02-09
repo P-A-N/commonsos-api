@@ -25,21 +25,21 @@ public class AbstractWordpressControllerTest {
   @Test
   public void handle1() {
     when(request.ip()).thenReturn("127.0.0.1");
-    when(config.wordpressServerIp()).thenReturn("127.0.0.1");
+    when(config.allowedWordpressRequestIpList()).thenReturn("127.0.0.1");
     controller.handle(request, null);
   }
   
   @Test
   public void handle2() {
     when(request.ip()).thenReturn("127.0.0.1");
-    when(config.wordpressServerIp()).thenReturn("127.0.0.3,127.0.0.2,127.0.0.1");
+    when(config.allowedWordpressRequestIpList()).thenReturn("127.0.0.3,127.0.0.2,127.0.0.1");
     controller.handle(request, null);
   }
   
   @Test
   public void handle3() {
     when(request.ip()).thenReturn("127.0.0.1");
-    when(config.wordpressServerIp()).thenReturn("127.0.0.2");
+    when(config.allowedWordpressRequestIpList()).thenReturn("127.0.0.2");
     assertThrows(AuthenticationException.class, () -> controller.handle(request, null));
   }
   

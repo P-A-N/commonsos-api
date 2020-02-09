@@ -1,9 +1,15 @@
 package commonsos.integration.admin.community;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.ok;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static commonsos.repository.entity.PublishStatus.PUBLIC;
 import static commonsos.repository.entity.Role.COMMUNITY_ADMIN;
 import static commonsos.repository.entity.Role.NCL;
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -13,9 +19,15 @@ import java.io.File;
 import java.net.URI;
 import java.net.URL;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+
+import commonsos.Configuration;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
@@ -29,6 +41,9 @@ public class CreateCommunityTest extends IntegrationTest {
   private Community com1;
   private String sessionId;
   
+  private Configuration conf = new Configuration();
+  private WireMockServer wireMockServer;
+  
   @BeforeEach
   public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
@@ -39,8 +54,23 @@ public class CreateCommunityTest extends IntegrationTest {
     com1Admin = create(new Admin().setEmailAddress("com1Admin@before.each.com").setPasswordHash(hash("password")).setRole(COMMUNITY_ADMIN).setCommunity(com1));
   }
   
+  @BeforeEach
+  public void setupWordPressServer() {
+    wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(80));
+    wireMockServer.start();
+    WireMock.configureFor("http", "localhost", 80);
+    stubFor(post(urlEqualTo("/wp-json/wp/v2"))
+        .withBasicAuth(conf.wordpressBasicAuthorizationUsername(), conf.wordpressBasicAuthorizationPassword())
+        .willReturn(ok()));
+  }
+
+  @AfterEach
+  public void stopWordPressServer() {
+    wireMockServer.stop();
+  }
+  
   @Test
-  public void createCommunity() {
+  public void createCommunity() throws Exception {
     sessionId = loginAdmin(ncl.getEmailAddress(), "password");
 
     // create temporary account
@@ -48,6 +78,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.5")
       .multiPart("description", "description")
       .multiPart("adminIdList", String.format("%d,%d", tmp1.getId(), tmp2.getId()))
@@ -61,6 +93,14 @@ public class CreateCommunityTest extends IntegrationTest {
       .body("createdAt", notNullValue())
       .body("adminList.id", contains(tmp1.getId().intValue(), tmp2.getId().intValue()))
       .body("adminList.adminname", contains("tmp1", "tmp2"));
+
+    // verify db
+    Community c = emService.get().createQuery("FROM Community WHERE name = 'community1'", Community.class).getSingleResult();
+    assertThat(c.getWordpressAccountId()).isEqualTo("community1_wp");
+    assertThat(c.getWordpressAccountEmailAddress()).isEqualTo("community1@test.com");
+    
+    Thread.sleep(1000);
+    WireMock.verify(1, postRequestedFor(urlEqualTo("/wp-json/wp/v2")));
   }
   
   @Test
@@ -72,6 +112,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.5")
       .multiPart("description", "description")
       .multiPart("adminIdList", String.format("%d,%d", tmp1.getId(), tmp2.getId()))
@@ -90,6 +132,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.5")
       .multiPart("description", "description")
       .multiPart("adminIdList", String.format("%d", com1Admin.getId()))
@@ -107,6 +151,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.5")
       .multiPart("description", "description")
       .multiPart("adminIdList", String.format("%d", -1))
@@ -124,6 +170,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.5")
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
@@ -140,6 +188,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "101")
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
@@ -156,6 +206,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "-1")
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
@@ -172,6 +224,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("transactionFee", "1.9999999")
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
@@ -189,6 +243,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("description", "description")
       .cookie("JSESSIONID", sessionId)
       .when().post("/admin/communities")
@@ -209,6 +265,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("description", "description")
       .multiPart("photo", photo)
       .cookie("JSESSIONID", sessionId)
@@ -229,6 +287,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("description", "description")
       .multiPart("photo", photo)
       .multiPart("photo[width]", 1000)
@@ -253,6 +313,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("description", "description")
       .multiPart("coverPhoto", photo)
       .cookie("JSESSIONID", sessionId)
@@ -273,6 +335,8 @@ public class CreateCommunityTest extends IntegrationTest {
       .multiPart("communityName", "community1")
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
+      .multiPart("wordpressAccountId", "community1_wp")
+      .multiPart("wordpressAccountEmailAddress", "community1@test.com")
       .multiPart("description", "description")
       .multiPart("coverPhoto", photo)
       .multiPart("coverPhoto[width]", 1000)

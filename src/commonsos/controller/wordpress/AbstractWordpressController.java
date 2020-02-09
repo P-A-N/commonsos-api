@@ -27,7 +27,7 @@ public abstract class AbstractWordpressController extends AbstractController {
   private void checkAccessIp(Request request) {
     String accessIp = request.ip();
     
-    String AllowIps = config.wordpressServerIp();
+    String AllowIps = config.allowedWordpressRequestIpList();
     for (String allowIp : AllowIps.split(",")) {
       if (allowIp.equals(accessIp)) return;
     }

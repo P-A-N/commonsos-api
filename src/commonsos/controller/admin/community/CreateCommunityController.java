@@ -52,6 +52,8 @@ public class CreateCommunityController extends MultipartFormdataController {
         .setCommunityName(RequestUtil.getFileItemString(fileItemMap, "communityName", true))
         .setTokenName(RequestUtil.getFileItemString(fileItemMap, "tokenName", true))
         .setTokenSymbol(RequestUtil.getFileItemString(fileItemMap, "tokenSymbol", true))
+        .setWordpressAccountId(RequestUtil.getFileItemString(fileItemMap, "wordpressAccountId", true))
+        .setWordpressAccountEmailAddress(RequestUtil.getFileItemString(fileItemMap, "wordpressAccountEmailAddress", true))
         .setTransactionFee(RequestUtil.getFileItemBigDecimal(fileItemMap, "transactionFee", false))
         .setDescription(RequestUtil.getFileItemString(fileItemMap, "description", false))
         .setAdminIdList(RequestUtil.getFileItemLongList(fileItemMap, "adminIdList", false));

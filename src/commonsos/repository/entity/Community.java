@@ -39,5 +39,7 @@ public class Community extends AbstractEntity {
   private String feeWalletAddress;
   private BigDecimal fee;
   private String adminPageUrl;
+  private String wordpressAccountId;
+  private String wordpressAccountEmailAddress;
   private boolean deleted;
 }

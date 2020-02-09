@@ -33,6 +33,7 @@ dependencies {
   compile 'com.google.zxing:core:3.4.0'
   compile 'com.google.zxing:javase:3.4.0'
   compile 'com.amazonaws:aws-java-sdk-s3:1.11.338'
+  compile 'com.squareup.okhttp3:okhttp:4.3.1'
   
   compile 'org.apache.commons:commons-lang3:3.8.1'
   compile 'org.apache.velocity:velocity:1.7'
@@ -63,6 +64,7 @@ dependencies {
   testCompile 'io.rest-assured:rest-assured:3.1.1'
   testCompile 'org.subethamail:subethasmtp:3.1.7'
   testCompile 'com.github.stefanbirkner:system-rules:1.19.0'
+  testCompile 'com.github.tomakehurst:wiremock-jre8:2.26.0'
 }
 
 test {

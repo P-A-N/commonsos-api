@@ -52,7 +52,7 @@ public class IntegrationTest {
     testServer.start(new String[]{});
     blockchainService = testServer.getBlockchainService();
     awaitInitialization();
-
+    
     // RestAssured
     RestAssured.port = TestServer.TEST_SERVER_PORT;
 

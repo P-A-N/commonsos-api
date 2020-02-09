@@ -45,6 +45,7 @@ import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.EthBalance;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.multithread.CreateCommunityTask;
+import commonsos.service.multithread.CreateWordpressAccountTask;
 import commonsos.service.multithread.TaskExecutorService;
 import commonsos.service.multithread.UpdateCommunityTokenNameTask;
 import commonsos.service.multithread.UpdateCommunityTotalSupplyTask;
@@ -75,6 +76,7 @@ public class CommunityService extends AbstractService {
   public Community createCommunity(Admin admin, CreateCommunityCommand command) {
     // check role
     if (!admin.getRole().equals(NCL)) throw new ForbiddenException();
+
     // check adminList
     List<Admin> adminList = new ArrayList<>();
     if (command.getAdminIdList() != null) {
@@ -95,13 +97,19 @@ public class CommunityService extends AbstractService {
     // check fee
     BigDecimal fee = command.getTransactionFee() == null ? BigDecimal.ZERO : command.getTransactionFee().setScale(2, RoundingMode.DOWN);
     ValidateUtil.validateFee(fee);
-    
+
+    // validate wordpress id, emailAddress
+    ValidateUtil.validateWordpressAccountId(command.getWordpressAccountId());
+    ValidateUtil.validateWordpressAccountEmailAddress(command.getWordpressAccountEmailAddress());
+    if (repository.isWordpressAccountIdTaken(command.getWordpressAccountId())) throw DisplayableException.getTakenException("wordpressAccountId");
+    if (repository.isWordpressAccountEmailAddressTaken(command.getWordpressAccountEmailAddress())) throw DisplayableException.getTakenException("wordpressAccountEmailAddress");
+
     // check system balance
     BigDecimal initialEther = new BigDecimal(config.initialEther());
     Credentials systemCredentials = blockchainService.systemCredentials();
     BigDecimal systemBalance = blockchainService.getEthBalance(systemCredentials.getAddress());
     if (systemBalance.compareTo(initialEther) < 0) throw DisplayableException.NOT_ENOUGH_ETHER_TO_INITIATE_COMMUNITY;
-    
+
     // create upload photo
     String photoUrl = command.getUploadPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadPhotoCommand(), "");
     String coverPhotoUrl = command.getUploadCoverPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadCoverPhotoCommand(), "");
@@ -123,7 +131,9 @@ public class CommunityService extends AbstractService {
         .setMainWalletAddress(mainCredentials.getAddress())
         .setFeeWallet(feeWallet)
         .setFeeWalletAddress(feeCredentials.getAddress())
-        .setFee(fee);
+        .setFee(fee)
+        .setWordpressAccountId(command.getWordpressAccountId())
+        .setWordpressAccountEmailAddress(command.getWordpressAccountEmailAddress());
     community = repository.create(community);
     
     // set adminPageUrl
@@ -139,6 +149,9 @@ public class CommunityService extends AbstractService {
     
     CreateCommunityTask task = new CreateCommunityTask(community.getId(), command);
     taskExecutorService.execute(task);
+
+    CreateWordpressAccountTask createWordpressAccountTask = new CreateWordpressAccountTask(community.getId(), command);
+    taskExecutorService.execute(createWordpressAccountTask);
     
     return community;
   }

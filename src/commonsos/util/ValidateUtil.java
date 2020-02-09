@@ -30,12 +30,17 @@ public class ValidateUtil {
   
   private static Pattern passwordPattern = Pattern.compile("^[a-zA-Z0-9_]+$");
   private static Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_]+$");
+  private static Pattern wordpressAccountIdPattern = Pattern.compile("^[a-zA-Z0-9_]+$");
   private static Pattern telNoPattern = Pattern.compile("^[0-9-]+$");
   
   private ValidateUtil() {}
 
   public static void validateEmailAddress(String emailAddress) {
-    if (emailAddress == null || !EmailValidator.getInstance().isValid(emailAddress)) throw DisplayableException.getInvalidException("emailAddress");
+    validateEmailAddress(emailAddress, "emailAddress");
+  }
+
+  public static void validateEmailAddress(String emailAddress, String paramName) {
+    if (emailAddress == null || !EmailValidator.getInstance().isValid(emailAddress)) throw DisplayableException.getInvalidException(paramName);
   }
 
   public static void validateTelNo(String telNo) {
@@ -83,6 +88,21 @@ public class ValidateUtil {
   
   public static void validateFee(BigDecimal fee) {
     if (fee.compareTo(BigDecimal.valueOf(100L)) > 0 || fee.compareTo(BigDecimal.ZERO) < 0) throw DisplayableException.getInvalidException("fee");
+  }
+
+  public static void validateWordpressAccountEmailAddress(String emailAddress) {
+    validateEmailAddress(emailAddress, "wordpressAccountEmailAddress");
+    if (StringUtils.isEmpty(emailAddress)) throw DisplayableException.getInvalidException("wordpressAccountEmailAddress");
+    if (emailAddress.length() > 60) throw DisplayableException.getInvalidlengthException("wordpressAccountEmailAddress");
+  }
+
+  public static void validateWordpressAccountId(String accountId) {
+    if (StringUtils.isEmpty(accountId)) throw DisplayableException.getInvalidException("wordpressAccountId");
+    if (accountId.length() < 8 || accountId.length() > 60) throw DisplayableException.getInvalidlengthException("wordpressAccountId");
+    if ("root".equals(accountId)) throw DisplayableException.getInvalidException("wordpressAccountId");
+
+    Matcher m = wordpressAccountIdPattern.matcher(accountId);
+    if (!m.find()) throw DisplayableException.getInvalidCharacterException("wordpressAccountId");
   }
   
   public static void validateCommand(AdminLoginCommand command) {

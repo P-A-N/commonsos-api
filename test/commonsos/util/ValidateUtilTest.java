@@ -222,4 +222,22 @@ public class ValidateUtilTest {
     assertThrows(DisplayableException.class, () -> ValidateUtil.validateRole(null));
     assertThrows(DisplayableException.class, () -> ValidateUtil.validateRole(-1L));
   }
+
+  @Test
+  public void validate_wordpressAccountEmailAddress() {
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountEmailAddress(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountEmailAddress("testtesttest")); // invalid format
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountEmailAddress("a@a.com.com.com.com.com.com.com.com.com.com.com.com.com.com.com")); // more than 60 character
+    ValidateUtil.validateWordpressAccountEmailAddress("a@a.com");
+  }
+
+  @Test
+  public void validate_wordpressAccountId() {
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountId(null));
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountId("testtesttest?")); // invalid format
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountId("testtes")); // less than 8 character
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountId("root")); // root
+    assertThrows(DisplayableException.class, () -> ValidateUtil.validateWordpressAccountId("testtesttesttesttesttesttesttesttesttesttesttesttesttesttestt")); // more than 60 character
+    ValidateUtil.validateWordpressAccountId("testtesttest");
+  }
 }
