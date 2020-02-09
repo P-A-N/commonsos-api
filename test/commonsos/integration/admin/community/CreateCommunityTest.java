@@ -58,7 +58,7 @@ public class CreateCommunityTest extends IntegrationTest {
   public void setupWordPressServer() {
     wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(80));
     wireMockServer.start();
-    WireMock.configureFor("http", "localhost", 80);
+    WireMock.configureFor("http", "localhost", Integer.parseInt(conf.wordpressServerApiPort()));
     stubFor(post(urlEqualTo("/wp-json/wp/v2"))
         .withBasicAuth(conf.wordpressBasicAuthorizationUsername(), conf.wordpressBasicAuthorizationPassword())
         .willReturn(ok()));

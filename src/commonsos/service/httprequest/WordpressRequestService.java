@@ -23,6 +23,7 @@ public class WordpressRequestService extends AbstractHttpRequestService {
     HttpUrl url = new HttpUrl.Builder()
         .scheme("http")
         .host(conf.wordpressServerIp())
+        .port(Integer.parseInt(conf.wordpressServerApiPort()))
         .addPathSegment("wp-json")
         .addPathSegment("wp")
         .addPathSegment("v2")

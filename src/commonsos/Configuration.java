@@ -121,6 +121,10 @@ public class Configuration {
     return environmentVariable("WORDPRESS_SERVER_IP", "127.0.0.1");
   }
   
+  public String wordpressServerApiPort() {
+    return environmentVariable("WORDPRESS_SERVER_API_PORT", "8080");
+  }
+  
   public String wordpressAccountDefaultPassword() {
     return environmentVariable("WORDPRESS_ACCOUNT_DEFAULT_PASSWORD", "test");
   }
