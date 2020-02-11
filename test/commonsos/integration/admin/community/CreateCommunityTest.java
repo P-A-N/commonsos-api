@@ -1,5 +1,6 @@
 package commonsos.integration.admin.community;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.ok;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -31,6 +32,7 @@ import commonsos.Configuration;
 import commonsos.integration.IntegrationTest;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
+import io.restassured.builder.MultiPartSpecBuilder;
 
 public class CreateCommunityTest extends IntegrationTest {
 
@@ -60,7 +62,8 @@ public class CreateCommunityTest extends IntegrationTest {
     wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(port));
     wireMockServer.start();
     WireMock.configureFor("http", "localhost", port);
-    stubFor(post(urlEqualTo("/wp-json/wp/v2"))
+    stubFor(post(urlEqualTo("/" + conf.wordpressServerApiCreateUserPath()))
+        .withHeader("Content-Type", containing("application/json"))
         .withBasicAuth(conf.wordpressBasicAuthorizationUsername(), conf.wordpressBasicAuthorizationPassword())
         .willReturn(ok()));
   }
@@ -76,7 +79,7 @@ public class CreateCommunityTest extends IntegrationTest {
 
     // create temporary account
     given()
-      .multiPart("communityName", "community1")
+      .multiPart(new MultiPartSpecBuilder("コミュニティ１").controlName("communityName").charset("UTF-8").build())
       .multiPart("tokenName", "com1")
       .multiPart("tokenSymbol", "com")
       .multiPart("wordpressAccountId", "community1_wp")
@@ -96,12 +99,13 @@ public class CreateCommunityTest extends IntegrationTest {
       .body("adminList.adminname", contains("tmp1", "tmp2"));
 
     // verify db
-    Community c = emService.get().createQuery("FROM Community WHERE name = 'community1'", Community.class).getSingleResult();
+    Community c = emService.get().createQuery("FROM Community WHERE name = 'コミュニティ１'", Community.class).getSingleResult();
     assertThat(c.getWordpressAccountId()).isEqualTo("community1_wp");
     assertThat(c.getWordpressAccountEmailAddress()).isEqualTo("community1@test.com");
     
     Thread.sleep(1000);
-    WireMock.verify(1, postRequestedFor(urlEqualTo("/wp-json/wp/v2")));
+    WireMock.verify(1, postRequestedFor(urlEqualTo("/" + conf.wordpressServerApiCreateUserPath())).withRequestBody(
+        WireMock.equalTo(String.format("{\"username\":\"community1_wp\",\"email\":\"community1@test.com\",\"name\":\"コミュニティ１\",\"password\":\"test\",\"roles\":\"nothing\",\"community_id\":%d}", c.getId()))));
   }
   
   @Test

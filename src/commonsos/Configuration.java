@@ -125,6 +125,10 @@ public class Configuration {
     return environmentVariable("WORDPRESS_SERVER_API_PORT", "8080");
   }
   
+  public String wordpressServerApiCreateUserPath() {
+    return environmentVariable("WORDPRESS_SERVER_API_CREATEUSER_PATH", "path/to/createuser");
+  }
+  
   public String wordpressAccountDefaultPassword() {
     return environmentVariable("WORDPRESS_ACCOUNT_DEFAULT_PASSWORD", "test");
   }
