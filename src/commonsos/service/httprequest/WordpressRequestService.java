@@ -40,15 +40,6 @@ public class WordpressRequestService extends AbstractHttpRequestService {
   
 
   public void sendCreateWordPressAccount(Long communityId, String wpUsername, String wpEmailAddress, String wpDisplayname) {
-    /*RequestBody body = new FormBody.Builder()
-        .add("username", wpUsername)
-        .add("email", wpEmailAddress)
-        .add("name", wpUsername)
-        .add("password", conf.wordpressAccountDefaultPassword())
-        .add("roles", conf.wordpressAccountDefaultAuthority())
-        .add("community_id", String.valueOf(communityId))
-        .build();*/
-    
     WordpressRequestBody body = new WordpressRequestBody()
         .setUsername(wpUsername)
         .setEmail(wpEmailAddress)
@@ -66,7 +57,7 @@ public class WordpressRequestService extends AbstractHttpRequestService {
         .build();
     
     try (Response response = execute(request)) {
-      if (response.code() != 200) throw new ServerErrorException(String.format("Failed to create WordPress account. [Status=%d, Message=%s]", response.code(), response.message()));
+      if (!response.isSuccessful()) throw new ServerErrorException(String.format("Failed to create WordPress account. [Status=%d, Message=%s]", response.code(), response.message()));
     }
   }
 }
