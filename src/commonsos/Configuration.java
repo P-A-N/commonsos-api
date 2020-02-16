@@ -33,6 +33,14 @@ public class Configuration {
     return environmentVariable("ETHEREUM_URL", "http://localhost:8545/");
   }
 
+  public String ethererumBasicAuthorizationUsername() {
+    return environmentVariable("ETHERERUM_BASIC_AUTHORIZATION_USERNAME", "");
+  }
+
+  public String ethererumBasicAuthorizationPassword() {
+    return environmentVariable("ETHERERUM_BASIC_AUTHORIZATION_PASSWORD", "");
+  }
+
   public String smtpHost() {
     return environmentVariable("SMTP_HOST", "localhost");
   }
