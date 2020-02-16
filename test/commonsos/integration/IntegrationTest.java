@@ -38,6 +38,7 @@ public class IntegrationTest {
 
   protected boolean isBlockchainEnable() { return false; }
   protected boolean imageuploadEnable() { return false; }
+  protected boolean wordpressServerEnable() { return false; }
   
   @BeforeAll
   public void setupIntegrationTest() {
@@ -49,6 +50,7 @@ public class IntegrationTest {
     TestServer testServer = new TestServer();
     testServer.setBlockchainEnable(isBlockchainEnable());
     testServer.setImageuploadEnable(imageuploadEnable());
+    testServer.setWordpressServerEnable(wordpressServerEnable());
     testServer.start(new String[]{});
     blockchainService = testServer.getBlockchainService();
     awaitInitialization();

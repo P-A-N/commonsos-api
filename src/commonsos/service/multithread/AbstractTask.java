@@ -4,12 +4,13 @@ import javax.inject.Inject;
 import javax.persistence.EntityTransaction;
 
 import commonsos.repository.EntityManagerService;
+import commonsos.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractTask implements Runnable {
 
-  private static int MAX_REPEAT_COUNT = 10;
+  private static int MAX_REPEAT_COUNT = 3;
   @Inject EntityManagerService entityManagerService;
 
   @Override
@@ -30,6 +31,7 @@ public abstract class AbstractTask implements Runnable {
       } catch (Exception e) {
         log.error(String.format("Task execution failed. Task:%s [repeat_count=%d]", this, i), e);
         if (transaction.isActive()) transaction.rollback();
+        ThreadUtil.sleep(1000);
       }
     }
     

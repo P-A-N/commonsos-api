@@ -39,6 +39,7 @@ import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.EthBalance;
 import commonsos.service.blockchain.TokenBalance;
 import commonsos.service.email.EmailService;
+import commonsos.service.httprequest.WordpressRequestService;
 import commonsos.service.image.ImageUploadService;
 import commonsos.service.notification.PushNotificationService;
 import spark.Spark;
@@ -51,6 +52,7 @@ public class TestServer extends Server {
   
   private boolean blockchainEnable = false;
   private boolean imageuploadEnable = false;
+  private boolean wordpressServerEnable = false;
   
   @Override
   protected void setupServer() {
@@ -116,6 +118,9 @@ public class TestServer extends Server {
     // firebase
     PushNotificationService pushNotificationService = mock(PushNotificationService.class);
     
+    // httpRequest
+    WordpressRequestService wordpressRequestService = mock(WordpressRequestService.class);
+    
     Module module = new AbstractModule() {
       @Override protected void configure() {
         bind(Gson.class).toProvider(GsonProvider.class);
@@ -131,6 +136,10 @@ public class TestServer extends Server {
 
         if (!imageuploadEnable) {
           bind(ImageUploadService.class).toInstance(imageUploadService);
+        }
+        
+        if (!wordpressServerEnable) {
+          bind(WordpressRequestService.class).toInstance(wordpressRequestService);
         }
         
         bind(PushNotificationService.class).toInstance(pushNotificationService);
@@ -160,6 +169,10 @@ public class TestServer extends Server {
 
   public void setImageuploadEnable(boolean imageuploadEnable) {
     this.imageuploadEnable = imageuploadEnable;
+  }
+
+  public void setWordpressServerEnable(boolean wordpressServerEnable) {
+    this.wordpressServerEnable = wordpressServerEnable;
   }
   
   private void checkBlockchainIsConnected() {

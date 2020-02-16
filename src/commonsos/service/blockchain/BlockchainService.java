@@ -50,6 +50,7 @@ import commonsos.repository.entity.Community;
 import commonsos.repository.entity.User;
 import commonsos.repository.entity.WalletType;
 import commonsos.service.AbstractService;
+import commonsos.util.ThreadUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Singleton
@@ -63,11 +64,13 @@ public class BlockchainService extends AbstractService {
   public static final BigInteger TOKEN_SET_NAME_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_MINT_BURN_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("4700000");
-  public static final BigInteger GAS_PRICE = new BigInteger("18000000000");
+  public static final BigInteger GAS_PRICE = new BigInteger("0");
 
   public static final int NUMBER_OF_DECIMALS = 18;
   private static final BigInteger MAX_UINT_256 = new BigInteger("2").pow(256);
   public static final BigInteger INITIAL_TOKEN_AMOUNT = MAX_UINT_256.divide(TEN.pow(NUMBER_OF_DECIMALS)).subtract(ONE);
+
+  private static int MAX_REPEAT_COUNT = 3;
 
   @Inject CommunityRepository communityRepository;
   @Inject TokenTransactionRepository tokenTransactionRepository;
@@ -80,8 +83,7 @@ public class BlockchainService extends AbstractService {
     try {
       web3j.ethBlockNumber().send();
       return true;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       log.warn("Blockchain error "+ e.getMessage());
       return false;
     }
@@ -95,7 +97,7 @@ public class BlockchainService extends AbstractService {
   public boolean isAllowed(String address, Community community, BigInteger floor) {
     try {
       Token token = loadTokenReadOnly(community.getTokenContractAddress());
-      BigInteger allowance = token.allowance(address, community.getMainWalletAddress()).send();
+      BigInteger allowance = handle(() -> token.allowance(address, community.getMainWalletAddress()).send());
       log.info(String.format("Token allowance info. communityId=%d, address=%s, allowance=%d", community.getId(), address, allowance));
       return allowance.compareTo(floor) >= 0;
     } catch (Exception e) {
@@ -165,7 +167,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.transferFrom(remitter.getWalletAddress(), beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
     
@@ -198,7 +200,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.transferFrom(remitter.getWalletAddress(), community.getFeeWalletAddress(), toTokensWithoutDecimals(feeAmount)).send();
     });
 
@@ -234,7 +236,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_TRANSFER_GAS_LIMIT);
 
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.transfer(beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
     
@@ -260,7 +262,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.transferFrom(feeCredentials.getAddress(), beneficiary.getWalletAddress(), toTokensWithoutDecimals(amount)).send();
     });
 
@@ -279,14 +281,14 @@ public class BlockchainService extends AbstractService {
     if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
     
     TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH)); // 15s * 40 = 10m
-    return Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
+    return handle(() -> Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT)));
   }
 
   Token loadTokenReadOnly(String tokenContractAddress) {
     if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
     
     String walletAddress = systemCredentials().getAddress();
-    return Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT));
+    return handle(() -> Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT)));
   }
 
   public void transferEther(Community community, String beneficiaryAddress, BigInteger amount, boolean waitUntilCompleted) {
@@ -304,7 +306,7 @@ public class BlockchainService extends AbstractService {
     else trp = new NoOpProcessor(web3j);
     
     log.info(String.format("transferEther %d to %s", amount, beneficiaryAddress));
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       TransactionManager tm = new RawTransactionManager(web3j, credentials, ChainId.NONE, trp);
       Transfer transfer = new Transfer(web3j, tm);
       return transfer.sendFunds(beneficiaryAddress, new BigDecimal(amount), Unit.WEI).send();
@@ -313,15 +315,26 @@ public class BlockchainService extends AbstractService {
     return receipt.getTransactionHash();
   }
 
-  private <T> T handleBlockchainException(Callable<T> callable) {
-    try {
-      return callable.call();
+  private <T> T handle(Callable<T> callable) {
+    T result = null;
+    for (int i = 0; i < MAX_REPEAT_COUNT; i++ ) {
+      try {
+        result = callable.call();
+        break;
+      } catch (Exception e) {
+        if (e.getMessage().contains("Rate limit")) {
+          log.error(String.format("Blockchain execution failed. [repeat_count=%d]", i), e);
+          ThreadUtil.sleep(1000);
+          continue;
+        }
+        if (e.getMessage().contains("insufficient funds for gas")) {
+          throw DisplayableException.OUT_OF_ETHER;
+        }
+        throw new ServerErrorException(e);
+      }
     }
-    catch (Exception e) {
-      if (e.getMessage().contains("insufficient funds for gas"))
-        throw DisplayableException.OUT_OF_ETHER;
-      throw new ServerErrorException(e);
-    }
+    
+    return result;
   }
 
   public String createToken(User owner, String symbol, String name) {
@@ -330,51 +343,37 @@ public class BlockchainService extends AbstractService {
   }
 
   public String createToken(Credentials credentials, String symbol, String name) {
-    return handleBlockchainException(() -> {
-      log.info("Deploying token contract: " + name + " (" + symbol + "), owner: " + credentials.getAddress());
-      Token token = handleBlockchainException(() -> {
-        return Token.deploy(
-            web3j,
-            credentials,
-            new StaticGasProvider(GAS_PRICE, TOKEN_DEPLOYMENT_GAS_LIMIT),
-            name,
-            symbol,
-            INITIAL_TOKEN_AMOUNT).send();
-      });
-      if (!token.isValid()) {
-        if (token.getTransactionReceipt().isPresent()) {
-          throw new ServerErrorException("Deploying token contract " + token.getTransactionReceipt().get().getTransactionHash() + " failed");
-        } else {
-          throw new ServerErrorException("Deploying token contract " + token.getContractAddress() + " failed");
-        }
-      }
-      
-      log.info("Deploy successful, contract address: " + token.getContractAddress());
-      return token.getContractAddress();
+    log.info("Deploying token contract: " + name + " (" + symbol + "), owner: " + credentials.getAddress());
+    Token token = handle(() -> {
+      return Token.deploy(
+          web3j,
+          credentials,
+          new StaticGasProvider(GAS_PRICE, TOKEN_DEPLOYMENT_GAS_LIMIT),
+          name,
+          symbol,
+          INITIAL_TOKEN_AMOUNT).send();
     });
+    if (!handle(() -> token.isValid())) {
+      if (token.getTransactionReceipt().isPresent()) {
+        throw new ServerErrorException("Deploying token contract " + token.getTransactionReceipt().get().getTransactionHash() + " failed");
+      } else {
+        throw new ServerErrorException("Deploying token contract " + token.getContractAddress() + " failed");
+      }
+    }
+
+    log.info("Deploy successful, contract address: " + token.getContractAddress());
+    return token.getContractAddress();
   }
 
   public BigDecimal getSystemEthBalance() {
     Credentials credentials = systemCredentials();
-    EthGetBalance ethGetBalance;
-    try {
-      ethGetBalance = web3j.ethGetBalance(credentials.getAddress(), DefaultBlockParameterName.LATEST).send();
-    } catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
-    
+    EthGetBalance ethGetBalance = handle(() -> web3j.ethGetBalance(credentials.getAddress(), DefaultBlockParameterName.LATEST).send());
     BigDecimal balance = toTokensWithDecimals(ethGetBalance.getBalance());
     return balance;
   }
 
   public EthBalance getEthBalance(Community community) {
-    EthGetBalance ethGetBalance;
-    try {
-      ethGetBalance = web3j.ethGetBalance(community.getMainWalletAddress(), DefaultBlockParameterName.LATEST).send();
-    } catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
-    
+    EthGetBalance ethGetBalance = handle(() -> web3j.ethGetBalance(community.getMainWalletAddress(), DefaultBlockParameterName.LATEST).send());
     BigDecimal balance = toTokensWithDecimals(ethGetBalance.getBalance());
     EthBalance ethBalance = new EthBalance()
         .setCommunityId(community.getId())
@@ -384,15 +383,10 @@ public class BlockchainService extends AbstractService {
   }
 
   public BigDecimal getEthBalance(String address) {
-    try {
-      log.info("balance request for " + address);
-      BigInteger balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance();
-      log.info("balance request for " + address + " complete, balance=" + balance.toString());
-      return toTokensWithDecimals(balance);
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
+    log.info("balance request for " + address);
+    BigInteger balance = handle(() -> web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send().getBalance());
+    log.info("balance request for " + address + " complete, balance=" + balance.toString());
+    return toTokensWithDecimals(balance);
   }
 
   public TokenBalance getTokenBalance(Long communityId, WalletType walletType) {
@@ -461,16 +455,11 @@ public class BlockchainService extends AbstractService {
   }
   
   private BigDecimal getTokenBalanceFromBlockchain(Long communityId, String walletAddress, String tokenContractAddress) {
-    try {
-      log.info("Token balance request for: " + walletAddress);
-      Token token = loadTokenReadOnly(tokenContractAddress);
-      BigInteger balance = token.balanceOf(walletAddress).send();
-      log.info("Token balance request complete, balance " + balance.toString());
-      return toTokensWithDecimals(balance);
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
+    log.info("Token balance request for: " + walletAddress);
+    Token token = loadTokenReadOnly(tokenContractAddress);
+    BigInteger balance = handle(() -> token.balanceOf(walletAddress).send());
+    log.info("Token balance request complete, balance " + balance.toString());
+    return toTokensWithDecimals(balance);
   }
   
   public String tokenName(String tokenAddress) {
@@ -487,18 +476,13 @@ public class BlockchainService extends AbstractService {
     String tokenName = cache.getTokenName(tokenAddress);
     if (tokenName != null) return tokenName;
 
-    try {
-      log.info(String.format("Token name request for: tokenAddress=%s", tokenAddress));
-      Token token = loadTokenReadOnly(tokenAddress);
-      tokenName = token.name().send();
-      log.info(String.format("Token name request complete: name=%s, tokenAddress=%s", tokenName, tokenAddress));
-      
-      cache.setTokenName(tokenAddress, tokenName == null ? "" : tokenName);
-      return tokenName;
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
+    log.info(String.format("Token name request for: tokenAddress=%s", tokenAddress));
+    Token token = loadTokenReadOnly(tokenAddress);
+    tokenName = handle(() -> token.name().send());
+    log.info(String.format("Token name request complete: name=%s, tokenAddress=%s", tokenName, tokenAddress));
+
+    cache.setTokenName(tokenAddress, tokenName == null ? "" : tokenName);
+    return tokenName;
   }
 
   public String tokenSymbol(String tokenAddress) {
@@ -515,18 +499,13 @@ public class BlockchainService extends AbstractService {
     String tokenSymbol = cache.getTokenSymbol(tokenAddress);
     if (tokenSymbol != null) return tokenSymbol;
 
-    try {
-      log.info(String.format("Token symbol request for: tokenAddress=%s", tokenAddress));
-      Token token = loadTokenReadOnly(tokenAddress);
-      tokenSymbol = token.symbol().send();
-      log.info(String.format("Token symbol request complete: symbol=%s, tokenAddress=%s", tokenSymbol, tokenAddress));
-      
-      cache.setTokenSymbol(tokenAddress, tokenSymbol == null ? "" : tokenSymbol);
-      return tokenSymbol;
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
+    log.info(String.format("Token symbol request for: tokenAddress=%s", tokenAddress));
+    Token token = loadTokenReadOnly(tokenAddress);
+    tokenSymbol = handle(() -> token.symbol().send());
+    log.info(String.format("Token symbol request complete: symbol=%s, tokenAddress=%s", tokenSymbol, tokenAddress));
+
+    cache.setTokenSymbol(tokenAddress, tokenSymbol == null ? "" : tokenSymbol);
+    return tokenSymbol;
   }
 
   public BigDecimal totalSupply(String tokenAddress) {
@@ -543,19 +522,14 @@ public class BlockchainService extends AbstractService {
     BigDecimal totalSupply = cache.getTotalSupply(tokenAddress);
     if (totalSupply != null) return totalSupply;
 
-    try {
-      log.info(String.format("Token total supply request for: tokenAddress=%s", tokenAddress));
-      Token token = loadTokenReadOnly(tokenAddress);
-      BigInteger totalSupplyInWei = token.totalSupply().send();
-      log.info(String.format("Token total supply complete: totalSupply=%d, tokenAddress=%s", totalSupplyInWei, tokenAddress));
-      
-      totalSupply = totalSupplyInWei == null ? BigDecimal.ZERO : toTokensWithDecimals(totalSupplyInWei);
-      cache.setTotalSupply(tokenAddress, totalSupply);
-      return totalSupply;
-    }
-    catch (Exception e) {
-      throw new ServerErrorException(e);
-    }
+    log.info(String.format("Token total supply request for: tokenAddress=%s", tokenAddress));
+    Token token = loadTokenReadOnly(tokenAddress);
+    BigInteger totalSupplyInWei = handle(() -> token.totalSupply().send());
+    log.info(String.format("Token total supply complete: totalSupply=%d, tokenAddress=%s", totalSupplyInWei, tokenAddress));
+
+    totalSupply = totalSupplyInWei == null ? BigDecimal.ZERO : toTokensWithDecimals(totalSupplyInWei);
+    cache.setTotalSupply(tokenAddress, totalSupply);
+    return totalSupply;
   }
   
   public String updateTokenName(Community community, String newTokenName) {
@@ -569,7 +543,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_SET_NAME_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.setName(newTokenName).send();
     });
     
@@ -590,7 +564,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_MINT_BURN_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return isBurn ? token.burn(toTokensWithoutDecimals(absAmount)).send() : token.mint(toTokensWithoutDecimals(absAmount)).send();
     });
     
@@ -625,7 +599,7 @@ public class BlockchainService extends AbstractService {
         GAS_PRICE,
         TOKEN_APPROVE_GAS_LIMIT);
     
-    TransactionReceipt receipt = handleBlockchainException(() -> {
+    TransactionReceipt receipt = handle(() -> {
       return token.approve(community.getMainWalletAddress(), INITIAL_TOKEN_AMOUNT).send();
     });
     

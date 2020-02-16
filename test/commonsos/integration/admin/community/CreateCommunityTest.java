@@ -46,6 +46,9 @@ public class CreateCommunityTest extends IntegrationTest {
   private Configuration conf = new Configuration();
   private WireMockServer wireMockServer;
   
+  @Override
+  protected boolean wordpressServerEnable() { return true; }
+  
   @BeforeEach
   public void setup() throws Exception {
     ncl = create(new Admin().setEmailAddress("ncl@before.each.com").setPasswordHash(hash("password")).setRole(NCL));
