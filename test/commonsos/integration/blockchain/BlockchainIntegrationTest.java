@@ -156,8 +156,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // create eth balance history batch
     createEthBalanceHistory();
-    checkEthBalanceHistoryOfCommunity(community1, equalTo(0F));
-    checkEthBalanceHistoryOfCommunity(community2, equalTo(0F));
+    checkEthBalanceHistoryOfCommunity(community1, equalTo(0));
+    checkEthBalanceHistoryOfCommunity(community2, equalTo(0));
   }
 
   private Community createCommunity(

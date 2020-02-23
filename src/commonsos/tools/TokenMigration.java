@@ -4,7 +4,6 @@ import static commonsos.repository.entity.WalletType.MAIN;
 import static commonsos.service.UserService.WALLET_PASSWORD;
 import static commonsos.service.blockchain.BlockchainService.INITIAL_TOKEN_AMOUNT;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -14,7 +13,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.web3j.crypto.Credentials;
-import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,7 +38,6 @@ public class TokenMigration {
   private static CommunityRepository communityRepository;
   private static UserRepository userRepository;
   private static TokenTransactionRepository transactionRepository;
-  private static Credentials credentials;
   private static TaskExecutorService taskExecutorService;
   private static Scanner scanner = new Scanner(System.in);
 
@@ -48,7 +45,6 @@ public class TokenMigration {
   public static void main(String[] args) throws Exception {
     checkArguments(args);
     prepareInstances();
-    getCredentials(args);
     checkTXDone();
 
     System.out.println("Token migration started.\n");
@@ -74,14 +70,11 @@ public class TokenMigration {
       emService.runInTransaction(() -> {
         communityRepository.lockForUpdate(c);
 
-        transferEtherToMainWallet(c);
         String newTokenAddress = createToken(c);
         c.setTokenContractAddress(newTokenAddress);
         
-        transferEtherToMainWallet(c);
         allowMainWallet(c);
         
-        transferEtherToMainWallet(c);
         transferToken(c);
         
         checkTokenBalance(c);
@@ -121,12 +114,6 @@ public class TokenMigration {
     userRepository = injector.getInstance(UserRepository.class);
     transactionRepository = injector.getInstance(TokenTransactionRepository.class);
     taskExecutorService = injector.getInstance(TaskExecutorService.class);
-  }
-
-  private static void getCredentials(String[] args) throws Exception {
-    System.out.print("Please unlock Commons OS wallet: ");
-    String password = scanner.nextLine();
-    credentials = WalletUtils.loadCredentials(password, new File(args[0]));
   }
 
   private static void checkTXDone() {
@@ -169,22 +156,7 @@ public class TokenMigration {
     return newTokenAddress;
   }
 
-  private static void transferEtherToMainWallet(Community c) {
-    BigDecimal balance = blockchainService.getEthBalance(c.getMainWalletAddress());
-    System.out.println(String.format("Balance of main wallet=%f [wallet address=%s]", balance, c.getMainWalletAddress()));
-    if (balance.compareTo(BigDecimal.TEN.pow(4)) < 0) {
-      BigInteger amount = BigInteger.TEN.pow(18 + 5);
-      System.out.println(String.format("Transfer ether to main wallet [wallet address=%s, transferAmount=%d]", c.getMainWalletAddress(), amount));
-      blockchainService.transferEther(credentials, c.getMainWalletAddress(), amount, true);
-      System.out.println(String.format("Finish transfer ether to main wallet [wallet address=%s, transferAmount=%d]", c.getMainWalletAddress(), amount));
-    }
-    
-    System.out.println();
-  }
-
   private static void allowMainWallet(Community c) throws Exception {
-    waitUntilTransferredEther(c.getMainWalletAddress());
-    
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
@@ -196,8 +168,6 @@ public class TokenMigration {
   }
 
   private static void transferToken(Community c) throws Exception {
-    waitUntilTransferredEther(c.getMainWalletAddress());
-    
     List<User> userList = userRepository.search(c.getId(), null, null).getList();
     for (int i = 0; i < userList.size(); i++) {
       User u = userList.get(i);
@@ -224,19 +194,6 @@ public class TokenMigration {
         System.out.println(String.format("Token balance is OK. [users=%s, community=%s, balance=%f]", u.getUsername(), c.getName(), balanceFromBlockchain));
       } else {
         System.out.println(String.format("Token balance isn't OK. [users=%s, community=%s, balanceFromTransactions=%f, balanceFromBlockchain=%f]", u.getUsername(), c.getName(), balanceFromTransactions, balanceFromBlockchain));
-      }
-    }
-  }
-  
-  private static void waitUntilTransferredEther(String address) throws Exception {
-    BigDecimal balance = blockchainService.getEthBalance(address);
-    
-    while (balance.compareTo(BigDecimal.valueOf(1000)) < 0) {
-      System.out.println(String.format("Waiting for transferred ether [address=%s, balance=%f]", address, balance));
-      Thread.sleep(10000);
-      balance = blockchainService.getEthBalance(address);
-      if (balance.compareTo(BigDecimal.valueOf(1000)) >= 0) {
-        System.out.println(String.format("Transferred ether [address=%s, balance=%f]", address, balance));
       }
     }
   }
