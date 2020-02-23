@@ -440,6 +440,7 @@ public class BlockchainService extends AbstractService {
       
       if (balanceOnBlockchain.compareTo(settleAmount) == 0) {
         balance = settleAmount.subtract(pendingAmount);
+        break;
       } else {
         log.info(String.format("balance mismatched. [balanceOnBlockchain=%f, settleAmount=%f, pendingAmount=%f]", balanceOnBlockchain, settleAmount, pendingAmount));
       }
