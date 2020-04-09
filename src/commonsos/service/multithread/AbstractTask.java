@@ -41,6 +41,12 @@ public abstract class AbstractTask implements Runnable {
   protected int getMaxRepeatCount() {
     return MAX_REPEAT_COUNT;
   }
+
+  protected void commitAndStartNewTran() {
+    EntityTransaction transaction = entityManagerService.get().getTransaction();
+    if (transaction.isActive()) transaction.commit();
+    transaction.begin();
+  }
   
   public abstract void runTask();
 }

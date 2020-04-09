@@ -30,16 +30,12 @@ import commonsos.exception.ForbiddenException;
 import commonsos.repository.AdRepository;
 import commonsos.repository.AdminRepository;
 import commonsos.repository.CommunityRepository;
-import commonsos.repository.MessageRepository;
-import commonsos.repository.MessageThreadRepository;
 import commonsos.repository.RedistributionRepository;
 import commonsos.repository.TokenTransactionRepository;
 import commonsos.repository.UserRepository;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
-import commonsos.repository.entity.Message;
-import commonsos.repository.entity.MessageThread;
 import commonsos.repository.entity.Redistribution;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.Role;
@@ -49,10 +45,10 @@ import commonsos.repository.entity.WalletType;
 import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.TokenBalance;
-import commonsos.service.notification.PushNotificationService;
-import commonsos.service.sync.SyncService;
+import commonsos.service.multithread.CreateTokenTransactionFromAdminTask;
+import commonsos.service.multithread.CreateTokenTransactionFromUserTask;
+import commonsos.service.multithread.TaskExecutorService;
 import commonsos.util.AdminUtil;
-import commonsos.util.MessageUtil;
 import commonsos.util.PaginationUtil;
 import commonsos.util.UserUtil;
 import commonsos.util.ValidateUtil;
@@ -70,13 +66,10 @@ public class TokenTransactionService extends AbstractService {
   @Inject private AdminRepository adminRepository;
   @Inject private AdRepository adRepository;
   @Inject private CommunityRepository communityRepository;
-  @Inject private MessageThreadRepository messageThreadRepository;
-  @Inject private MessageRepository messageRepository;
   @Inject private RedistributionRepository redistributionRepository;
   @Inject private BlockchainService blockchainService;
   @Inject private BlockchainEventService blockchainEventService;
-  @Inject private SyncService syncService;
-  @Inject private PushNotificationService pushNotificationService;
+  @Inject private TaskExecutorService taskExecutorService;
   @Inject private Configuration config;
 
   public TokenBalance getTokenBalanceForAdmin(Admin admin, Long communityId, WalletType walletType) {
@@ -244,19 +237,10 @@ public class TokenTransactionService extends AbstractService {
 
     repository.create(transaction);
 
-    String blockchainTransactionHash = blockchainService.transferTokensFromUserToUser(user, beneficiary, command.getCommunityId(), transaction.getAmount());
-    commitAndStartNewTran();
-    
-    repository.lockForUpdate(transaction);
-    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
-    repository.update(transaction);
-    
-    blockchainEventService.checkTransaction(blockchainTransactionHash);
-    commitAndStartNewTran();
-    
     // create transaction for fee
+    TokenTransaction feeTransaction = null;
     if (community.getFee().compareTo(ZERO) > 0) {
-      TokenTransaction feeTransaction = new TokenTransaction()
+      feeTransaction = new TokenTransaction()
         .setCommunityId(command.getCommunityId())
         .setRemitterUserId(user.getId())
         .setAmount(feeAmount)
@@ -265,38 +249,11 @@ public class TokenTransactionService extends AbstractService {
         .setWalletDivision(WalletType.FEE);
 
       repository.create(feeTransaction);
-
-      String blockchainTransactionHashOfFee = blockchainService.transferTokensFee(user, command.getCommunityId(), feeTransaction.getAmount());
-      commitAndStartNewTran();
-      
-      repository.lockForUpdate(feeTransaction);
-      feeTransaction.setBlockchainTransactionHash(blockchainTransactionHashOfFee);
-      repository.update(feeTransaction);
-      
-      blockchainEventService.checkTransaction(blockchainTransactionHashOfFee);
-      commitAndStartNewTran();
     }
-    
-    // create message
-    MessageThread thread = null;
-    if (command.getAdId() != null) {
-      User adCreator = userRepository.findStrictById(ad.getCreatedUserId());
-      User notAdCreator = adCreator.equals(user) ? beneficiary : user;
-      Optional<MessageThread> threadForAd = messageThreadRepository.findByCreaterAndAdId(notAdCreator.getId(), command.getAdId());
-      thread = threadForAd.orElseGet(() -> syncService.createMessageThreadForAd(adCreator, notAdCreator, command.getAdId()));
-    } else {
-      Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(user.getId(), beneficiary.getId(), community.getId());
-      thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithUser(user, beneficiary, community));
-    }
-    String messageText = MessageUtil.getSystemMessageTokenSend1(user.getUsername(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol(), command.getDescription());
-    messageRepository.create(new Message()
-        .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
-        .setThreadId(thread.getId())
-        .setText(messageText));
     commitAndStartNewTran();
     
-    pushNotificationService.send(user, user, messageText, thread, messageRepository.unreadMessageCount(user.getId(), thread.getId()));
-    pushNotificationService.send(user, beneficiary, messageText, thread, messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId()));
+    CreateTokenTransactionFromUserTask task = new CreateTokenTransactionFromUserTask(user, beneficiary, community, tokenBalance.getToken(), ad, transaction, feeTransaction);
+    taskExecutorService.execute(task);
 
     return transaction;
   }
@@ -327,30 +284,11 @@ public class TokenTransactionService extends AbstractService {
       .setAmount(command.getAmount());
 
     repository.create(transaction);
-
-    String blockchainTransactionHash = blockchainService.transferTokensFromCommunity(community, command.getWallet(), beneficiary, command.getAmount());
     commitAndStartNewTran();
 
-    repository.lockForUpdate(transaction);
-    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
-    repository.update(transaction);
+    CreateTokenTransactionFromAdminTask task = new CreateTokenTransactionFromAdminTask(community, command.getWallet(), tokenBalance.getToken(), beneficiary, transaction);
+    taskExecutorService.execute(task);
     
-    blockchainEventService.checkTransaction(blockchainTransactionHash);
-    commitAndStartNewTran();
-
-    // create message
-    Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
-    MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
-    String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), command.getAmount(), tokenBalance.getToken().getTokenSymbol());
-    messageRepository.create(new Message()
-        .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
-        .setThreadId(thread.getId())
-        .setText(messageText));
-    commitAndStartNewTran();
-    
-    Integer unreadCount = messageRepository.unreadMessageCount(beneficiary.getId(), thread.getId());
-    pushNotificationService.send(community, beneficiary, messageText, thread, unreadCount);
-
     return transaction;
   }
 

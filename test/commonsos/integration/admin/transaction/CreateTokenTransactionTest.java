@@ -56,7 +56,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
   }
 
   @Test
-  public void createTransaction_ncl() {
+  public void createTransaction_ncl() throws Exception {
     sessionId = loginAdmin(ncl.getEmailAddress(), "password");
 
     // send token from main wallet
@@ -66,6 +66,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
       .body(gson.toJson(requestParam))
       .when().post("/admin/transactions/coin")
       .then().statusCode(200);
+    Thread.sleep(1000); // wait until multi thread is done.
 
     // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction ORDER BY id DESC", TokenTransaction.class).setMaxResults(1).getSingleResult();

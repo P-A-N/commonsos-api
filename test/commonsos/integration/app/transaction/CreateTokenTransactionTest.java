@@ -74,6 +74,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
+    Thread.sleep(1000); // wait until multi thread is done.
     
     // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE adId = :adId ORDER BY id DESC", TokenTransaction.class)
@@ -269,7 +270,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
   }
 
   @Test
-  public void transactionBetweenUser() {
+  public void transactionBetweenUser() throws Exception {
     Map<String, Object> requestParam = new HashMap<>();
     requestParam.put("communityId", community.getId());
     requestParam.put("beneficiaryId", adCreator.getId());
@@ -286,6 +287,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
+    Thread.sleep(1000); // wait until multi thread is done.
     
     // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryUserId = :userId", TokenTransaction.class)

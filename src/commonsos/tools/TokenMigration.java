@@ -1,7 +1,6 @@
 package commonsos.tools;
 
 import static commonsos.repository.entity.WalletType.MAIN;
-import static commonsos.service.UserService.WALLET_PASSWORD;
 import static commonsos.service.blockchain.BlockchainService.INITIAL_TOKEN_AMOUNT;
 
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
+import commonsos.Configuration;
 import commonsos.di.Web3jProvider;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.EntityManagerService;
@@ -39,6 +39,7 @@ public class TokenMigration {
   private static UserRepository userRepository;
   private static TokenTransactionRepository transactionRepository;
   private static TaskExecutorService taskExecutorService;
+  private static Configuration config;
   private static Scanner scanner = new Scanner(System.in);
 
 
@@ -114,6 +115,7 @@ public class TokenMigration {
     userRepository = injector.getInstance(UserRepository.class);
     transactionRepository = injector.getInstance(TokenTransactionRepository.class);
     taskExecutorService = injector.getInstance(TaskExecutorService.class);
+    config = injector.getInstance(Configuration.class);
   }
 
   private static void checkTXDone() {
@@ -126,13 +128,13 @@ public class TokenMigration {
 
   private static void createWallet(Community c) {
     if (StringUtils.isEmpty(c.getMainWallet())) {
-      String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
-      Credentials mainCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
+      String mainWallet = blockchainService.createWallet(config.communityWalletPassword());
+      Credentials mainCredentials = blockchainService.credentials(mainWallet, config.communityWalletPassword());
       c.setMainWallet(mainWallet);
       c.setMainWalletAddress(mainCredentials.getAddress());
       
-      String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
-      Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
+      String feeWallet = blockchainService.createWallet(config.communityWalletPassword());
+      Credentials feeCredentials = blockchainService.credentials(feeWallet, config.communityWalletPassword());
       c.setFeeWallet(feeWallet);
       c.setFeeWalletAddress(feeCredentials.getAddress());
       
@@ -148,7 +150,7 @@ public class TokenMigration {
     System.out.print("Please enter community's token symbol: ");
     String tokenSymbol = scanner.nextLine();
     
-    Credentials credentials = blockchainService.credentials(c.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = blockchainService.credentials(c.getMainWallet(), config.communityWalletPassword());
     String newTokenAddress = blockchainService.createToken(credentials, tokenSymbol, tokenName);
 
     System.out.println(String.format("Finished creating community's token [Community name=%s, Token address=%s]", c.getName(), newTokenAddress));

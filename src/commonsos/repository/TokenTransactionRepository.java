@@ -14,6 +14,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import commonsos.command.PaginationCommand;
+import commonsos.exception.TokenTransactionNotFoundException;
 import commonsos.repository.entity.Ad;
 import commonsos.repository.entity.ResultList;
 import commonsos.repository.entity.TokenTransaction;
@@ -31,6 +32,22 @@ public class TokenTransactionRepository extends Repository {
   public TokenTransaction create(TokenTransaction transaction) {
     em().persist(transaction);
     return transaction;
+  }
+
+  public Optional<TokenTransaction> findById(Long id) {
+    try {
+      return Optional.of(em().createQuery("FROM TokenTransaction WHERE id = :id", TokenTransaction.class)
+        .setParameter("id", id)
+        .getSingleResult()
+      );
+    }
+    catch (NoResultException e) {
+        return empty();
+    }
+  }
+
+  public TokenTransaction findStrictById(Long id) {
+    return findById(id).orElseThrow(TokenTransactionNotFoundException::new);
   }
 
   public ResultList<TokenTransaction> searchUserTran(User user, Long communityId, PaginationCommand pagination) {

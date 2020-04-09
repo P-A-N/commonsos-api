@@ -1,6 +1,5 @@
 package commonsos.service.blockchain;
 
-import static commonsos.service.UserService.WALLET_PASSWORD;
 import static java.lang.String.format;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
@@ -64,7 +63,6 @@ public class BlockchainService extends AbstractService {
   public static final BigInteger TOKEN_SET_NAME_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_MINT_BURN_GAS_LIMIT = new BigInteger("90000");
   public static final BigInteger TOKEN_DEPLOYMENT_GAS_LIMIT = new BigInteger("4700000");
-  public static final BigInteger GAS_PRICE = new BigInteger("0");
 
   public static final int NUMBER_OF_DECIMALS = 18;
   private static final BigInteger MAX_UINT_256 = new BigInteger("2").pow(256);
@@ -160,11 +158,11 @@ public class BlockchainService extends AbstractService {
         amount,
         community.getTokenContractAddress()));
     
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {
@@ -193,11 +191,11 @@ public class BlockchainService extends AbstractService {
         feeAmount,
         community.getTokenContractAddress()));
     
-    Credentials mainCredentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials mainCredentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     Token token = loadToken(
         mainCredentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {
@@ -228,12 +226,12 @@ public class BlockchainService extends AbstractService {
   }
 
   private String transferTokensFromMainWallet(Community community, User beneficiary, BigDecimal amount) {
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), config.communityWalletPassword());
 
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_TRANSFER_GAS_LIMIT);
 
     TransactionReceipt receipt = handle(() -> {
@@ -244,7 +242,7 @@ public class BlockchainService extends AbstractService {
   }
 
   private String transferTokensFromFeeWallet(Community community, User beneficiary, BigDecimal amount) {
-    Credentials feeCredentials = credentials(community.getFeeWallet(), WALLET_PASSWORD);
+    Credentials feeCredentials = credentials(community.getFeeWallet(), config.communityWalletPassword());
 
     if (!isAllowed(feeCredentials.getAddress(), community, toTokensWithoutDecimals(amount))) {
       String message = String.format(
@@ -255,11 +253,11 @@ public class BlockchainService extends AbstractService {
       throw new ServerErrorException(message);
     }
 
-    Credentials mainCredentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials mainCredentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     Token token = loadToken(
         mainCredentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_TRANSFER_FROM_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {
@@ -281,18 +279,18 @@ public class BlockchainService extends AbstractService {
     if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
     
     TransactionManager transactionManager = new RawTransactionManager(web3j, remitterCredentials, ChainId.NONE, new PollingTransactionReceiptProcessor(web3j, DEFAULT_POLLING_FREQUENCY, DEFAULT_POLLING_ATTEMPTS_PER_TX_HASH)); // 15s * 40 = 10m
-    return handle(() -> Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT)));
+    return handle(() -> Token.load(tokenContractAddress, web3j, transactionManager, new StaticGasProvider(config.gasPrice(), TOKEN_TRANSFER_GAS_LIMIT)));
   }
 
   Token loadTokenReadOnly(String tokenContractAddress) {
     if (StringUtils.isEmpty(tokenContractAddress)) throw new DisplayableException("error.createTokenNotCompleted");
     
     String walletAddress = systemCredentials().getAddress();
-    return handle(() -> Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(GAS_PRICE, TOKEN_TRANSFER_GAS_LIMIT)));
+    return handle(() -> Token.load(tokenContractAddress, web3j, new ReadonlyTransactionManager(web3j, walletAddress), new StaticGasProvider(config.gasPrice(), TOKEN_TRANSFER_GAS_LIMIT)));
   }
 
   public void transferEther(Community community, String beneficiaryAddress, BigInteger amount, boolean waitUntilCompleted) {
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     transferEther(credentials, beneficiaryAddress, amount, waitUntilCompleted);
   }
 
@@ -338,7 +336,7 @@ public class BlockchainService extends AbstractService {
   }
 
   public String createToken(User owner, String symbol, String name) {
-    Credentials credentials = credentials(owner.getWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(owner.getWallet(), config.userWalletPassword());
     return createToken(credentials, symbol, name);
   }
 
@@ -348,7 +346,7 @@ public class BlockchainService extends AbstractService {
       return Token.deploy(
           web3j,
           credentials,
-          new StaticGasProvider(GAS_PRICE, TOKEN_DEPLOYMENT_GAS_LIMIT),
+          new StaticGasProvider(config.gasPrice(), TOKEN_DEPLOYMENT_GAS_LIMIT),
           name,
           symbol,
           INITIAL_TOKEN_AMOUNT).send();
@@ -537,11 +535,11 @@ public class BlockchainService extends AbstractService {
     String currentTokenName = tokenName(community.getTokenContractAddress());
     log.info(format("Updating token name. [communityId=%d, currentTokenName=%s, newTokenName=%s]", community.getId(), currentTokenName, newTokenName));
 
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_SET_NAME_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {
@@ -558,11 +556,11 @@ public class BlockchainService extends AbstractService {
     BigDecimal currentTotalSupply = totalSupply(community.getTokenContractAddress());
     log.info(format("Updating total supply. [communityId=%d, currentTotalSupply=%f, absAmount=%f, isBurn=%b]", community.getId(), currentTotalSupply, absAmount, isBurn));
 
-    Credentials credentials = credentials(community.getMainWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getMainWallet(), config.communityWalletPassword());
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_MINT_BURN_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {
@@ -578,7 +576,7 @@ public class BlockchainService extends AbstractService {
   public void approveFromUser(User user, Community community) {
     log.info(format("Approving token transfer. [communityId=%d, userId=%d, amount=%d]", community.getId(), user.getId(), INITIAL_TOKEN_AMOUNT));
 
-    Credentials credentials = credentials(user.getWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(user.getWallet(), config.userWalletPassword());
     String hash = approveOwner(credentials, community);
 
     log.info(format("Approving token transfer has sent. [hash=%s]", hash));
@@ -587,7 +585,7 @@ public class BlockchainService extends AbstractService {
   public void approveFromFeeWallet(Community community) {
     log.info(format("Approving token transfer of fee wallet. [communityId=%d, amount=%d]", community.getId(), INITIAL_TOKEN_AMOUNT));
 
-    Credentials credentials = credentials(community.getFeeWallet(), WALLET_PASSWORD);
+    Credentials credentials = credentials(community.getFeeWallet(), config.communityWalletPassword());
     String hash = approveOwner(credentials, community);
 
     log.info(format("Approving token transfer has sent. [hash=%s]", hash));
@@ -597,7 +595,7 @@ public class BlockchainService extends AbstractService {
     Token token = loadToken(
         credentials,
         community.getTokenContractAddress(),
-        GAS_PRICE,
+        config.gasPrice(),
         TOKEN_APPROVE_GAS_LIMIT);
     
     TransactionReceipt receipt = handle(() -> {

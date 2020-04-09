@@ -8,10 +8,11 @@ import static commonsos.repository.entity.WalletType.FEE;
 import static commonsos.repository.entity.WalletType.MAIN;
 import static io.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -59,15 +60,15 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilCommunityCreated();
     waitUntilAllowedFromFeeWallet(community1);
     waitUntilAllowedFromFeeWallet(community2);
-    checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0));
-    checkTokenBalanceOfCommunity(community2, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
-    checkTokenBalanceOfCommunity(community2, FEE, equalTo(0));
+//    checkTokenBalanceOfCommunity(community1, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
+    checkTokenBalanceOfCommunity(community1, FEE, 0D);
+//    checkTokenBalanceOfCommunity(community2, MAIN, greaterThan(BigInteger.valueOf((long) Math.pow(10, 6))));
+    checkTokenBalanceOfCommunity(community2, FEE, 0D);
     
     // update total supply
     updateTotalSupply(community1, Math.pow(10, 6));
     waitUntilUpdateTotalSupply(community1, Math.pow(10, 6));
-    checkTokenBalanceOfCommunity(community1, MAIN, equalTo((int) Math.pow(10, 6)));
+    checkTokenBalanceOfCommunity(community1, MAIN, Math.pow(10, 6));
     
     com1Admin = create(new Admin().setEmailAddress("com1Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community1));
     com2Admin = create(new Admin().setEmailAddress("com2Admin@test.com").setPasswordHash(hash("passpass")).setRole(COMMUNITY_ADMIN).setCommunity(community2));
@@ -78,9 +79,9 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     waitUntilAllowed(user1, community1);
     waitUntilAllowed(user2, community1);
     waitUntilAllowed(user2, community2);
-    checkBalanceOfUser(user1, community1, equalTo(0F));
-    checkBalanceOfUser(user2, community1, equalTo(0F));
-    checkBalanceOfUser(user2, community2, equalTo(0F));
+    checkBalanceOfUser(user1, community1, 0D);
+    checkBalanceOfUser(user2, community1, 0D);
+    checkBalanceOfUser(user2, community2, 0D);
     
     // check omite balance
     checkOmiteBalance();
@@ -88,14 +89,14 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com1Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(1000F));
+    checkBalanceOfUser(user1, community1, 1000D);
 
     // transfer token to user from user
     transferTokenFromUser(user1, user2, community1, 100);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899F));
-    checkBalanceOfUser(user2, community1, equalTo(100F));
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(1));
+    checkBalanceOfUser(user1, community1, 899D);
+    checkBalanceOfUser(user2, community1, 100D);
+    checkTokenBalanceOfCommunity(community1, FEE, 1D);
     
     // change a community of user
     changeCommunity(user1, asList(community2.getId()));
@@ -104,32 +105,32 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     // transfer token to user from admin (main)
     transferTokenFromAdmin(com2Admin, user1, MAIN, 1000);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(1000F));
+    checkBalanceOfUser(user1, community2, 1000D);
 
     // transfer token to user from user
     transferTokenFromUser(user1, user2, community2, 200);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community2, equalTo(798F));
-    checkBalanceOfUser(user2, community2, equalTo(200F));
-    checkTokenBalanceOfCommunity(community2, FEE, equalTo(2));
+    checkBalanceOfUser(user1, community2, 798D);
+    checkBalanceOfUser(user2, community2, 200D);
+    checkTokenBalanceOfCommunity(community2, FEE, 2D);
 
     // change a community of user
     changeCommunity(user1, asList(community1.getId(), community2.getId()));
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899F));
-    checkBalanceOfUser(user1, community2, equalTo(798F));
+    checkBalanceOfUser(user1, community1, 899D);
+    checkBalanceOfUser(user1, community2, 798D);
 
     // transfer token to user from admin (fee)
-    transferTokenFromAdmin(com1Admin, user1, FEE, 0.1F);
+    transferTokenFromAdmin(com1Admin, user1, FEE, 0.1D);
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899.1F));
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.9F));
+    checkBalanceOfUser(user1, community1, 899.1D);
+    checkTokenBalanceOfCommunity(community1, FEE, 0.9D);
     
     // transfer ether to community
-    checkEthBalanceOfCommunity(community1, equalTo(0));
-//    transferEtherToCommunity(community1, "1");
-//    waitUntilEthTransactionCompleted();
-//    checkEthBalanceOfCommunity(community1, greaterThan(1F));
+    checkEthBalanceOfCommunity(community1, lessThanOrEqualTo(1D));
+    transferEtherToCommunity(community1, "1");
+    waitUntilEthTransactionCompleted();
+    checkEthBalanceOfCommunity(community1, greaterThan(1D));
     
     // update token name
     updateTokenName(community1, "communit1_updated");
@@ -142,22 +143,22 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     createRedistribution(community2, false, user1, "30");
     redistribution();
     waitUntilTokenTransactionCompleted();
-    checkBalanceOfUser(user1, community1, equalTo(899.4F)); // +0.3
-    checkBalanceOfUser(user1, community2, equalTo(798.9F)); // +0.9
-    checkBalanceOfUser(user2, community1, equalTo(100.1F)); // +0.1
-    checkBalanceOfUser(user2, community2, equalTo(200.3F)); // +0.3
-    checkTokenBalanceOfCommunity(community1, FEE, equalTo(0.5F)); // -0.4
-    checkTokenBalanceOfCommunity(community2, FEE, equalTo(0.8F)); // -1.2
+    checkBalanceOfUser(user1, community1, 899.4D); // +0.3
+    checkBalanceOfUser(user1, community2, 798.9D); // +0.9
+    checkBalanceOfUser(user2, community1, 100.1D); // +0.1
+    checkBalanceOfUser(user2, community2, 200.3D); // +0.3
+    checkTokenBalanceOfCommunity(community1, FEE, 0.5D); // -0.4
+    checkTokenBalanceOfCommunity(community2, FEE, 0.8D); // -1.2
 
     // update total supply
     updateTotalSupply(community1, Math.pow(10, 7));
     waitUntilUpdateTotalSupply(community1, Math.pow(10, 7));
-    checkTokenBalanceOfCommunity(community1, MAIN, equalTo((int) (Math.pow(10, 7) - 899.4d - 100.1d - 0.5d)));
+    checkTokenBalanceOfCommunity(community1, MAIN, Math.pow(10, 7) - 899.4d - 100.1D - 0.5D);
     
     // create eth balance history batch
     createEthBalanceHistory();
-    checkEthBalanceHistoryOfCommunity(community1, equalTo(0));
-    checkEthBalanceHistoryOfCommunity(community2, equalTo(0));
+    checkEthBalanceHistoryOfCommunity(community1, greaterThan(1D));
+    checkEthBalanceHistoryOfCommunity(community2, lessThanOrEqualTo(1D));
   }
 
   private Community createCommunity(
@@ -214,8 +215,8 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     
     // get accessId
     List<WiserMessage> messages = wiser.getMessages();
-    assertThat(messages.size()).isEqualTo(1);
-    assertThat(messages.get(0).getEnvelopeReceiver()).isEqualTo(requestParam.get("emailAddress"));
+    assertThat(messages.size(), equalTo(1));
+    assertThat(messages.get(0).getEnvelopeReceiver(), equalTo(requestParam.get("emailAddress")));
     String accessId = extractAccessId(messages.get(0));
     messages.clear();
     
@@ -397,54 +398,62 @@ public class BlockchainIntegrationTest extends IntegrationTest {
     log.info(String.format("change community completed. [user=%s]", user.getUsername()));
   }
   
-  private void checkBalanceOfUser(User user, Community community, Matcher<?> expected) throws Exception {
+  private void checkBalanceOfUser(User user, Community community, Double expected) throws Exception {
     sleep();
     
     sessionId = loginApp(user.getUsername(), "passpass");
     Object balance = given().cookie("JSESSIONID", sessionId)
       .when().get("/app/v{v}/balance?communityId={communityId}", APP_API_VERSION.getMajor(), community.getId())
-      .then().statusCode(200).body("balance", expected)
+      .then().statusCode(200)
       .extract().path("balance");
+    Double balanceFloat = Double.valueOf(balance.toString());
+    assertThat(balanceFloat, equalTo(expected));
     log.info(String.format("check balance ok. [user=%s, community=%s, balance=%s]", user.getUsername(), community.getName(), balance.toString()));
   }
   
-  private void checkTokenBalanceOfCommunity(Community com, WalletType walletType, Matcher<?> expect) throws Exception {
+  private void checkTokenBalanceOfCommunity(Community com, WalletType walletType, Double expect) throws Exception {
     sleep();
     
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
 
-    given()
+    Object balance = given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/coin/balance?communityId={id}&wallet={wallet}", com.getId(), walletType.name())
       .then().statusCode(200)
-      .body("balance", expect);
+      .extract().path("balance");
+    Double balanceFloat = Double.valueOf(balance.toString());
+    assertThat(balanceFloat, equalTo(expect));
   }
   
-  private void checkEthBalanceOfCommunity(Community com, Matcher<?> expect) throws Exception {
+  private void checkEthBalanceOfCommunity(Community com, Matcher<Double> expect) throws Exception {
     sleep();
     
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
 
-    given()
+    Object balance = given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/eth/balance?communityId={id}", com.getId())
       .then().statusCode(200)
-      .body("balance", expect);
+      .extract().path("balance");
+    Double balanceFloat = Double.valueOf(balance.toString());
+    assertThat(balanceFloat, expect);
   }
 
-  private void checkEthBalanceHistoryOfCommunity(Community com, Matcher<?> expect) throws Exception {
+  private void checkEthBalanceHistoryOfCommunity(Community com, Matcher<Double> expect) throws Exception {
     sleep();
     
     sessionId = loginAdmin(ncl.getEmailAddress(), "passpass");
     
     String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-    given()
+    List<Object> balance = given()
       .cookie("JSESSIONID", sessionId)
       .when().get("/admin/transactions/eth/balance/histories?communityId={comId}", com.getId())
       .then().statusCode(200)
       .body("balanceList.baseDate", contains(today))
-      .body("balanceList.balance", contains(expect));
+      .extract().path("balanceList.balance");
+    Double balanceFloat = Double.valueOf(balance.get(0).toString());
+    assertThat(balanceFloat, expect);
   }
 
   private void checkOmiteBalance() throws Exception {

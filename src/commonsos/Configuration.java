@@ -1,5 +1,7 @@
 package commonsos;
 
+import java.math.BigInteger;
+
 import javax.inject.Singleton;
 
 @Singleton
@@ -97,12 +99,24 @@ public class Configuration {
     return environmentVariable("COMMONSOS_WALLET_PASSWORD", "pass1");
   }
 
+  public String userWalletPassword() {
+    return environmentVariable("USER_WALLET_PASSWORD", "user_wallet_password");
+  }
+
+  public String communityWalletPassword() {
+    return environmentVariable("COMMUNITY_WALLET_PASSWORD", "community_wallet_password");
+  }
+
   public String initialEther() {
     return environmentVariable("INITIAL_ETHER", "1");
   }
 
   public String initialWei() {
     return environmentVariable("INITIAL_WEI", "1000000000000000000");
+  }
+
+  public BigInteger gasPrice() {
+    return new BigInteger(environmentVariable("GAS_PRICE", "0"));
   }
 
   public String minimumNumberOfDecimalsForToken() {

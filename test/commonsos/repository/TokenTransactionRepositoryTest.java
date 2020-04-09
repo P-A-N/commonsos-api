@@ -36,7 +36,21 @@ public class TokenTransactionRepositoryTest extends AbstractRepositoryTest {
   public void ignoreCheckLocked() {
     doNothing().when(repository).checkLocked(any());
   }
-  
+
+  @Test
+  public void findById() {
+    // prepare
+    TokenTransaction tran = inTransaction(() -> repository.create(new TokenTransaction()
+        .setCommunityId(id("community id"))));
+    
+    // execute
+    Optional<TokenTransaction> result = repository.findById(tran.getId());
+
+    // verify
+    assertThat(result.isPresent());
+    assertThat(result.get().getId()).isEqualTo(tran.getId());
+  }
+
   @Test
   public void create() {
     Long id = inTransaction(() -> repository.create(new TokenTransaction()

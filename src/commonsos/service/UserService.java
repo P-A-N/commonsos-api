@@ -74,7 +74,6 @@ import lombok.extern.slf4j.Slf4j;
 @Singleton
 @Slf4j
 public class UserService extends AbstractService {
-  public static final String WALLET_PASSWORD = "test";
 
   @Inject private UserRepository userRepository;
   @Inject private CommunityRepository communityRepository;
@@ -199,8 +198,8 @@ public class UserService extends AbstractService {
         .setStatus("")
         .setLoggedinAt(Instant.now());
 
-    String wallet = blockchainService.createWallet(WALLET_PASSWORD);
-    Credentials credentials = blockchainService.credentials(wallet, WALLET_PASSWORD);
+    String wallet = blockchainService.createWallet(config.userWalletPassword());
+    Credentials credentials = blockchainService.credentials(wallet, config.userWalletPassword());
 
     user.setWallet(wallet);
     user.setWalletAddress(credentials.getAddress());

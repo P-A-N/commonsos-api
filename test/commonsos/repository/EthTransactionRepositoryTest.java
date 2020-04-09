@@ -26,6 +26,20 @@ public class EthTransactionRepositoryTest extends AbstractRepositoryTest {
   public void ignoreCheckLocked() {
     doNothing().when(repository).checkLocked(any());
   }
+
+  @Test
+  public void findById() {
+    // prepare
+    EthTransaction tran = inTransaction(() -> repository.create(new EthTransaction()
+        .setCommunityId(id("community id"))));
+    
+    // execute
+    Optional<EthTransaction> result = repository.findById(tran.getId());
+
+    // verify
+    assertThat(result.isPresent());
+    assertThat(result.get().getId()).isEqualTo(tran.getId());
+  }
   
   @Test
   public void findByBlockchainTransactionHash() {

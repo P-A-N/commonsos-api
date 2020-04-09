@@ -1,6 +1,5 @@
 package commonsos.service.multithread;
 
-import static commonsos.service.blockchain.BlockchainService.GAS_PRICE;
 import static commonsos.service.blockchain.BlockchainService.TOKEN_TRANSFER_GAS_LIMIT;
 
 import java.math.BigInteger;
@@ -13,7 +12,6 @@ import commonsos.Configuration;
 import commonsos.command.admin.CreateCommunityCommand;
 import commonsos.repository.CommunityRepository;
 import commonsos.repository.entity.Community;
-import commonsos.service.CommunityService;
 import commonsos.service.blockchain.BlockchainService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,8 +36,8 @@ public class CreateCommunityTask extends AbstractTask {
     Community community = communityRepository.findStrictById(communityId);
     
     Credentials systemCredentials = blockchainService.systemCredentials();
-    Credentials mainCredentials = blockchainService.credentials(community.getMainWallet(), CommunityService.WALLET_PASSWORD);
-    Credentials feeCredentials = blockchainService.credentials(community.getFeeWallet(), CommunityService.WALLET_PASSWORD);
+    Credentials mainCredentials = blockchainService.credentials(community.getMainWallet(), config.communityWalletPassword());
+    Credentials feeCredentials = blockchainService.credentials(community.getFeeWallet(), config.communityWalletPassword());
 
     BigInteger initialWei = new BigInteger(config.initialWei());
     
@@ -54,7 +52,7 @@ public class CreateCommunityTask extends AbstractTask {
     communityRepository.update(community);
 
     // approve main wallet from fee wallet
-    blockchainService.transferEther(systemCredentials, feeCredentials.getAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(GAS_PRICE), true);
+    blockchainService.transferEther(systemCredentials, feeCredentials.getAddress(), TOKEN_TRANSFER_GAS_LIMIT.multiply(BigInteger.TEN).multiply(config.gasPrice()), true);
     blockchainService.approveFromFeeWallet(community);
     
     log.info(String.format("Create community task done. [communityId=%d, communityName=%s]", community.getId(), community.getName()));

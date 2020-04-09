@@ -9,8 +9,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.web3j.crypto.Credentials;
-
 import commonsos.command.admin.CreateEthTransactionCommand;
 import commonsos.exception.DisplayableException;
 import commonsos.exception.ForbiddenException;
@@ -19,9 +17,10 @@ import commonsos.repository.EthTransactionRepository;
 import commonsos.repository.entity.Admin;
 import commonsos.repository.entity.Community;
 import commonsos.repository.entity.EthTransaction;
-import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.EthBalance;
+import commonsos.service.multithread.CreateEthTransactionTask;
+import commonsos.service.multithread.TaskExecutorService;
 import commonsos.util.AdminUtil;
 import commonsos.util.ValidateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,7 @@ public class EthTransactionService extends AbstractService {
   @Inject private EthTransactionRepository repository;
   @Inject private CommunityRepository communityRepository;
   @Inject private BlockchainService blockchainService;
-  @Inject private BlockchainEventService blockchainEventService;
+  @Inject private TaskExecutorService taskExecutorService;
 
   public EthBalance getEthBalance(Admin admin, Long communityId) {
     if (!AdminUtil.isSeeableCommunity(admin, communityId)) throw new ForbiddenException();
@@ -58,16 +57,8 @@ public class EthTransactionService extends AbstractService {
       .setAmount(amount);
     repository.create(transaction);
 
-    // send ether
-    Credentials credentials = blockchainService.systemCredentials();
-    String beneficiaryAddress = beneficiaryCommunity.getMainWalletAddress();
-    String blockchainTransactionHash = blockchainService.transferEther(credentials, beneficiaryAddress, amount, false);
-
-    repository.lockForUpdate(transaction);
-    transaction.setBlockchainTransactionHash(blockchainTransactionHash);
-    repository.update(transaction);
-
-    blockchainEventService.checkTransaction(blockchainTransactionHash);
+    CreateEthTransactionTask task = new CreateEthTransactionTask(beneficiaryCommunity, transaction);
+    taskExecutorService.execute(task);
 
     return transaction;
   }

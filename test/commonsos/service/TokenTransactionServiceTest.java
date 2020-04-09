@@ -71,6 +71,7 @@ import commonsos.service.blockchain.BlockchainEventService;
 import commonsos.service.blockchain.BlockchainService;
 import commonsos.service.blockchain.CommunityToken;
 import commonsos.service.blockchain.TokenBalance;
+import commonsos.service.multithread.TaskExecutorService;
 import commonsos.service.notification.PushNotificationService;
 import commonsos.service.sync.SyncService;
 
@@ -89,6 +90,7 @@ public class TokenTransactionServiceTest {
   @Mock BlockchainEventService blockchainEventService;
   @Mock SyncService syncService;
   @Mock PushNotificationService pushNotificationService;
+  @Mock TaskExecutorService taskExecutorService;
   @Spy Configuration config;
   @Captor ArgumentCaptor<TokenTransaction> captor;
   @InjectMocks @Spy TokenTransactionService service;

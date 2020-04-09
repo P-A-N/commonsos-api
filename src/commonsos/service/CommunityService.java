@@ -61,7 +61,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Singleton
 public class CommunityService extends AbstractService {
-  public static final String WALLET_PASSWORD = "test";
 
   @Inject private CommunityRepository repository;
   @Inject private AdminRepository adminRepository;
@@ -115,10 +114,10 @@ public class CommunityService extends AbstractService {
     String coverPhotoUrl = command.getUploadCoverPhotoCommand().getPhotoFile() == null ? null : imageService.create(command.getUploadCoverPhotoCommand(), "");
 
     // create wallet
-    String mainWallet = blockchainService.createWallet(WALLET_PASSWORD);
-    Credentials mainCredentials = blockchainService.credentials(mainWallet, WALLET_PASSWORD);
-    String feeWallet = blockchainService.createWallet(WALLET_PASSWORD);
-    Credentials feeCredentials = blockchainService.credentials(feeWallet, WALLET_PASSWORD);
+    String mainWallet = blockchainService.createWallet(config.communityWalletPassword());
+    Credentials mainCredentials = blockchainService.credentials(mainWallet, config.communityWalletPassword());
+    String feeWallet = blockchainService.createWallet(config.communityWalletPassword());
+    Credentials feeCredentials = blockchainService.credentials(feeWallet, config.communityWalletPassword());
     
     // create community
     Community community = new Community()
