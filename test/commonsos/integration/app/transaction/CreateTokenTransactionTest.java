@@ -287,7 +287,7 @@ public class CreateTokenTransactionTest extends IntegrationTest {
       .then().statusCode(200)
       .body("communityId", equalTo(community.getId().intValue()))
       .body("balance", notNullValue());
-    Thread.sleep(1000); // wait until multi thread is done.
+    Thread.sleep(5000); // wait until multi thread is done.
     
     // verify db transaction
     TokenTransaction transaction = emService.get().createQuery("FROM TokenTransaction WHERE beneficiaryUserId = :userId", TokenTransaction.class)
