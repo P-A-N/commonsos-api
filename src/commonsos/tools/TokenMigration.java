@@ -100,6 +100,8 @@ public class TokenMigration {
 
   private static void getSystemCredentials() throws Exception {
     systemCredentials = blockchainService.systemCredentials();
+    BigDecimal balance = blockchainService.getEthBalance(systemCredentials.getAddress());
+    System.out.println(String.format("Balance of system wallet=%f [wallet address=%s]", balance, systemCredentials.getAddress()));
   }
 
   private static void prepareInstances() {
