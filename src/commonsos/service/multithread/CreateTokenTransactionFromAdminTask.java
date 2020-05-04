@@ -65,7 +65,7 @@ public class CreateTokenTransactionFromAdminTask extends AbstractTask {
     // create message
     Optional<MessageThread> threadBetweenUser = messageThreadRepository.findDirectThread(beneficiary.getId(), MessageUtil.getSystemMessageCreatorId(), community.getId());
     MessageThread thread = threadBetweenUser.orElseGet(() -> syncService.createMessageThreadWithSystem(beneficiary, community));
-    String messageText = MessageUtil.getSystemMessageTokenSend2(community.getName(), beneficiary.getUsername(), transaction.getAmount(), communityToken.getTokenSymbol());
+    String messageText = MessageUtil.getSystemMessageTokenSendFromCommynity(community.getName(), beneficiary.getUsername(), transaction.getAmount(), communityToken.getTokenSymbol());
     messageRepository.create(new Message()
         .setCreatedUserId(MessageUtil.getSystemMessageCreatorId())
         .setThreadId(thread.getId())

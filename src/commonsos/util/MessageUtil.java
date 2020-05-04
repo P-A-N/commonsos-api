@@ -26,7 +26,7 @@ public class MessageUtil {
     return String.format(SYSTEM_MESSAGE_UNSUBSCRIBE, username);
   }
   
-  public static String getSystemMessageTokenSend1(String remitterUsername, String beneficiaryUsername, BigDecimal amount, String symbol, String description) {
+  public static String getSystemMessageTokenSendFromUser(String remitterUsername, String beneficiaryUsername, BigDecimal amount, String symbol, String description) {
     String message = String.format(SYSTEM_MESSAGE_TOKEN_SEND_FROM_USER, remitterUsername, beneficiaryUsername, amount.stripTrailingZeros().toPlainString(), symbol);
     if (StringUtils.isNotEmpty(description)) {
       message = message + String.format("\n【コメント】\n%s", description);
@@ -35,7 +35,7 @@ public class MessageUtil {
     return message;
   }
   
-  public static String getSystemMessageTokenSend2(String communityName, String beneficiaryUsername, BigDecimal amount, String symbol) {
+  public static String getSystemMessageTokenSendFromCommynity(String communityName, String beneficiaryUsername, BigDecimal amount, String symbol) {
     String message = String.format(SYSTEM_MESSAGE_TOKEN_SEND_FROM_COMM, communityName, beneficiaryUsername, amount.stripTrailingZeros().toPlainString(), symbol);
     return message;
   }

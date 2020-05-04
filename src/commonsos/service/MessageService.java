@@ -1,6 +1,5 @@
 package commonsos.service;
 
-import static java.lang.String.format;
 import static java.time.Instant.now;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -244,9 +243,8 @@ public class MessageService extends AbstractService {
     messageThread.getParties().stream()
       .filter(p -> !p.getUser().getId().equals(senderUser.getId()))
       .forEach(p -> {
-        String messageText = format("%s:\n\n%s", senderUser.getUsername(), message.getText());
         Integer unreadCount = messageRepository.unreadMessageCount(p.getUser().getId(), messageThread.getId());
-        pushNotificationService.send(senderUser, p.getUser(), messageText, messageThread, unreadCount);
+        pushNotificationService.send(senderUser, p.getUser(), message.getText(), messageThread, unreadCount);
       });
   }
 
