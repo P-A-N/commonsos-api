@@ -17,11 +17,6 @@ echo "Linking current installation to $DEPLOY_DIR"
 rm $APP_DIR
 ln -sfv $DEPLOY_DIR $APP_DIR
 
-pushd $APP_DIR
-./shell/stop.sh
-./shell/start.sh
-popd
-
 crontab $APP_DIR/cron/cron.txt
 
 echo "Done"
